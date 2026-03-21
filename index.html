@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ð° Finanzas Personales â Daniel</title>
+<title>💰 Finanzas Personales — Daniel</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  /* âââ FONTS ââââââââââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── FONTS ──────────────────────────────────────────────── */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-  /* âââ RESET & BASE âââââââââââââââââââââââââââââââââââââââ */
+  /* ─── RESET & BASE ─────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -28,7 +28,7 @@
     --accent2:     #f06fa0;
     --accent2-dim: rgba(240,111,160,0.13);
 
-    /* Semantic colors con versiÃ³n dim */
+    /* Semantic colors con versión dim */
     --green:      #34d399;
     --green-dim:  rgba(52,211,153,0.11);
     --red:        #f87171;
@@ -52,7 +52,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* âââ PANTALLA DE CONFIGURACIÃN ââââââââââââââââââââââââââ */
+  /* ─── PANTALLA DE CONFIGURACIÓN ────────────────────────── */
   #setup-screen {
     display: flex;
     flex-direction: column;
@@ -96,10 +96,10 @@
   .ok   { color: var(--green); }
   .fail { color: var(--red); }
 
-  /* âââ APP âââââââââââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── APP ───────────────────────────────────────────────── */
   #app { display: none; }
 
-  /* âââ SIDEBAR âââââââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── SIDEBAR ───────────────────────────────────────────── */
   .layout { display: flex; min-height: 100vh; }
 
   .sidebar {
@@ -156,7 +156,7 @@
   }
   .config-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
-  /* âââ MAIN CONTENT âââââââââââââââââââââââââââââââââââââââ */
+  /* ─── MAIN CONTENT ─────────────────────────────────────── */
   .main {
     flex: 1; margin-left: 230px;
     padding: 2rem 2.5rem; overflow-x: hidden;
@@ -165,7 +165,7 @@
   .page { display: none; }
   .page.active { display: block; }
 
-  /* âââ HEADER ââââââââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── HEADER ────────────────────────────────────────────── */
   .page-header {
     display: flex; align-items: center;
     justify-content: space-between;
@@ -185,7 +185,7 @@
   }
   .mes-selector select:focus { outline: none; border-color: var(--accent); }
 
-  /* âââ KPI CARDS âââââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── KPI CARDS ─────────────────────────────────────────── */
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -204,7 +204,7 @@
     background: var(--border2); transition: background .2s;
   }
   .kpi-card:hover { transform: translateY(-2px); border-color: var(--border2); }
-  /* Acento de color superior segÃºn tipo de KPI */
+  /* Acento de color superior según tipo de KPI */
   .kpi-card:has(.income)::before      { background: linear-gradient(90deg, var(--green), transparent 70%); }
   .kpi-card:has(.expense)::before     { background: linear-gradient(90deg, var(--red), transparent 70%); }
   .kpi-card:has(.balance-pos)::before { background: linear-gradient(90deg, var(--accent), transparent 70%); }
@@ -218,7 +218,7 @@
   .kpi-value.balance-neg { color: var(--red); }
   .kpi-sub { font-size: .74rem; color: var(--text-muted); margin-top: .35rem; font-weight: 400; }
 
-  /* âââ CHARTS GRID âââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── CHARTS GRID ───────────────────────────────────────── */
   .charts-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -239,7 +239,7 @@
   }
   .chart-wrap { position: relative; height: 250px; }
 
-  /* âââ TABLA TRANSACCIONES âââââââââââââââââââââââââââââââââ */
+  /* ─── TABLA TRANSACCIONES ───────────────────────────────── */
   .table-filters {
     display: flex; gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap;
   }
@@ -276,7 +276,7 @@
     border-radius: 6px; transition: color .15s, background .15s;
   }
   .delete-btn:hover { color: var(--red); background: var(--red-dim); }
-  /* âââ COMPARTIDOS ââââââââââââââââââââââââââââââââââ */
+  /* ─── COMPARTIDOS ────────────────────────────────── */
   .comp-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -308,7 +308,7 @@
   }
   .comp-tfoot-total { font-size: .95rem; font-weight: 800 !important; }
 
-  /* âââ PÃGINA CATEGORÃAS Y FUENTES âââââââââââââââââââââââââ */
+  /* ─── PÁGINA CATEGORÍAS Y FUENTES ───────────────────────── */
   .cfg-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -350,7 +350,7 @@
   .cfg-add-btn { white-space: nowrap; padding: .5rem 1rem; font-size: .84rem; }
   .cfg-msg { font-size: .8rem; min-height: 1.2em; margin-top: .4rem; }
 
-  /* âââ PÃGINA PRESUPUESTO âââââââââââââââââââââââââââââââââââ */
+  /* ─── PÁGINA PRESUPUESTO ─────────────────────────────────── */
   .pres-input {
     background: var(--bg2); border: 1px solid var(--border);
     border-radius: 7px; padding: .3rem .55rem;
@@ -372,7 +372,7 @@
     text-align: center; padding: 3rem; color: var(--text-muted); font-size: .9rem;
   }
 
-  /* âââ IMPORTAR DATOS ââââââââââââââââââââââââââââââââââââââ */
+  /* ─── IMPORTAR DATOS ────────────────────────────────────── */
   .imp-instrucciones {
     background: var(--accent-dim); border: 1px solid rgba(124,110,255,.2);
     border-radius: var(--radius); padding: 1.2rem 1.5rem;
@@ -453,7 +453,7 @@
   .imp-result-msg.ok   { background: var(--green-dim); border: 1px solid rgba(52,211,153,.3);  color: var(--green); }
   .imp-result-msg.fail { background: var(--red-dim);   border: 1px solid rgba(248,113,113,.3); color: var(--red); }
 
-  /* âââ FORMULARIO NUEVA TRANSACCIÃN âââââââââââââââââââââââ */
+  /* ─── FORMULARIO NUEVA TRANSACCIÓN ─────────────────────── */
   .form-card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 2rem; max-width: 600px;
@@ -478,7 +478,7 @@
   }
   .form-group textarea { resize: vertical; min-height: 70px; }
 
-  /* âââ TIPO TOGGLE âââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── TIPO TOGGLE ───────────────────────────────────────── */
   .tipo-toggle {
     display: flex; gap: .4rem; background: var(--bg2);
     border: 1px solid var(--border); border-radius: 9px; padding: .28rem;
@@ -492,7 +492,7 @@
   .tipo-btn.active-income  { background: var(--green-dim); color: var(--green); }
   .tipo-btn.active-expense { background: var(--red-dim);   color: var(--red); }
 
-  /* âââ MONEDA TOGGLE âââââââââââââââââââââââââââââââââââââââ */
+  /* ─── MONEDA TOGGLE ─────────────────────────────────────── */
   .moneda-toggle {
     display: flex; gap: .35rem; background: var(--bg2);
     border: 1px solid var(--border); border-radius: 9px; padding: .25rem;
@@ -513,7 +513,7 @@
   .badge-moneda.ars { background: var(--accent-dim); color: var(--accent); }
   .badge-moneda.usd { background: var(--green-dim);  color: var(--green); }
 
-  /* âââ BOTONES âââââââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── BOTONES ───────────────────────────────────────────── */
   .btn {
     padding: .65rem 1.4rem; border: none; border-radius: 9px;
     cursor: pointer; font-size: .88rem; font-weight: 600;
@@ -536,7 +536,7 @@
   }
   .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
-  /* âââ TOAST âââââââââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── TOAST ─────────────────────────────────────────────── */
   .toast {
     position: fixed; bottom: 1.5rem; right: 1.5rem;
     background: var(--card); border: 1px solid var(--border2);
@@ -549,7 +549,7 @@
   .toast.toast-ok  { border-left: 3px solid var(--green); }
   .toast.toast-err { border-left: 3px solid var(--red); }
 
-  /* âââ LOADING âââââââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── LOADING ───────────────────────────────────────────── */
   .loading {
     display: flex; align-items: center; justify-content: center;
     height: 120px; color: var(--text-muted); gap: .5rem; font-size: .88rem;
@@ -561,13 +561,13 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* âââ SCROLLBAR âââââââââââââââââââââââââââââââââââââââââââ */
+  /* ─── SCROLLBAR ─────────────────────────────────────────── */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-  /* âââ MOBILE LAYOUT âââââââââââââââââââââââââââââââââââââââ */
+  /* ─── MOBILE LAYOUT ─────────────────────────────────────── */
   .mobile-header {
     display: none;
     position: fixed; top: 0; left: 0; right: 0; z-index: 200;
@@ -589,7 +589,7 @@
   }
   .hamburger-btn:hover { background: var(--accent-dim); }
 
-  /* Overlay oscuro detrÃ¡s del sidebar en mobile */
+  /* Overlay oscuro detrás del sidebar en mobile */
   .sidebar-overlay {
     display: none; position: fixed; inset: 0; z-index: 150;
     background: rgba(0,0,0,0.65); backdrop-filter: blur(3px);
@@ -617,7 +617,7 @@
     /* Formulario en 1 columna */
     .form-row { grid-template-columns: 1fr; }
 
-    /* Header de pÃ¡gina en columna */
+    /* Header de página en columna */
     .page-header {
       flex-direction: column; align-items: flex-start;
       gap: .75rem; margin-bottom: 1.2rem;
@@ -631,7 +631,7 @@
     .comp-balance-card { flex-direction: column; gap: .75rem; padding: 1.2rem; }
     .comp-balance-value { font-size: 1.6rem; }
 
-    /* KPI value mÃ¡s chico en pantallas pequeÃ±as */
+    /* KPI value más chico en pantallas pequeñas */
     .kpi-value { font-size: 1.35rem; }
     .kpi-card { padding: 1rem 1.1rem; }
   }
@@ -645,17 +645,17 @@
 </head>
 <body>
 
-<!-- ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-     PANTALLA DE CONFIGURACIÃN INICIAL
-ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+<!-- ════════════════════════════════════════════════════════
+     PANTALLA DE CONFIGURACIÓN INICIAL
+════════════════════════════════════════════════════════ -->
 <div id="setup-screen">
   <div class="setup-card">
-    <h1>ð° Finanzas Personales</h1>
-    <p>IngresÃ¡ la URL de tu Google Apps Script para conectar el dashboard con tu Google Sheet.</p>
+    <h1>💰 Finanzas Personales</h1>
+    <p>Ingresá la URL de tu Google Apps Script para conectar el dashboard con tu Google Sheet.</p>
 
     <div class="hint">
-      <strong>Â¿DÃ³nde encontrÃ¡s la URL?</strong><br>
-      En tu Google Sheet â Extensiones â Apps Script â Implementar â Administrar implementaciones â copiÃ¡ la URL del Web App.
+      <strong>¿Dónde encontrás la URL?</strong><br>
+      En tu Google Sheet → Extensiones → Apps Script → Implementar → Administrar implementaciones → copiá la URL del Web App.
     </div>
 
     <label for="api-url">URL del Web App (Apps Script)</label>
@@ -666,22 +666,22 @@
     <input type="text" id="usuario-setup" placeholder="Daniel" value="Daniel">
 
     <div style="display:flex; gap:.75rem;">
-      <button class="btn btn-outline" onclick="testConnection()">ð Probar conexiÃ³n</button>
-      <button class="btn btn-primary" onclick="guardarConfig()">Guardar y entrar â</button>
+      <button class="btn btn-outline" onclick="testConnection()">🔌 Probar conexión</button>
+      <button class="btn btn-primary" onclick="guardarConfig()">Guardar y entrar →</button>
     </div>
     <div id="test-result"></div>
   </div>
 </div>
 
-<!-- ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+<!-- ════════════════════════════════════════════════════════
      APP PRINCIPAL
-ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+════════════════════════════════════════════════════════ -->
 
 <!-- Header mobile (solo visible en pantallas chicas) -->
 <header class="mobile-header" id="mobile-header" style="display:none;">
-  <span class="mobile-logo">ð° Finanzas</span>
-  <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="MenÃº">
-    <span id="hamburger-icon">â°</span>
+  <span class="mobile-logo">💰 Finanzas</span>
+  <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menú">
+    <span id="hamburger-icon">☰</span>
   </button>
 </header>
 
@@ -694,42 +694,42 @@
     <!-- SIDEBAR -->
     <nav class="sidebar">
       <div class="sidebar-logo">
-        <h2>ð° Finanzas</h2>
+        <h2>💰 Finanzas</h2>
         <span id="sidebar-user">Daniel</span>
       </div>
       <div class="nav-item active" onclick="navegarA('resumen')">
-        <span class="nav-icon">ð</span> Resumen
+        <span class="nav-icon">📊</span> Resumen
       </div>
       <div class="nav-item" onclick="navegarA('evolucion')">
-        <span class="nav-icon">ð</span> EvoluciÃ³n
+        <span class="nav-icon">📈</span> Evolución
       </div>
       <div class="nav-item" onclick="navegarA('transacciones')">
-        <span class="nav-icon">ð</span> Transacciones
+        <span class="nav-icon">📋</span> Transacciones
       </div>
       <div class="nav-item" onclick="navegarA('nueva')">
-        <span class="nav-icon">â</span> Nueva
+        <span class="nav-icon">➕</span> Nueva
       </div>
       <div class="nav-item" onclick="navegarA('compartidos')">
-        <span class="nav-icon">ð«</span> Compartidos
+        <span class="nav-icon">👫</span> Compartidos
       </div>
       <div class="nav-item" onclick="navegarA('presupuesto')">
-        <span class="nav-icon">ð¯</span> Presupuesto
+        <span class="nav-icon">🎯</span> Presupuesto
       </div>
       <div class="nav-item" onclick="navegarA('config')">
-        <span class="nav-icon">âï¸</span> CategorÃ­as y Fuentes
+        <span class="nav-icon">⚙️</span> Categorías y Fuentes
       </div>
       <div class="nav-item" onclick="navegarA('importar')">
-        <span class="nav-icon">ð¥</span> Importar datos
+        <span class="nav-icon">📥</span> Importar datos
       </div>
       <div class="sidebar-bottom">
-        <button class="config-btn" onclick="volverConfig()">ð Reconectar API</button>
+        <button class="config-btn" onclick="volverConfig()">🔌 Reconectar API</button>
       </div>
     </nav>
 
     <!-- MAIN -->
     <main class="main">
 
-      <!-- ââ PÃGINA RESUMEN ââââââââââââââââââââââââââââââ -->
+      <!-- ── PÁGINA RESUMEN ────────────────────────────── -->
       <div id="page-resumen" class="page active">
         <div class="page-header">
           <h1>Resumen del mes</h1>
@@ -744,17 +744,17 @@
           <div class="kpi-card">
             <div class="kpi-label">Ingresos</div>
             <div class="kpi-value income" id="kpi-ingresos">$0</div>
-            <div class="kpi-sub" id="kpi-ingresos-sub">â</div>
+            <div class="kpi-sub" id="kpi-ingresos-sub">—</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Gastos</div>
             <div class="kpi-value expense" id="kpi-gastos">$0</div>
-            <div class="kpi-sub" id="kpi-gastos-sub">â</div>
+            <div class="kpi-sub" id="kpi-gastos-sub">—</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Balance</div>
             <div class="kpi-value balance-pos" id="kpi-balance">$0</div>
-            <div class="kpi-sub" id="kpi-balance-sub">â</div>
+            <div class="kpi-sub" id="kpi-balance-sub">—</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Ahorro</div>
@@ -762,16 +762,16 @@
             <div class="kpi-sub">del ingreso mensual</div>
           </div>
           <div class="kpi-card" style="border-color:var(--accent2)">
-            <div class="kpi-label">ð³ Ama te debe</div>
+            <div class="kpi-label">💳 Ama te debe</div>
             <div class="kpi-value" id="kpi-ama-debe" style="color:var(--accent2)">$0</div>
             <div class="kpi-sub" id="kpi-ama-debe-sub">gastos de Ama pagados por vos</div>
           </div>
         </div>
 
-        <!-- GrÃ¡fico categorÃ­as -->
+        <!-- Gráfico categorías -->
         <div class="charts-grid">
           <div class="chart-card">
-            <div class="chart-title">Gastos por categorÃ­a</div>
+            <div class="chart-title">Gastos por categoría</div>
             <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
           </div>
           <div class="chart-card">
@@ -780,20 +780,20 @@
           </div>
         </div>
 
-        <!-- Top categorÃ­as -->
+        <!-- Top categorías -->
         <div class="chart-card">
           <div class="chart-title">Top gastos del mes</div>
           <div id="top-gastos-list"></div>
         </div>
       </div>
 
-      <!-- ââ PÃGINA EVOLUCIÃN ââââââââââââââââââââââââââââ -->
+      <!-- ── PÁGINA EVOLUCIÓN ──────────────────────────── -->
       <div id="page-evolucion" class="page">
         <div class="page-header">
-          <h1>EvoluciÃ³n mensual</h1>
+          <h1>Evolución mensual</h1>
         </div>
         <div class="chart-card full" style="margin-bottom:1rem">
-          <div class="chart-title">Ingresos vs Gastos â Ãºltimos 12 meses</div>
+          <div class="chart-title">Ingresos vs Gastos — últimos 12 meses</div>
           <div class="chart-wrap" style="height:300px"><canvas id="chart-evol"></canvas></div>
         </div>
         <div class="chart-card full">
@@ -802,7 +802,7 @@
         </div>
       </div>
 
-      <!-- ââ PÃGINA TRANSACCIONES ââââââââââââââââââââââââ -->
+      <!-- ── PÁGINA TRANSACCIONES ──────────────────────── -->
       <div id="page-transacciones" class="page">
         <div class="page-header">
           <h1>Historial de transacciones</h1>
@@ -817,16 +817,16 @@
             <option value="Gasto">Gastos</option>
           </select>
           <select id="fil-cat" onchange="filtrarTabla()">
-            <option value="">Todas las categorÃ­as</option>
+            <option value="">Todas las categorías</option>
           </select>
           <select id="fil-fuente" onchange="filtrarTabla()">
             <option value="">Todas las fuentes</option>
           </select>
           <select id="fil-resp" onchange="filtrarTabla()">
             <option value="">Todas</option>
-            <option value="MÃ­o">ð MÃ­o</option>
-            <option value="Compartido">ð« Compartido</option>
-            <option value="De Ama">ð³ De Ama</option>
+            <option value="Mío">🙋 Mío</option>
+            <option value="Compartido">👫 Compartido</option>
+            <option value="De Ama">💳 De Ama</option>
           </select>
           <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="filtrarTabla()">
         </div>
@@ -837,10 +837,10 @@
                 <tr>
                   <th>Fecha</th>
                   <th>Tipo</th>
-                  <th>CategorÃ­a</th>
+                  <th>Categoría</th>
                   <th>Fuente</th>
                   <th>Responsabilidad</th>
-                  <th>DescripciÃ³n</th>
+                  <th>Descripción</th>
                   <th style="text-align:right">Monto</th>
                   <th>Moneda</th>
                   <th></th>
@@ -854,18 +854,18 @@
         </div>
       </div>
 
-      <!-- ââ PÃGINA NUEVA TRANSACCIÃN ââââââââââââââââââââ -->
+      <!-- ── PÁGINA NUEVA TRANSACCIÓN ──────────────────── -->
       <div id="page-nueva" class="page">
         <div class="page-header">
-          <h1>Nueva transacciÃ³n</h1>
+          <h1>Nueva transacción</h1>
         </div>
         <div class="form-card">
           <div class="form-row">
             <div class="form-group full">
               <label>Tipo</label>
               <div class="tipo-toggle">
-                <button class="tipo-btn active-expense" id="btn-gasto"  onclick="setTipo('Gasto')">ð¸ Gasto</button>
-                <button class="tipo-btn"                id="btn-ingreso" onclick="setTipo('Ingreso')">ð° Ingreso</button>
+                <button class="tipo-btn active-expense" id="btn-gasto"  onclick="setTipo('Gasto')">💸 Gasto</button>
+                <button class="tipo-btn"                id="btn-ingreso" onclick="setTipo('Ingreso')">💰 Ingreso</button>
               </div>
             </div>
           </div>
@@ -883,14 +883,14 @@
             <div class="form-group full">
               <label>Moneda</label>
               <div class="moneda-toggle">
-                <button class="moneda-btn active-ars" id="btn-ars" onclick="setMoneda('ARS')">ð¦ð· ARS â Pesos</button>
-                <button class="moneda-btn" id="btn-usd" onclick="setMoneda('USD')">ðºð¸ USD â DÃ³lares</button>
+                <button class="moneda-btn active-ars" id="btn-ars" onclick="setMoneda('ARS')">🇦🇷 ARS — Pesos</button>
+                <button class="moneda-btn" id="btn-usd" onclick="setMoneda('USD')">🇺🇸 USD — Dólares</button>
               </div>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full">
-              <label>CategorÃ­a</label>
+              <label>Categoría</label>
               <select id="f-categoria"></select>
             </div>
           </div>
@@ -898,9 +898,9 @@
             <div class="form-group full">
               <label>Responsabilidad del gasto</label>
               <select id="f-responsabilidad">
-                <option value="MÃ­o">ð MÃ­o</option>
-                <option value="Compartido">ð« Compartido</option>
-                <option value="De Ama">ð³ De Ama (ella me reintegra)</option>
+                <option value="Mío">🙋 Mío</option>
+                <option value="Compartido">👫 Compartido</option>
+                <option value="De Ama">💳 De Ama (ella me reintegra)</option>
               </select>
             </div>
           </div>
@@ -908,19 +908,19 @@
             <div class="form-group full">
               <label>Fuente / Medio de pago</label>
               <select id="f-fuente">
-                <option value="">â Sin especificar â</option>
+                <option value="">— Sin especificar —</option>
               </select>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group full">
-              <label>DescripciÃ³n (opcional)</label>
-              <textarea id="f-descripcion" placeholder="Â¿En quÃ© gastaste o de dÃ³nde vino?"></textarea>
+              <label>Descripción (opcional)</label>
+              <textarea id="f-descripcion" placeholder="¿En qué gastaste o de dónde vino?"></textarea>
             </div>
           </div>
           <div style="display:flex; gap:.75rem; margin-top:.5rem">
             <button class="btn btn-primary" id="btn-guardar" onclick="guardarTransaccion()">
-              ð¾ Guardar
+              💾 Guardar
             </button>
             <button class="btn btn-outline" onclick="navegarA('transacciones')">Cancelar</button>
           </div>
@@ -928,10 +928,10 @@
         </div>
       </div>
 
-      <!-- ââ PÃGINA COMPARTIDOS ââââââââââââââââââââââââââ -->
+      <!-- ── PÁGINA COMPARTIDOS ────────────────────────── -->
       <div id="page-compartidos" class="page">
         <div class="page-header">
-          <h1>ð« Compartidos con Ama</h1>
+          <h1>👫 Compartidos con Ama</h1>
         </div>
 
         <!-- Selector de mes -->
@@ -944,7 +944,7 @@
         <div id="comp-balance-card" class="comp-balance-card">
           <div class="comp-balance-label">Balance del mes</div>
           <div class="comp-balance-value" id="comp-balance-valor">$0</div>
-          <div class="comp-balance-sub" id="comp-balance-sub">â</div>
+          <div class="comp-balance-sub" id="comp-balance-sub">—</div>
         </div>
 
         <!-- Dos tablas side-by-side -->
@@ -953,13 +953,13 @@
           <!-- Tabla izquierda: Compartidos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 style="font-size:1rem;font-weight:700;color:var(--yellow)">ð« Compartidos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(cada uno paga la mitad)</span></h3>
+              <h3 style="font-size:1rem;font-weight:700;color:var(--yellow)">👫 Compartidos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(cada uno paga la mitad)</span></h3>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>CategorÃ­a</th>
+                    <th>Categoría</th>
                     <th style="text-align:right">Daniel</th>
                     <th style="text-align:right">Ama</th>
                     <th style="text-align:right">Total a cobrar</th>
@@ -972,22 +972,22 @@
               </table>
             </div>
             <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
-              * Cada valor ya estÃ¡ dividido por 2 â es la parte que le corresponde a cada uno.
+              * Cada valor ya está dividido por 2 — es la parte que le corresponde a cada uno.
             </div>
           </div>
 
           <!-- Tabla derecha: Reembolsos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 style="font-size:1rem;font-weight:700;color:var(--accent2)">ð³ Reembolsos de Ama <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos 100% de ella)</span></h3>
+              <h3 style="font-size:1rem;font-weight:700;color:var(--accent2)">💳 Reembolsos de Ama <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos 100% de ella)</span></h3>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>CategorÃ­a</th>
-                    <th style="text-align:right">Daniel pagÃ³</th>
-                    <th style="text-align:right">Ama pagÃ³</th>
+                    <th>Categoría</th>
+                    <th style="text-align:right">Daniel pagó</th>
+                    <th style="text-align:right">Ama pagó</th>
                     <th style="text-align:right">Ama debe</th>
                   </tr>
                 </thead>
@@ -998,56 +998,56 @@
               </table>
             </div>
             <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
-              * Monto completo â son gastos de Ama que vos financiaste.
+              * Monto completo — son gastos de Ama que vos financiaste.
             </div>
           </div>
 
         </div><!-- /comp-grid -->
       </div><!-- /page-compartidos -->
 
-      <!-- ââ PÃGINA PRESUPUESTO ââââââââââââââââââââââââââââââ -->
+      <!-- ── PÁGINA PRESUPUESTO ────────────────────────────── -->
       <div id="page-presupuesto" class="page">
         <div class="page-header">
-          <h1>ð¯ Presupuesto mensual</h1>
+          <h1>🎯 Presupuesto mensual</h1>
           <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
             <div class="mes-selector">
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
-            <button class="btn btn-primary" onclick="guardarPresupuesto()">ð¾ Guardar presupuesto</button>
+            <button class="btn btn-primary" onclick="guardarPresupuesto()">💾 Guardar presupuesto</button>
           </div>
         </div>
 
         <!-- KPI strip -->
         <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
           <div class="kpi-card">
-            <div class="kpi-label">ð° Sueldo del mes</div>
+            <div class="kpi-label">💰 Sueldo del mes</div>
             <div class="kpi-value income" id="pres-kpi-sueldo">$0</div>
             <div class="kpi-sub">ingresos del mes</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">ð Total presupuestado</div>
+            <div class="kpi-label">📊 Total presupuestado</div>
             <div class="kpi-value" id="pres-kpi-total" style="color:var(--accent)">$0</div>
             <div class="kpi-sub" id="pres-kpi-total-sub">de tu sueldo asignado</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">ð¸ Gastado efectivo</div>
+            <div class="kpi-label">💸 Gastado efectivo</div>
             <div class="kpi-value expense" id="pres-kpi-gastado">$0</div>
-            <div class="kpi-sub">50% compartidos Â· sin "De Ama"</div>
+            <div class="kpi-sub">50% compartidos · sin "De Ama"</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">â Disponible</div>
+            <div class="kpi-label">✅ Disponible</div>
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
-            <div class="kpi-sub">Sueldo â Gastado efectivo</div>
+            <div class="kpi-sub">Sueldo − Gastado efectivo</div>
           </div>
         </div>
 
-        <!-- Tabla presupuesto vs ejecuciÃ³n -->
+        <!-- Tabla presupuesto vs ejecución -->
         <div class="chart-card" style="padding:0;overflow:hidden">
           <table class="data-table">
             <thead>
               <tr>
-                <th>CategorÃ­a</th>
+                <th>Categoría</th>
                 <th style="text-align:right">Presupuesto</th>
                 <th style="text-align:right">Gastado</th>
                 <th style="text-align:right">Restante</th>
@@ -1061,37 +1061,37 @@
         </div>
 
         <p class="pres-note">
-          ð¡ Los gastos <strong>Compartidos</strong> cuentan al 50% Â· Los gastos <strong>De Ama</strong> no se cuentan Â· Solo se consideran tus transacciones.
+          💡 Los gastos <strong>Compartidos</strong> cuentan al 50% · Los gastos <strong>De Ama</strong> no se cuentan · Solo se consideran tus transacciones.
         </p>
         <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
       </div><!-- /page-presupuesto -->
 
-      <!-- ââ PÃGINA CATEGORÃAS Y FUENTES ââââââââââââââââââââ -->
+      <!-- ── PÁGINA CATEGORÍAS Y FUENTES ──────────────────── -->
       <div id="page-config" class="page">
         <div class="page-header">
-          <h1>âï¸ CategorÃ­as y Fuentes</h1>
+          <h1>⚙️ Categorías y Fuentes</h1>
           <div style="font-size:.85rem;color:var(--text-muted)">Los cambios se guardan en tu Google Sheet</div>
         </div>
 
         <div class="cfg-grid">
 
-          <!-- CategorÃ­as Gasto -->
+          <!-- Categorías Gasto -->
           <div class="chart-card">
-            <div class="chart-title">ð¸ CategorÃ­as de Gasto</div>
+            <div class="chart-title">💸 Categorías de Gasto</div>
             <div id="cfg-lista-gasto" class="cfg-lista"></div>
             <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-gasto" placeholder="Nueva categorÃ­a..." class="cfg-input">
+              <input type="text" id="cfg-nueva-gasto" placeholder="Nueva categoría..." class="cfg-input">
               <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('GASTO')">+ Agregar</button>
             </div>
             <div id="cfg-msg-gasto" class="cfg-msg"></div>
           </div>
 
-          <!-- CategorÃ­as Ingreso -->
+          <!-- Categorías Ingreso -->
           <div class="chart-card">
-            <div class="chart-title">ð° CategorÃ­as de Ingreso</div>
+            <div class="chart-title">💰 Categorías de Ingreso</div>
             <div id="cfg-lista-ingreso" class="cfg-lista"></div>
             <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-ingreso" placeholder="Nueva categorÃ­a..." class="cfg-input">
+              <input type="text" id="cfg-nueva-ingreso" placeholder="Nueva categoría..." class="cfg-input">
               <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('INGRESO')">+ Agregar</button>
             </div>
             <div id="cfg-msg-ingreso" class="cfg-msg"></div>
@@ -1099,7 +1099,7 @@
 
           <!-- Fuentes -->
           <div class="chart-card">
-            <div class="chart-title">ð¦ Fuentes / Medios de pago</div>
+            <div class="chart-title">🏦 Fuentes / Medios de pago</div>
             <div id="cfg-lista-fuente" class="cfg-lista"></div>
             <div class="cfg-add-row">
               <input type="text" id="cfg-nueva-fuente" placeholder="Nueva fuente..." class="cfg-input">
@@ -1111,17 +1111,17 @@
         </div><!-- /cfg-grid -->
       </div><!-- /page-config -->
 
-      <!-- ââ PÃGINA IMPORTAR DATOS ââââââââââââââââââââââââ -->
+      <!-- ── PÁGINA IMPORTAR DATOS ──────────────────────── -->
       <div id="page-importar" class="page">
         <div class="page-header">
-          <h1>ð¥ Importar datos histÃ³ricos</h1>
+          <h1>📥 Importar datos históricos</h1>
         </div>
 
         <!-- Instrucciones -->
         <div class="imp-instrucciones">
-          <strong>Â¿CÃ³mo usar?</strong><br>
-          PegÃ¡ filas copiadas desde <strong>Excel o Google Sheets</strong> (las columnas se separan con <code>Tab</code>).
-          TambiÃ©n podÃ©s usar <strong>punto y coma</strong> como separador.<br><br>
+          <strong>¿Cómo usar?</strong><br>
+          Pegá filas copiadas desde <strong>Excel o Google Sheets</strong> (las columnas se separan con <code>Tab</code>).
+          También podés usar <strong>punto y coma</strong> como separador.<br><br>
           <strong>Orden de columnas:</strong>
           <table class="imp-formato-tabla">
             <thead>
@@ -1130,38 +1130,38 @@
               </tr>
             </thead>
             <tbody>
-              <tr><td>1</td><td>Fecha</td><td><code>DD/MM/YYYY</code> o <code>YYYY-MM-DD</code></td><td>â</td></tr>
-              <tr><td>2</td><td>Tipo</td><td><code>Gasto</code> o <code>Ingreso</code></td><td>â</td></tr>
-              <tr><td>3</td><td>CategorÃ­a</td><td>Cualquier categorÃ­a existente</td><td>â</td></tr>
-              <tr><td>4</td><td>Monto</td><td>NÃºmero positivo (ej: <code>1500.50</code>)</td><td>â</td></tr>
-              <tr><td>5</td><td>DescripciÃ³n</td><td>Texto libre</td><td>â</td></tr>
-              <tr><td>6</td><td>Responsabilidad</td><td><code>MÃ­o</code> / <code>Compartido</code> / <code>De Ama</code></td><td>â (default: MÃ­o)</td></tr>
-              <tr><td>7</td><td>Fuente</td><td>Galicia, HSBC, etc.</td><td>â</td></tr>
-              <tr><td>8</td><td>Moneda</td><td><code>ARS</code> (pesos) o <code>USD</code> (dÃ³lares)</td><td>â (default: ARS)</td></tr>
+              <tr><td>1</td><td>Fecha</td><td><code>DD/MM/YYYY</code> o <code>YYYY-MM-DD</code></td><td>✅</td></tr>
+              <tr><td>2</td><td>Tipo</td><td><code>Gasto</code> o <code>Ingreso</code></td><td>✅</td></tr>
+              <tr><td>3</td><td>Categoría</td><td>Cualquier categoría existente</td><td>✅</td></tr>
+              <tr><td>4</td><td>Monto</td><td>Número positivo (ej: <code>1500.50</code>)</td><td>✅</td></tr>
+              <tr><td>5</td><td>Descripción</td><td>Texto libre</td><td>—</td></tr>
+              <tr><td>6</td><td>Responsabilidad</td><td><code>Mío</code> / <code>Compartido</code> / <code>De Ama</code></td><td>— (default: Mío)</td></tr>
+              <tr><td>7</td><td>Fuente</td><td>Galicia, HSBC, etc.</td><td>—</td></tr>
+              <tr><td>8</td><td>Moneda</td><td><code>ARS</code> (pesos) o <code>USD</code> (dólares)</td><td>— (default: ARS)</td></tr>
             </tbody>
           </table>
           <br>
           <strong>Ejemplo de fila (ARS):</strong><br>
           <code>15/01/2025	Gasto	Mercado	4500	Supermercado	Compartido	Galicia	ARS</code><br><br>
           <strong>Ejemplo de fila (USD):</strong><br>
-          <code>10/02/2025	Ingreso	Freelance	500	Pago cliente	MÃ­o	Galicia	USD</code>
+          <code>10/02/2025	Ingreso	Freelance	500	Pago cliente	Mío	Galicia	USD</code>
         </div>
 
-        <!-- Ãrea de pegado -->
+        <!-- Área de pegado -->
         <div class="card" style="padding: 1.5rem;">
           <textarea id="imp-textarea" class="imp-paste-area"
-            placeholder="PegÃ¡ acÃ¡ las filas (Tab o ; como separador)...&#10;15/01/2025	Gasto	Mercado	4500	Supermercado	Compartido	Galicia	ARS&#10;01/01/2025	Ingreso	Sueldo	180000	Sueldo enero	MÃ­o	Galicia	ARS&#10;10/02/2025	Ingreso	Freelance	500	Pago cliente	MÃ­o	Galicia	USD"></textarea>
+            placeholder="Pegá acá las filas (Tab o ; como separador)...&#10;15/01/2025	Gasto	Mercado	4500	Supermercado	Compartido	Galicia	ARS&#10;01/01/2025	Ingreso	Sueldo	180000	Sueldo enero	Mío	Galicia	ARS&#10;10/02/2025	Ingreso	Freelance	500	Pago cliente	Mío	Galicia	USD"></textarea>
 
           <div class="imp-actions">
-            <button class="btn btn-primary" onclick="parsearImport()">ð Previsualizar</button>
-            <button class="btn btn-outline" onclick="limpiarImport()">ð Limpiar</button>
+            <button class="btn btn-primary" onclick="parsearImport()">🔍 Previsualizar</button>
+            <button class="btn btn-outline" onclick="limpiarImport()">🗑 Limpiar</button>
           </div>
         </div>
 
-        <!-- PrevisualizaciÃ³n -->
+        <!-- Previsualización -->
         <div id="imp-preview-wrap" class="imp-preview-wrap" style="display:none;">
           <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-            <h3>PrevisualizaciÃ³n</h3>
+            <h3>Previsualización</h3>
             <span id="imp-badge" class="imp-badge-count">0 filas</span>
           </div>
           <div id="imp-stats" class="imp-stats"></div>
@@ -1172,9 +1172,9 @@
                   <th>#</th>
                   <th>Fecha</th>
                   <th>Tipo</th>
-                  <th>CategorÃ­a</th>
+                  <th>Categoría</th>
                   <th>Monto</th>
-                  <th>DescripciÃ³n</th>
+                  <th>Descripción</th>
                   <th>Responsabilidad</th>
                   <th>Fuente</th>
                   <th>Moneda</th>
@@ -1186,7 +1186,7 @@
           </div>
           <div class="imp-actions" style="margin-top:1.5rem;">
             <button id="imp-confirm-btn" class="btn btn-primary" onclick="confirmarImport()" disabled>
-              â Importar transacciones
+              ✅ Importar transacciones
             </button>
           </div>
           <div id="imp-result-msg" style="display:none;" class="imp-result-msg"></div>
@@ -1201,36 +1201,36 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+<!-- ════════════════════════════════════════════════════════
      JAVASCRIPT
-ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+════════════════════════════════════════════════════════ -->
 <script>
-// âââ ESTADO GLOBAL âââââââââââââââââââââââââââââââââââââââââââ
+// ─── ESTADO GLOBAL ───────────────────────────────────────────
 let API_URL     = "";
 let USUARIO     = "Daniel";
 let allTransac  = [];
 let resumenData = [];
-// CategorÃ­as de movimiento entre cuentas propias â se muestran en la tabla
-// para control, pero se excluyen de todos los KPIs y grÃ¡ficos financieros.
+// Categorías de movimiento entre cuentas propias — se muestran en la tabla
+// para control, pero se excluyen de todos los KPIs y gráficos financieros.
 const CATS_TRANSFERENCIA = ["Internas"];
 let categGasto           = [];
 let categIngreso         = [];
 let categFuentes         = [];
-let categResponsabilidad = ["MÃ­o","Compartido","De Ama"];
+let categResponsabilidad = ["Mío","Compartido","De Ama"];
 
 let chartCat    = null;
 let chartDonut  = null;
 let chartEvol   = null;
 let chartBal    = null;
 
-// âââ PALETA DE COLORES ââââââââââââââââââââââââââââââââââââââââ
+// ─── PALETA DE COLORES ────────────────────────────────────────
 const PALETTE = [
   "#7c6eff","#f06fa0","#34d399","#fbbf24","#22d3ee",
   "#fb923c","#a78bfa","#f472b6","#6ee7b7","#fde68a",
   "#74b9ff","#e17055"
 ];
 
-// âââ INICIALIZACIÃN âââââââââââââââââââââââââââââââââââââââââââ
+// ─── INICIALIZACIÓN ───────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
   // Leer config guardada
   const savedUrl  = localStorage.getItem("fp_api_url");
@@ -1244,30 +1244,30 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   // Fecha de hoy en el formulario
   document.getElementById("f-fecha").valueAsDate = new Date();
-  // Poblar selectores de mes/aÃ±o
+  // Poblar selectores de mes/año
   poblarSelectoresFecha();
 });
 
-// âââ CONFIGURACIÃN ââââââââââââââââââââââââââââââââââââââââââââ
+// ─── CONFIGURACIÓN ────────────────────────────────────────────
 async function testConnection() {
   const url = document.getElementById("api-url").value.trim();
   const res = document.getElementById("test-result");
-  if (!url) { res.innerHTML = '<span class="fail">â IngresÃ¡ la URL primero.</span>'; return; }
-  res.innerHTML = 'â³ Probando...';
+  if (!url) { res.innerHTML = '<span class="fail">❌ Ingresá la URL primero.</span>'; return; }
+  res.innerHTML = '⏳ Probando...';
   try {
     const r = await fetch(`${url}?action=ping`);
     const j = await r.json();
-    if (j.ok) res.innerHTML = `<span class="ok">â ${j.msg}</span>`;
-    else       res.innerHTML = `<span class="fail">â ${j.error || "Error desconocido"}</span>`;
+    if (j.ok) res.innerHTML = `<span class="ok">✅ ${j.msg}</span>`;
+    else       res.innerHTML = `<span class="fail">❌ ${j.error || "Error desconocido"}</span>`;
   } catch(e) {
-    res.innerHTML = `<span class="fail">â No se pudo conectar. VerificÃ¡ la URL y que el script estÃ© publicado.</span>`;
+    res.innerHTML = `<span class="fail">❌ No se pudo conectar. Verificá la URL y que el script esté publicado.</span>`;
   }
 }
 
 function guardarConfig() {
   const url  = document.getElementById("api-url").value.trim();
   const user = document.getElementById("usuario-setup").value.trim() || "Daniel";
-  if (!url) { alert("IngresÃ¡ la URL del Web App primero."); return; }
+  if (!url) { alert("Ingresá la URL del Web App primero."); return; }
   localStorage.setItem("fp_api_url",  url);
   localStorage.setItem("fp_usuario",  user);
   API_URL  = url;
@@ -1282,7 +1282,7 @@ function volverConfig() {
   document.getElementById("setup-screen").style.display = "flex";
 }
 
-// âââ INICIO APP âââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── INICIO APP ───────────────────────────────────────────────
 async function iniciarApp() {
   document.getElementById("setup-screen").style.display = "none";
   document.getElementById("app").style.display = "block";
@@ -1305,7 +1305,7 @@ async function iniciarApp() {
   inicializarSelectoresPresupuesto();
 }
 
-// âââ CATEGORÃAS Y FUENTES âââââââââââââââââââââââââââââââââââââ
+// ─── CATEGORÍAS Y FUENTES ─────────────────────────────────────
 async function cargarCategorias() {
   try {
     const r = await fetch(`${API_URL}?action=getCategorias`);
@@ -1320,7 +1320,7 @@ async function cargarCategorias() {
       const selResp = document.getElementById("f-responsabilidad");
       if (selResp) {
         selResp.innerHTML = categResponsabilidad.map(rv =>
-          `<option value="${rv}">${rv === "MÃ­o" ? "ð MÃ­o" : rv === "Compartido" ? "ð« Compartido" : "ð³ De Ama (ella me reintegra)"}</option>`
+          `<option value="${rv}">${rv === "Mío" ? "🙋 Mío" : rv === "Compartido" ? "👫 Compartido" : "💳 De Ama (ella me reintegra)"}</option>`
         ).join("");
       }
       // Filtro de responsabilidad
@@ -1332,7 +1332,7 @@ async function cargarCategorias() {
       // Select fuente del formulario
       const selFuente = document.getElementById("f-fuente");
       if (selFuente) {
-        selFuente.innerHTML = '<option value="">â Sin especificar â</option>' +
+        selFuente.innerHTML = '<option value="">— Sin especificar —</option>' +
           categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
       }
       // Filtro de fuente
@@ -1342,19 +1342,19 @@ async function cargarCategorias() {
           categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
       }
     }
-  } catch(e) { console.warn("No se pudieron cargar categorÃ­as:", e); }
+  } catch(e) { console.warn("No se pudieron cargar categorías:", e); }
 }
 
-// âââ TRANSACCIONES ââââââââââââââââââââââââââââââââââââââââââââ
+// ─── TRANSACCIONES ────────────────────────────────────────────
 async function cargarTodasTransacciones() {
   try {
     const r = await fetch(`${API_URL}?action=getTransacciones&usuario=${encodeURIComponent(USUARIO)}`);
     const j = await r.json();
     if (j.ok) allTransac = j.data;
-  } catch(e) { console.warn("Error cargándo transacciones:", e); }
+  } catch(e) { console.warn("Error carg�ndo transacciones:", e); }
 }
 
-// âââ SELECTORES FECHA âââââââââââââââââââââââââââââââââââââââââ
+// ─── SELECTORES FECHA ─────────────────────────────────────────
 function poblarSelectoresFecha() {
   const hoy  = new Date();
   const meses = [
@@ -1377,7 +1377,7 @@ function poblarSelectoresFecha() {
   const anioIds = ["sel-anio-resumen","fil-anio"];
   anioIds.forEach(id => {
     const el = document.getElementById(id);
-    el.innerHTML = '<option value="">Todos los aÃ±os</option>';
+    el.innerHTML = '<option value="">Todos los años</option>';
     for (let y = hoy.getFullYear(); y >= hoy.getFullYear() - 4; y--) {
       const o = document.createElement("option");
       o.value = y; o.textContent = y;
@@ -1393,7 +1393,7 @@ function poblarSelectoresFecha() {
   });
 }
 
-// âââ RESUMEN MES âââââââââââââââââââââââââââââââââââââââââââââ
+// ─── RESUMEN MES ─────────────────────────────────────────────
 async function cargarResumenMes() {
   const mes  = document.getElementById("sel-mes-resumen").value;
   const anio = document.getElementById("sel-anio-resumen").value;
@@ -1404,8 +1404,8 @@ async function cargarResumenMes() {
     return (d.getMonth() + 1) === parseInt(mes) && d.getFullYear() === parseInt(anio);
   });
 
-  // Todos los montos en BRUTO â montoEfectivoGasto se usa SOLO en la pestaÃ±a Compartidos.
-  // Cuando Ama reembolsa su parte, se registra como Ingreso â ya baja el balance naturalmente.
+  // Todos los montos en BRUTO — montoEfectivoGasto se usa SOLO en la pestaña Compartidos.
+  // Cuando Ama reembolsa su parte, se registra como Ingreso → ya baja el balance naturalmente.
   // Se excluyen "Internas" (transferencias entre cuentas propias, siempre neto 0).
   const ingresosARS = datos.filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "ARS").reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
   const ingresosUSD = datos.filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD").reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
@@ -1428,33 +1428,33 @@ async function cargarResumenMes() {
 
   const ingSubParts = [`${datos.filter(t=>t.tipo==="Ingreso").length} transacciones`];
   if (ingresosUSD > 0) ingSubParts.push(`+ ${fmtMoneda(ingresosUSD,"USD")} USD`);
-  document.getElementById("kpi-ingresos-sub").textContent = ingSubParts.join(" Â· ");
+  document.getElementById("kpi-ingresos-sub").textContent = ingSubParts.join(" · ");
 
   const gasSubParts = [`${datos.filter(t=>t.tipo==="Gasto").length} transacciones`];
   if (gastosUSD > 0) gasSubParts.push(`+ ${fmtMoneda(gastosUSD,"USD")} USD`);
-  document.getElementById("kpi-gastos-sub").textContent = gasSubParts.join(" Â· ");
+  document.getElementById("kpi-gastos-sub").textContent = gasSubParts.join(" · ");
 
-  const balSubParts = [balance >= 0 ? "SuperÃ¡vit ð" : "DÃ©ficit â ï¸"];
+  const balSubParts = [balance >= 0 ? "Superávit 🎉" : "Déficit ⚠️"];
   if (ingresosUSD > 0 || gastosUSD > 0) {
     const balUSD = ingresosUSD - gastosUSD;
-    balSubParts.push(`Balance USD: ${fmtMoneda(Math.abs(balUSD),"USD")} ${balUSD >= 0 ? "â" : "â ï¸"}`);
+    balSubParts.push(`Balance USD: ${fmtMoneda(Math.abs(balUSD),"USD")} ${balUSD >= 0 ? "✅" : "⚠️"}`);
   }
-  document.getElementById("kpi-balance-sub").textContent = balSubParts.join(" Â· ");
+  document.getElementById("kpi-balance-sub").textContent = balSubParts.join(" · ");
 
-  // KPI "Ama te debe" â acumulado total (no filtrado por mes)
+  // KPI "Ama te debe" — acumulado total (no filtrado por mes)
   const amaDebeTotalMes = allTransac
-    .filter(t => t.tipo === "Gasto" && (t.responsabilidad || "MÃ­o") === "De Ama")
+    .filter(t => t.tipo === "Gasto" && (t.responsabilidad || "Mío") === "De Ama")
     .reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
   const amaKpi = document.getElementById("kpi-ama-debe");
   if (amaKpi) {
     amaKpi.textContent = fmt(amaDebeTotalMes);
     document.getElementById("kpi-ama-debe-sub").textContent =
-      amaDebeTotalMes > 0 ? `${allTransac.filter(t=>t.tipo==="Gasto"&&(t.responsabilidad||"MÃ­o")==="De Ama").length} gastos pendientes de reintegro` : "Sin gastos pendientes â";
+      amaDebeTotalMes > 0 ? `${allTransac.filter(t=>t.tipo==="Gasto"&&(t.responsabilidad||"Mío")==="De Ama").length} gastos pendientes de reintegro` : "Sin gastos pendientes ✅";
   }
 
-  // CategorÃ­as para charts â gasto NETO por categorÃ­a usando montos BRUTOS
-  // (gastos brutos â ingresos brutos de la misma categorÃ­a).
-  // Catmaps separados por moneda â montos BRUTOS, gastos â ingresos de la misma categorÃ­a.
+  // Categorías para charts — gasto NETO por categoría usando montos BRUTOS
+  // (gastos brutos − ingresos brutos de la misma categoría).
+  // Catmaps separados por moneda — montos BRUTOS, gastos − ingresos de la misma categoría.
   const catMapARS = {}, catMapUSD = {};
   datos.filter(t => !esTransferencia(t)).forEach(t => {
     const m   = Math.abs(Number(t.monto));
@@ -1466,12 +1466,12 @@ async function cargarResumenMes() {
   const sortedCatsARS = Object.entries(catMapARS).filter(([,v]) => v > 0).sort((a,b) => b[1] - a[1]);
   const sortedCatsUSD = Object.entries(catMapUSD).filter(([,v]) => v > 0).sort((a,b) => b[1] - a[1]);
 
-  renderCatChart(sortedCatsARS);          // grÃ¡fico de barras muestra ARS
+  renderCatChart(sortedCatsARS);          // gráfico de barras muestra ARS
   renderDonutChart(ingresos, gastos);
   renderTopGastos(sortedCatsARS, sortedCatsUSD, datos);
 }
 
-// âââ GRÃFICO BARRAS CATEGORÃAS ââââââââââââââââââââââââââââââââ
+// ─── GRÁFICO BARRAS CATEGORÍAS ────────────────────────────────
 function renderCatChart(sortedCats) {
   const ctx = document.getElementById("chart-cat");
   if (chartCat) chartCat.destroy();
@@ -1504,7 +1504,7 @@ function renderCatChart(sortedCats) {
   });
 }
 
-// âââ GRÃFICO DONUT ââââââââââââââââââââââââââââââââââââââââââââ
+// ─── GRÁFICO DONUT ────────────────────────────────────────────
 function renderDonutChart(ingresos, gastos) {
   const ctx = document.getElementById("chart-donut");
   if (chartDonut) chartDonut.destroy();
@@ -1530,7 +1530,7 @@ function renderDonutChart(ingresos, gastos) {
   });
 }
 
-// âââ TOP GASTOS âââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── TOP GASTOS ───────────────────────────────────────────────
 function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos) {
   const el = document.getElementById("top-gastos-list");
   if (!sortedCatsARS.length && !sortedCatsUSD.length) {
@@ -1538,7 +1538,7 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos) {
     return;
   }
 
-  // Genera las filas HTML para un conjunto de categorÃ­as de una moneda dada
+  // Genera las filas HTML para un conjunto de categorías de una moneda dada
   function renderSeccion(cats, moneda) {
     const fmtVal = (v) => moneda === "USD" ? fmtMoneda(v, "USD") : fmt(v);
     const total  = cats.reduce((s,[,v]) => s + v, 0);
@@ -1552,18 +1552,18 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos) {
         const esGasto = t.tipo === "Gasto";
         const bruto   = Math.abs(Number(t.monto));
         const efe     = esGasto ? bruto : -bruto;
-        const resp    = t.responsabilidad || "MÃ­o";
+        const resp    = t.responsabilidad || "Mío";
         const respTag = resp === "Compartido"
           ? `<span style="color:#a78bfa;font-size:.75rem;">Compartido</span>`
           : resp === "De Ama"
           ? `<span style="color:#f59e0b;font-size:.75rem;">De Ama</span>`
           : "";
         const efeColor = efe >= 0 ? "var(--red)" : "var(--green)";
-        const efeLabel = efe >= 0 ? fmtVal(bruto) : "â" + fmtVal(bruto);
+        const efeLabel = efe >= 0 ? fmtVal(bruto) : "−" + fmtVal(bruto);
         return `<tr>
           <td style="padding:.2rem .5rem;color:var(--text-muted);font-size:.78rem;">${fmtFecha(t.fecha)}</td>
-          <td style="padding:.2rem .5rem;font-size:.78rem;">${esGasto ? "â Gasto" : "â Ingreso"}</td>
-          <td style="padding:.2rem .5rem;font-size:.78rem;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.descripcion||"â"}</td>
+          <td style="padding:.2rem .5rem;font-size:.78rem;">${esGasto ? "↑ Gasto" : "↓ Ingreso"}</td>
+          <td style="padding:.2rem .5rem;font-size:.78rem;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.descripcion||"—"}</td>
           <td style="padding:.2rem .5rem;font-size:.78rem;text-align:right;">${fmtVal(bruto)}</td>
           <td style="padding:.2rem .5rem;font-size:.78rem;text-align:right;color:${efeColor};">${efeLabel} ${respTag}</td>
         </tr>`;
@@ -1572,8 +1572,8 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos) {
       <div style="margin-bottom:.9rem;">
         <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;font-size:.88rem;cursor:pointer;"
              onclick="document.getElementById('${drillId}').style.display=document.getElementById('${drillId}').style.display==='none'?'block':'none'">
-          <span><span style="color:${PALETTE[i%PALETTE.length]};margin-right:.4rem;">â</span>${cat}
-            <span style="color:var(--text-muted);font-size:.72rem;margin-left:.3rem;">(${txsCat.length} tx) â¾</span>
+          <span><span style="color:${PALETTE[i%PALETTE.length]};margin-right:.4rem;">●</span>${cat}
+            <span style="color:var(--text-muted);font-size:.72rem;margin-left:.3rem;">(${txsCat.length} tx) ▾</span>
           </span>
           <span style="color:var(--text-muted)">${fmtVal(val)} <span style="color:var(--red)">(${pct}%)</span></span>
         </div>
@@ -1585,7 +1585,7 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos) {
             <thead><tr>
               <th style="padding:.2rem .5rem;font-size:.72rem;color:var(--text-muted);text-align:left;">Fecha</th>
               <th style="padding:.2rem .5rem;font-size:.72rem;color:var(--text-muted);text-align:left;">Tipo</th>
-              <th style="padding:.2rem .5rem;font-size:.72rem;color:var(--text-muted);text-align:left;">DescripciÃ³n</th>
+              <th style="padding:.2rem .5rem;font-size:.72rem;color:var(--text-muted);text-align:left;">Descripción</th>
               <th style="padding:.2rem .5rem;font-size:.72rem;color:var(--text-muted);text-align:right;">Bruto</th>
               <th style="padding:.2rem .5rem;font-size:.72rem;color:var(--text-muted);text-align:right;">Neto</th>
             </tr></thead>
@@ -1598,18 +1598,18 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos) {
 
   let html = "";
   if (sortedCatsARS.length) {
-    html += `<div style="font-size:.75rem;font-weight:600;color:var(--text-muted);letter-spacing:.05em;margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);">ð¦ð· PESOS (ARS)</div>`;
+    html += `<div style="font-size:.75rem;font-weight:600;color:var(--text-muted);letter-spacing:.05em;margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);">🇦🇷 PESOS (ARS)</div>`;
     html += renderSeccion(sortedCatsARS, "ARS");
   }
   if (sortedCatsUSD.length) {
     if (sortedCatsARS.length) html += `<div style="margin-top:1rem;"></div>`;
-    html += `<div style="font-size:.75rem;font-weight:600;color:var(--text-muted);letter-spacing:.05em;margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);">ðºð¸ DÃLARES (USD)</div>`;
+    html += `<div style="font-size:.75rem;font-weight:600;color:var(--text-muted);letter-spacing:.05em;margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);">🇺🇸 DÓLARES (USD)</div>`;
     html += renderSeccion(sortedCatsUSD, "USD");
   }
   el.innerHTML = html;
 }
 
-// âââ EVOLUCIÃN ââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── EVOLUCIÓN ────────────────────────────────────────────────
 function cargarEvolucion() {
   // Agrupar allTransac por mes
   const map = {};
@@ -1621,7 +1621,7 @@ function cargarEvolucion() {
     else map[k].gastos += Math.abs(Number(t.monto));
   });
 
-  // Ãltimos 12 meses
+  // Últimos 12 meses
   const labels = [], ingArr = [], gasArr = [], balArr = [];
   let acum = 0;
   Object.keys(map).sort().slice(-12).forEach(k => {
@@ -1635,7 +1635,7 @@ function cargarEvolucion() {
     balArr.push(acum);
   });
 
-  // Chart evoluciÃ³n
+  // Chart evolución
   const ctxE = document.getElementById("chart-evol");
   if (chartEvol) chartEvol.destroy();
   chartEvol = new Chart(ctxE, {
@@ -1695,7 +1695,7 @@ function cargarEvolucion() {
   });
 }
 
-// âââ TABLA TRANSACCIONES âââââââââââââââââââââââââââââââââââââ
+// ─── TABLA TRANSACCIONES ─────────────────────────────────────
 function filtrarTabla() {
   const mes     = document.getElementById("fil-mes").value;
   const anio    = document.getElementById("fil-anio").value;
@@ -1712,14 +1712,14 @@ function filtrarTabla() {
     const okTipo   = !tipo   || t.tipo === tipo;
     const okCat    = !cat    || t.categoria === cat;
     const okFuente = !fuente || (t.fuente || "") === fuente;
-    const okResp   = !resp   || (t.responsabilidad || "MÃ­o") === resp;
+    const okResp   = !resp   || (t.responsabilidad || "Mío") === resp;
     const okBus    = !buscar || (t.descripcion||"").toLowerCase().includes(buscar)
                              || t.categoria.toLowerCase().includes(buscar)
                              || (t.fuente||"").toLowerCase().includes(buscar);
     return okMes && okAnio && okTipo && okCat && okFuente && okResp && okBus;
   });
 
-  // Ordenar mÃ¡s recientes primero
+  // Ordenar más recientes primero
   datos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
 
   const tbody = document.getElementById("tabla-body");
@@ -1728,11 +1728,11 @@ function filtrarTabla() {
     return;
   }
 
-  const respEmoji = { "MÃ­o": "ð", "Compartido": "ð«", "De Ama": "ð³" };
-  const respColor = { "MÃ­o": "var(--accent)", "Compartido": "var(--yellow)", "De Ama": "var(--accent2)" };
+  const respEmoji = { "Mío": "🙋", "Compartido": "👫", "De Ama": "💳" };
+  const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", "De Ama": "var(--accent2)" };
 
   tbody.innerHTML = datos.map(t => {
-    const r = t.responsabilidad || "MÃ­o";
+    const r = t.responsabilidad || "Mío";
     const mon = t.moneda || "ARS";
     const monBadge = mon === "USD"
       ? `<span class="badge-moneda usd">USD</span>`
@@ -1742,20 +1742,20 @@ function filtrarTabla() {
       <td style="color:var(--text-muted);font-size:.83rem;">${fmtFecha(t.fecha)}</td>
       <td><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
       <td>${t.categoria}</td>
-      <td style="color:var(--text-muted);font-size:.83rem">${t.fuente || "â"}</td>
+      <td style="color:var(--text-muted);font-size:.83rem">${t.fuente || "—"}</td>
       <td><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${r}</span></td>
-      <td style="color:var(--text-muted)">${t.descripcion || "â"}</td>
+      <td style="color:var(--text-muted)">${t.descripcion || "—"}</td>
       <td style="text-align:right;font-weight:600;color:${t.tipo==="Ingreso":"var(--green)":"var(--red)"}">${fmtMoneda(t.monto, mon)}</td>
       <td>${monBadge}</td>
-      <td><button class="delete-btn" onclick="eliminarTransaccion('${t.id}')" title="Eliminar">ðï¸</button></td>
+      <td><button class="delete-btn" onclick="eliminarTransaccion('${t.id}')" title="Eliminar">🗑️</button></td>
     </tr>`
   }).join("");
 
-  // Poblar filtro categorÃ­as
+  // Poblar filtro categorías
   const cats = [...new Set(allTransac.map(t => t.categoria))].sort();
   const filCat = document.getElementById("fil-cat");
   const currentVal = filCat.value;
-  filCat.innerHTML = '<option value="">Todas las categorÃ­as</option>';
+  filCat.innerHTML = '<option value="">Todas las categorías</option>';
   cats.forEach(c => {
     const o = document.createElement("option");
     o.value = c; o.textContent = c;
@@ -1764,9 +1764,9 @@ function filtrarTabla() {
   });
 }
 
-// âââ ELIMINAR âââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── ELIMINAR ─────────────────────────────────────────────────
 async function eliminarTransaccion(id) {
-  if (!confirm("Â¿Eliminar esta transacciÃ³n?")) return;
+  if (!confirm("¿Eliminar esta transacción?")) return;
   try {
     const r = await fetch(API_URL, {
       method: "POST",
@@ -1778,16 +1778,16 @@ async function eliminarTransaccion(id) {
       filtrarTabla();
       cargarResumenMes();
       cargarEvolucion();
-      showToast("â TransacciÃ³n eliminada", "ok");
+      showToast("✅ Transacción eliminada", "ok");
     } else {
-      showToast("â " + j.error, "err");
+      showToast("❌ " + j.error, "err");
     }
   } catch(e) {
-    showToast("â Error de conexiÃ³n", "err");
+    showToast("❌ Error de conexión", "err");
   }
 }
 
-// âââ FORMULARIO NUEVA TRANSACCIÃN âââââââââââââââââââââââââââââ
+// ─── FORMULARIO NUEVA TRANSACCIÓN ─────────────────────────────
 let tipoActual   = "Gasto";
 let monedaActual = "ARS";
 
@@ -1805,7 +1805,7 @@ function setTipo(tipo) {
   btnG.className = "tipo-btn " + (tipo === "Gasto"    ? "active-expense" : "");
   btnI.className = "tipo-btn " + (tipo === "Ingreso"  ? "active-income"  : "");
 
-  // Actualizar categorÃ­as
+  // Actualizar categorías
   const cats = tipo === "Gasto" ? categGasto : categIngreso;
   const sel  = document.getElementById("f-categoria");
   sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join("");
@@ -1816,18 +1816,18 @@ async function guardarTransaccion() {
   const monto   = parseFloat(document.getElementById("f-monto").value);
   const cat     = document.getElementById("f-categoria").value;
   const desc    = document.getElementById("f-descripcion").value;
-  const resp    = document.getElementById("f-responsabilidad")?.value || "MÃ­o";
+  const resp    = document.getElementById("f-responsabilidad")?.value || "Mío";
   const fuente  = document.getElementById("f-fuente")?.value || "";
   const msg   = document.getElementById("form-msg");
 
   if (!fecha || isNaN(monto) || monto <= 0 || !cat) {
-    msg.innerHTML = '<span style="color:var(--red)">CompletÃ¡ fecha, monto y categorÃ­a.</span>';
+    msg.innerHTML = '<span style="color:var(--red)">Completá fecha, monto y categoría.</span>';
     return;
   }
 
   const btn = document.getElementById("btn-guardar");
   btn.disabled = true;
-  btn.textContent = "â³ Guardando...";
+  btn.textContent = "⏳ Guardando...";
   msg.innerHTML = "";
 
   try {
@@ -1851,20 +1851,20 @@ async function guardarTransaccion() {
       document.getElementById("f-monto").value = "";
       document.getElementById("f-descripcion").value = "";
       document.getElementById("f-fecha").valueAsDate = new Date();
-      showToast("â TransacciÃ³n guardada", "ok");
-      msg.innerHTML = '<span style="color:var(--green)">â Guardado correctamente.</span>';
+      showToast("✅ Transacción guardada", "ok");
+      msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
     } else {
-      msg.innerHTML = `<span style="color:var(--red)">â ${j.error}</span>`;
+      msg.innerHTML = `<span style="color:var(--red)">❌ ${j.error}</span>`;
     }
   } catch(e) {
-    msg.innerHTML = '<span style="color:var(--red)">â Error de conexiÃ³n con el servidor.</span>';
+    msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión con el servidor.</span>';
   }
 
   btn.disabled = false;
-  btn.textContent = "ð¾ Guardar";
+  btn.textContent = "💾 Guardar";
 }
 
-// âââ COMPARTIDOS ââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── COMPARTIDOS ──────────────────────────────────────────────
 function inicializarSelectoresCompartidos() {
   const hoy   = new Date();
   const meses = [
@@ -1899,19 +1899,19 @@ function cargarCompartidos() {
   const anio = parseInt(document.getElementById("comp-anio").value);
   const CATS = [...new Set([...categGasto, ...categIngreso])].sort();
 
-  // Filtrar transacciones del mes/aÃ±o seleccionado â gastos para compPorCat y reembolsos
+  // Filtrar transacciones del mes/año seleccionado — gastos para compPorCat y reembolsos
   const datos = allTransac.filter(t => {
     const d = new Date(t.fecha + "T12:00:00");
     return (d.getMonth() + 1) === mes && d.getFullYear() === anio && t.tipo === "Gasto";
   });
-  // Ingresos del mes â los compartidos reducen lo que se debe
+  // Ingresos del mes — los compartidos reducen lo que se debe
   const datosIngresos = allTransac.filter(t => {
     const d = new Date(t.fecha + "T12:00:00");
     return (d.getMonth() + 1) === mes && d.getFullYear() === anio && t.tipo === "Ingreso";
   });
 
-  // ââ COMPARTIDOS ââââââââââââââââââââââââââââââââââââââââââââââ
-  // Gastos Compartido Ã· 2 suman; Ingresos Compartido Ã· 2 restan (son reintegros de la otra parte)
+  // ── COMPARTIDOS ──────────────────────────────────────────────
+  // Gastos Compartido ÷ 2 suman; Ingresos Compartido ÷ 2 restan (son reintegros de la otra parte)
   // Separados por moneda: ARS y USD
   const compPorCatARS = {}, compPorCatUSD = {};
   CATS.forEach(cat => {
@@ -1919,7 +1919,7 @@ function cargarCompartidos() {
     compPorCatUSD[cat] = { daniel: 0, ama: 0 };
   });
 
-  datos.filter(t => (t.responsabilidad || "MÃ­o") === "Compartido").forEach(t => {
+  datos.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t => {
     const cat    = t.categoria;
     const moneda = (t.moneda || "ARS").toUpperCase();
     const map    = moneda === "USD" ? compPorCatUSD : compPorCatARS;
@@ -1932,8 +1932,8 @@ function cargarCompartidos() {
     }
   });
 
-  // Restar ingresos compartidos (reintegros) â reducen el neto por categorÃ­a
-  datosIngresos.filter(t => (t.responsabilidad || "MÃ­o") === "Compartido").forEach(t => {
+  // Restar ingresos compartidos (reintegros) — reducen el neto por categoría
+  datosIngresos.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t => {
     const cat    = t.categoria;
     const moneda = (t.moneda || "ARS").toUpperCase();
     const map    = moneda === "USD" ? compPorCatUSD : compPorCatARS;
@@ -1946,18 +1946,18 @@ function cargarCompartidos() {
     }
   });
 
-  // ââ REEMBOLSOS âââââââââââââââââââââââââââââââââââââââââââââââ
-  // Gastos marcados "De Ama" â monto completo
+  // ── REEMBOLSOS ───────────────────────────────────────────────
+  // Gastos marcados "De Ama" → monto completo
   const reembPorCat = {};
   CATS.forEach(cat => { reembPorCat[cat] = { daniel: 0, ama: 0 }; });
 
-  datos.filter(t => (t.responsabilidad || "MÃ­o") === "De Ama").forEach(t => {
+  datos.filter(t => (t.responsabilidad || "Mío") === "De Ama").forEach(t => {
     const cat = t.categoria;
     if (!reembPorCat[cat]) reembPorCat[cat] = { daniel: 0, ama: 0 };
     reembPorCat[cat].daniel += Math.abs(Number(t.monto));
   });
 
-  // ââ RENDERIZAR TABLA COMPARTIDOS (ARS + USD separados) âââââââ
+  // ── RENDERIZAR TABLA COMPARTIDOS (ARS + USD separados) ───────
   const filasCompARS = CATS.map(cat => ({ cat, ...compPorCatARS[cat] })).filter(r => r.daniel > 0 || r.ama > 0);
   const filasCompUSD = CATS.map(cat => ({ cat, ...compPorCatUSD[cat] })).filter(r => r.daniel > 0 || r.ama > 0);
 
@@ -1969,24 +1969,24 @@ function cargarCompartidos() {
   const totalCompAmaUSD    = filasCompUSD.reduce((s,r) => s + r.ama,    0);
   const totalCompNetUSD    = totalCompDanielUSD - totalCompAmaUSD;
 
-  // FunciÃ³n auxiliar que genera las filas de una moneda dada
+  // Función auxiliar que genera las filas de una moneda dada
   function buildCompRows(filas, monedaFilter) {
     return filas.map(r => {
       const net        = r.daniel - r.ama;
-      const txsGasto   = datos.filter(t => t.categoria === r.cat && (t.responsabilidad || "MÃ­o") === "Compartido" && (t.moneda || "ARS").toUpperCase() === monedaFilter);
-      const txsIngreso = datosIngresos.filter(t => t.categoria === r.cat && (t.responsabilidad || "MÃ­o") === "Compartido" && (t.moneda || "ARS").toUpperCase() === monedaFilter);
+      const txsGasto   = datos.filter(t => t.categoria === r.cat && (t.responsabilidad || "Mío") === "Compartido" && (t.moneda || "ARS").toUpperCase() === monedaFilter);
+      const txsIngreso = datosIngresos.filter(t => t.categoria === r.cat && (t.responsabilidad || "Mío") === "Compartido" && (t.moneda || "ARS").toUpperCase() === monedaFilter);
       const txsAll     = [...txsGasto, ...txsIngreso];
       const drillId    = "comp-drill-" + r.cat.replace(/\s+/g,"_") + "-" + monedaFilter;
       const drillRows  = txsAll.map(t => {
         const m         = Math.abs(Number(t.monto));
         const esAma     = (t.usuario || "Daniel").toLowerCase() === "ama";
         const esGasto   = t.tipo === "Gasto";
-        const signo     = esGasto ? "+" : "â";
+        const signo     = esGasto ? "+" : "−";
         const color     = esGasto ? "var(--accent)" : "var(--green)";
         const tipoLabel = esGasto ? "Gasto" : "Ingreso";
         return `<tr style="background:var(--bg1);">
           <td colspan="2" style="padding:.2rem .8rem;font-size:.76rem;color:var(--text-muted);">
-            <span style="color:${color};font-size:.7rem;">[${tipoLabel}]</span> ${fmtFecha(t.fecha)} â ${t.descripcion||"â"}
+            <span style="color:${color};font-size:.7rem;">[${tipoLabel}]</span> ${fmtFecha(t.fecha)} — ${t.descripcion||"—"}
           </td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:var(--text-muted);">Bruto: ${fmtMoneda(m, monedaFilter)}</td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:${color};">
@@ -1995,18 +1995,18 @@ function cargarCompartidos() {
         </tr>`;
       }).join("");
       return `<tr style="cursor:pointer;" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'table-row':'none'">
-        <td>${r.cat} <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) â¾</span></td>
+        <td>${r.cat} <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
         <td style="text-align:right;color:var(--text)">${fmtMoneda(r.daniel, monedaFilter)}</td>
-        <td style="text-align:right;color:var(--text-muted)">${r.ama > 0 ? fmtMoneda(r.ama, monedaFilter) : "â"}</td>
+        <td style="text-align:right;color:var(--text-muted)">${r.ama > 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}</td>
         <td style="text-align:right;font-weight:700;color:${net>0?"var(--yellow)":"var(--green)"}">${fmtMoneda(net, monedaFilter)}</td>
       </tr>
       <tr id="${drillId}" style="display:none;">
         <td colspan="4" style="padding:0;">
           <table style="width:100%;border-collapse:collapse;">
             <thead><tr style="background:var(--bg2);">
-              <th colspan="2" style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:left;font-weight:400;">Fecha â DescripciÃ³n</th>
+              <th colspan="2" style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:left;font-weight:400;">Fecha — Descripción</th>
               <th style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:right;font-weight:400;">Monto bruto</th>
-              <th style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:right;font-weight:400;">Parte (Ã·2)</th>
+              <th style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:right;font-weight:400;">Parte (÷2)</th>
             </tr></thead>
             <tbody>${drillRows}</tbody>
           </table>
@@ -2021,12 +2021,12 @@ function cargarCompartidos() {
   } else {
     let htmlComp = "";
     if (filasCompARS.length > 0) {
-      htmlComp += `<tr style="background:var(--bg2);"><td colspan="4" style="padding:.4rem .8rem;font-size:.74rem;color:var(--text-muted);font-weight:600;letter-spacing:.05em;">ð¦ð· PESOS (ARS)</td></tr>`;
+      htmlComp += `<tr style="background:var(--bg2);"><td colspan="4" style="padding:.4rem .8rem;font-size:.74rem;color:var(--text-muted);font-weight:600;letter-spacing:.05em;">🇦🇷 PESOS (ARS)</td></tr>`;
       htmlComp += buildCompRows(filasCompARS, "ARS");
     }
     if (filasCompUSD.length > 0) {
       if (filasCompARS.length > 0) htmlComp += `<tr><td colspan="4" style="height:.4rem;background:var(--bg);padding:0;"></td></tr>`;
-      htmlComp += `<tr style="background:var(--bg2);"><td colspan="4" style="padding:.4rem .8rem;font-size:.74rem;color:var(--text-muted);font-weight:600;letter-spacing:.05em;">ðºð¸ DÃLARES (USD)</td></tr>`;
+      htmlComp += `<tr style="background:var(--bg2);"><td colspan="4" style="padding:.4rem .8rem;font-size:.74rem;color:var(--text-muted);font-weight:600;letter-spacing:.05em;">🇺🇸 DÓLARES (USD)</td></tr>`;
       htmlComp += buildCompRows(filasCompUSD, "USD");
     }
     tbodyComp.innerHTML = htmlComp;
@@ -2038,7 +2038,7 @@ function cargarCompartidos() {
     tfootHtml += `<tr class="comp-tfoot-row">
       <td><strong>TOTAL ARS</strong></td>
       <td style="text-align:right">${fmt(totalCompDanielARS)}</td>
-      <td style="text-align:right">${totalCompAmaARS > 0 ? fmt(totalCompAmaARS) : "â"}</td>
+      <td style="text-align:right">${totalCompAmaARS > 0 ? fmt(totalCompAmaARS) : "—"}</td>
       <td style="text-align:right" class="comp-tfoot-total">${fmt(totalCompNetARS)}</td>
     </tr>`;
   }
@@ -2046,7 +2046,7 @@ function cargarCompartidos() {
     tfootHtml += `<tr class="comp-tfoot-row">
       <td><strong>TOTAL USD</strong></td>
       <td style="text-align:right">${fmtMoneda(totalCompDanielUSD,"USD")}</td>
-      <td style="text-align:right">${totalCompAmaUSD > 0 ? fmtMoneda(totalCompAmaUSD,"USD") : "â"}</td>
+      <td style="text-align:right">${totalCompAmaUSD > 0 ? fmtMoneda(totalCompAmaUSD,"USD") : "—"}</td>
       <td style="text-align:right" class="comp-tfoot-total">${fmtMoneda(totalCompNetUSD,"USD")}</td>
     </tr>`;
   }
@@ -2057,7 +2057,7 @@ function cargarCompartidos() {
   </tr>`;
   tfootComp.innerHTML = tfootHtml;
 
-  // ââ RENDERIZAR TABLA REEMBOLSOS ââââââââââââââââââââââââââââââ
+  // ── RENDERIZAR TABLA REEMBOLSOS ──────────────────────────────
   const filasReemb = CATS
     .map(cat => ({ cat, ...reembPorCat[cat] }))
     .filter(r => r.daniel > 0);
@@ -2071,7 +2071,7 @@ function cargarCompartidos() {
     tbodyReemb.innerHTML = filasReemb.map(r => `<tr>
       <td>${r.cat}</td>
       <td style="text-align:right;font-weight:600;color:var(--accent2)">${fmt(r.daniel)}</td>
-      <td style="text-align:right;color:var(--text-muted)">â</td>
+      <td style="text-align:right;color:var(--text-muted)">—</td>
       <td style="text-align:right;font-weight:700;color:var(--accent2)">${fmt(r.daniel)}</td>
     </tr>`).join("");
   }
@@ -2080,7 +2080,7 @@ function cargarCompartidos() {
   tfootReemb.innerHTML = `<tr class="comp-tfoot-row">
     <td><strong>TOTAL</strong></td>
     <td style="text-align:right">${fmt(totalReembDaniel)}</td>
-    <td style="text-align:right">â</td>
+    <td style="text-align:right">—</td>
     <td style="text-align:right" class="comp-tfoot-total">${fmt(totalReembDaniel)}</td>
   </tr>
   <tr style="font-size:.73rem;color:var(--text-muted)">
@@ -2089,7 +2089,7 @@ function cargarCompartidos() {
     <td style="text-align:right">Ama debe reintegrar</td>
   </tr>`;
 
-  // ââ BALANCE FINAL ââââââââââââââââââââââââââââââââââââââââââââ
+  // ── BALANCE FINAL ────────────────────────────────────────────
   // ARS: compartidos neto ARS + reembolsos (siempre ARS)
   const balanceFinalARS = totalCompNetARS + totalReembDaniel;
   // USD: solo compartidos USD (reembolsos no tienen USD en este modelo)
@@ -2109,23 +2109,23 @@ function cargarCompartidos() {
   if (balanceFinalUSD   > 0) desglose.push(`Compartidos USD: ${fmtMoneda(totalCompNetUSD, "USD")}`);
 
   const debeAma = balanceFinalARS > 0 || balanceFinalUSD > 0;
-  const vosDebÃ©s = balanceFinalARS < 0 || balanceFinalUSD < 0;
+  const vosDebés = balanceFinalARS < 0 || balanceFinalUSD < 0;
 
-  if (debeAma && !vosDebÃ©s) {
-    balSub.textContent = `â Ama te debe â ${desglose.join(" + ")}`;
-  } else if (vosDebÃ©s && !debeAma) {
+  if (debeAma && !vosDebés) {
+    balSub.textContent = `✅ Ama te debe — ${desglose.join(" + ")}`;
+  } else if (vosDebés && !debeAma) {
     const partes = [];
     if (balanceFinalARS < 0) partes.push(fmt(Math.abs(balanceFinalARS)));
     if (balanceFinalUSD < 0) partes.push(fmtMoneda(Math.abs(balanceFinalUSD), "USD"));
-    balSub.textContent = `â ï¸ Vos le debÃ©s ${partes.join(" + ")} a Ama`;
-  } else if (debeAma || vosDebÃ©s) {
-    balSub.textContent = `âï¸ Deudas mixtas â ${desglose.join(" | ")}`;
+    balSub.textContent = `⚠️ Vos le debés ${partes.join(" + ")} a Ama`;
+  } else if (debeAma || vosDebés) {
+    balSub.textContent = `⚖️ Deudas mixtas — ${desglose.join(" | ")}`;
   } else {
-    balSub.textContent = "â EstÃ¡n a mano â sin deuda pendiente";
+    balSub.textContent = "✅ Están a mano — sin deuda pendiente";
   }
 }
 
-// âââ NAVEGACIÃN âââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── NAVEGACIÓN ───────────────────────────────────────────────
 function navegarA(pagina) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
@@ -2141,34 +2141,34 @@ function navegarA(pagina) {
   closeSidebar();
 }
 
-// âââ SIDEBAR MOBILE âââââââââââââââââââââââââââââââââââââââââââ
+// ─── SIDEBAR MOBILE ───────────────────────────────────────────
 function toggleSidebar() {
   const sidebar = document.querySelector(".sidebar");
   const overlay = document.getElementById("sidebar-overlay");
   const icon    = document.getElementById("hamburger-icon");
   const open    = sidebar.classList.toggle("open");
   overlay.classList.toggle("open", open);
-  icon.textContent = open ? "â" : "â°";
+  icon.textContent = open ? "✕" : "☰";
 }
 function closeSidebar() {
   document.querySelector(".sidebar").classList.remove("open");
   document.getElementById("sidebar-overlay").classList.remove("open");
   const icon = document.getElementById("hamburger-icon");
-  if (icon) icon.textContent = "â°";
+  if (icon) icon.textContent = "☰";
 }
 
-// Mostrar/ocultar header mobile al cambiar tamaÃ±o de ventana (ej: rotaciÃ³n)
+// Mostrar/ocultar header mobile al cambiar tamaño de ventana (ej: rotación)
 window.addEventListener("resize", () => {
   const mh = document.getElementById("mobile-header");
   if (!mh) return;
-  // Solo aplica si el app estÃ¡ visible
+  // Solo aplica si el app está visible
   if (document.getElementById("app").style.display === "block") {
     mh.style.display = window.innerWidth <= 768 ? "flex" : "none";
-    if (window.innerWidth > 768) closeSidebar(); // cerrar drawer si amplÃ­an pantalla
+    if (window.innerWidth > 768) closeSidebar(); // cerrar drawer si amplían pantalla
   }
 });
 
-// âââ PRESUPUESTO ââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── PRESUPUESTO ──────────────────────────────────────────────
 let presupuestoActual = {}; // { categoria: monto }
 
 function inicializarSelectoresPresupuesto() {
@@ -2226,7 +2226,7 @@ async function guardarPresupuesto() {
     if (val > 0) items.push({ categoria: cat, presupuesto: val });
   });
 
-  msg.innerHTML = "â³ Guardando...";
+  msg.innerHTML = "⏳ Guardando...";
   try {
     const r = await fetch(API_URL, {
       method: "POST",
@@ -2234,29 +2234,29 @@ async function guardarPresupuesto() {
     });
     const j = await r.json();
     if (j.ok) {
-      msg.innerHTML = `<span style="color:var(--green)">â ${j.msg}</span>`;
+      msg.innerHTML = `<span style="color:var(--green)">✅ ${j.msg}</span>`;
       renderPresupuesto();
     } else {
-      msg.innerHTML = `<span style="color:var(--red)">â ${j.error}</span>`;
+      msg.innerHTML = `<span style="color:var(--red)">❌ ${j.error}</span>`;
     }
   } catch(e) {
-    msg.innerHTML = '<span style="color:var(--red)">â Error de conexiÃ³n.</span>';
+    msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>';
   }
   setTimeout(() => { msg.innerHTML = ""; }, 3500);
 }
 
-// Calcula el monto efectivo de un gasto segÃºn responsabilidad
+// Calcula el monto efectivo de un gasto según responsabilidad
 function esTransferencia(t) {
   return CATS_TRANSFERENCIA.includes(t.categoria);
 }
 
 function montoEfectivoGasto(t) {
   if (t.tipo !== "Gasto") return 0;
-  const resp = t.responsabilidad || "MÃ­o";
+  const resp = t.responsabilidad || "Mío";
   const m = Math.abs(Number(t.monto));
   if (resp === "De Ama")    return 0;
   if (resp === "Compartido") return m / 2;
-  return m; // "MÃ­o"
+  return m; // "Mío"
 }
 
 function renderPresupuesto() {
@@ -2269,14 +2269,14 @@ function renderPresupuesto() {
     return (d.getMonth() + 1) === mes && d.getFullYear() === anio && t.usuario === USUARIO;
   });
 
-  // Sueldo = ingresos genuinos del mes (solo categorÃ­as de ingreso propio)
+  // Sueldo = ingresos genuinos del mes (solo categorías de ingreso propio)
   const CATS_SUELDO = ["Sueldo", "Otros Ingresos", "Intereses"];
   const sueldo = dataMes
     .filter(t => t.tipo === "Ingreso" && CATS_SUELDO.includes(t.categoria))
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
 
-  // Gasto neto por categorÃ­a: gastos â ingresos de la misma categorÃ­a
-  // (misma lÃ³gica que catMap: los reintegros reducen el gasto real)
+  // Gasto neto por categoría: gastos − ingresos de la misma categoría
+  // (misma lógica que catMap: los reintegros reducen el gasto real)
   const gastoPorCat = {};
   dataMes.filter(t => !esTransferencia(t)).forEach(t => {
     const m = Math.abs(Number(t.monto));
@@ -2327,11 +2327,11 @@ function renderPresupuesto() {
 
     const gastoStr = gasto > 0
       ? `<span style="color:var(--red);font-weight:600">${fmt(gasto)}</span>`
-      : `<span style="color:var(--text-muted)">â</span>`;
+      : `<span style="color:var(--text-muted)">—</span>`;
 
     const restStr = pres > 0
       ? `<span style="color:${restColor};font-weight:600">${fmt(rest)}</span>`
-      : `<span style="color:var(--text-muted)">â</span>`;
+      : `<span style="color:var(--text-muted)">—</span>`;
 
     const barHtml = pres > 0
       ? `<div class="pres-bar-wrap">
@@ -2346,7 +2346,7 @@ function renderPresupuesto() {
       <td>${cat}</td>
       <td style="text-align:right">
         <input type="number" class="pres-input" data-cat="${cat}"
-               value="${pres > 0 ? pres : ''}" placeholder="â" min="0" step="100"
+               value="${pres > 0 ? pres : ''}" placeholder="—" min="0" step="100"
                oninput="actualizarKpisPres()">
       </td>
       <td style="text-align:right">${gastoStr}</td>
@@ -2396,7 +2396,7 @@ function actualizarKpisPres() {
   }
 }
 
-// âââ CATEGORÃAS Y FUENTES â PÃGINA CONFIGURACIÃN âââââââââââââ
+// ─── CATEGORÍAS Y FUENTES — PÁGINA CONFIGURACIÓN ─────────────
 function renderizarConfig() {
   _renderLista("gasto",   categGasto,   "GASTO");
   _renderLista("ingreso", categIngreso, "INGRESO");
@@ -2407,13 +2407,13 @@ function _renderLista(tipo, items, tipoAPI) {
   const el = document.getElementById("cfg-lista-" + tipo);
   if (!el) return;
   if (!items.length) {
-    el.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin Ã­tems</div>';
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin ítems</div>';
     return;
   }
   el.innerHTML = items.map(item => `
     <div class="cfg-item">
       <span class="cfg-item-name">${item}</span>
-      <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}','${item.replace(/'/g,"\\'")}',this)" title="Eliminar">â</button>
+      <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}','${item.replace(/'/g,"\\'")}',this)" title="Eliminar">✕</button>
     </div>`).join("");
 }
 
@@ -2423,9 +2423,9 @@ async function agregarCategoria(tipoAPI) {
   const input   = document.getElementById(inputId);
   const msg     = document.getElementById(msgId);
   const valor   = input.value.trim();
-  if (!valor) { msg.innerHTML = '<span style="color:var(--red)">EscribÃ­ un nombre primero.</span>'; return; }
+  if (!valor) { msg.innerHTML = '<span style="color:var(--red)">Escribí un nombre primero.</span>'; return; }
 
-  msg.innerHTML = "â³ Guardando...";
+  msg.innerHTML = "⏳ Guardando...";
   try {
     const r = await fetch(API_URL, {
       method: "POST",
@@ -2441,18 +2441,18 @@ async function agregarCategoria(tipoAPI) {
       renderizarConfig();
       _refrescarSelectores();
       input.value = "";
-      msg.innerHTML = `<span style="color:var(--green)">â "${valor}" agregado.</span>`;
+      msg.innerHTML = `<span style="color:var(--green)">✅ "${valor}" agregado.</span>`;
     } else {
-      msg.innerHTML = `<span style="color:var(--red)">â ${j.error}</span>`;
+      msg.innerHTML = `<span style="color:var(--red)">❌ ${j.error}</span>`;
     }
   } catch(e) {
-    msg.innerHTML = '<span style="color:var(--red)">â Error de conexiÃ³n.</span>';
+    msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>';
   }
   setTimeout(() => { msg.innerHTML = ""; }, 3000);
 }
 
 async function eliminarCategoria(tipoAPI, valor, btn) {
-  if (!confirm(`Â¿Eliminar "${valor}" de ${tipoAPI}?`)) return;
+  if (!confirm(`¿Eliminar "${valor}" de ${tipoAPI}?`)) return;
   btn.disabled = true;
   const tipo = tipoAPI.toLowerCase();
   const msgEl = document.getElementById("cfg-msg-" + tipo);
@@ -2468,13 +2468,13 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
       else if (tipoAPI === "FUENTE")  categFuentes = categFuentes.filter(x => x !== valor);
       renderizarConfig();
       _refrescarSelectores();
-      if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">â "${valor}" eliminado.</span>`; }
+      if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" eliminado.</span>`; }
     } else {
-      if (msgEl) { msgEl.innerHTML = `<span style="color:var(--red)">â ${j.error}</span>`; }
+      if (msgEl) { msgEl.innerHTML = `<span style="color:var(--red)">❌ ${j.error}</span>`; }
       btn.disabled = false;
     }
   } catch(e) {
-    if (msgEl) { msgEl.innerHTML = '<span style="color:var(--red)">â Error de conexiÃ³n.</span>'; }
+    if (msgEl) { msgEl.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>'; }
     btn.disabled = false;
   }
   setTimeout(() => { if (msgEl) msgEl.innerHTML = ""; }, 3000);
@@ -2486,7 +2486,7 @@ function _refrescarSelectores() {
   const selFuente = document.getElementById("f-fuente");
   if (selFuente) {
     const curVal = selFuente.value;
-    selFuente.innerHTML = '<option value="">â Sin especificar â</option>' +
+    selFuente.innerHTML = '<option value="">— Sin especificar —</option>' +
       categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
     selFuente.value = curVal;
   }
@@ -2498,16 +2498,16 @@ function _refrescarSelectores() {
       categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
     filFuente.value = curVal;
   }
-  // Formulario categorÃ­a (segÃºn tipo actual)
+  // Formulario categoría (según tipo actual)
   setTipo(tipoActual);
 }
 
-// âââ IMPORTAR DATOS âââââââââââââââââââââââââââââââââââââââââââ
+// ─── IMPORTAR DATOS ───────────────────────────────────────────
 let importFilas = []; // filas parseadas y validadas
 
 function parsearImport() {
   const raw = document.getElementById("imp-textarea").value.trim();
-  if (!raw) { showToast("PegÃ¡ datos primero", "error"); return; }
+  if (!raw) { showToast("Pegá datos primero", "error"); return; }
 
   // Detectar separador: Tab o ;
   const lineas = raw.split(/\r?\n/).filter(l => l.trim());
@@ -2534,7 +2534,7 @@ function parsearImport() {
       } else if (isDash) {
         fechaValida = fechaRaw;
       } else {
-        errList.push("Fecha invÃ¡lida");
+        errList.push("Fecha inválida");
       }
     } else {
       errList.push("Falta fecha");
@@ -2544,16 +2544,16 @@ function parsearImport() {
     const tipoNorm = tipo.charAt(0).toUpperCase() + tipo.slice(1).toLowerCase();
     if (!["Gasto","Ingreso"].includes(tipoNorm)) errList.push("Tipo debe ser Gasto/Ingreso");
 
-    // Validar categorÃ­a
-    if (!categoria) errList.push("Falta categorÃ­a");
+    // Validar categoría
+    if (!categoria) errList.push("Falta categoría");
 
     // Validar monto
     const monto = parseFloat(montoRaw.replace(",",".").replace(/[^\d.]/g,""));
-    if (isNaN(monto) || monto <= 0) errList.push("Monto invÃ¡lido");
+    if (isNaN(monto) || monto <= 0) errList.push("Monto inválido");
 
     // Normalizar responsabilidad
-    const respNorm = resp || "MÃ­o";
-    const respVal  = ["MÃ­o","Compartido","De Ama"].includes(respNorm) ? respNorm : "MÃ­o";
+    const respNorm = resp || "Mío";
+    const respVal  = ["Mío","Compartido","De Ama"].includes(respNorm) ? respNorm : "Mío";
 
     // Normalizar moneda
     const monedaUp = monedaRaw.toUpperCase().trim();
@@ -2591,34 +2591,34 @@ function parsearImport() {
         <td class="${tipoClass}">${tipoNorm}</td>
         <td>${categoria}</td>
         <td>${isNaN(monto) ? montoRaw : fmtMoneda(monto, monedaVal)}</td>
-        <td>${descripcion || "â"}</td>
+        <td>${descripcion || "—"}</td>
         <td>${respVal}</td>
-        <td>${fuente || "â"}</td>
+        <td>${fuente || "—"}</td>
         <td>${monBadge}</td>
-        <td>${errList.length ? `<span class="err-badge">â  ${errList.join(", ")}</span>` : "â"}</td>
+        <td>${errList.length ? `<span class="err-badge">⚠ ${errList.join(", ")}</span>` : "✅"}</td>
       </tr>`);
   });
 
   importFilas = validas;
 
-  // Mostrar previsualizaciÃ³n
+  // Mostrar previsualización
   document.getElementById("imp-preview-tbody").innerHTML = tbodyRows.join("");
   document.getElementById("imp-preview-wrap").style.display = "block";
 
   const badge = document.getElementById("imp-badge");
-  badge.textContent = `${lineas.length} filas (${validas.length} vÃ¡lidas, ${errores.length} con error)`;
+  badge.textContent = `${lineas.length} filas (${validas.length} válidas, ${errores.length} con error)`;
   badge.className = "imp-badge-count" + (errores.length ? " has-errors" : "");
 
   // Stats de totales
   const totalGasto   = validas.filter(f => f.tipo === "Gasto").reduce((s,f) => s + Math.abs(Number(f.monto)), 0);
   const totalIngreso = validas.filter(f => f.tipo === "Ingreso").reduce((s,f) => s + Math.abs(Number(f.monto)), 0);
   document.getElementById("imp-stats").innerHTML =
-    `<span>Gastos vÃ¡lidos: <strong>${validas.filter(f=>f.tipo==="Gasto").length}</strong> por <strong style="color:var(--red)">${fmt(totalGasto)}</strong></span>` +
-    `<span>Ingresos vÃ¡lidos: <strong>${validas.filter(f=>f.tipo==="Ingreso").length}</strong> por <strong style="color:var(--green)">${fmt(totalIngreso)}</strong></span>`;
+    `<span>Gastos válidos: <strong>${validas.filter(f=>f.tipo==="Gasto").length}</strong> por <strong style="color:var(--red)">${fmt(totalGasto)}</strong></span>` +
+    `<span>Ingresos válidos: <strong>${validas.filter(f=>f.tipo==="Ingreso").length}</strong> por <strong style="color:var(--green)">${fmt(totalIngreso)}</strong></span>`;
 
   const btn = document.getElementById("imp-confirm-btn");
   btn.disabled = validas.length === 0;
-  btn.textContent = `â Importar ${validas.length} transacciones`;
+  btn.textContent = `✅ Importar ${validas.length} transacciones`;
 
   document.getElementById("imp-result-msg").style.display = "none";
 
@@ -2630,7 +2630,7 @@ async function confirmarImport() {
   if (!importFilas.length) return;
   const btn = document.getElementById("imp-confirm-btn");
   btn.disabled = true;
-  btn.textContent = "â³ Importando...";
+  btn.textContent = "⏳ Importando...";
 
   try {
     const resp = await fetch(API_URL, {
@@ -2642,25 +2642,25 @@ async function confirmarImport() {
     msgEl.style.display = "block";
     if (j.ok) {
       msgEl.className = "imp-result-msg ok";
-      msgEl.textContent = `â ${j.msg}`;
+      msgEl.textContent = `✅ ${j.msg}`;
       showToast(j.msg, "ok");
       // Recargar datos globales
       await cargarTodasTransacciones();
       importFilas = [];
-      btn.textContent = "â Importar transacciones";
+      btn.textContent = "✅ Importar transacciones";
     } else {
       msgEl.className = "imp-result-msg fail";
-      msgEl.textContent = `â Error: ${j.error}`;
+      msgEl.textContent = `❌ Error: ${j.error}`;
       btn.disabled = false;
-      btn.textContent = `â Importar ${importFilas.length} transacciones`;
+      btn.textContent = `✅ Importar ${importFilas.length} transacciones`;
     }
   } catch (err) {
     const msgEl = document.getElementById("imp-result-msg");
     msgEl.style.display = "block";
     msgEl.className = "imp-result-msg fail";
-    msgEl.textContent = `â Error de conexiÃ³n: ${err.message}`;
+    msgEl.textContent = `❌ Error de conexión: ${err.message}`;
     btn.disabled = false;
-    btn.textContent = `â Importar ${importFilas.length} transacciones`;
+    btn.textContent = `✅ Importar ${importFilas.length} transacciones`;
   }
 }
 
@@ -2671,7 +2671,7 @@ function limpiarImport() {
   importFilas = [];
 }
 
-// âââ TOAST ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── TOAST ────────────────────────────────────────────────────
 function showToast(msg, tipo) {
   const t = document.getElementById("toast");
   t.textContent = msg;
@@ -2679,7 +2679,7 @@ function showToast(msg, tipo) {
   setTimeout(() => { t.className = "toast"; }, 3000);
 }
 
-// âââ FORMATEO âââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── FORMATEO ─────────────────────────────────────────────────
 function fmt(n) {
   return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 }
