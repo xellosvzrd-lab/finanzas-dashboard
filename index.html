@@ -185,7 +185,7 @@
   }
   .mes-selector select:focus { outline: none; border-color: var(--accent); }
 
-  /* ─── KPI CARDS ─────────────────────────────────────��───── */
+  /* ─── KPI CARDS ─────────────────────────────────────────── */
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1351,7 +1351,7 @@ async function cargarTodasTransacciones() {
     const r = await fetch(`${API_URL}?action=getTransacciones&usuario=${encodeURIComponent(USUARIO)}`);
     const j = await r.json();
     if (j.ok) allTransac = j.data;
-  } catch(e) { console.warn("Error carg�ndo transacciones:", e); }
+  } catch(e) { console.warn("Error cargando transacciones:", e); }
 }
 
 // ─── SELECTORES FECHA ─────────────────────────────────────────
@@ -1714,7 +1714,8 @@ function filtrarTabla() {
     const okFuente = !fuente || (t.fuente || "") === fuente;
     const okResp   = !resp   || (t.responsabilidad || "Mío") === resp;
     const okBus    = !buscar || (t.descripcion||"").toLowerCase().includes(buscar)
-                             || t.categoria.toLowerCase().includes(buscar);
+                             || t.categoria.toLowerCase().includes(buscar)
+                             || (t.fuente||"").toLowerCase().includes(buscar);
     return okMes && okAnio && okTipo && okCat && okFuente && okResp && okBus;
   });
 
@@ -1896,7 +1897,7 @@ function inicializarSelectoresCompartidos() {
 function cargarCompartidos() {
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
-  const CATS= [...new Set([...categGasto, ...categIngreso])].sort();
+  const CATS = [...new Set([...categGasto, ...categIngreso])].sort();
 
   // Filtrar transacciones del mes/año seleccionado — gastos para compPorCat y reembolsos
   const datos = allTransac.filter(t => {
@@ -1910,9 +1911,9 @@ function cargarCompartidos() {
   });
 
   // ── COMPARTIDOS ──────────────────────────────────────────────
-` // Gastos Compartido ÷ 2 suman; Ingresos Compartido ÷ 2 restan (son reintegros de la otra parte)
-  // Separados por moneda: ARS y USD 
-const compPorCatARS = {}, compPorCatUSD = {};
+  // Gastos Compartido ÷ 2 suman; Ingresos Compartido ÷ 2 restan (son reintegros de la otra parte)
+  // Separados por moneda: ARS y USD
+  const compPorCatARS = {}, compPorCatUSD = {};
   CATS.forEach(cat => {
     compPorCatARS[cat] = { daniel: 0, ama: 0 };
     compPorCatUSD[cat] = { daniel: 0, ama: 0 };
@@ -1921,7 +1922,7 @@ const compPorCatARS = {}, compPorCatUSD = {};
   datos.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t => {
     const cat    = t.categoria;
     const moneda = (t.moneda || "ARS").toUpperCase();
-    const map    = moneda === "USD" ? compPorCatUSD 2: compPorCatARS;
+    const map    = moneda === "USD" ? compPorCatUSD : compPorCatARS;
     if (!map[cat]) map[cat] = { daniel: 0, ama: 0 };
     const m = Math.abs(Number(t.monto));
     if ((t.usuario || "Daniel").toLowerCase() === "ama") {
