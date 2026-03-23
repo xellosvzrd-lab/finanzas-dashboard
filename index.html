@@ -1348,7 +1348,7 @@ async function cargarCategorias() {
 // ─── TRANSACCIONES ────────────────────────────────────────────
 async function cargarTodasTransacciones() {
   try {
-    const r = await fetch(`${API_URL}?action=getTransacciones&usuario=${encodeURIComponent(USUARIO)}`);
+    const r = await fetch(`${API_URL}?action=getTransacciones`);
     const j = await r.json();
     if (j.ok) allTransac = j.data;
   } catch(e) { console.warn("Error cargando transacciones:", e); }
