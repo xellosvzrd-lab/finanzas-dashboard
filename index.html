@@ -1630,6 +1630,17 @@ const PALETTE = [
   "#74b9ff","#e17055"
 ];
 
+// ─── CACHE (stale-while-revalidate) ───────────────────────────
+const CACHE_TRANSAC_KEY = "fp_transac_cache";
+const CACHE_CATEG_KEY   = "fp_categ_cache";
+
+function guardarCacheTransac() {
+  try { localStorage.setItem(CACHE_TRANSAC_KEY, JSON.stringify(allTransac)); } catch(e) {}
+}
+function guardarCacheCateg(data) {
+  try { localStorage.setItem(CACHE_CATEG_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
 // ─── INICIALIZACIÓN ───────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
   // Leer config guardada
@@ -1683,20 +1694,27 @@ function volverConfig() {
 }
 
 // ─── INICIO APP ───────────────────────────────────────────────
-async function iniciarApp() {
-  document.getElementById("setup-screen").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  document.getElementById("sidebar-user").textContent = USUARIO;
-  // Mostrar header mobile solo si es pantalla chica
-  if (window.innerWidth <= 768) {
-    document.getElementById("mobile-header").style.display = "flex";
-  }
+function _aplicarCacheCateg(catData) {
+  categGasto           = catData.gasto           || [];
+  categIngreso         = catData.ingreso          || [];
+  categFuentes         = catData.fuentes          || [];
+  categResponsabilidad = catData.responsabilidad  || categResponsabilidad;
+  // Poblar selectores con los datos cacheados
+  const selResp = document.getElementById("f-responsabilidad");
+  if (selResp) selResp.innerHTML = categResponsabilidad.map(rv =>
+    `<option value="${rv}">${rv === "Mío" ? "🙋 Mío" : rv === "Compartido" ? "👫 Compartido" : "💳 De Ama (ella me reintegra)"}</option>`).join("");
+  const filResp = document.getElementById("fil-resp");
+  if (filResp) filResp.innerHTML = '<option value="">Todas</option>' +
+    categResponsabilidad.map(rv => `<option value="${rv}">${rv}</option>`).join("");
+  const selFuente = document.getElementById("f-fuente");
+  if (selFuente) selFuente.innerHTML = '<option value="">— Sin especificar —</option>' +
+    categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+  const filFuente = document.getElementById("fil-fuente");
+  if (filFuente) filFuente.innerHTML = '<option value="">Todas las fuentes</option>' +
+    categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+}
 
-  await Promise.all([
-    cargarCategorias(),
-    cargarTodasTransacciones()
-  ]);
-
+function _renderApp() {
   setTipo("Gasto");
   cargarResumenMes();
   cargarEvolucion();
@@ -1705,42 +1723,48 @@ async function iniciarApp() {
   inicializarSelectoresPresupuesto();
 }
 
+async function iniciarApp() {
+  document.getElementById("setup-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("sidebar-user").textContent = USUARIO;
+  if (window.innerWidth <= 768) {
+    document.getElementById("mobile-header").style.display = "flex";
+  }
+
+  const cachedTransac = localStorage.getItem(CACHE_TRANSAC_KEY);
+  const cachedCateg   = localStorage.getItem(CACHE_CATEG_KEY);
+
+  if (cachedTransac && cachedCateg) {
+    // Cache hit → renderizar inmediatamente con datos guardados
+    try {
+      _aplicarCacheCateg(JSON.parse(cachedCateg));
+      allTransac = JSON.parse(cachedTransac);
+      _renderApp();
+    } catch(e) { /* datos corruptos — caemos al fetch normal */ }
+
+    // Actualizar en background sin bloquear la UI
+    Promise.all([cargarCategorias(), cargarTodasTransacciones()])
+      .then(() => _renderApp())
+      .catch(e => console.warn("Background refresh error:", e));
+  } else {
+    // Primera vez o cache vacío → esperar el fetch
+    await Promise.all([cargarCategorias(), cargarTodasTransacciones()]);
+    _renderApp();
+  }
+}
+
 // ─── CATEGORÍAS Y FUENTES ─────────────────────────────────────
 async function cargarCategorias() {
   try {
     const r = await fetch(`${API_URL}?action=getCategorias&usuario=${encodeURIComponent(USUARIO)}`);
     const j = await r.json();
     if (j.ok) {
-      categGasto           = j.gasto;
-      categIngreso         = j.ingreso;
-      categFuentes         = j.fuentes || [];
-      categResponsabilidad = j.responsabilidad || categResponsabilidad;
-
-      // Select responsabilidad del formulario
-      const selResp = document.getElementById("f-responsabilidad");
-      if (selResp) {
-        selResp.innerHTML = categResponsabilidad.map(rv =>
-          `<option value="${rv}">${rv === "Mío" ? "🙋 Mío" : rv === "Compartido" ? "👫 Compartido" : "💳 De Ama (ella me reintegra)"}</option>`
-        ).join("");
-      }
-      // Filtro de responsabilidad
-      const filResp = document.getElementById("fil-resp");
-      if (filResp) {
-        filResp.innerHTML = '<option value="">Todas</option>' +
-          categResponsabilidad.map(rv => `<option value="${rv}">${rv}</option>`).join("");
-      }
-      // Select fuente del formulario
-      const selFuente = document.getElementById("f-fuente");
-      if (selFuente) {
-        selFuente.innerHTML = '<option value="">— Sin especificar —</option>' +
-          categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
-      }
-      // Filtro de fuente
-      const filFuente = document.getElementById("fil-fuente");
-      if (filFuente) {
-        filFuente.innerHTML = '<option value="">Todas las fuentes</option>' +
-          categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
-      }
+      const catData = {
+        gasto: j.gasto, ingreso: j.ingreso,
+        fuentes: j.fuentes || [], responsabilidad: j.responsabilidad
+      };
+      _aplicarCacheCateg(catData);
+      guardarCacheCateg(catData);
     }
   } catch(e) { console.warn("No se pudieron cargar categorías:", e); }
 }
@@ -1750,7 +1774,10 @@ async function cargarTodasTransacciones() {
   try {
     const r = await fetch(`${API_URL}?action=getTransacciones`);
     const j = await r.json();
-    if (j.ok) allTransac = j.data;
+    if (j.ok) {
+      allTransac = j.data;
+      guardarCacheTransac();
+    }
   } catch(e) { console.warn("Error cargando transacciones:", e); }
 }
 
@@ -2314,6 +2341,7 @@ async function eliminarTransaccion(id) {
     const j = await r.json();
     if (j.ok) {
       allTransac = allTransac.filter(t => t.id !== id);
+      guardarCacheTransac();
       filtrarTabla();
       cargarResumenMes();
       cargarEvolucion();
@@ -2426,6 +2454,7 @@ async function guardarEdicionTransaccion() {
       // Reemplazar en array local: quitar el original y agregar el nuevo
       allTransac = allTransac.filter(t => t.id !== idAEliminar);
       allTransac.push({ id: jAdd.id, fecha, tipo, categoria: cat, monto, descripcion: desc, usuario: USUARIO, responsabilidad: resp, fuente, moneda });
+      guardarCacheTransac();
       cerrarEditorTransaccion();
       filtrarTabla();
       cargarResumenMes();
@@ -2501,6 +2530,7 @@ async function guardarTransaccion() {
     if (j.ok) {
       // Agregar al array local sin recargar todo
       allTransac.push({ id: j.id, fecha, tipo: tipoActual, categoria: cat, monto, descripcion: desc, usuario: USUARIO, responsabilidad: resp, fuente, moneda: monedaActual });
+      guardarCacheTransac();
       cargarResumenMes();
       cargarEvolucion();
       filtrarTabla();
@@ -3307,6 +3337,7 @@ async function agregarCategoria(tipoAPI) {
       if      (tipoAPI === "GASTO")   { categGasto.push(valor);   categGasto.sort(); }
       else if (tipoAPI === "INGRESO") { categIngreso.push(valor); categIngreso.sort(); }
       else if (tipoAPI === "FUENTE")  { categFuentes.push(valor); }
+      guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, responsabilidad: categResponsabilidad });
       // Re-render lista y selectores
       renderizarConfig();
       _refrescarSelectores();
@@ -3336,6 +3367,7 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
       if      (tipoAPI === "GASTO")   categGasto   = categGasto.filter(x => x !== valor);
       else if (tipoAPI === "INGRESO") categIngreso = categIngreso.filter(x => x !== valor);
       else if (tipoAPI === "FUENTE")  categFuentes = categFuentes.filter(x => x !== valor);
+      guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, responsabilidad: categResponsabilidad });
       renderizarConfig();
       _refrescarSelectores();
       if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" eliminado.</span>`; }
