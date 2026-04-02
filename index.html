@@ -1716,7 +1716,7 @@
                   <tr>
                     <th>#</th><th>Fecha</th><th>Descripción</th>
                     <th>Monto</th><th>Moneda</th>
-                    <th>Categoría</th><th>Fuente</th><th>Estado</th>
+                    <th>Categoría</th><th>Resp.</th><th>Fuente</th><th>Estado</th>
                   </tr>
                 </thead>
                 <tbody id="pdf-preview-tbody"></tbody>
@@ -4367,6 +4367,10 @@ function _renderPDFPreview() {
     ? `⚠ ${sinCat} sin categoría auto-detectada — asignala manualmente`
     : "";
 
+  const respOpts = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De Ama"])
+    .map(r => `<option value="${r}">${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De Ama"}</option>`)
+    .join("");
+
   tbody.innerHTML = pdfFilasParsed.map((f, i) => {
     const catOpts = allCats.map(c =>
       `<option value="${c}" ${c === f.categoria ? "selected" : ""}>${c}</option>`
@@ -4375,6 +4379,9 @@ function _renderPDFPreview() {
     const monBadge = f.moneda === "USD"
       ? `<span class="badge-moneda usd">USD</span>`
       : `<span class="badge-moneda ars">ARS</span>`;
+    const respOptsRow = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De Ama"])
+      .map(r => `<option value="${r}" ${r === (f.responsabilidad||"Mío") ? "selected" : ""}>${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De Ama"}</option>`)
+      .join("");
     return `<tr>
       <td>${i+1}</td>
       <td>${f.fecha}</td>
@@ -4384,6 +4391,9 @@ function _renderPDFPreview() {
       <td><select class="pdf-cat-select${sinCatCls}"
             onchange="pdfFilasParsed[${i}].categoria=this.value;this.classList.remove('sin-cat')"
           ><option value="">— elegir —</option>${catOpts}</select></td>
+      <td><select class="pdf-cat-select" style="min-width:7rem"
+            onchange="pdfFilasParsed[${i}].responsabilidad=this.value"
+          >${respOptsRow}</select></td>
       <td style="font-size:.75rem">${f.fuente}</td>
       <td>${f.categoria ? "✅" : `<span style="color:var(--yellow)">⚠ asignar</span>`}</td>
     </tr>`;
