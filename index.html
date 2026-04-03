@@ -1974,7 +1974,22 @@ function _aplicarCacheCateg(catData) {
     categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
 }
 
+// ─ Normaliza categorías de allTransac contra la lista canónica (case-insensitive)
+function _normalizarCategorias() {
+  if (!categGasto.length && !categIngreso.length) return;
+  const allCats = [...categGasto, ...categIngreso];
+  // Mapa: "mercado" → "Mercado", "ALQUILER" → "Alquiler", etc.
+  const lookup = Object.fromEntries(allCats.map(c => [c.toLowerCase().trim(), c]));
+  allTransac.forEach(t => {
+    if (t.categoria) {
+      const norm = lookup[t.categoria.toLowerCase().trim()];
+      if (norm) t.categoria = norm;
+    }
+  });
+}
+
 function _renderApp() {
+  _normalizarCategorias(); // unificar capitalización antes de renderizar
   setTipo("Gasto");
   cargarResumenMes();
   cargarEvolucion();
@@ -2036,6 +2051,7 @@ async function cargarTodasTransacciones() {
     const j = await r.json();
     if (j.ok) {
       allTransac = j.data;
+      _normalizarCategorias(); // unificar capitalización al cargar
       guardarCacheTransac();
     }
   } catch(e) { console.warn("Error cargando transacciones:", e); }
