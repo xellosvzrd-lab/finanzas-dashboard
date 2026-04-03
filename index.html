@@ -329,12 +329,16 @@
   .multi-select-option input, .multi-select-all input { cursor: pointer; accent-color: var(--accent); }
   /* ── Subtotales ── */
   .tabla-subtotal {
-    display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;
-    padding: .55rem 1rem; background: var(--bg2);
-    border-bottom: 1px solid var(--border); font-size: .82rem;
-    color: var(--text-muted);
+    display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap;
+    padding: .75rem 1.1rem; background: var(--bg2);
+    border-bottom: 1px solid var(--border);
   }
-  .tabla-subtotal strong { color: var(--text); }
+  .sub-neto-main { display: flex; flex-direction: column; gap: .05rem; min-width: 100px; }
+  .sub-neto-lbl  { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); font-weight: 600; }
+  #sub-neto      { font-size: 1.45rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; color: var(--text); }
+  .sub-stats     { display: flex; gap: .7rem; align-items: center; flex-wrap: wrap; font-size: .81rem; color: var(--text-muted); }
+  .sub-stats strong { color: var(--text); }
+  .sub-stats-sep { opacity: .35; }
   .tabla-subtotal .sub-neto-pos { color: var(--green) !important; }
   .tabla-subtotal .sub-neto-neg { color: var(--red) !important; }
 
@@ -1152,9 +1156,6 @@
       <div class="nav-item active" onclick="navegarA('resumen')">
         <span class="nav-icon">📊</span> Resumen
       </div>
-      <div class="nav-item" onclick="navegarA('evolucion')">
-        <span class="nav-icon">📈</span> Evolución
-      </div>
       <div class="nav-item" onclick="navegarA('transacciones')">
         <span class="nav-icon">📋</span> Transacciones
       </div>
@@ -1260,20 +1261,11 @@
           <div class="chart-title">Top gastos del mes</div>
           <div id="top-gastos-list"></div>
         </div>
-      </div>
 
-      <!-- ── PÁGINA EVOLUCIÓN ──────────────────────────── -->
-      <div id="page-evolucion" class="page">
-        <div class="page-header">
-          <h1>Evolución mensual</h1>
-        </div>
-        <div class="chart-card full" style="margin-bottom:1rem">
-          <div class="chart-title">Ingresos vs Gastos — últimos 12 meses</div>
-          <div class="chart-wrap" style="height:300px"><canvas id="chart-evol"></canvas></div>
-        </div>
-        <div class="chart-card full">
-          <div class="chart-title">Balance acumulado</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="chart-balance"></canvas></div>
+        <!-- Evolución mensual fusionada — últimos 12 meses -->
+        <div class="chart-card full" style="margin-top:1rem">
+          <div class="chart-title">Evolución mensual — últimos 12 meses</div>
+          <div class="chart-wrap" style="height:300px"><canvas id="chart-evol-combo"></canvas></div>
         </div>
       </div>
 
@@ -1315,10 +1307,17 @@
         </div>
         <div class="chart-card" style="padding:0; overflow:hidden">
           <div class="tabla-subtotal" id="tabla-subtotal">
-            <span id="sub-count">—</span>
-            <span>Ingresos: <strong id="sub-ingresos">—</strong></span>
-            <span>Gastos: <strong id="sub-gastos">—</strong></span>
-            <span>Neto: <strong id="sub-neto">—</strong></span>
+            <div class="sub-neto-main">
+              <span class="sub-neto-lbl">Neto del período</span>
+              <strong id="sub-neto">—</strong>
+            </div>
+            <div class="sub-stats">
+              <span id="sub-count">—</span>
+              <span class="sub-stats-sep">·</span>
+              <span>↑ <strong id="sub-ingresos">—</strong></span>
+              <span class="sub-stats-sep">·</span>
+              <span>↓ <strong id="sub-gastos">—</strong></span>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
@@ -1542,7 +1541,7 @@
             <thead>
               <tr>
                 <th>Categoría</th>
-                <th style="text-align:right">Presupuesto</th>
+                <th style="text-align:right">% Sueldo</th>
                 <th style="text-align:right">Gastado</th>
                 <th style="text-align:right">Restante</th>
                 <th>Progreso</th>
@@ -1556,7 +1555,7 @@
         </div>
 
         <p class="pres-note">
-          💡 Gastos <strong>Mío</strong> → 100% · Gastos <strong>Compartidos</strong> (tuyos + de Ama, netos de reintegros compartidos) → 50% · Gastos <strong>De Ama</strong> → 0% · Reintegros de Ama (<em>Mío</em>) ignorados.
+          💡 Los valores se ingresan como <strong>% del sueldo</strong> del mes. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → 50% · <strong>De Ama</strong> → 0%.
         </p>
         <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
       </div><!-- /page-presupuesto -->
@@ -1878,10 +1877,9 @@ let categIngreso         = [];
 let categFuentes         = [];
 let categResponsabilidad = ["Mío","Compartido","De Ama"];
 
-let chartCat    = null;
-let chartDonut  = null;
-let chartEvol   = null;
-let chartBal    = null;
+let chartCat       = null;
+let chartDonut     = null;
+let chartEvolCombo = null;
 
 // ─── PALETA DE COLORES ────────────────────────────────────────
 const PALETTE = [
@@ -1974,16 +1972,25 @@ function _aplicarCacheCateg(catData) {
     categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
 }
 
-// ─ Normaliza categorías de allTransac contra la lista canónica (case-insensitive)
+// ─ Normaliza categorías, fuente y responsabilidad contra las listas canónicas (case-insensitive)
 function _normalizarCategorias() {
   if (!categGasto.length && !categIngreso.length) return;
-  const allCats = [...categGasto, ...categIngreso];
-  // Mapa: "mercado" → "Mercado", "ALQUILER" → "Alquiler", etc.
-  const lookup = Object.fromEntries(allCats.map(c => [c.toLowerCase().trim(), c]));
+  const allCats   = [...categGasto, ...categIngreso];
+  const catLookup  = Object.fromEntries(allCats.map(c => [c.toLowerCase().trim(), c]));
+  const fuenteLookup = Object.fromEntries(categFuentes.map(f => [f.toLowerCase().trim(), f]));
+  const respLookup   = Object.fromEntries(categResponsabilidad.map(r => [r.toLowerCase().trim(), r]));
   allTransac.forEach(t => {
     if (t.categoria) {
-      const norm = lookup[t.categoria.toLowerCase().trim()];
+      const norm = catLookup[t.categoria.toLowerCase().trim()];
       if (norm) t.categoria = norm;
+    }
+    if (t.fuente) {
+      const norm = fuenteLookup[t.fuente.toLowerCase().trim()];
+      if (norm) t.fuente = norm;
+    }
+    if (t.responsabilidad) {
+      const norm = respLookup[t.responsabilidad.toLowerCase().trim()];
+      if (norm) t.responsabilidad = norm;
     }
   });
 }
@@ -1992,7 +1999,7 @@ function _renderApp() {
   _normalizarCategorias(); // unificar capitalización antes de renderizar
   setTipo("Gasto");
   cargarResumenMes();
-  cargarEvolucion();
+  cargarEvolucion(); // fusionado en Resumen
   filtrarTabla();
   inicializarSelectoresCompartidos();
   inicializarSelectoresPresupuesto();
@@ -2465,10 +2472,11 @@ function cargarEvolucion() {
     balArr.push(acum);
   });
 
-  // Chart evolución
-  const ctxE = document.getElementById("chart-evol");
-  if (chartEvol) chartEvol.destroy();
-  chartEvol = new Chart(ctxE, {
+  // Chart combo doble eje: barras ingresos/gastos + línea balance acumulado
+  const ctxCombo = document.getElementById("chart-evol-combo");
+  if (!ctxCombo) return;
+  if (chartEvolCombo) chartEvolCombo.destroy();
+  chartEvolCombo = new Chart(ctxCombo, {
     type: "bar",
     data: {
       labels,
@@ -2476,50 +2484,32 @@ function cargarEvolucion() {
         {
           label: "Ingresos", data: ingArr, type: "bar",
           backgroundColor: "rgba(52,211,153,.65)", borderColor: "#34d399",
-          borderWidth: 1, borderRadius: 4,
+          borderWidth: 1, borderRadius: 4, yAxisID: "y",
         },
         {
           label: "Gastos", data: gasArr, type: "bar",
           backgroundColor: "rgba(248,113,113,.65)", borderColor: "#f87171",
-          borderWidth: 1, borderRadius: 4,
+          borderWidth: 1, borderRadius: 4, yAxisID: "y",
+        },
+        {
+          label: "Balance acumulado", data: balArr, type: "line",
+          borderColor: "#7c6eff", backgroundColor: "rgba(124,110,255,.13)",
+          fill: false, tension: 0.4, pointRadius: 3, pointBackgroundColor: "#7c6eff",
+          yAxisID: "y1", borderWidth: 2,
         }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { labels: { color: "#8888aa" } },
         tooltip: { callbacks: { label: ctx => " " + fmt(ctx.raw) } }
       },
       scales: {
         x: { grid: { color: "#2a2a4a" }, ticks: { color: "#8888aa" } },
-        y: { grid: { color: "#2a2a4a" }, ticks: { color: "#8888aa", callback: v => fmtShort(v) } }
-      }
-    }
-  });
-
-  // Chart balance acumulado
-  const ctxB = document.getElementById("chart-balance");
-  if (chartBal) chartBal.destroy();
-  chartBal = new Chart(ctxB, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Balance acumulado", data: balArr,
-        borderColor: "#7c6eff", backgroundColor: "rgba(124,110,255,.13)",
-        fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: "#7c6eff"
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => " " + fmt(ctx.raw) } }
-      },
-      scales: {
-        x: { grid: { color: "#2a2a4a" }, ticks: { color: "#8888aa" } },
-        y: { grid: { color: "#2a2a4a" }, ticks: { color: "#8888aa", callback: v => fmtShort(v) } }
+        y:  { position: "left",  grid: { color: "#2a2a4a" }, ticks: { color: "#8888aa", callback: v => fmtShort(v) } },
+        y1: { position: "right", grid: { drawOnChartArea: false }, ticks: { color: "#7c6eff", callback: v => fmtShort(v) } }
       }
     }
   });
@@ -2624,7 +2614,8 @@ function filtrarTabla() {
   document.getElementById("sub-ingresos").textContent = fmt(subIngARS) + (subIngUSD>0?` + ${fmtMoneda(subIngUSD,"USD")}`:"");
   document.getElementById("sub-gastos").textContent   = fmt(subGasARS) + (subGasUSD>0?` + ${fmtMoneda(subGasUSD,"USD")}`:"");
   const netoEl = document.getElementById("sub-neto");
-  netoEl.textContent = fmt(Math.abs(netoARS)) + (hayUSDsub?` + ${fmtMoneda(Math.abs(netoUSD),"USD")}`:"");
+  const netoSigno = netoARS >= 0 ? "+" : "−";
+  netoEl.textContent = netoSigno + " " + fmt(Math.abs(netoARS)) + (hayUSDsub?` / ${fmtMoneda(Math.abs(netoUSD),"USD")}`:"");
   netoEl.className = netoARS >= 0 ? "sub-neto-pos" : "sub-neto-neg";
 
   const tbody = document.getElementById("tabla-body");
@@ -3336,10 +3327,9 @@ function navegarA(pagina) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
   document.getElementById("page-" + pagina).classList.add("active");
-  const navIdx = { resumen: 0, evolucion: 1, transacciones: 2, nueva: 3, compartidos: 4, presupuesto: 5, config: 6, importar: 7 };
+  const navIdx = { resumen: 0, transacciones: 1, nueva: 2, compartidos: 3, presupuesto: 4, config: 5, importar: 6 };
   const navItems = document.querySelectorAll(".nav-item");
   if (navIdx[pagina] !== undefined) navItems[navIdx[pagina]].classList.add("active");
-  if (pagina === "evolucion")   cargarEvolucion();
   if (pagina === "compartidos") cargarCompartidos();
   if (pagina === "presupuesto") cargarPresupuesto();
   if (pagina === "config")      renderizarConfig();
@@ -3603,15 +3593,15 @@ function renderPresupuesto() {
     gastoPorCat[cat] = Math.max(0, gastosMio - ingresosMio) + netComp * 0.5 + Math.max(0, deJGasto - deJIngreso);
   });
 
-  // Totales KPI
-  const totalPres   = categGasto.reduce((s, c) => s + (presupuestoActual[c] || 0), 0);
-  const totalGasto  = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
-  const disponible  = sueldo - totalGasto;
+  // Totales KPI — presupuestoActual[cat] almacena % (0–100), se convierte a monto según sueldo
+  const totalPresARS = categGasto.reduce((s, c) => s + ((presupuestoActual[c] || 0) / 100) * sueldo, 0);
+  const totalGasto   = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
+  const disponible   = sueldo - totalGasto;
 
   // KPIs
   const kpiTotal = document.getElementById("pres-kpi-total");
-  kpiTotal.textContent = fmt(totalPres);
-  kpiTotal.style.color = totalPres > sueldo && sueldo > 0 ? "var(--red)" : "var(--accent)";
+  kpiTotal.textContent = fmt(totalPresARS);
+  kpiTotal.style.color = totalPresARS > sueldo && sueldo > 0 ? "var(--red)" : "var(--accent)";
 
   document.getElementById("pres-kpi-sueldo").textContent = fmt(sueldo);
   document.getElementById("pres-kpi-gastado").textContent = fmt(totalGasto);
@@ -3621,19 +3611,20 @@ function renderPresupuesto() {
   kpiDisp.className = "kpi-value " + (disponible >= 0 ? "balance-pos" : "expense");
 
   const subTotal = document.getElementById("pres-kpi-total-sub");
-  if (subTotal && sueldo > 0) {
-    const pctPres = ((totalPres / sueldo) * 100).toFixed(0);
-    subTotal.textContent = pctPres + "% del sueldo asignado";
+  if (subTotal) {
+    const totalPct = categGasto.reduce((s, c) => s + (presupuestoActual[c] || 0), 0);
+    subTotal.textContent = totalPct.toFixed(0) + "% del sueldo asignado";
   }
 
   // Anillo de progreso total
-  renderPresupuestoRing(totalGasto, sueldo, totalPres);
+  renderPresupuestoRing(totalGasto, sueldo, totalPresARS);
 
   // Tabla
   const tbody = document.getElementById("pres-tbody");
   tbody.innerHTML = categGasto.map(cat => {
-    const pres  = presupuestoActual[cat] || 0;
-    const gasto = gastoPorCat[cat]       || 0;
+    const pct_sueldo = presupuestoActual[cat] || 0;     // % guardado
+    const pres       = (pct_sueldo / 100) * sueldo;     // monto ARS calculado
+    const gasto      = gastoPorCat[cat]       || 0;
     const rest  = pres - gasto;
     const pct   = pres > 0 ? (gasto / pres) * 100 : 0;
 
@@ -3666,12 +3657,21 @@ function renderPresupuesto() {
         ? `<span style="color:var(--text-muted);font-size:.78rem">Sin presupuesto</span>`
         : "";
 
+    const presMontoStr = sueldo > 0 && pct_sueldo > 0
+      ? `<div style="color:var(--text-muted);font-size:.71rem;margin-top:.15rem">${fmt(pres)}</div>`
+      : "";
+
     return `<tr class="${rowCls}">
       <td><span class="pres-status-dot" style="background:${dotColor}"></span>${cat}</td>
       <td style="text-align:right">
-        <input type="number" class="pres-input" data-cat="${cat}"
-               value="${pres > 0 ? pres : ''}" placeholder="—" min="0" step="100"
-               oninput="actualizarKpisPres()">
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:.3rem">
+          <input type="number" class="pres-input" data-cat="${cat}"
+                 value="${pct_sueldo > 0 ? pct_sueldo : ''}" placeholder="—"
+                 min="0" max="100" step="0.5" style="max-width:68px"
+                 oninput="actualizarKpisPres()">
+          <span style="color:var(--text-muted);font-size:.8rem">%</span>
+        </div>
+        ${presMontoStr}
       </td>
       <td style="text-align:right">${gastoStr}</td>
       <td style="text-align:right">${restStr}</td>
@@ -3682,14 +3682,15 @@ function renderPresupuesto() {
   // Footer de totales
   const tfoot = document.getElementById("pres-tfoot");
   if (tfoot) {
-    const totalRest = totalPres - totalGasto;
-    const totalPct  = totalPres > 0 ? (totalGasto / totalPres * 100).toFixed(0) : 0;
+    const totalPctAsig = categGasto.reduce((s, c) => s + (presupuestoActual[c] || 0), 0);
+    const totalRest    = totalPresARS - totalGasto;
+    const totalEjec    = totalPresARS > 0 ? (totalGasto / totalPresARS * 100).toFixed(0) : 0;
     tfoot.innerHTML = `<tr class="pres-tfoot-row">
       <td><strong>TOTAL</strong></td>
-      <td style="text-align:right"><strong>${fmt(totalPres)}</strong></td>
+      <td style="text-align:right"><strong>${totalPctAsig.toFixed(0)}% <small style="color:var(--text-muted);font-weight:400">(${fmt(totalPresARS)})</small></strong></td>
       <td style="text-align:right"><strong style="color:var(--red)">${fmt(totalGasto)}</strong></td>
       <td style="text-align:right"><strong style="color:${totalRest>=0?"var(--green)":"var(--red)"}">${totalRest<0?"−":""}${fmt(Math.abs(totalRest))}</strong></td>
-      <td><strong style="color:var(--text-muted)">${totalPct}% ejecutado</strong></td>
+      <td><strong style="color:var(--text-muted)">${totalEjec}% ejecutado</strong></td>
     </tr>`;
   }
 }
@@ -3747,17 +3748,19 @@ function actualizarKpisPres() {
                      + Math.max(0, deJGastoP - deJIngresoP);
   });
 
-  let totalPres = 0;
+  // Los inputs ahora almacenan porcentajes (0–100); se convierte a monto con el sueldo
+  let totalPctPres = 0;
   document.querySelectorAll("#pres-tbody .pres-input").forEach(inp => {
-    totalPres += parseFloat(inp.value) || 0;
+    totalPctPres += parseFloat(inp.value) || 0;
   });
+  const totalPresARS = (totalPctPres / 100) * sueldo;
 
   const totalGasto = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
   const disponible = sueldo - totalGasto;
 
   const kpiTotal = document.getElementById("pres-kpi-total");
-  kpiTotal.textContent = fmt(totalPres);
-  kpiTotal.style.color = totalPres > sueldo && sueldo > 0 ? "var(--red)" : "var(--accent)";
+  kpiTotal.textContent = fmt(totalPresARS);
+  kpiTotal.style.color = totalPresARS > sueldo && sueldo > 0 ? "var(--red)" : "var(--accent)";
 
   document.getElementById("pres-kpi-gastado").textContent = fmt(totalGasto);
 
@@ -3766,8 +3769,8 @@ function actualizarKpisPres() {
   kpiDisp.className = "kpi-value " + (disponible >= 0 ? "balance-pos" : "expense");
 
   const subTotal = document.getElementById("pres-kpi-total-sub");
-  if (subTotal && sueldo > 0) {
-    subTotal.textContent = ((totalPres / sueldo) * 100).toFixed(0) + "% del sueldo asignado";
+  if (subTotal) {
+    subTotal.textContent = totalPctPres.toFixed(0) + "% del sueldo asignado";
   }
 }
 
@@ -3804,7 +3807,7 @@ async function agregarCategoria(tipoAPI) {
   try {
     const r = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ action: "addCategoria", tipo: tipoAPI, valor })
+      body: JSON.stringify({ action: "addCategoria", tipo: tipoAPI, valor, usuario: USUARIO })
     });
     const j = await r.json();
     if (j.ok) {
