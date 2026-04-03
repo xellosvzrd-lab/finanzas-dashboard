@@ -3398,7 +3398,7 @@ async function cargarPresupuesto() {
   const mes  = document.getElementById("pres-mes").value;
   const anio = document.getElementById("pres-anio").value;
   try {
-    const r = await fetch(`${API_URL}?action=getPresupuesto&mes=${mes}&anio=${anio}`);
+    const r = await fetch(`${API_URL}?action=getPresupuesto&mes=${mes}&anio=${anio}&usuario=${encodeURIComponent(USUARIO)}`);
     const j = await r.json();
     if (j.ok) {
       presupuestoActual = {};
@@ -3426,7 +3426,7 @@ async function guardarPresupuesto() {
   try {
     const r = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ action: "savePresupuesto", mes, anio, items })
+      body: JSON.stringify({ action: "savePresupuesto", mes, anio, items, usuario: USUARIO })
     });
     const j = await r.json();
     if (j.ok) {
