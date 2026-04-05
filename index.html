@@ -1279,6 +1279,7 @@
     <!-- MAIN -->
     <main class="main">
       <div class="refresh-badge" id="refresh-badge">⟳ actualizando...</div>
+      <div id="error-carga" style="display:none;margin:1rem;padding:.75rem 1rem;background:var(--card);border:1px solid var(--red);border-left:3px solid var(--red);border-radius:10px;color:var(--red);font-size:.87rem;"></div>
 
       <!-- ── PÁGINA RESUMEN ────────────────────────────── -->
       <div id="page-resumen" class="page active">
@@ -2055,7 +2056,7 @@ async function testConnection() {
   if (!url) { res.innerHTML = '<span class="fail">❌ Ingresá la URL primero.</span>'; return; }
   res.innerHTML = '⏳ Probando...';
   try {
-    const r = await fetch(`${url}?action=ping`);
+    const r = await fetchConTimeout(`${url}?action=ping`, {}, 10000);
     const j = await r.json();
     if (j.ok) res.innerHTML = `<span class="ok">✅ ${j.msg}</span>`;
     else       res.innerHTML = `<span class="fail">❌ ${j.error || "Error desconocido"}</span>`;
@@ -2137,6 +2138,26 @@ function _renderApp() {
   inicializarSelectoresPresupuesto();
 }
 
+// ─── FETCH CON TIMEOUT ────────────────────────────────────────
+async function fetchConTimeout(url, opciones = {}, ms = 15000) {
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, { ...opciones, signal: ctrl.signal });
+  } finally {
+    clearTimeout(tid);
+  }
+}
+
+function mostrarErrorCarga(msg) {
+  const el = document.getElementById("error-carga");
+  if (el) { el.innerHTML = `⚠️ ${msg}`; el.style.display = "block"; }
+}
+function ocultarErrorCarga() {
+  const el = document.getElementById("error-carga");
+  if (el) el.style.display = "none";
+}
+
 async function iniciarApp() {
   document.getElementById("setup-screen").style.display = "none";
   document.getElementById("app").style.display = "block";
@@ -2160,19 +2181,29 @@ async function iniciarApp() {
     const badge = document.getElementById("refresh-badge");
     if (badge) badge.style.display = "block";
     Promise.all([cargarCategorias(), cargarTodasTransacciones()])
-      .then(() => { _renderApp(); if (badge) badge.style.display = "none"; })
-      .catch(e => { console.warn("Background refresh error:", e); if (badge) badge.style.display = "none"; });
+      .then(() => { ocultarErrorCarga(); _renderApp(); if (badge) badge.style.display = "none"; })
+      .catch(e => {
+        console.warn("Background refresh error:", e);
+        if (badge) badge.style.display = "none";
+        showToast("⚠️ Sin conexión — mostrando datos guardados", "err");
+      });
   } else {
     // Primera vez o cache vacío → esperar el fetch
-    await Promise.all([cargarCategorias(), cargarTodasTransacciones()]);
-    _renderApp();
+    try {
+      await Promise.all([cargarCategorias(), cargarTodasTransacciones()]);
+      ocultarErrorCarga();
+      _renderApp();
+    } catch(e) {
+      mostrarErrorCarga("No se pudo conectar al servidor. Verificá la URL en Configuración o tu conexión a internet.");
+    }
   }
 }
 
 // ─── CATEGORÍAS Y FUENTES ─────────────────────────────────────
 async function cargarCategorias() {
   try {
-    const r = await fetch(`${API_URL}?action=getCategorias&usuario=${encodeURIComponent(USUARIO)}`);
+    const r = await fetchConTimeout(`${API_URL}?action=getCategorias&usuario=${encodeURIComponent(USUARIO)}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     if (j.ok) {
       const catData = {
@@ -2182,20 +2213,21 @@ async function cargarCategorias() {
       _aplicarCacheCateg(catData);
       guardarCacheCateg(catData);
     }
-  } catch(e) { console.warn("No se pudieron cargar categorías:", e); }
+  } catch(e) { console.warn("No se pudieron cargar categorías:", e); throw e; }
 }
 
 // ─── TRANSACCIONES ────────────────────────────────────────────
 async function cargarTodasTransacciones() {
   try {
-    const r = await fetch(`${API_URL}?action=getTransacciones`);
+    const r = await fetchConTimeout(`${API_URL}?action=getTransacciones`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     if (j.ok) {
       allTransac = j.data;
       _normalizarCategorias(); // unificar capitalización al cargar
       guardarCacheTransac();
     }
-  } catch(e) { console.warn("Error cargando transacciones:", e); }
+  } catch(e) { console.warn("Error cargando transacciones:", e); throw e; }
 }
 
 // ─── SELECTORES FECHA ─────────────────────────────────────────
@@ -2980,10 +3012,11 @@ async function _ejecutarDelete(id) {
   cargarResumenMes();
   cargarEvolucion();
   try {
-    const r = await fetch(API_URL, {
+    const r = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({ action: "deleteTransaccion", id })
     });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     if (!j.ok) showToast("❌ Error al eliminar: " + (j.error || "?"), "err");
   } catch(e) {
@@ -3096,10 +3129,11 @@ async function guardarEdicionTransaccion() {
 
   try {
     // PASO 1: eliminar la transacción original
-    const rDel = await fetch(API_URL, {
+    const rDel = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({ action: "deleteTransaccion", id: idAEliminar })
     });
+    if (!rDel.ok) throw new Error(`HTTP ${rDel.status}`);
     const jDel = await rDel.json();
     if (!jDel.ok) {
       msg.innerHTML = `<span style="color:var(--red)">❌ Error al eliminar original: ${jDel.error || "?"}</span>`;
@@ -3109,7 +3143,7 @@ async function guardarEdicionTransaccion() {
     }
 
     // PASO 2: agregar con los datos actualizados
-    const rAdd = await fetch(API_URL, {
+    const rAdd = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({
         action: "addTransaccion",
@@ -3120,6 +3154,7 @@ async function guardarEdicionTransaccion() {
         fuente, moneda
       })
     });
+    if (!rAdd.ok) throw new Error(`HTTP ${rAdd.status}`);
     const jAdd = await rAdd.json();
     if (jAdd.ok) {
       // Reemplazar en array local: quitar el original y agregar el nuevo
@@ -3132,13 +3167,31 @@ async function guardarEdicionTransaccion() {
       cargarEvolucion();
       showToast("✅ Transacción actualizada", "ok");
     } else {
-      // El add falló — la fila fue borrada pero no re-creada. Intentamos restore.
-      msg.innerHTML = `<span style="color:var(--red)">❌ Error al guardar: ${jAdd.error || "?"} — Recargá la página para verificar.</span>`;
+      // El add falló — la fila fue borrada. Intentamos restaurar el original automáticamente.
+      btn.textContent = "⏳ Restaurando...";
+      try {
+        const rRestore = await fetchConTimeout(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "addTransaccion", ...editandoOrig })
+        });
+        const jRestore = await rRestore.json();
+        if (jRestore.ok) {
+          allTransac = allTransac.filter(t => t.id !== idAEliminar);
+          allTransac.push({ ...editandoOrig, id: jRestore.id });
+          guardarCacheTransac();
+          filtrarTabla();
+          msg.innerHTML = `<span style="color:var(--red)">❌ Error al guardar: ${jAdd.error || "?"}. La transacción original fue restaurada.</span>`;
+        } else {
+          msg.innerHTML = `<span style="color:var(--red)">❌ Error al guardar y no se pudo restaurar automáticamente. Recargá para verificar.</span>`;
+        }
+      } catch(eRestore) {
+        msg.innerHTML = `<span style="color:var(--red)">❌ Error de conexión. No se pudo restaurar la transacción. Recargá para verificar.</span>`;
+      }
       btn.disabled = false;
       btn.textContent = "💾 Guardar cambios";
     }
   } catch(e) {
-    msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión</span>';
+    msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión al guardar</span>';
     btn.disabled = false;
     btn.textContent = "💾 Guardar cambios";
   }
@@ -3188,7 +3241,7 @@ async function guardarTransaccion() {
   msg.innerHTML = "";
 
   try {
-    const r = await fetch(API_URL, {
+    const r = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({
         action: "addTransaccion",
@@ -3197,6 +3250,7 @@ async function guardarTransaccion() {
         moneda: monedaActual
       })
     });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     if (j.ok) {
       // Agregar al array local sin recargar todo
@@ -3351,10 +3405,11 @@ async function guardarRafaga() {
   btn.textContent = "⏳ Guardando...";
 
   try {
-    const r = await fetch(API_URL, {
+    const r = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({ action: "batchAddTransacciones", rows: validas })
     });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     if (j.ok) {
       showToast(`✅ ${j.msg || `${validas.length} transacciones guardadas`}`, "ok");
@@ -3934,7 +3989,7 @@ async function cargarPresupuesto() {
   const mes  = document.getElementById("pres-mes").value;
   const anio = document.getElementById("pres-anio").value;
   try {
-    const r = await fetch(`${API_URL}?action=getPresupuesto&mes=${mes}&anio=${anio}&usuario=${encodeURIComponent(USUARIO)}`);
+    const r = await fetchConTimeout(`${API_URL}?action=getPresupuesto&mes=${mes}&anio=${anio}&usuario=${encodeURIComponent(USUARIO)}`);
     const j = await r.json();
     if (j.ok) {
       presupuestoActual = {};
@@ -3960,10 +4015,11 @@ async function guardarPresupuesto() {
 
   msg.innerHTML = "⏳ Guardando...";
   try {
-    const r = await fetch(API_URL, {
+    const r = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({ action: "savePresupuesto", mes, anio, items, usuario: USUARIO })
     });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     if (j.ok) {
       msg.innerHTML = `<span style="color:var(--green)">✅ ${j.msg}</span>`;
@@ -4340,10 +4396,11 @@ async function agregarCategoria(tipoAPI) {
 
   msg.innerHTML = "⏳ Guardando...";
   try {
-    const r = await fetch(API_URL, {
+    const r = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({ action: "addCategoria", tipo: tipoAPI, valor, usuario: USUARIO })
     });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     if (j.ok) {
       // Actualizar array local
@@ -4371,10 +4428,11 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
   const tipo = tipoAPI.toLowerCase();
   const msgEl = document.getElementById("cfg-msg-" + tipo);
   try {
-    const r = await fetch(API_URL, {
+    const r = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({ action: "deleteCategoria", tipo: tipoAPI, valor })
     });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     if (j.ok) {
       if      (tipoAPI === "GASTO")   categGasto   = categGasto.filter(x => x !== valor);
@@ -4548,10 +4606,11 @@ async function confirmarImport() {
   btn.textContent = "⏳ Importando...";
 
   try {
-    const resp = await fetch(API_URL, {
+    const resp = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({ action: "batchAddTransacciones", rows: importFilas })
     });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const j = await resp.json();
     const msgEl = document.getElementById("imp-result-msg");
     msgEl.style.display = "block";
@@ -5057,10 +5116,11 @@ async function confirmarImportPDF() {
   msgEl.style.display = "none";
 
   try {
-    const r = await fetch(API_URL, {
+    const r = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({ action: "batchAddTransacciones", rows: pdfFilasParsed })
     });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const j = await r.json();
     msgEl.style.display = "block";
     if (j.ok) {
