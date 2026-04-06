@@ -3125,41 +3125,24 @@ async function guardarEdicionTransaccion() {
   btn.textContent = "⏳ Guardando...";
   msg.textContent = "";
 
-  const idAEliminar = editandoId;
-
   try {
-    // PASO 1: eliminar la transacción original
-    const rDel = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "deleteTransaccion", id: idAEliminar })
-    });
-    if (!rDel.ok) throw new Error(`HTTP ${rDel.status}`);
-    const jDel = await rDel.json();
-    if (!jDel.ok) {
-      msg.innerHTML = `<span style="color:var(--red)">❌ Error al eliminar original: ${jDel.error || "?"}</span>`;
-      btn.disabled = false;
-      btn.textContent = "💾 Guardar cambios";
-      return;
-    }
-
-    // PASO 2: agregar con los datos actualizados
-    const rAdd = await fetchConTimeout(API_URL, {
+    const r = await fetchConTimeout(API_URL, {
       method: "POST",
       body: JSON.stringify({
-        action: "addTransaccion",
-        fecha, tipo, categoria: cat,
-        monto, descripcion: desc,
-        usuario: USUARIO,
-        responsabilidad: resp,
-        fuente, moneda
+        action: "updateTransaccion",
+        id: editandoId, fecha, tipo, categoria: cat,
+        monto, descripcion: desc, usuario: USUARIO,
+        responsabilidad: resp, fuente, moneda
       })
     });
-    if (!rAdd.ok) throw new Error(`HTTP ${rAdd.status}`);
-    const jAdd = await rAdd.json();
-    if (jAdd.ok) {
-      // Reemplazar en array local: quitar el original y agregar el nuevo
-      allTransac = allTransac.filter(t => t.id !== idAEliminar);
-      allTransac.push({ id: jAdd.id, fecha, tipo, categoria: cat, monto, descripcion: desc, usuario: USUARIO, responsabilidad: resp, fuente, moneda });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const j = await r.json();
+    if (j.ok) {
+      allTransac = allTransac.map(t =>
+        t.id === editandoId
+          ? { ...t, fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda }
+          : t
+      );
       guardarCacheTransac();
       cerrarEditorTransaccion();
       filtrarTabla();
@@ -3167,26 +3150,7 @@ async function guardarEdicionTransaccion() {
       cargarEvolucion();
       showToast("✅ Transacción actualizada", "ok");
     } else {
-      // El add falló — la fila fue borrada. Intentamos restaurar el original automáticamente.
-      btn.textContent = "⏳ Restaurando...";
-      try {
-        const rRestore = await fetchConTimeout(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "addTransaccion", ...editandoOrig })
-        });
-        const jRestore = await rRestore.json();
-        if (jRestore.ok) {
-          allTransac = allTransac.filter(t => t.id !== idAEliminar);
-          allTransac.push({ ...editandoOrig, id: jRestore.id });
-          guardarCacheTransac();
-          filtrarTabla();
-          msg.innerHTML = `<span style="color:var(--red)">❌ Error al guardar: ${jAdd.error || "?"}. La transacción original fue restaurada.</span>`;
-        } else {
-          msg.innerHTML = `<span style="color:var(--red)">❌ Error al guardar y no se pudo restaurar automáticamente. Recargá para verificar.</span>`;
-        }
-      } catch(eRestore) {
-        msg.innerHTML = `<span style="color:var(--red)">❌ Error de conexión. No se pudo restaurar la transacción. Recargá para verificar.</span>`;
-      }
+      msg.innerHTML = `<span style="color:var(--red)">❌ Error al guardar: ${j.error || "?"}</span>`;
       btn.disabled = false;
       btn.textContent = "💾 Guardar cambios";
     }
