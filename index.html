@@ -3344,7 +3344,7 @@ async function guardarTransaccion() {
     msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
     setTimeout(() => { msg.innerHTML = ""; }, 3000);
   } catch(e) {
-    msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión con el servidor.</span>';
+    msg.innerHTML = `<span style="color:var(--red)">❌ ${e.message || e}</span>`;
   }
 
   btn.disabled = false;
