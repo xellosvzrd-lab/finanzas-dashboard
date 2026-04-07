@@ -6,6 +6,7 @@
 <title>💰 Finanzas Personales — Daniel</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   /* ─── FONTS ──────────────────────────────────────────────── */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -1178,23 +1179,22 @@
 <div id="setup-screen">
   <div class="setup-card">
     <h1>💰 Finanzas Personales</h1>
-    <p>Ingresá la URL de tu Google Apps Script para conectar el dashboard con tu Google Sheet.</p>
+    <p>Ingresá tus credenciales de Supabase para conectar el dashboard.</p>
 
-    <div class="hint">
-      <strong>¿Dónde encontrás la URL?</strong><br>
-      En tu Google Sheet → Extensiones → Apps Script → Implementar → Administrar implementaciones → copiá la URL del Web App.
-    </div>
+    <label for="sb-url">Project URL</label>
+    <input type="url" id="sb-url" placeholder="https://xxxx.supabase.co">
 
-    <label for="api-url">URL del Web App (Apps Script)</label>
-    <input type="url" id="api-url" placeholder="https://script.google.com/macros/s/XXXX/exec"
-           value="https://script.google.com/macros/s/AKfycby0QBnEIN7x3Xl6bw9qt8CzAeZe8_MlJs3c-5vlEztzGv5I3gO6LtXaWfUKCSxVMef-8w/exec">
+    <label for="sb-key">Anon Key</label>
+    <input type="text" id="sb-key" placeholder="eyJ...">
 
-    <label for="usuario-setup">Tu nombre de usuario</label>
-    <input type="text" id="usuario-setup" placeholder="Daniel" value="Daniel">
+    <label for="sb-email">Email</label>
+    <input type="email" id="sb-email" placeholder="daniel@finanzas">
+
+    <label for="sb-password">Contraseña</label>
+    <input type="password" id="sb-password" placeholder="••••••••">
 
     <div style="display:flex; gap:.75rem;">
-      <button class="btn btn-outline" onclick="testConnection()">🔌 Probar conexión</button>
-      <button class="btn btn-primary" onclick="guardarConfig()">Guardar y entrar →</button>
+      <button class="btn btn-primary" id="btn-conectar" onclick="guardarConfig()">Conectar →</button>
     </div>
     <div id="test-result"></div>
   </div>
@@ -1990,8 +1990,9 @@
 ════════════════════════════════════════════════════════ -->
 <script>
 // ─── ESTADO GLOBAL ───────────────────────────────────────────
-let API_URL     = "";
-let USUARIO     = "Daniel";
+let supabaseClient  = null;
+let supabaseSession = null;
+const USUARIO       = "Daniel";
 let allTransac  = [];
 let resumenData = [];
 // Categorías de movimiento entre cuentas propias — se muestran en la tabla
@@ -2032,51 +2033,82 @@ function guardarCacheCateg(data) {
 }
 
 // ─── INICIALIZACIÓN ───────────────────────────────────────────
-window.addEventListener("DOMContentLoaded", () => {
-  // Leer config guardada
-  const savedUrl  = localStorage.getItem("fp_api_url");
-  const savedUser = localStorage.getItem("fp_usuario");
-  if (savedUrl) {
-    API_URL  = savedUrl;
-    USUARIO  = savedUser || "Daniel";
-    document.getElementById("api-url").value         = API_URL;
-    document.getElementById("usuario-setup").value   = USUARIO;
-    iniciarApp();
-  }
-  // Fecha de hoy en el formulario
+window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("f-fecha").valueAsDate = new Date();
-  // Poblar selectores de mes/año
   poblarSelectoresFecha();
+
+  const sbUrl = localStorage.getItem("fp_sb_url");
+  const sbKey = localStorage.getItem("fp_sb_key");
+  if (!sbUrl || !sbKey) return; // mostrar setup screen
+
+  // Pre-llenar el form por si hay que volver a conectar
+  document.getElementById("sb-url").value   = sbUrl;
+  document.getElementById("sb-key").value   = sbKey;
+  document.getElementById("sb-email").value = localStorage.getItem("fp_sb_email") || "";
+
+  supabaseClient = supabase.createClient(sbUrl, sbKey);
+
+  // Intentar recuperar sesión existente
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    supabaseSession = session;
+    iniciarApp();
+    return;
+  }
+
+  // Sesión expirada — intentar re-login con credenciales guardadas
+  const email    = localStorage.getItem("fp_sb_email");
+  const password = localStorage.getItem("fp_sb_password");
+  if (email && password) {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (!error && data.session) {
+      supabaseSession = data.session;
+      iniciarApp();
+      return;
+    }
+  }
+  // No se pudo restaurar — mostrar setup screen
 });
 
 // ─── CONFIGURACIÓN ────────────────────────────────────────────
-async function testConnection() {
-  const url = document.getElementById("api-url").value.trim();
-  const res = document.getElementById("test-result");
-  if (!url) { res.innerHTML = '<span class="fail">❌ Ingresá la URL primero.</span>'; return; }
-  res.innerHTML = '⏳ Probando...';
+async function guardarConfig() {
+  const url      = document.getElementById("sb-url").value.trim();
+  const key      = document.getElementById("sb-key").value.trim();
+  const email    = document.getElementById("sb-email").value.trim();
+  const password = document.getElementById("sb-password").value;
+  const res      = document.getElementById("test-result");
+  const btn      = document.getElementById("btn-conectar");
+
+  if (!url || !key || !email || !password) {
+    res.innerHTML = '<span class="fail">❌ Completá todos los campos.</span>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "⏳ Conectando...";
+  res.innerHTML = "";
+
   try {
-    const r = await fetchConTimeout(`${url}?action=ping`, {}, 10000);
-    const j = await r.json();
-    if (j.ok) res.innerHTML = `<span class="ok">✅ ${j.msg}</span>`;
-    else       res.innerHTML = `<span class="fail">❌ ${j.error || "Error desconocido"}</span>`;
+    supabaseClient = supabase.createClient(url, key);
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+
+    supabaseSession = data.session;
+    localStorage.setItem("fp_sb_url",      url);
+    localStorage.setItem("fp_sb_key",      key);
+    localStorage.setItem("fp_sb_email",    email);
+    localStorage.setItem("fp_sb_password", password);
+    iniciarApp();
   } catch(e) {
-    res.innerHTML = `<span class="fail">❌ No se pudo conectar. Verificá la URL y que el script esté publicado.</span>`;
+    res.innerHTML = `<span class="fail">❌ ${e.message || "Error al conectar"}</span>`;
+    btn.disabled = false;
+    btn.textContent = "Conectar →";
   }
 }
 
-function guardarConfig() {
-  const url  = document.getElementById("api-url").value.trim();
-  const user = document.getElementById("usuario-setup").value.trim() || "Daniel";
-  if (!url) { alert("Ingresá la URL del Web App primero."); return; }
-  localStorage.setItem("fp_api_url",  url);
-  localStorage.setItem("fp_usuario",  user);
-  API_URL  = url;
-  USUARIO  = user;
-  iniciarApp();
-}
-
-function volverConfig() {
+async function volverConfig() {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  supabaseSession = null;
   document.getElementById("app").style.display = "none";
   document.getElementById("mobile-header").style.display = "none";
   closeSidebar();
@@ -2202,31 +2234,34 @@ async function iniciarApp() {
 // ─── CATEGORÍAS Y FUENTES ─────────────────────────────────────
 async function cargarCategorias() {
   try {
-    const r = await fetchConTimeout(`${API_URL}?action=getCategorias&usuario=${encodeURIComponent(USUARIO)}`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (j.ok) {
-      const catData = {
-        gasto: j.gasto, ingreso: j.ingreso,
-        fuentes: j.fuentes || [], responsabilidad: j.responsabilidad
-      };
-      _aplicarCacheCateg(catData);
-      guardarCacheCateg(catData);
-    }
+    const { data, error } = await supabaseClient.from('categorias').select('*');
+    if (error) throw error;
+    const catData = {
+      gasto:           data.filter(r => r.tipo === 'GASTO').map(r => r.valor).sort(),
+      ingreso:         data.filter(r => r.tipo === 'INGRESO').map(r => r.valor).sort(),
+      fuentes:         data.filter(r => r.tipo === 'FUENTE').map(r => r.valor),
+      responsabilidad: categResponsabilidad
+    };
+    _aplicarCacheCateg(catData);
+    guardarCacheCateg(catData);
   } catch(e) { console.warn("No se pudieron cargar categorías:", e); throw e; }
 }
 
 // ─── TRANSACCIONES ────────────────────────────────────────────
 async function cargarTodasTransacciones() {
   try {
-    const r = await fetchConTimeout(`${API_URL}?action=getTransacciones`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (j.ok) {
-      allTransac = j.data;
-      _normalizarCategorias(); // unificar capitalización al cargar
-      guardarCacheTransac();
-    }
+    const { data, error } = await supabaseClient
+      .from('transacciones').select('*').order('fecha', { ascending: false });
+    if (error) throw error;
+    allTransac = data.map(t => ({
+      ...t,
+      monto:           parseFloat(t.monto),
+      responsabilidad: t.responsabilidad || 'Mío',
+      fuente:          t.fuente || '',
+      moneda:          t.moneda || 'ARS'
+    }));
+    _normalizarCategorias();
+    guardarCacheTransac();
   } catch(e) { console.warn("Error cargando transacciones:", e); throw e; }
 }
 
@@ -3012,13 +3047,8 @@ async function _ejecutarDelete(id) {
   cargarResumenMes();
   cargarEvolucion();
   try {
-    const r = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "deleteTransaccion", id })
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (!j.ok) showToast("❌ Error al eliminar: " + (j.error || "?"), "err");
+    const { error } = await supabaseClient.from('transacciones').delete().eq('id', id);
+    if (error) throw error;
   } catch(e) {
     showToast("❌ Error de conexión al eliminar", "err");
   }
@@ -3126,34 +3156,22 @@ async function guardarEdicionTransaccion() {
   msg.textContent = "";
 
   try {
-    const r = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        action: "updateTransaccion",
-        id: editandoId, fecha, tipo, categoria: cat,
-        monto, descripcion: desc, usuario: USUARIO,
-        responsabilidad: resp, fuente, moneda
-      })
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (j.ok) {
-      allTransac = allTransac.map(t =>
-        t.id === editandoId
-          ? { ...t, fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda }
-          : t
-      );
-      guardarCacheTransac();
-      cerrarEditorTransaccion();
-      filtrarTabla();
-      cargarResumenMes();
-      cargarEvolucion();
-      showToast("✅ Transacción actualizada", "ok");
-    } else {
-      msg.innerHTML = `<span style="color:var(--red)">❌ Error al guardar: ${j.error || "?"}</span>`;
-      btn.disabled = false;
-      btn.textContent = "💾 Guardar cambios";
-    }
+    const { error } = await supabaseClient
+      .from('transacciones')
+      .update({ fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda })
+      .eq('id', editandoId);
+    if (error) throw error;
+    allTransac = allTransac.map(t =>
+      t.id === editandoId
+        ? { ...t, fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda }
+        : t
+    );
+    guardarCacheTransac();
+    cerrarEditorTransaccion();
+    filtrarTabla();
+    cargarResumenMes();
+    cargarEvolucion();
+    showToast("✅ Transacción actualizada", "ok");
   } catch(e) {
     msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión al guardar</span>';
     btn.disabled = false;
@@ -3205,40 +3223,31 @@ async function guardarTransaccion() {
   msg.innerHTML = "";
 
   try {
-    const r = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        action: "addTransaccion",
-        fecha, tipo: tipoActual, categoria: cat,
-        monto, descripcion: desc, usuario: USUARIO, responsabilidad: resp, fuente,
-        moneda: monedaActual
-      })
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (j.ok) {
-      // Agregar al array local sin recargar todo
-      allTransac.push({ id: j.id, fecha, tipo: tipoActual, categoria: cat, monto, descripcion: desc, usuario: USUARIO, responsabilidad: resp, fuente, moneda: monedaActual });
-      guardarCacheTransac();
-      cargarResumenMes();
-      cargarEvolucion();
-      filtrarTabla();
-      // Limpiar formulario completo
-      document.getElementById("f-monto").value = "";
-      document.getElementById("f-descripcion").value = "";
-      document.getElementById("f-fecha").valueAsDate = new Date();
-      const selCat  = document.getElementById("f-categoria");
-      const selResp = document.getElementById("f-responsabilidad");
-      const selFte  = document.getElementById("f-fuente");
-      if (selCat)  selCat.selectedIndex  = 0;
-      if (selResp) selResp.selectedIndex = 0;
-      if (selFte)  selFte.selectedIndex  = 0;
-      showToast("✅ Transacción guardada", "ok");
-      msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
-      setTimeout(() => { msg.innerHTML = ""; }, 3000);
-    } else {
-      msg.innerHTML = `<span style="color:var(--red)">❌ ${j.error}</span>`;
-    }
+    const { data, error } = await supabaseClient
+      .from('transacciones')
+      .insert({ fecha, tipo: tipoActual, categoria: cat, monto, descripcion: desc,
+                usuario: USUARIO, responsabilidad: resp, fuente, moneda: monedaActual,
+                user_id: supabaseSession.user.id })
+      .select().single();
+    if (error) throw error;
+    allTransac.push({ ...data, monto: parseFloat(data.monto) });
+    guardarCacheTransac();
+    cargarResumenMes();
+    cargarEvolucion();
+    filtrarTabla();
+    // Limpiar formulario completo
+    document.getElementById("f-monto").value = "";
+    document.getElementById("f-descripcion").value = "";
+    document.getElementById("f-fecha").valueAsDate = new Date();
+    const selCat  = document.getElementById("f-categoria");
+    const selResp = document.getElementById("f-responsabilidad");
+    const selFte  = document.getElementById("f-fuente");
+    if (selCat)  selCat.selectedIndex  = 0;
+    if (selResp) selResp.selectedIndex = 0;
+    if (selFte)  selFte.selectedIndex  = 0;
+    showToast("✅ Transacción guardada", "ok");
+    msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
+    setTimeout(() => { msg.innerHTML = ""; }, 3000);
   } catch(e) {
     msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión con el servidor.</span>';
   }
@@ -3369,23 +3378,14 @@ async function guardarRafaga() {
   btn.textContent = "⏳ Guardando...";
 
   try {
-    const r = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "batchAddTransacciones", rows: validas })
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (j.ok) {
-      showToast(`✅ ${j.msg || `${validas.length} transacciones guardadas`}`, "ok");
-      cerrarRafaga();
-      document.getElementById("rafaga-tbody").innerHTML = "";
-      await cargarTodasTransacciones();
-      _renderApp();
-    } else {
-      msg.innerHTML = `<span style="color:var(--red)">❌ ${j.error}</span>`;
-      btn.disabled = false;
-      btn.textContent = `💾 Guardar todo (${validas.length})`;
-    }
+    const rows = validas.map(v => ({ ...v, user_id: supabaseSession.user.id }));
+    const { error } = await supabaseClient.from('transacciones').insert(rows);
+    if (error) throw error;
+    showToast(`✅ ${validas.length} transacciones guardadas`, "ok");
+    cerrarRafaga();
+    document.getElementById("rafaga-tbody").innerHTML = "";
+    await cargarTodasTransacciones();
+    _renderApp();
   } catch(e) {
     msg.innerHTML = `<span style="color:var(--red)">❌ Error de conexión: ${e.message}</span>`;
     btn.disabled = false;
@@ -3950,15 +3950,14 @@ function inicializarSelectoresPresupuesto() {
 }
 
 async function cargarPresupuesto() {
-  const mes  = document.getElementById("pres-mes").value;
-  const anio = document.getElementById("pres-anio").value;
+  const mes  = parseInt(document.getElementById("pres-mes").value);
+  const anio = parseInt(document.getElementById("pres-anio").value);
   try {
-    const r = await fetchConTimeout(`${API_URL}?action=getPresupuesto&mes=${mes}&anio=${anio}&usuario=${encodeURIComponent(USUARIO)}`);
-    const j = await r.json();
-    if (j.ok) {
-      presupuestoActual = {};
-      j.data.forEach(d => { presupuestoActual[d.categoria] = d.presupuesto; });
-    }
+    const { data, error } = await supabaseClient
+      .from('presupuesto').select('*').eq('mes', mes).eq('anio', anio);
+    if (error) throw error;
+    presupuestoActual = {};
+    data.forEach(d => { presupuestoActual[d.categoria] = d.porcentaje; });
   } catch(e) { console.warn("Error cargando presupuesto:", e); }
   renderPresupuesto();
 }
@@ -3979,18 +3978,20 @@ async function guardarPresupuesto() {
 
   msg.innerHTML = "⏳ Guardando...";
   try {
-    const r = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "savePresupuesto", mes, anio, items, usuario: USUARIO })
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (j.ok) {
-      msg.innerHTML = `<span style="color:var(--green)">✅ ${j.msg}</span>`;
-      renderPresupuesto();
-    } else {
-      msg.innerHTML = `<span style="color:var(--red)">❌ ${j.error}</span>`;
+    // Borrar presupuesto existente del mes/año y re-insertar
+    const { error: delErr } = await supabaseClient
+      .from('presupuesto').delete().eq('mes', mes).eq('anio', anio);
+    if (delErr) throw delErr;
+    if (items.length) {
+      const rows = items.map(it => ({
+        mes, anio, categoria: it.categoria, porcentaje: it.presupuesto,
+        usuario: USUARIO, user_id: supabaseSession.user.id
+      }));
+      const { error: insErr } = await supabaseClient.from('presupuesto').insert(rows);
+      if (insErr) throw insErr;
     }
+    msg.innerHTML = `<span style="color:var(--green)">✅ Presupuesto guardado</span>`;
+    renderPresupuesto();
   } catch(e) {
     msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>';
   }
@@ -4360,28 +4361,20 @@ async function agregarCategoria(tipoAPI) {
 
   msg.innerHTML = "⏳ Guardando...";
   try {
-    const r = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "addCategoria", tipo: tipoAPI, valor, usuario: USUARIO })
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (j.ok) {
-      // Actualizar array local
-      if      (tipoAPI === "GASTO")   { categGasto.push(valor);   categGasto.sort(); }
-      else if (tipoAPI === "INGRESO") { categIngreso.push(valor); categIngreso.sort(); }
-      else if (tipoAPI === "FUENTE")  { categFuentes.push(valor); }
-      guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, responsabilidad: categResponsabilidad });
-      // Re-render lista y selectores
-      renderizarConfig();
-      _refrescarSelectores();
-      input.value = "";
-      msg.innerHTML = `<span style="color:var(--green)">✅ "${valor}" agregado.</span>`;
-    } else {
-      msg.innerHTML = `<span style="color:var(--red)">❌ ${j.error}</span>`;
-    }
+    const { error } = await supabaseClient
+      .from('categorias')
+      .insert({ tipo: tipoAPI, valor, usuario: USUARIO, user_id: supabaseSession.user.id });
+    if (error) throw error;
+    if      (tipoAPI === "GASTO")   { categGasto.push(valor);   categGasto.sort(); }
+    else if (tipoAPI === "INGRESO") { categIngreso.push(valor); categIngreso.sort(); }
+    else if (tipoAPI === "FUENTE")  { categFuentes.push(valor); }
+    guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, responsabilidad: categResponsabilidad });
+    renderizarConfig();
+    _refrescarSelectores();
+    input.value = "";
+    msg.innerHTML = `<span style="color:var(--green)">✅ "${valor}" agregado.</span>`;
   } catch(e) {
-    msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>';
+    msg.innerHTML = `<span style="color:var(--red)">❌ ${e.message || "Error de conexión."}</span>`;
   }
   setTimeout(() => { msg.innerHTML = ""; }, 3000);
 }
@@ -4392,24 +4385,16 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
   const tipo = tipoAPI.toLowerCase();
   const msgEl = document.getElementById("cfg-msg-" + tipo);
   try {
-    const r = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "deleteCategoria", tipo: tipoAPI, valor })
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
-    if (j.ok) {
-      if      (tipoAPI === "GASTO")   categGasto   = categGasto.filter(x => x !== valor);
-      else if (tipoAPI === "INGRESO") categIngreso = categIngreso.filter(x => x !== valor);
-      else if (tipoAPI === "FUENTE")  categFuentes = categFuentes.filter(x => x !== valor);
-      guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, responsabilidad: categResponsabilidad });
-      renderizarConfig();
-      _refrescarSelectores();
-      if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" eliminado.</span>`; }
-    } else {
-      if (msgEl) { msgEl.innerHTML = `<span style="color:var(--red)">❌ ${j.error}</span>`; }
-      btn.disabled = false;
-    }
+    const { error } = await supabaseClient
+      .from('categorias').delete().eq('tipo', tipoAPI).eq('valor', valor);
+    if (error) throw error;
+    if      (tipoAPI === "GASTO")   categGasto   = categGasto.filter(x => x !== valor);
+    else if (tipoAPI === "INGRESO") categIngreso = categIngreso.filter(x => x !== valor);
+    else if (tipoAPI === "FUENTE")  categFuentes = categFuentes.filter(x => x !== valor);
+    guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, responsabilidad: categResponsabilidad });
+    renderizarConfig();
+    _refrescarSelectores();
+    if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" eliminado.</span>`; }
   } catch(e) {
     if (msgEl) { msgEl.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>'; }
     btn.disabled = false;
@@ -4569,31 +4554,19 @@ async function confirmarImport() {
   btn.disabled = true;
   btn.textContent = "⏳ Importando...";
 
+  const msgEl = document.getElementById("imp-result-msg");
   try {
-    const resp = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "batchAddTransacciones", rows: importFilas })
-    });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const j = await resp.json();
-    const msgEl = document.getElementById("imp-result-msg");
+    const rows = importFilas.map(f => ({ ...f, user_id: supabaseSession.user.id }));
+    const { error } = await supabaseClient.from('transacciones').insert(rows);
+    if (error) throw error;
     msgEl.style.display = "block";
-    if (j.ok) {
-      msgEl.className = "imp-result-msg ok";
-      msgEl.textContent = `✅ ${j.msg}`;
-      showToast(j.msg, "ok");
-      // Recargar datos globales
-      await cargarTodasTransacciones();
-      importFilas = [];
-      btn.textContent = "✅ Importar transacciones";
-    } else {
-      msgEl.className = "imp-result-msg fail";
-      msgEl.textContent = `❌ Error: ${j.error}`;
-      btn.disabled = false;
-      btn.textContent = `✅ Importar ${importFilas.length} transacciones`;
-    }
+    msgEl.className = "imp-result-msg ok";
+    msgEl.textContent = `✅ ${importFilas.length} transacciones importadas`;
+    showToast(`✅ ${importFilas.length} transacciones importadas`, "ok");
+    await cargarTodasTransacciones();
+    importFilas = [];
+    btn.textContent = "✅ Importar transacciones";
   } catch (err) {
-    const msgEl = document.getElementById("imp-result-msg");
     msgEl.style.display = "block";
     msgEl.className = "imp-result-msg fail";
     msgEl.textContent = `❌ Error de conexión: ${err.message}`;
@@ -5080,28 +5053,18 @@ async function confirmarImportPDF() {
   msgEl.style.display = "none";
 
   try {
-    const r = await fetchConTimeout(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "batchAddTransacciones", rows: pdfFilasParsed })
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const j = await r.json();
+    const rows = pdfFilasParsed.map(f => ({ ...f, user_id: supabaseSession.user.id }));
+    const { error } = await supabaseClient.from('transacciones').insert(rows);
+    if (error) throw error;
     msgEl.style.display = "block";
-    if (j.ok) {
-      msgEl.className = "imp-result-msg ok";
-      msgEl.textContent = `✅ ${j.msg || `${pdfFilasParsed.length} transacciones importadas`}`;
-      showToast(msgEl.textContent, "ok");
-      await cargarTodasTransacciones();
-      _renderApp();
-      pdfFilasParsed = [];
-      pdfLimpiarTodo();
-      document.getElementById("pdf-preview-wrap").style.display = "none";
-    } else {
-      msgEl.className = "imp-result-msg fail";
-      msgEl.textContent = `❌ ${j.error}`;
-      btn.disabled = false;
-      btn.textContent = "✅ Importar transacciones";
-    }
+    msgEl.className = "imp-result-msg ok";
+    msgEl.textContent = `✅ ${pdfFilasParsed.length} transacciones importadas`;
+    showToast(msgEl.textContent, "ok");
+    await cargarTodasTransacciones();
+    _renderApp();
+    pdfFilasParsed = [];
+    pdfLimpiarTodo();
+    document.getElementById("pdf-preview-wrap").style.display = "none";
   } catch (e) {
     msgEl.style.display = "block";
     msgEl.className = "imp-result-msg fail";
