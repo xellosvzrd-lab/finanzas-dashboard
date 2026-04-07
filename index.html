@@ -1179,22 +1179,16 @@
 <div id="setup-screen">
   <div class="setup-card">
     <h1>💰 Finanzas Personales</h1>
-    <p>Ingresá tus credenciales de Supabase para conectar el dashboard.</p>
-
-    <label for="sb-url">Project URL</label>
-    <input type="url" id="sb-url" placeholder="https://xxxx.supabase.co">
-
-    <label for="sb-key">Anon Key</label>
-    <input type="text" id="sb-key" placeholder="eyJ...">
+    <p>Ingresá tu email y contraseña para acceder.</p>
 
     <label for="sb-email">Email</label>
-    <input type="email" id="sb-email" placeholder="daniel@finanzas">
+    <input type="email" id="sb-email" placeholder="daniel@finanzas" autocomplete="email">
 
     <label for="sb-password">Contraseña</label>
-    <input type="password" id="sb-password" placeholder="••••••••">
+    <input type="password" id="sb-password" placeholder="••••••••" autocomplete="current-password">
 
     <div style="display:flex; gap:.75rem;">
-      <button class="btn btn-primary" id="btn-conectar" onclick="guardarConfig()">Conectar →</button>
+      <button class="btn btn-primary" id="btn-conectar" onclick="guardarConfig()">Entrar →</button>
     </div>
     <div id="test-result"></div>
   </div>
@@ -1989,6 +1983,10 @@
      JAVASCRIPT
 ════════════════════════════════════════════════════════ -->
 <script>
+// ─── SUPABASE CONFIG ─────────────────────────────────────────
+const SUPABASE_URL = "https://eutarjfnlkcehhigqqxr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1dGFyamZubGtjZWhoaWdxcXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTA0MTQsImV4cCI6MjA5MTA4NjQxNH0._7-AO_9_12PumXjDfcAWkgKyS4s_kXZTxb8EKSdxlAg";
+
 // ─── ESTADO GLOBAL ───────────────────────────────────────────
 let supabaseClient  = null;
 let supabaseSession = null;
@@ -2037,50 +2035,34 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("f-fecha").valueAsDate = new Date();
   poblarSelectoresFecha();
 
-  const sbUrl = localStorage.getItem("fp_sb_url");
-  const sbKey = localStorage.getItem("fp_sb_key");
-  if (!sbUrl || !sbKey) return; // mostrar setup screen
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // Pre-llenar el form por si hay que volver a conectar
-  document.getElementById("sb-url").value   = sbUrl;
-  document.getElementById("sb-key").value   = sbKey;
+  // Pre-llenar email guardado
   document.getElementById("sb-email").value = localStorage.getItem("fp_sb_email") || "";
-
-  supabaseClient = supabase.createClient(sbUrl, sbKey);
 
   // Intentar recuperar sesión existente
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) {
-    supabaseSession = session;
-    iniciarApp();
-    return;
-  }
+  if (session) { supabaseSession = session; iniciarApp(); return; }
 
   // Sesión expirada — intentar re-login con credenciales guardadas
   const email    = localStorage.getItem("fp_sb_email");
   const password = localStorage.getItem("fp_sb_password");
   if (email && password) {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (!error && data.session) {
-      supabaseSession = data.session;
-      iniciarApp();
-      return;
-    }
+    if (!error && data.session) { supabaseSession = data.session; iniciarApp(); return; }
   }
-  // No se pudo restaurar — mostrar setup screen
+  // No se pudo restaurar — mostrar pantalla de login
 });
 
 // ─── CONFIGURACIÓN ────────────────────────────────────────────
 async function guardarConfig() {
-  const url      = document.getElementById("sb-url").value.trim();
-  const key      = document.getElementById("sb-key").value.trim();
   const email    = document.getElementById("sb-email").value.trim();
   const password = document.getElementById("sb-password").value;
   const res      = document.getElementById("test-result");
   const btn      = document.getElementById("btn-conectar");
 
-  if (!url || !key || !email || !password) {
-    res.innerHTML = '<span class="fail">❌ Completá todos los campos.</span>';
+  if (!email || !password) {
+    res.innerHTML = '<span class="fail">❌ Completá email y contraseña.</span>';
     return;
   }
 
@@ -2089,20 +2071,16 @@ async function guardarConfig() {
   res.innerHTML = "";
 
   try {
-    supabaseClient = supabase.createClient(url, key);
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
-
     supabaseSession = data.session;
-    localStorage.setItem("fp_sb_url",      url);
-    localStorage.setItem("fp_sb_key",      key);
     localStorage.setItem("fp_sb_email",    email);
     localStorage.setItem("fp_sb_password", password);
     iniciarApp();
   } catch(e) {
     res.innerHTML = `<span class="fail">❌ ${e.message || "Error al conectar"}</span>`;
     btn.disabled = false;
-    btn.textContent = "Conectar →";
+    btn.textContent = "Entrar →";
   }
 }
 
