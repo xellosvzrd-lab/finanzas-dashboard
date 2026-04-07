@@ -1177,20 +1177,61 @@
      PANTALLA DE CONFIGURACIÓN INICIAL
 ════════════════════════════════════════════════════════ -->
 <div id="setup-screen">
-  <div class="setup-card">
+  <!-- ── Pantalla: login ───────────────────────────────── -->
+  <div class="setup-card" id="card-login">
     <h1>💰 Finanzas Personales</h1>
     <p>Ingresá tu email y contraseña para acceder.</p>
 
     <label for="sb-email">Email</label>
-    <input type="email" id="sb-email" placeholder="daniel@finanzas" autocomplete="email">
+    <input type="email" id="sb-email" placeholder="daniel@finanzas" autocomplete="email"
+           onkeydown="if(event.key==='Enter') guardarConfig()">
 
     <label for="sb-password">Contraseña</label>
-    <input type="password" id="sb-password" placeholder="••••••••" autocomplete="current-password">
+    <input type="password" id="sb-password" placeholder="••••••••" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter') guardarConfig()">
 
-    <div style="display:flex; gap:.75rem;">
+    <div style="display:flex; gap:.75rem; align-items:center;">
       <button class="btn btn-primary" id="btn-conectar" onclick="guardarConfig()">Entrar →</button>
+      <button class="btn" style="background:none;color:var(--text-muted);font-size:.83rem;padding:.3rem .5rem"
+              onclick="mostrarRecuperarPassword()">¿Olvidaste tu contraseña?</button>
     </div>
     <div id="test-result"></div>
+  </div>
+
+  <!-- ── Pantalla: recuperar contraseña ───────────────── -->
+  <div class="setup-card" id="card-reset" style="display:none;">
+    <h1>💰 Recuperar contraseña</h1>
+    <p>Ingresá tu email y te enviamos un link para resetearla.</p>
+
+    <label for="reset-email">Email</label>
+    <input type="email" id="reset-email" placeholder="daniel@finanzas" autocomplete="email"
+           onkeydown="if(event.key==='Enter') enviarResetPassword()">
+
+    <div style="display:flex; gap:.75rem; align-items:center;">
+      <button class="btn btn-primary" id="btn-reset" onclick="enviarResetPassword()">Enviar email →</button>
+      <button class="btn" style="background:none;color:var(--text-muted);font-size:.83rem;padding:.3rem .5rem"
+              onclick="mostrarLogin()">← Volver</button>
+    </div>
+    <div id="reset-result"></div>
+  </div>
+
+  <!-- ── Pantalla: nueva contraseña (después de link de email) -->
+  <div class="setup-card" id="card-nueva-password" style="display:none;">
+    <h1>💰 Nueva contraseña</h1>
+    <p>Elegí una nueva contraseña para tu cuenta.</p>
+
+    <label for="nueva-password">Nueva contraseña</label>
+    <input type="password" id="nueva-password" placeholder="••••••••" autocomplete="new-password"
+           onkeydown="if(event.key==='Enter') guardarNuevaPassword()">
+
+    <label for="nueva-password2">Repetir contraseña</label>
+    <input type="password" id="nueva-password2" placeholder="••••••••" autocomplete="new-password"
+           onkeydown="if(event.key==='Enter') guardarNuevaPassword()">
+
+    <div style="display:flex; gap:.75rem;">
+      <button class="btn btn-primary" id="btn-nueva-password" onclick="guardarNuevaPassword()">Guardar contraseña →</button>
+    </div>
+    <div id="nueva-password-result"></div>
   </div>
 </div>
 
@@ -2037,6 +2078,18 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  // Detectar retorno desde email de recuperación de contraseña
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY") {
+      supabaseSession = session;
+      document.getElementById("setup-screen").style.display = "flex";
+      document.getElementById("card-login").style.display         = "none";
+      document.getElementById("card-reset").style.display         = "none";
+      document.getElementById("card-nueva-password").style.display = "";
+      document.getElementById("nueva-password").focus();
+    }
+  });
+
   // Pre-llenar email guardado
   document.getElementById("sb-email").value = localStorage.getItem("fp_sb_email") || "";
 
@@ -2090,7 +2143,71 @@ async function volverConfig() {
   document.getElementById("app").style.display = "none";
   document.getElementById("mobile-header").style.display = "none";
   closeSidebar();
+  mostrarLogin();
   document.getElementById("setup-screen").style.display = "flex";
+}
+
+function mostrarLogin() {
+  document.getElementById("card-login").style.display        = "";
+  document.getElementById("card-reset").style.display        = "none";
+  document.getElementById("card-nueva-password").style.display = "none";
+  document.getElementById("test-result").innerHTML = "";
+}
+
+function mostrarRecuperarPassword() {
+  document.getElementById("card-login").style.display        = "none";
+  document.getElementById("card-reset").style.display        = "";
+  document.getElementById("card-nueva-password").style.display = "none";
+  // Pre-llenar email si ya lo escribió
+  const email = document.getElementById("sb-email").value.trim();
+  if (email) document.getElementById("reset-email").value = email;
+  document.getElementById("reset-result").innerHTML = "";
+  document.getElementById("reset-email").focus();
+}
+
+async function enviarResetPassword() {
+  const email = document.getElementById("reset-email").value.trim();
+  const res   = document.getElementById("reset-result");
+  const btn   = document.getElementById("btn-reset");
+  if (!email) { res.innerHTML = '<span class="fail">❌ Ingresá tu email.</span>'; return; }
+  btn.disabled = true;
+  btn.textContent = "⏳ Enviando...";
+  res.innerHTML = "";
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    if (error) throw error;
+    res.innerHTML = '<span class="ok">✅ Revisá tu email — te enviamos el link para resetear tu contraseña.</span>';
+    btn.textContent = "Enviado";
+  } catch(e) {
+    res.innerHTML = `<span class="fail">❌ ${e.message || "Error al enviar."}</span>`;
+    btn.disabled = false;
+    btn.textContent = "Enviar email →";
+  }
+}
+
+async function guardarNuevaPassword() {
+  const p1  = document.getElementById("nueva-password").value;
+  const p2  = document.getElementById("nueva-password2").value;
+  const res = document.getElementById("nueva-password-result");
+  const btn = document.getElementById("btn-nueva-password");
+  if (!p1 || p1.length < 6) { res.innerHTML = '<span class="fail">❌ La contraseña debe tener al menos 6 caracteres.</span>'; return; }
+  if (p1 !== p2)             { res.innerHTML = '<span class="fail">❌ Las contraseñas no coinciden.</span>'; return; }
+  btn.disabled = true;
+  btn.textContent = "⏳ Guardando...";
+  res.innerHTML = "";
+  try {
+    const { error } = await supabaseClient.auth.updateUser({ password: p1 });
+    if (error) throw error;
+    res.innerHTML = '<span class="ok">✅ Contraseña actualizada. Redirigiendo...</span>';
+    localStorage.setItem("fp_sb_password", p1);
+    setTimeout(() => iniciarApp(), 1500);
+  } catch(e) {
+    res.innerHTML = `<span class="fail">❌ ${e.message || "Error al guardar."}</span>`;
+    btn.disabled = false;
+    btn.textContent = "Guardar contraseña →";
+  }
 }
 
 // ─── INICIO APP ───────────────────────────────────────────────
