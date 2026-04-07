@@ -1544,7 +1544,7 @@
       <!-- ── PÁGINA COMPARTIDOS ────────────────────────── -->
       <div id="page-compartidos" class="page">
         <div class="page-header">
-          <h1>👫 Compartidos con Ama</h1>
+          <h1 id="comp-titulo">👫 Compartidos con Ama</h1>
         </div>
 
         <!-- Selector de mes -->
@@ -1611,7 +1611,7 @@
               </table>
             </div>
             <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
-              * Neto por categoría: positivo = Ama te debe · negativo = vos le debés a Ama.
+              <span id="comp-nota">* Neto por categoría: positivo = Ama te debe · negativo = vos le debés a Ama.</span>
             </div>
           </div>
 
@@ -2031,7 +2031,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // ─── ESTADO GLOBAL ───────────────────────────────────────────
 let supabaseClient  = null;
 let supabaseSession = null;
-const USUARIO       = "Daniel";
+let USUARIO         = "Daniel";
+let PARTNER         = "Ama";
+let CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
+let tipoCambioMEP   = null;
 let allTransac  = [];
 let resumenData = [];
 // Categorías de movimiento entre cuentas propias — se muestran en la tabla
@@ -2095,14 +2098,14 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Intentar recuperar sesión existente
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) { supabaseSession = session; iniciarApp(); return; }
+  if (session) { supabaseSession = session; _configurarUsuario(session); iniciarApp(); return; }
 
   // Sesión expirada — intentar re-login con credenciales guardadas
   const email    = localStorage.getItem("fp_sb_email");
   const password = localStorage.getItem("fp_sb_password");
   if (email && password) {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (!error && data.session) { supabaseSession = data.session; iniciarApp(); return; }
+    if (!error && data.session) { supabaseSession = data.session; _configurarUsuario(data.session); iniciarApp(); return; }
   }
   // No se pudo restaurar — mostrar pantalla de login
 });
@@ -2127,6 +2130,7 @@ async function guardarConfig() {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
     supabaseSession = data.session;
+    _configurarUsuario(data.session);
     localStorage.setItem("fp_sb_email",    email);
     localStorage.setItem("fp_sb_password", password);
     iniciarApp();
@@ -2219,7 +2223,7 @@ function _aplicarCacheCateg(catData) {
   // Poblar selectores con los datos cacheados
   const selResp = document.getElementById("f-responsabilidad");
   if (selResp) selResp.innerHTML = categResponsabilidad.map(rv =>
-    `<option value="${rv}">${rv === "Mío" ? "🙋 Mío" : rv === "Compartido" ? "👫 Compartido" : "💳 De Ama (ella me reintegra)"}</option>`).join("");
+    `<option value="${rv}">${rv === "Mío" ? "🙋 Mío" : rv === "Compartido" ? "👫 Compartido" : "💳 De " + PARTNER}</option>`).join("");
   const filResp = document.getElementById("fil-resp");
   if (filResp) filResp.innerHTML = '<option value="">Todas</option>' +
     categResponsabilidad.map(rv => `<option value="${rv}">${rv}</option>`).join("");
@@ -2283,6 +2287,32 @@ function mostrarErrorCarga(msg) {
 function ocultarErrorCarga() {
   const el = document.getElementById("error-carga");
   if (el) el.style.display = "none";
+}
+
+function _configurarUsuario(session) {
+  USUARIO = session.user.user_metadata?.nombre || "Daniel";
+  PARTNER = USUARIO === "Daniel" ? "Ama" : "Daniel";
+  CATS_INGRESO_REAL = USUARIO === "Ama"
+    ? ["Sueldo", "Otros Ingresos", "Intereses"]
+    : ["Sueldo", "Otros Ingresos"];
+  categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
+  // Strings dinámicos en HTML
+  const tit = document.getElementById("comp-titulo");
+  if (tit) tit.textContent = "👫 Compartidos con " + PARTNER;
+  const nota = document.getElementById("comp-nota");
+  if (nota) nota.textContent = `* Neto por categoría: positivo = ${PARTNER} te debe · negativo = vos le debés a ${PARTNER}.`;
+}
+
+async function fetchTipoCambioMEP() {
+  try {
+    const res = await fetch("https://dolarapi.com/v1/dolares/bolsa");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if (data?.venta) tipoCambioMEP = data.venta;
+  } catch (e) {
+    console.warn("No se pudo obtener el tipo de cambio MEP:", e);
+    tipoCambioMEP = null;
+  }
 }
 
 async function iniciarApp() {
@@ -2500,8 +2530,7 @@ async function cargarResumenMes() {
   // Solo las de Daniel (para KPI ingresos y drill-down)
   const datos = dataMesAll.filter(t => (t.usuario || "Daniel") === USUARIO);
 
-  // ── INGRESOS: solo Sueldo + Otros Ingresos de Daniel ─────────
-  const CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
+  // ── INGRESOS: solo categorías de ingreso real del usuario ─────
   const ingresosARS = datos.filter(t => t.tipo === "Ingreso" && !esTransferencia(t)
     && CATS_INGRESO_REAL.includes(t.categoria) && (t.moneda || "ARS") === "ARS")
     .reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
@@ -2840,9 +2869,8 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
 // ─── EVOLUCIÓN ────────────────────────────────────────────────
 function cargarEvolucion() {
   // Misma lógica que cargarResumenMes:
-  // Ingresos = solo Sueldo y Otros Ingresos (ARS)
+  // Ingresos = solo categorías de ingreso real del usuario (ARS)
   // Gastos   = neto por categoría (gastos − reintegros de la misma cat)
-  const CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
 
   // 1. Agrupar transacciones por mes
   const monthTxs = {};
@@ -3547,7 +3575,7 @@ function cargarCompartidos() {
     const map    = moneda === "USD" ? compPorCatUSD : compPorCatARS;
     if (!map[cat]) map[cat] = { daniel: 0, ama: 0 };
     const m = Math.abs(Number(t.monto));
-    if ((t.usuario || "Daniel").toLowerCase() === "ama") {
+    if ((t.usuario || USUARIO) === PARTNER) {
       map[cat].ama += m / 2;
     } else {
       map[cat].daniel += m / 2;
@@ -3561,7 +3589,7 @@ function cargarCompartidos() {
     const map    = moneda === "USD" ? compPorCatUSD : compPorCatARS;
     if (!map[cat]) map[cat] = { daniel: 0, ama: 0 };
     const m = Math.abs(Number(t.monto));
-    if ((t.usuario || "Daniel").toLowerCase() === "ama") {
+    if ((t.usuario || USUARIO) === PARTNER) {
       map[cat].ama -= m / 2;
     } else {
       map[cat].daniel -= m / 2;
@@ -3574,13 +3602,13 @@ function cargarCompartidos() {
   const reembA_ARS = {}, reembA_USD = {};
   const reembB_ARS = {}, reembB_USD = {};
 
-  datos.filter(t => (t.responsabilidad || "Mío") === "De Ama" && (t.usuario || "Daniel") === "Daniel").forEach(t => {
+  datos.filter(t => (t.responsabilidad || "Mío") === "De " + PARTNER && (t.usuario || USUARIO) === USUARIO).forEach(t => {
     const cat = t.categoria, mon = (t.moneda || "ARS").toUpperCase();
     if (mon === "USD") { reembA_USD[cat] = (reembA_USD[cat]||0) + Math.abs(Number(t.monto)); }
     else               { reembA_ARS[cat] = (reembA_ARS[cat]||0) + Math.abs(Number(t.monto)); }
   });
 
-  datos.filter(t => (t.responsabilidad || "Mío") === "De Daniel" && t.usuario === "Ama").forEach(t => {
+  datos.filter(t => (t.responsabilidad || "Mío") === "De " + USUARIO && t.usuario === PARTNER).forEach(t => {
     const cat = t.categoria, mon = (t.moneda || "ARS").toUpperCase();
     if (mon === "USD") { reembB_USD[cat] = (reembB_USD[cat]||0) + Math.abs(Number(t.monto)); }
     else               { reembB_ARS[cat] = (reembB_ARS[cat]||0) + Math.abs(Number(t.monto)); }
@@ -3778,12 +3806,12 @@ function cargarCompartidos() {
   const vosDebés = balanceFinalARS < 0 || balanceFinalUSD < 0;
 
   if (debeAma && !vosDebés) {
-    balSub.textContent = `✅ Ama te debe — ${desglose.join(" + ")}`;
+    balSub.textContent = `✅ ${PARTNER} te debe — ${desglose.join(" + ")}`;
   } else if (vosDebés && !debeAma) {
     const partes = [];
     if (balanceFinalARS < 0) partes.push(fmt(Math.abs(balanceFinalARS)));
     if (balanceFinalUSD < 0) partes.push(fmtMoneda(Math.abs(balanceFinalUSD), "USD"));
-    balSub.textContent = `⚠️ Vos le debés ${partes.join(" + ")} a Ama`;
+    balSub.textContent = `⚠️ Vos le debés ${partes.join(" + ")} a ${PARTNER}`;
   } else if (debeAma || vosDebés) {
     balSub.textContent = `⚖️ Deudas mixtas — ${desglose.join(" | ")}`;
   } else {
@@ -3810,7 +3838,6 @@ function _poblarAnioAnual() {
 function cargarAnual() {
   _poblarAnioAnual();
   const anio = parseInt(document.getElementById("anual-anio").value);
-  const CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
   const MESES_LABEL = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
   // Transacciones ARS del año (para chart + tabla ARS)
@@ -4045,9 +4072,13 @@ function inicializarSelectoresPresupuesto() {
 async function cargarPresupuesto() {
   const mes  = parseInt(document.getElementById("pres-mes").value);
   const anio = parseInt(document.getElementById("pres-anio").value);
+  const fetchList = [
+    supabaseClient.from('presupuesto').select('*').eq('mes', mes).eq('anio', anio)
+  ];
+  if (USUARIO === "Ama") fetchList.push(fetchTipoCambioMEP());
+  const [presRes] = await Promise.allSettled(fetchList);
   try {
-    const { data, error } = await supabaseClient
-      .from('presupuesto').select('*').eq('mes', mes).eq('anio', anio);
+    const { data, error } = presRes.value;
     if (error) throw error;
     presupuestoActual = {};
     data.forEach(d => { presupuestoActual[d.categoria] = d.porcentaje; });
@@ -4170,7 +4201,7 @@ function montoEfectivoGasto(t) {
   if (t.tipo !== "Gasto") return 0;
   const resp = t.responsabilidad || "Mío";
   const m = Math.abs(Number(t.monto));
-  if (resp === "De Ama")    return 0;
+  if (resp === "De " + PARTNER)    return 0;
   if (resp === "Compartido") return m / 2;
   return m; // "Mío"
 }
@@ -4187,12 +4218,21 @@ function renderPresupuesto() {
   // Solo las transacciones de Daniel (para "Mío" y KPI sueldo)
   const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO);
 
-  // Sueldo KPI = ingresos reales de Daniel (Sueldo + Otros Ingresos, ARS)
-  const CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
+  // Sueldo KPI = ingresos reales del usuario (ARS)
   const sueldo = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)
              && (t.moneda || "ARS") === "ARS")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  // Para Ama: sueldoEfectivo incluye saldo USD × MEP
+  const ingresosUSDPres = dataMesDaniel
+    .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const gastosUSDPres = dataMes
+    .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const saldoUSDPres = ingresosUSDPres - gastosUSDPres;
+  const usdEnARSPres = USUARIO === "Ama" && tipoCambioMEP ? saldoUSDPres * tipoCambioMEP : 0;
+  const sueldoEfectivo = sueldo + usdEnARSPres;
 
   // Gasto efectivo por categoría usando lógica de responsabilidad:
   //   "Mío" gastos Daniel           → 100%
@@ -4227,15 +4267,15 @@ function renderPresupuesto() {
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
 
-    // Gastos "De Daniel" de Ama → 100% de Daniel (Ama pagó por él)
+    // Gastos "De [usuario]" del partner → 100% del usuario (partner pagó por él)
     const deJGasto = dataMes
       .filter(t => t.tipo === "Gasto" && t.categoria === cat
-               && t.responsabilidad === "De Daniel"
+               && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     const deJIngreso = dataMes
       .filter(t => t.tipo === "Ingreso" && t.categoria === cat
-               && t.responsabilidad === "De Daniel"
+               && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
 
@@ -4243,17 +4283,17 @@ function renderPresupuesto() {
     gastoPorCat[cat] = Math.max(0, gastosMio - ingresosMio) + netComp * 0.5 + Math.max(0, deJGasto - deJIngreso);
   });
 
-  // Totales KPI — presupuestoActual[cat] almacena % (0–100), se convierte a monto según sueldo
-  const totalPresARS = categGasto.reduce((s, c) => s + ((presupuestoActual[c] || 0) / 100) * sueldo, 0);
+  // Totales KPI — presupuestoActual[cat] almacena % (0–100), se convierte a monto según sueldoEfectivo
+  const totalPresARS = categGasto.reduce((s, c) => s + ((presupuestoActual[c] || 0) / 100) * sueldoEfectivo, 0);
   const totalGasto   = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
-  const disponible   = sueldo - totalGasto;
+  const disponible   = sueldoEfectivo - totalGasto;
 
   // KPIs
   const kpiTotal = document.getElementById("pres-kpi-total");
   kpiTotal.textContent = fmt(totalPresARS);
-  kpiTotal.style.color = totalPresARS > sueldo && sueldo > 0 ? "var(--red)" : "var(--accent)";
+  kpiTotal.style.color = totalPresARS > sueldoEfectivo && sueldoEfectivo > 0 ? "var(--red)" : "var(--accent)";
 
-  document.getElementById("pres-kpi-sueldo").textContent = fmt(sueldo);
+  document.getElementById("pres-kpi-sueldo").textContent = fmt(sueldoEfectivo);
   document.getElementById("pres-kpi-gastado").textContent = fmt(totalGasto);
 
   const kpiDisp = document.getElementById("pres-kpi-disponible");
@@ -4267,13 +4307,13 @@ function renderPresupuesto() {
   }
 
   // Anillo de progreso total
-  renderPresupuestoRing(totalGasto, sueldo, totalPresARS);
+  renderPresupuestoRing(totalGasto, sueldoEfectivo, totalPresARS);
 
   // Tabla
   const tbody = document.getElementById("pres-tbody");
   tbody.innerHTML = categGasto.map(cat => {
     const pct_sueldo = presupuestoActual[cat] || 0;     // % guardado
-    const pres       = (pct_sueldo / 100) * sueldo;     // monto ARS calculado
+    const pres       = (pct_sueldo / 100) * sueldoEfectivo;     // monto ARS calculado
     const gasto      = gastoPorCat[cat]       || 0;
     const rest  = pres - gasto;
     const pct   = pres > 0 ? (gasto / pres) * 100 : 0;
@@ -4351,11 +4391,18 @@ function actualizarKpisPres() {
   });
   const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO);
 
-  const CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
   const sueldo = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)
              && (t.moneda || "ARS") === "ARS")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const ingUSDKpi = dataMesDaniel
+    .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const gasUSDKpi = dataMes
+    .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const usdEnARSKpi = USUARIO === "Ama" && tipoCambioMEP ? (ingUSDKpi - gasUSDKpi) * tipoCambioMEP : 0;
+  const sueldoEfectivo = sueldo + usdEnARSKpi;
 
   const gastoPorCat = {};
   categGasto.forEach(cat => {
@@ -4381,12 +4428,12 @@ function actualizarKpisPres() {
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     const deJGastoP = dataMes
       .filter(t => t.tipo === "Gasto" && t.categoria === cat
-               && t.responsabilidad === "De Daniel"
+               && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     const deJIngresoP = dataMes
       .filter(t => t.tipo === "Ingreso" && t.categoria === cat
-               && t.responsabilidad === "De Daniel"
+               && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     gastoPorCat[cat] = Math.max(0, gastosMio - ingresosMio) + Math.max(0, gastosComp - ingresosComp) * 0.5
@@ -4400,16 +4447,16 @@ function actualizarKpisPres() {
     totalPctPres += pct;
     // Actualizar importe en vivo junto al input
     const liveEl = inp.closest("td") && inp.closest("td").querySelector(".pres-monto-live");
-    if (liveEl) liveEl.textContent = (pct > 0 && sueldo > 0) ? fmt((pct / 100) * sueldo) : "";
+    if (liveEl) liveEl.textContent = (pct > 0 && sueldoEfectivo > 0) ? fmt((pct / 100) * sueldoEfectivo) : "";
   });
-  const totalPresARS = (totalPctPres / 100) * sueldo;
+  const totalPresARS = (totalPctPres / 100) * sueldoEfectivo;
 
   const totalGasto = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
-  const disponible = sueldo - totalGasto;
+  const disponible = sueldoEfectivo - totalGasto;
 
   const kpiTotal = document.getElementById("pres-kpi-total");
   kpiTotal.textContent = fmt(totalPresARS);
-  kpiTotal.style.color = totalPresARS > sueldo && sueldo > 0 ? "var(--red)" : "var(--accent)";
+  kpiTotal.style.color = totalPresARS > sueldoEfectivo && sueldoEfectivo > 0 ? "var(--red)" : "var(--accent)";
 
   document.getElementById("pres-kpi-gastado").textContent = fmt(totalGasto);
 
@@ -4720,7 +4767,6 @@ function renderSparklineSVG(containerId, values, color) {
 // Calcula los últimos N meses de KPIs desde allTransac y renderiza sparklines
 function renderSparklines(curMes, curAnio) {
   const NMONTHS = 6;
-  const CATS_INGRESO = ["Sueldo", "Otros Ingresos"];
   const seriesIng = [], seriesGas = [], seriesBal = [], seriesAho = [];
 
   for (let offset = -(NMONTHS - 1); offset <= 0; offset++) {
@@ -4733,7 +4779,7 @@ function renderSparklines(curMes, curAnio) {
     });
     const mine = all.filter(t => (t.usuario || "Daniel") === USUARIO);
     const ing  = mine.filter(t => t.tipo === "Ingreso" && !esTransferencia(t)
-                   && CATS_INGRESO.includes(t.categoria) && (t.moneda || "ARS") === "ARS")
+                   && CATS_INGRESO_REAL.includes(t.categoria) && (t.moneda || "ARS") === "ARS")
                  .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     // Gastos efectivos simplificados para sparkline (misma fórmula del resumen)
     const g = (arr, tipo, resp) => arr.filter(t =>
@@ -5089,8 +5135,8 @@ function _renderPDFPreview() {
     ? `⚠ ${sinCat} sin categoría auto-detectada — asignala manualmente`
     : "";
 
-  const respOpts = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De Ama"])
-    .map(r => `<option value="${r}">${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De Ama"}</option>`)
+  const respOpts = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De " + PARTNER])
+    .map(r => `<option value="${r}">${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De " + PARTNER}</option>`)
     .join("");
 
   tbody.innerHTML = pdfFilasParsed.map((f, i) => {
@@ -5101,8 +5147,8 @@ function _renderPDFPreview() {
     const monBadge = f.moneda === "USD"
       ? `<span class="badge-moneda usd">USD</span>`
       : `<span class="badge-moneda ars">ARS</span>`;
-    const respOptsRow = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De Ama"])
-      .map(r => `<option value="${r}" ${r === (f.responsabilidad||"Mío") ? "selected" : ""}>${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De Ama"}</option>`)
+    const respOptsRow = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De " + PARTNER])
+      .map(r => `<option value="${r}" ${r === (f.responsabilidad||"Mío") ? "selected" : ""}>${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De " + PARTNER}</option>`)
       .join("");
     return `<tr>
       <td>${i+1}</td>
