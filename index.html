@@ -3320,13 +3320,12 @@ async function guardarTransaccion() {
   try {
     const { data, error } = await supabaseClient
       .from('transacciones')
-      .insert({ fecha, tipo: tipoActual, categoria: cat, monto, descripcion: desc,
+      .insert({ id: crypto.randomUUID(), fecha, tipo: tipoActual, categoria: cat, monto, descripcion: desc,
                 usuario: USUARIO, responsabilidad: resp, fuente, moneda: monedaActual,
                 user_id: supabaseSession.user.id })
       .select().single();
     if (error) throw error;
     allTransac.push({ ...data, monto: parseFloat(data.monto) });
-    guardarCacheTransac();
     cargarResumenMes();
     cargarEvolucion();
     filtrarTabla();
@@ -3473,7 +3472,7 @@ async function guardarRafaga() {
   btn.textContent = "⏳ Guardando...";
 
   try {
-    const rows = validas.map(v => ({ ...v, user_id: supabaseSession.user.id }));
+    const rows = validas.map(v => ({ id: crypto.randomUUID(), ...v, user_id: supabaseSession.user.id }));
     const { error } = await supabaseClient.from('transacciones').insert(rows);
     if (error) throw error;
     showToast(`✅ ${validas.length} transacciones guardadas`, "ok");
@@ -4651,7 +4650,7 @@ async function confirmarImport() {
 
   const msgEl = document.getElementById("imp-result-msg");
   try {
-    const rows = importFilas.map(f => ({ ...f, user_id: supabaseSession.user.id }));
+    const rows = importFilas.map(({ errores: _, ...f }) => ({ id: crypto.randomUUID(), ...f, user_id: supabaseSession.user.id }));
     const { error } = await supabaseClient.from('transacciones').insert(rows);
     if (error) throw error;
     msgEl.style.display = "block";
@@ -5148,7 +5147,7 @@ async function confirmarImportPDF() {
   msgEl.style.display = "none";
 
   try {
-    const rows = pdfFilasParsed.map(f => ({ ...f, user_id: supabaseSession.user.id }));
+    const rows = pdfFilasParsed.map(f => ({ id: crypto.randomUUID(), ...f, user_id: supabaseSession.user.id }));
     const { error } = await supabaseClient.from('transacciones').insert(rows);
     if (error) throw error;
     msgEl.style.display = "block";
