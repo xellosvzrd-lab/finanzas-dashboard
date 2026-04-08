@@ -1667,7 +1667,7 @@
           <div class="kpi-card">
             <div class="kpi-label">✅ Disponible</div>
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
-            <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Gastado efectivo</div>
+            <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Total presupuestado</div>
           </div>
           <div class="kpi-card" id="pres-kpi-usd-card" style="display:none">
             <div class="kpi-label">💵 Saldo USD del mes</div>
@@ -3696,8 +3696,8 @@ function cargarCompartidos() {
         : "";
       return `<tr style="cursor:pointer;" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'table-row':'none'">
         <td>${r.cat} <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
-        <td style="text-align:right;color:var(--text)">${fmtMoneda(r.daniel, monedaFilter)}</td>
-        <td style="text-align:right;color:var(--text-muted)">${r.ama > 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}</td>
+        <td style="text-align:right;color:${r.daniel !== 0 ? 'var(--text)' : 'var(--text-muted)'}">${r.daniel !== 0 ? fmtMoneda(r.daniel, monedaFilter) : "—"}</td>
+        <td style="text-align:right;color:${r.ama !== 0 ? 'var(--text-muted)' : 'var(--text-muted)'}">${r.ama !== 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}</td>
         <td style="text-align:right;font-weight:700;color:${net>0?"var(--yellow)":"var(--green)"}">${fmtMoneda(Math.abs(net), monedaFilter)}${liqBtn}</td>
       </tr>
       <tr id="${drillId}" style="display:none;">
@@ -4384,7 +4384,7 @@ function renderPresupuesto() {
   // Totales KPI — presupuestoActual[cat] almacena % (0–100), se convierte a monto según sueldoEfectivo
   const totalPresARS = categGasto.reduce((s, c) => s + ((presupuestoActual[c] || 0) / 100) * sueldoEfectivo, 0);
   const totalGasto   = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
-  const disponible   = sueldoEfectivo - totalGasto;
+  const disponible   = sueldoEfectivo - totalPresARS;
 
   // KPIs
   const kpiTotal = document.getElementById("pres-kpi-total");
@@ -4405,13 +4405,7 @@ function renderPresupuesto() {
   kpiDisp.className = "kpi-value " + (disponible >= 0 ? "balance-pos" : "expense");
   const subDisp = document.getElementById("pres-kpi-disponible-sub");
   if (subDisp) {
-    if (USUARIO === "Ama" && tipoCambioMEP && saldoUSDPres !== 0) {
-      subDisp.textContent = `ARS + ${fmtMoneda(Math.abs(saldoUSDPres),"USD")}×$${fmt(tipoCambioMEP).replace(/[^0-9,.]/g,"")} MEP`;
-    } else if (USUARIO === "Ama" && tipoCambioMEP) {
-      subDisp.textContent = "Sueldo − Gastado (sin saldo USD)";
-    } else {
-      subDisp.textContent = USUARIO === "Ama" ? "Sueldo − Gastado (sin cotización MEP)" : "Sueldo − Gastado efectivo";
-    }
+    subDisp.textContent = "Sueldo − Total presupuestado";
   }
 
   // KPI Saldo USD (solo Ama)
@@ -4576,7 +4570,7 @@ function actualizarKpisPres() {
   const totalPresARS = (totalPctPres / 100) * sueldoEfectivo;
 
   const totalGasto = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
-  const disponible = sueldoEfectivo - totalGasto;
+  const disponible = sueldoEfectivo - totalPresARS;
 
   const kpiTotal = document.getElementById("pres-kpi-total");
   kpiTotal.textContent = fmt(totalPresARS);
