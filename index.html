@@ -258,6 +258,7 @@
 
   /* Grid de 4 KPIs (presupuesto) — en desktop 4 cols, tablet/mobile 2 */
   .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .kpi-grid-5 { grid-template-columns: repeat(5, 1fr); }
 
   /* ─── CHARTS GRID ───────────────────────────────────────── */
   .charts-grid {
@@ -884,7 +885,7 @@
     .sidebar { width: 195px; }
     .main { margin-left: 195px; padding: 1.5rem 1.5rem; }
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid-4, .kpi-grid-5 { grid-template-columns: repeat(2, 1fr); }
     .charts-grid { grid-template-columns: 1fr; }
     .comp-grid { grid-template-columns: 1fr; }
   }
@@ -942,7 +943,7 @@
 
     /* KPIs: 2 columnas + forzar 4-columnas a 2 */
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid-4, .kpi-grid-5 { grid-template-columns: repeat(2, 1fr); }
 
     /* KPI cards más compactas */
     .kpi-value { font-size: 1.3rem; }
@@ -1647,11 +1648,11 @@
         </div>
 
         <!-- KPI strip -->
-        <div class="kpi-grid kpi-grid-4">
+        <div class="kpi-grid kpi-grid-4" id="pres-kpi-grid">
           <div class="kpi-card">
             <div class="kpi-label">💰 Sueldo del mes</div>
             <div class="kpi-value income" id="pres-kpi-sueldo">$0</div>
-            <div class="kpi-sub">ingresos del mes</div>
+            <div class="kpi-sub" id="pres-kpi-sueldo-sub">ingresos del mes</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">📊 Total presupuestado</div>
@@ -1661,12 +1662,17 @@
           <div class="kpi-card">
             <div class="kpi-label">💸 Gastado efectivo</div>
             <div class="kpi-value expense" id="pres-kpi-gastado">$0</div>
-            <div class="kpi-sub">50% compartidos · sin "De Ama"</div>
+            <div class="kpi-sub" id="pres-kpi-gastado-sub">50% compartidos</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">✅ Disponible</div>
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
-            <div class="kpi-sub">Sueldo − Gastado efectivo</div>
+            <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Gastado efectivo</div>
+          </div>
+          <div class="kpi-card" id="pres-kpi-usd-card" style="display:none">
+            <div class="kpi-label">💵 Saldo USD del mes</div>
+            <div class="kpi-value" id="pres-kpi-saldo-usd">U$S 0,00</div>
+            <div class="kpi-sub" id="pres-kpi-saldo-usd-sub">ingresos − gastos USD</div>
           </div>
         </div>
 
@@ -1693,7 +1699,7 @@
         </div>
 
         <p class="pres-note">
-          💡 Los valores se ingresan como <strong>% del sueldo</strong> del mes. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → 50% · <strong>De Ama</strong> → 0%.
+          💡 Los valores se ingresan como <strong>% del sueldo</strong> del mes. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → 50% · <strong id="pres-note-partner">De Ama</strong> → 0%.
         </p>
         <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
       </div><!-- /page-presupuesto -->
@@ -2320,6 +2326,19 @@ function _configurarUsuario(session) {
   if (thU) thU.textContent = USUARIO;
   const thP = document.getElementById("comp-th-partner");
   if (thP) thP.textContent = PARTNER;
+  // Presupuesto: sub-labels y card USD condicional
+  const gastSub = document.getElementById("pres-kpi-gastado-sub");
+  if (gastSub) gastSub.textContent = `50% compartidos · sin "De ${PARTNER}"`;
+  const noteP = document.getElementById("pres-note-partner");
+  if (noteP) noteP.textContent = "De " + PARTNER;
+  const usdCard = document.getElementById("pres-kpi-usd-card");
+  if (usdCard) {
+    usdCard.style.display = USUARIO === "Ama" ? "" : "none";
+    const grid = document.getElementById("pres-kpi-grid");
+    if (grid) {
+      grid.className = USUARIO === "Ama" ? "kpi-grid kpi-grid-5" : "kpi-grid kpi-grid-4";
+    }
+  }
 }
 
 async function fetchTipoCambioMEP() {
@@ -4305,7 +4324,7 @@ function renderPresupuesto() {
   const ingresosUSDPres = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const gastosUSDPres = dataMes
+  const gastosUSDPres = dataMesDaniel
     .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
   const saldoUSDPres = ingresosUSDPres - gastosUSDPres;
@@ -4372,11 +4391,37 @@ function renderPresupuesto() {
   kpiTotal.style.color = totalPresARS > sueldoEfectivo && sueldoEfectivo > 0 ? "var(--red)" : "var(--accent)";
 
   document.getElementById("pres-kpi-sueldo").textContent = fmt(sueldoEfectivo);
+  const sublSueldo = document.getElementById("pres-kpi-sueldo-sub");
+  if (sublSueldo) {
+    sublSueldo.textContent = USUARIO === "Ama" && tipoCambioMEP && saldoUSDPres !== 0
+      ? `ARS + ${fmtMoneda(Math.abs(saldoUSDPres),"USD")}×$${fmt(tipoCambioMEP).replace(/[^0-9,.]/g,"")} MEP`
+      : "ingresos del mes";
+  }
   document.getElementById("pres-kpi-gastado").textContent = fmt(totalGasto);
 
   const kpiDisp = document.getElementById("pres-kpi-disponible");
   kpiDisp.textContent = fmt(disponible);
   kpiDisp.className = "kpi-value " + (disponible >= 0 ? "balance-pos" : "expense");
+  const subDisp = document.getElementById("pres-kpi-disponible-sub");
+  if (subDisp) {
+    if (USUARIO === "Ama" && tipoCambioMEP && saldoUSDPres !== 0) {
+      subDisp.textContent = `ARS + ${fmtMoneda(Math.abs(saldoUSDPres),"USD")}×$${fmt(tipoCambioMEP).replace(/[^0-9,.]/g,"")} MEP`;
+    } else if (USUARIO === "Ama" && tipoCambioMEP) {
+      subDisp.textContent = "Sueldo − Gastado (sin saldo USD)";
+    } else {
+      subDisp.textContent = USUARIO === "Ama" ? "Sueldo − Gastado (sin cotización MEP)" : "Sueldo − Gastado efectivo";
+    }
+  }
+
+  // KPI Saldo USD (solo Ama)
+  const usdKpi = document.getElementById("pres-kpi-saldo-usd");
+  if (usdKpi && USUARIO === "Ama") {
+    usdKpi.textContent = fmtMoneda(Math.abs(saldoUSDPres), "USD");
+    usdKpi.style.color = saldoUSDPres >= 0 ? "var(--green)" : "var(--red)";
+    const usdSub = document.getElementById("pres-kpi-saldo-usd-sub");
+    if (usdSub) usdSub.textContent =
+      fmtMoneda(ingresosUSDPres,"USD") + " ingresados · " + fmtMoneda(gastosUSDPres,"USD") + " gastados";
+  }
 
   const subTotal = document.getElementById("pres-kpi-total-sub");
   if (subTotal) {
