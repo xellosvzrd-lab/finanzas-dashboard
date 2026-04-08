@@ -3587,13 +3587,6 @@ function cargarCompartidos() {
   const anio = parseInt(document.getElementById("comp-anio").value);
   const CATS = [...new Set([...categGasto, ...categIngreso])].sort();
 
-  // Diagnóstico: transacciones del partner en allTransac
-  const partnerTx = allTransac.filter(t => (t.usuario || "") === PARTNER);
-  const partnerComp = partnerTx.filter(t => (t.responsabilidad || "") === "Compartido");
-  console.log(`[Compartidos] allTransac total: ${allTransac.length} | ${PARTNER} total: ${partnerTx.length} | ${PARTNER} Compartido: ${partnerComp.length}`);
-  const compMes = partnerComp.filter(t => { const d = new Date(t.fecha + "T12:00:00"); return (d.getMonth()+1) === mes && d.getFullYear() === anio; });
-  console.log(`[Compartidos] ${PARTNER} Compartido en ${mes}/${anio}: ${compMes.length}`, compMes.map(t => `${t.categoria} $${t.monto}`));
-
   // Filtrar transacciones del mes/año seleccionado — gastos para compPorCat y reembolsos
   const datos = allTransac.filter(t => {
     const d = new Date(t.fecha + "T12:00:00");
@@ -3661,8 +3654,8 @@ function cargarCompartidos() {
 
   // ── RENDERIZAR TABLA COMPARTIDOS (ARS + USD separados) ───────
   // Usar todas las claves del mapa (no solo CATS) para incluir categorías del otro usuario
-  const filasCompARS = Object.entries(compPorCatARS).map(([cat,v]) => ({ cat, ...v })).filter(r => r.daniel > 0 || r.ama > 0).sort((a,b) => a.cat.localeCompare(b.cat));
-  const filasCompUSD = Object.entries(compPorCatUSD).map(([cat,v]) => ({ cat, ...v })).filter(r => r.daniel > 0 || r.ama > 0).sort((a,b) => a.cat.localeCompare(b.cat));
+  const filasCompARS = Object.entries(compPorCatARS).map(([cat,v]) => ({ cat, ...v })).filter(r => r.daniel !== 0 || r.ama !== 0).sort((a,b) => a.cat.localeCompare(b.cat));
+  const filasCompUSD = Object.entries(compPorCatUSD).map(([cat,v]) => ({ cat, ...v })).filter(r => r.daniel !== 0 || r.ama !== 0).sort((a,b) => a.cat.localeCompare(b.cat));
 
   const totalCompDanielARS = filasCompARS.reduce((s,r) => s + r.daniel, 0);
   const totalCompAmaARS    = filasCompARS.reduce((s,r) => s + r.ama,    0);
