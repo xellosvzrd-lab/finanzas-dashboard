@@ -1573,9 +1573,9 @@
                 <thead>
                   <tr>
                     <th>Categoría</th>
-                    <th style="text-align:right">Daniel</th>
-                    <th style="text-align:right">Ama</th>
-                    <th style="text-align:right">Total a cobrar</th>
+                    <th style="text-align:right" id="comp-th-usuario">Daniel</th>
+                    <th style="text-align:right" id="comp-th-partner">Ama</th>
+                    <th style="text-align:right">Neto</th>
                   </tr>
                 </thead>
                 <tbody id="comp-tabla-compartidos">
@@ -1616,6 +1616,21 @@
           </div>
 
         </div><!-- /comp-grid -->
+
+        <!-- Modal liquidación -->
+        <div id="liq-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;min-width:280px;max-width:340px;width:90%">
+            <div style="font-weight:700;font-size:1rem;margin-bottom:.3rem" id="liq-titulo">Liquidar</div>
+            <div style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem" id="liq-subtitulo"></div>
+            <label style="font-size:.83rem;color:var(--text-muted);display:block;margin-bottom:.35rem">Fuente de pago</label>
+            <select id="liq-fuente" style="width:100%;padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.9rem;margin-bottom:1.1rem"></select>
+            <div style="display:flex;gap:.6rem;justify-content:flex-end">
+              <button onclick="cerrarLiquidar()" style="padding:.45rem 1rem;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:.88rem">Cancelar</button>
+              <button onclick="confirmarLiquidar()" style="padding:.45rem 1.1rem;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:.88rem;font-weight:600">Confirmar</button>
+            </div>
+          </div>
+        </div>
+
       </div><!-- /page-compartidos -->
 
       <!-- ── PÁGINA PRESUPUESTO ────────────────────────────── -->
@@ -2301,6 +2316,10 @@ function _configurarUsuario(session) {
   if (tit) tit.textContent = "👫 Compartidos con " + PARTNER;
   const nota = document.getElementById("comp-nota");
   if (nota) nota.textContent = `* Neto por categoría: positivo = ${PARTNER} te debe · negativo = vos le debés a ${PARTNER}.`;
+  const thU = document.getElementById("comp-th-usuario");
+  if (thU) thU.textContent = USUARIO;
+  const thP = document.getElementById("comp-th-partner");
+  if (thP) thP.textContent = PARTNER;
 }
 
 async function fetchTipoCambioMEP() {
@@ -3651,11 +3670,15 @@ function cargarCompartidos() {
           </td>
         </tr>`;
       }).join("");
+      const liqBtn = monedaFilter === "ARS" && net !== 0
+        ? `<button onclick="event.stopPropagation();abrirLiquidar('${r.cat.replace(/'/g,"\\'")}',${Math.abs(net)},'${net>0?"Ingreso":"Gasto"}')"
+             style="margin-left:.5rem;padding:.15rem .5rem;font-size:.7rem;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text-muted);cursor:pointer;vertical-align:middle">Liquidar</button>`
+        : "";
       return `<tr style="cursor:pointer;" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'table-row':'none'">
         <td>${r.cat} <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
         <td style="text-align:right;color:var(--text)">${fmtMoneda(r.daniel, monedaFilter)}</td>
         <td style="text-align:right;color:var(--text-muted)">${r.ama > 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}</td>
-        <td style="text-align:right;font-weight:700;color:${net>0?"var(--yellow)":"var(--green)"}">${fmtMoneda(net, monedaFilter)}</td>
+        <td style="text-align:right;font-weight:700;color:${net>0?"var(--yellow)":"var(--green)"}">${fmtMoneda(Math.abs(net), monedaFilter)}${liqBtn}</td>
       </tr>
       <tr id="${drillId}" style="display:none;">
         <td colspan="4" style="padding:0;">
@@ -3816,6 +3839,61 @@ function cargarCompartidos() {
     balSub.textContent = `⚖️ Deudas mixtas — ${desglose.join(" | ")}`;
   } else {
     balSub.textContent = "✅ Están a mano — sin deuda pendiente";
+  }
+}
+
+// ─── LIQUIDACIÓN DE COMPARTIDOS ───────────────────────────────
+let _liqPendiente = null; // { cat, monto, tipo }
+
+function abrirLiquidar(cat, monto, tipo) {
+  _liqPendiente = { cat, monto, tipo };
+  const esIngreso = tipo === "Ingreso";
+  document.getElementById("liq-titulo").textContent =
+    `Liquidar — ${cat}`;
+  document.getElementById("liq-subtitulo").textContent =
+    esIngreso
+      ? `Registrar cobro de ${fmt(monto)} de ${PARTNER}`
+      : `Registrar pago de ${fmt(monto)} a ${PARTNER}`;
+  // Poblar fuentes
+  const sel = document.getElementById("liq-fuente");
+  sel.innerHTML = categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+  const modal = document.getElementById("liq-modal");
+  modal.style.display = "flex";
+}
+
+function cerrarLiquidar() {
+  document.getElementById("liq-modal").style.display = "none";
+  _liqPendiente = null;
+}
+
+async function confirmarLiquidar() {
+  if (!_liqPendiente) return;
+  const { cat, monto, tipo } = _liqPendiente;
+  const fuente = document.getElementById("liq-fuente").value;
+  const mes  = parseInt(document.getElementById("comp-mes").value);
+  const anio = parseInt(document.getElementById("comp-anio").value);
+  const ultimoDia = new Date(anio, mes, 0).getDate();
+  const fecha = `${anio}-${String(mes).padStart(2,"0")}-${String(ultimoDia).padStart(2,"0")}`;
+
+  cerrarLiquidar();
+  try {
+    const { data, error } = await supabaseClient
+      .from('transacciones')
+      .insert({
+        id: crypto.randomUUID(),
+        fecha, tipo, categoria: cat, monto,
+        descripcion: "Liquidación",
+        responsabilidad: "Mío",
+        fuente, moneda: "ARS",
+        usuario: USUARIO,
+        user_id: supabaseSession.user.id
+      })
+      .select().single();
+    if (error) throw error;
+    allTransac.push({ ...data, monto: parseFloat(data.monto) });
+    showToast(`✅ ${tipo} de ${fmt(monto)} registrado`, "ok");
+  } catch(e) {
+    showToast(`❌ Error: ${e.message}`, "error");
   }
 }
 
