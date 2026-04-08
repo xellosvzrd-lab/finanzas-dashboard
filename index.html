@@ -3591,10 +3591,8 @@ function cargarCompartidos() {
   const partnerTx = allTransac.filter(t => (t.usuario || "") === PARTNER);
   const partnerComp = partnerTx.filter(t => (t.responsabilidad || "") === "Compartido");
   console.log(`[Compartidos] allTransac total: ${allTransac.length} | ${PARTNER} total: ${partnerTx.length} | ${PARTNER} Compartido: ${partnerComp.length}`);
-  if (partnerTx.length > 0) {
-    const uniqueResp = [...new Set(partnerTx.map(t => t.responsabilidad))];
-    console.log(`[Compartidos] Responsabilidades de ${PARTNER}:`, uniqueResp);
-  }
+  const compMes = partnerComp.filter(t => { const d = new Date(t.fecha + "T12:00:00"); return (d.getMonth()+1) === mes && d.getFullYear() === anio; });
+  console.log(`[Compartidos] ${PARTNER} Compartido en ${mes}/${anio}: ${compMes.length}`, compMes.map(t => `${t.categoria} $${t.monto}`));
 
   // Filtrar transacciones del mes/año seleccionado — gastos para compPorCat y reembolsos
   const datos = allTransac.filter(t => {
