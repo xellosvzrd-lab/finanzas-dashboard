@@ -3653,8 +3653,9 @@ function cargarCompartidos() {
   });
 
   // ── RENDERIZAR TABLA COMPARTIDOS (ARS + USD separados) ───────
-  const filasCompARS = CATS.map(cat => ({ cat, ...compPorCatARS[cat] })).filter(r => r.daniel > 0 || r.ama > 0);
-  const filasCompUSD = CATS.map(cat => ({ cat, ...compPorCatUSD[cat] })).filter(r => r.daniel > 0 || r.ama > 0);
+  // Usar todas las claves del mapa (no solo CATS) para incluir categorías del otro usuario
+  const filasCompARS = Object.entries(compPorCatARS).map(([cat,v]) => ({ cat, ...v })).filter(r => r.daniel > 0 || r.ama > 0).sort((a,b) => a.cat.localeCompare(b.cat));
+  const filasCompUSD = Object.entries(compPorCatUSD).map(([cat,v]) => ({ cat, ...v })).filter(r => r.daniel > 0 || r.ama > 0).sort((a,b) => a.cat.localeCompare(b.cat));
 
   const totalCompDanielARS = filasCompARS.reduce((s,r) => s + r.daniel, 0);
   const totalCompAmaARS    = filasCompARS.reduce((s,r) => s + r.ama,    0);
@@ -3685,7 +3686,7 @@ function cargarCompartidos() {
           </td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:var(--text-muted);">Bruto: ${fmtMoneda(m, monedaFilter)}</td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:${color};">
-            ${signo}${fmtMoneda(m/2, monedaFilter)} ${esAma ? "(Ama)" : "(Daniel)"}
+            ${signo}${fmtMoneda(m/2, monedaFilter)} ${esAma ? "("+PARTNER+")" : "("+USUARIO+")"}
           </td>
         </tr>`;
       }).join("");
