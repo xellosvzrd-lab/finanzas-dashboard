@@ -2333,13 +2333,17 @@ function ocultarErrorCarga() {
 }
 
 function _configurarUsuario(session) {
-  USUARIO = session.user.user_metadata?.nombre || "Daniel";
-  PARTNER = USUARIO === "Daniel" ? "Ama" : "Daniel";
-  CATS_INGRESO_REAL = USUARIO === "Ama"
+  const metaNombre = session.user.user_metadata?.nombre;
+  USUARIO = metaNombre || "";
+  PARTNER = USUARIO.toLowerCase() === "daniel" ? "Ama" : "Daniel";
+  CATS_INGRESO_REAL = USUARIO.toLowerCase() === "ama"
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
   categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
-  // Strings dinámicos en HTML
+  if (USUARIO) _actualizarStringsUsuario();
+}
+
+function _actualizarStringsUsuario() {
   const tit = document.getElementById("comp-titulo");
   if (tit) tit.textContent = "👫 Compartidos con " + PARTNER;
   const nota = document.getElementById("comp-nota");
@@ -2348,19 +2352,50 @@ function _configurarUsuario(session) {
   if (thU) thU.textContent = USUARIO;
   const thP = document.getElementById("comp-th-partner");
   if (thP) thP.textContent = PARTNER;
-  // Presupuesto: sub-labels y card USD condicional
   const gastSub = document.getElementById("pres-kpi-gastado-sub");
   if (gastSub) gastSub.textContent = `50% compartidos · sin "De ${PARTNER}"`;
   const noteP = document.getElementById("pres-note-partner");
   if (noteP) noteP.textContent = "De " + PARTNER;
   const usdCard = document.getElementById("pres-kpi-usd-card");
   if (usdCard) {
-    usdCard.style.display = USUARIO === "Ama" ? "" : "none";
+    usdCard.style.display = USUARIO.toLowerCase() === "ama" ? "" : "none";
     const grid = document.getElementById("pres-kpi-grid");
     if (grid) {
-      grid.className = USUARIO === "Ama" ? "kpi-grid kpi-grid-5" : "kpi-grid kpi-grid-4";
+      grid.className = USUARIO.toLowerCase() === "ama" ? "kpi-grid kpi-grid-5" : "kpi-grid kpi-grid-4";
     }
   }
+  document.getElementById("sidebar-user").textContent = USUARIO;
+}
+
+async function guardarNombre() {
+  const input = document.getElementById("input-nombre");
+  const msg   = document.getElementById("modal-nombre-msg");
+  const nombre = input.value.trim();
+
+  if (!nombre) {
+    msg.innerHTML = '<span style="color:var(--red)">Escribí tu nombre primero.</span>';
+    return;
+  }
+
+  msg.innerHTML = '⏳ Guardando...';
+
+  const { error } = await supabaseClient.auth.updateUser({ data: { nombre } });
+
+  if (error) {
+    msg.innerHTML = `<span style="color:var(--red)">Error: ${error.message}</span>`;
+    return;
+  }
+
+  USUARIO = nombre;
+  PARTNER = USUARIO.toLowerCase() === "daniel" ? "Ama" : "Daniel";
+  CATS_INGRESO_REAL = USUARIO.toLowerCase() === "ama"
+    ? ["Sueldo", "Otros Ingresos", "Intereses"]
+    : ["Sueldo", "Otros Ingresos"];
+  categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
+
+  document.getElementById("modal-nombre").style.display = "none";
+  _actualizarStringsUsuario();
+  await iniciarApp();
 }
 
 async function fetchTipoCambioMEP() {
@@ -2381,6 +2416,12 @@ async function iniciarApp() {
   document.getElementById("sidebar-user").textContent = USUARIO;
   if (window.innerWidth <= 768) {
     document.getElementById("mobile-header").style.display = "flex";
+  }
+
+  if (!USUARIO) {
+    document.getElementById("modal-nombre").style.display = "flex";
+    setTimeout(() => document.getElementById("input-nombre").focus(), 50);
+    return;
   }
 
   const cachedTransac = localStorage.getItem(CACHE_TRANSAC_KEY);
@@ -4195,7 +4236,7 @@ async function cargarPresupuesto() {
   const fetchList = [
     supabaseClient.from('presupuesto').select('*').eq('mes', mes).eq('anio', anio)
   ];
-  if (USUARIO === "Ama") fetchList.push(fetchTipoCambioMEP());
+  if (USUARIO.toLowerCase() === "ama") fetchList.push(fetchTipoCambioMEP());
   const [presRes] = await Promise.allSettled(fetchList);
   try {
     const { data, error } = presRes.value;
@@ -4351,7 +4392,7 @@ function renderPresupuesto() {
     .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
   const saldoUSDPres = ingresosUSDPres - gastosUSDPres;
-  const usdEnARSPres = USUARIO === "Ama" && tipoCambioMEP ? saldoUSDPres * tipoCambioMEP : 0;
+  const usdEnARSPres = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? saldoUSDPres * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSPres;
 
   // Gasto efectivo por categoría usando lógica de responsabilidad:
@@ -4416,7 +4457,7 @@ function renderPresupuesto() {
   document.getElementById("pres-kpi-sueldo").textContent = fmt(sueldoEfectivo);
   const sublSueldo = document.getElementById("pres-kpi-sueldo-sub");
   if (sublSueldo) {
-    sublSueldo.textContent = USUARIO === "Ama" && tipoCambioMEP && saldoUSDPres !== 0
+    sublSueldo.textContent = USUARIO.toLowerCase() === "ama" && tipoCambioMEP && saldoUSDPres !== 0
       ? `ARS + ${fmtMoneda(Math.abs(saldoUSDPres),"USD")}×$${fmt(tipoCambioMEP).replace(/[^0-9,.]/g,"")} MEP`
       : "ingresos del mes";
   }
@@ -4432,7 +4473,7 @@ function renderPresupuesto() {
 
   // KPI Saldo USD (solo Ama)
   const usdKpi = document.getElementById("pres-kpi-saldo-usd");
-  if (usdKpi && USUARIO === "Ama") {
+  if (usdKpi && USUARIO.toLowerCase() === "ama") {
     usdKpi.textContent = fmtMoneda(Math.abs(saldoUSDPres), "USD");
     usdKpi.style.color = saldoUSDPres >= 0 ? "var(--green)" : "var(--red)";
     const usdSub = document.getElementById("pres-kpi-saldo-usd-sub");
@@ -4541,7 +4582,7 @@ function actualizarKpisPres() {
   const gasUSDKpi = dataMes
     .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const usdEnARSKpi = USUARIO === "Ama" && tipoCambioMEP ? (ingUSDKpi - gasUSDKpi) * tipoCambioMEP : 0;
+  const usdEnARSKpi = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? (ingUSDKpi - gasUSDKpi) * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSKpi;
 
   const gastoPorCat = {};
