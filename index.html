@@ -2332,14 +2332,18 @@ function ocultarErrorCarga() {
   if (el) el.style.display = "none";
 }
 
-function _configurarUsuario(session) {
-  const metaNombre = session.user.user_metadata?.nombre;
-  USUARIO = metaNombre || "";
+function _setVariablesUsuario(nombre) {
+  USUARIO = nombre;
   PARTNER = USUARIO.toLowerCase() === "daniel" ? "Ama" : "Daniel";
   CATS_INGRESO_REAL = USUARIO.toLowerCase() === "ama"
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
   categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
+}
+
+function _configurarUsuario(session) {
+  const metaNombre = session.user.user_metadata?.nombre;
+  _setVariablesUsuario(metaNombre || "");
   if (USUARIO) _actualizarStringsUsuario();
 }
 
@@ -2364,7 +2368,8 @@ function _actualizarStringsUsuario() {
       grid.className = USUARIO.toLowerCase() === "ama" ? "kpi-grid kpi-grid-5" : "kpi-grid kpi-grid-4";
     }
   }
-  document.getElementById("sidebar-user").textContent = USUARIO;
+  const sidebarUser = document.getElementById("sidebar-user");
+  if (sidebarUser) sidebarUser.textContent = USUARIO;
 }
 
 async function guardarNombre() {
@@ -2386,15 +2391,9 @@ async function guardarNombre() {
     return;
   }
 
-  USUARIO = nombre;
-  PARTNER = USUARIO.toLowerCase() === "daniel" ? "Ama" : "Daniel";
-  CATS_INGRESO_REAL = USUARIO.toLowerCase() === "ama"
-    ? ["Sueldo", "Otros Ingresos", "Intereses"]
-    : ["Sueldo", "Otros Ingresos"];
-  categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
+  _setVariablesUsuario(nombre);
 
   document.getElementById("modal-nombre").style.display = "none";
-  _actualizarStringsUsuario();
   await iniciarApp();
 }
 
