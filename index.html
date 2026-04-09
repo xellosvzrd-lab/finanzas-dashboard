@@ -1939,6 +1939,28 @@
   </div>
 </div>
 
+<!-- ── MODAL: setup nombre (primera vez) ──────────── -->
+<div id="modal-nombre" style="display:none;position:fixed;inset:0;z-index:9999;
+     background:rgba(0,0,0,.7);align-items:center;justify-content:center;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;
+              padding:2rem;max-width:360px;width:90%;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:.5rem;">👋</div>
+    <h2 style="margin:0 0 .5rem;font-size:1.2rem;">¿Cómo te llamás?</h2>
+    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 1.25rem;">
+      Lo usamos para separar tus gastos de los de tu pareja. Solo la primera vez.
+    </p>
+    <input type="text" id="input-nombre" placeholder="Ej: Daniel o Ama"
+           style="width:100%;box-sizing:border-box;padding:.65rem .9rem;border-radius:8px;
+                  border:1px solid var(--border);background:var(--bg2);color:var(--text);
+                  font-size:1rem;margin-bottom:1rem;"
+           onkeydown="if(event.key==='Enter') guardarNombre()">
+    <button class="btn btn-primary" style="width:100%" onclick="guardarNombre()">
+      Guardar →
+    </button>
+    <div id="modal-nombre-msg" style="margin-top:.75rem;font-size:.82rem;min-height:1rem;"></div>
+  </div>
+</div>
+
 <!-- MODAL MODO RÁFAGA -->
 <div class="rafaga-overlay" id="rafaga-overlay" onclick="if(event.target===this)cerrarRafaga()">
   <div class="rafaga-modal" role="dialog" aria-modal="true" aria-labelledby="rafaga-title">
@@ -2227,7 +2249,7 @@ async function guardarNuevaPassword() {
     if (error) throw error;
     res.innerHTML = '<span class="ok">✅ Contraseña actualizada. Redirigiendo...</span>';
     localStorage.setItem("fp_sb_password", p1);
-    setTimeout(() => iniciarApp(), 1500);
+    setTimeout(() => { _configurarUsuario(supabaseSession); iniciarApp(); }, 1500);
   } catch(e) {
     res.innerHTML = `<span class="fail">❌ ${e.message || "Error al guardar."}</span>`;
     btn.disabled = false;
@@ -2310,14 +2332,22 @@ function ocultarErrorCarga() {
   if (el) el.style.display = "none";
 }
 
-function _configurarUsuario(session) {
-  USUARIO = session.user.user_metadata?.nombre || "Daniel";
-  PARTNER = USUARIO === "Daniel" ? "Ama" : "Daniel";
-  CATS_INGRESO_REAL = USUARIO === "Ama"
+function _setVariablesUsuario(nombre) {
+  USUARIO = nombre;
+  PARTNER = USUARIO.toLowerCase() === "daniel" ? "Ama" : "Daniel";
+  CATS_INGRESO_REAL = USUARIO.toLowerCase() === "ama"
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
   categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
-  // Strings dinámicos en HTML
+}
+
+function _configurarUsuario(session) {
+  const metaNombre = session.user.user_metadata?.nombre;
+  _setVariablesUsuario(metaNombre || "");
+  if (USUARIO) _actualizarStringsUsuario();
+}
+
+function _actualizarStringsUsuario() {
   const tit = document.getElementById("comp-titulo");
   if (tit) tit.textContent = "👫 Compartidos con " + PARTNER;
   const nota = document.getElementById("comp-nota");
@@ -2326,19 +2356,45 @@ function _configurarUsuario(session) {
   if (thU) thU.textContent = USUARIO;
   const thP = document.getElementById("comp-th-partner");
   if (thP) thP.textContent = PARTNER;
-  // Presupuesto: sub-labels y card USD condicional
   const gastSub = document.getElementById("pres-kpi-gastado-sub");
   if (gastSub) gastSub.textContent = `50% compartidos · sin "De ${PARTNER}"`;
   const noteP = document.getElementById("pres-note-partner");
   if (noteP) noteP.textContent = "De " + PARTNER;
   const usdCard = document.getElementById("pres-kpi-usd-card");
   if (usdCard) {
-    usdCard.style.display = USUARIO === "Ama" ? "" : "none";
+    usdCard.style.display = USUARIO.toLowerCase() === "ama" ? "" : "none";
     const grid = document.getElementById("pres-kpi-grid");
     if (grid) {
-      grid.className = USUARIO === "Ama" ? "kpi-grid kpi-grid-5" : "kpi-grid kpi-grid-4";
+      grid.className = USUARIO.toLowerCase() === "ama" ? "kpi-grid kpi-grid-5" : "kpi-grid kpi-grid-4";
     }
   }
+  const sidebarUser = document.getElementById("sidebar-user");
+  if (sidebarUser) sidebarUser.textContent = USUARIO;
+}
+
+async function guardarNombre() {
+  const input = document.getElementById("input-nombre");
+  const msg   = document.getElementById("modal-nombre-msg");
+  const nombre = input.value.trim();
+
+  if (!nombre) {
+    msg.innerHTML = '<span style="color:var(--red)">Escribí tu nombre primero.</span>';
+    return;
+  }
+
+  msg.innerHTML = '⏳ Guardando...';
+
+  const { error } = await supabaseClient.auth.updateUser({ data: { nombre } });
+
+  if (error) {
+    msg.innerHTML = `<span style="color:var(--red)">Error: ${error.message}</span>`;
+    return;
+  }
+
+  _setVariablesUsuario(nombre);
+
+  document.getElementById("modal-nombre").style.display = "none";
+  await iniciarApp();
 }
 
 async function fetchTipoCambioMEP() {
@@ -2356,9 +2412,15 @@ async function fetchTipoCambioMEP() {
 async function iniciarApp() {
   document.getElementById("setup-screen").style.display = "none";
   document.getElementById("app").style.display = "block";
-  document.getElementById("sidebar-user").textContent = USUARIO;
+  if (USUARIO) document.getElementById("sidebar-user").textContent = USUARIO;
   if (window.innerWidth <= 768) {
     document.getElementById("mobile-header").style.display = "flex";
+  }
+
+  if (!USUARIO) {
+    document.getElementById("modal-nombre").style.display = "flex";
+    setTimeout(() => document.getElementById("input-nombre").focus(), 50);
+    return;
   }
 
   const cachedTransac = localStorage.getItem(CACHE_TRANSAC_KEY);
@@ -4173,7 +4235,7 @@ async function cargarPresupuesto() {
   const fetchList = [
     supabaseClient.from('presupuesto').select('*').eq('mes', mes).eq('anio', anio)
   ];
-  if (USUARIO === "Ama") fetchList.push(fetchTipoCambioMEP());
+  if (USUARIO.toLowerCase() === "ama") fetchList.push(fetchTipoCambioMEP());
   const [presRes] = await Promise.allSettled(fetchList);
   try {
     const { data, error } = presRes.value;
@@ -4329,7 +4391,7 @@ function renderPresupuesto() {
     .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
   const saldoUSDPres = ingresosUSDPres - gastosUSDPres;
-  const usdEnARSPres = USUARIO === "Ama" && tipoCambioMEP ? saldoUSDPres * tipoCambioMEP : 0;
+  const usdEnARSPres = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? saldoUSDPres * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSPres;
 
   // Gasto efectivo por categoría usando lógica de responsabilidad:
@@ -4394,7 +4456,7 @@ function renderPresupuesto() {
   document.getElementById("pres-kpi-sueldo").textContent = fmt(sueldoEfectivo);
   const sublSueldo = document.getElementById("pres-kpi-sueldo-sub");
   if (sublSueldo) {
-    sublSueldo.textContent = USUARIO === "Ama" && tipoCambioMEP && saldoUSDPres !== 0
+    sublSueldo.textContent = USUARIO.toLowerCase() === "ama" && tipoCambioMEP && saldoUSDPres !== 0
       ? `ARS + ${fmtMoneda(Math.abs(saldoUSDPres),"USD")}×$${fmt(tipoCambioMEP).replace(/[^0-9,.]/g,"")} MEP`
       : "ingresos del mes";
   }
@@ -4410,7 +4472,7 @@ function renderPresupuesto() {
 
   // KPI Saldo USD (solo Ama)
   const usdKpi = document.getElementById("pres-kpi-saldo-usd");
-  if (usdKpi && USUARIO === "Ama") {
+  if (usdKpi && USUARIO.toLowerCase() === "ama") {
     usdKpi.textContent = fmtMoneda(Math.abs(saldoUSDPres), "USD");
     usdKpi.style.color = saldoUSDPres >= 0 ? "var(--green)" : "var(--red)";
     const usdSub = document.getElementById("pres-kpi-saldo-usd-sub");
@@ -4519,7 +4581,7 @@ function actualizarKpisPres() {
   const gasUSDKpi = dataMes
     .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const usdEnARSKpi = USUARIO === "Ama" && tipoCambioMEP ? (ingUSDKpi - gasUSDKpi) * tipoCambioMEP : 0;
+  const usdEnARSKpi = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? (ingUSDKpi - gasUSDKpi) * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSKpi;
 
   const gastoPorCat = {};

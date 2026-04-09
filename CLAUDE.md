@@ -1,6 +1,6 @@
 # Proyecto Finanzas Personales — Memoria del Proyecto
 
-> Archivo de contexto para Claude. Última actualización: 2026-04-04.
+> Archivo de contexto para Claude. Última actualización: 2026-04-09.
 
 ---
 
@@ -18,33 +18,23 @@
 
 ---
 
-## 2. Los dos dashboards
+## 2. El dashboard unificado
 
-### Dashboard de Daniel
 - **Repo:** `xellosvzrd-lab/finanzas-dashboard`
-- **URL:** https://finanzas-dashboard-oncu.vercel.app/
-- **Archivo:** `index.html` (~4562 líneas) — repo local en `~/Documents/proyectosclaude/finanzas-dashboard-live/`
-- **Usuario fijo:** `USUARIO = "Daniel"`
-- **Responsabilidad opciones:** `["Mío","Compartido","De Ama"]`
-- **No tiene modo claro/oscuro** — siempre oscuro (`:root` dark only)
-- **Render principal:** `_renderApp()` → llama `_normalizarCategorias()` + `cargarResumenMes()` + `cargarEvolucion()` + `filtrarTabla()` + `inicializarSelectoresCompartidos()` + `inicializarSelectoresPresupuesto()`
-
-### Dashboard de Ama
-- **Repo:** `xellosvzrd-lab/finanzas-dashboard-ama`
-- **URL:** https://finanzas-dashboard-ama.vercel.app/
-- **Archivo:** `index.html` (~4689 líneas) — repo local en `~/Documents/proyectosclaude/finanzas-dashboard-ama-live/`
-- **Usuario fijo:** `USUARIO = "Ama"`
-- **Responsabilidad opciones:** `["Mío","Compartido","De Daniel"]`
-- **Tiene modo claro/oscuro** — `[data-theme="light"]` con override de variables CSS
-- **Render principal:** NO tiene `_renderApp()`. Llama directamente: `_normalizarCategorias()`, `cargarResumenMes()`, `cargarEvolucion()`, `filtrarTabla()` en cada punto de actualización
-- **Tipo de cambio MEP:** `tipoCambioMEP` se fetchea automáticamente al abrir Presupuesto desde una API pública. Se usa para convertir USD → ARS en el cálculo del sueldo efectivo.
+- **URL:** `https://finanzas-dashboard-oncu.vercel.app/`
+- **Archivo:** `index.html` (~5340 líneas) — repo local en `~/Documents/ProyectosClaude/finanzas-dashboard-live/`
+- **Autenticación:** Supabase email + password. Ambos usuarios (Daniel y Ama) comparten la misma URL.
+- **Usuario dinámico:** `USUARIO` se determina desde `session.user.user_metadata.nombre` al login. Si no está seteado, se muestra un modal de bienvenida la primera vez.
+- **Render principal:** `_renderApp()` → `_normalizarCategorias()` + `cargarResumenMes()` + `cargarEvolucion()` + `filtrarTabla()` + `inicializarSelectoresCompartidos()` + `inicializarSelectoresPresupuesto()`
 
 ---
 
-## 3. Variables globales clave (ambos archivos)
+## 3. Variables globales clave
 
 ```javascript
-let USUARIO = "";          // "Daniel" o "Ama"
+let USUARIO = "";          // Seteado por _setVariablesUsuario() desde user_metadata.nombre
+                           // Si falta en Supabase → modal bienvenida → guardarNombre()
+let PARTNER = "";          // Derivado de USUARIO. Opuesto entre "Daniel" y "Ama"
 let API_URL  = "";          // URL del Apps Script
 let allTransac = [];        // TODAS las transacciones cargadas
 let categGasto   = [];      // ej: ["Alimentación","Alquiler",...]
@@ -265,3 +255,15 @@ CATS_EXCLUIR      = ["Cambio"]  // cambio de divisas, tratamiento especial
 - `"Compartido"` → 50%
 - `"De Ama"` gastos que pagó Daniel → 100% de Ama
 - `"De Daniel"` → 0%
+
+---
+
+## 15. Flujo de autenticación y usuario dinámico
+
+1. `DOMContentLoaded` → `supabaseClient.auth.getSession()` → si hay sesión: `_configurarUsuario(session)` → `iniciarApp()`
+2. Si no hay sesión guardada → pantalla de login → `guardarConfig()` → `_configurarUsuario(session)` → `iniciarApp()`
+3. `_configurarUsuario(session)` lee `session.user.user_metadata?.nombre`:
+   - Si tiene valor → `_setVariablesUsuario(nombre)` → `_actualizarStringsUsuario()` → continúa
+   - Si está vacío → `_setVariablesUsuario("")` → `iniciarApp()` muestra modal `#modal-nombre`
+4. `guardarNombre()`: guarda nombre con `supabaseClient.auth.updateUser({ data: { nombre } })` → `_setVariablesUsuario(nombre)` → `iniciarApp()`
+5. `_setVariablesUsuario(nombre)`: setea `USUARIO`, `PARTNER`, `CATS_INGRESO_REAL`, `categResponsabilidad`
