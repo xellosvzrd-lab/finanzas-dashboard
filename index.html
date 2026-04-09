@@ -1482,7 +1482,7 @@
               <select id="f-categoria"></select>
             </div>
             <div class="form-group">
-              <label>¿De quién es?</label>
+              <label>¿Cómo se divide?</label>
               <select id="f-responsabilidad">
                 <option value="Mío">🙋 Mío</option>
                 <option value="Compartido">👫 Compartido</option>
@@ -1611,7 +1611,7 @@
       <!-- ── PÁGINA PRESUPUESTO ────────────────────────────── -->
       <div id="page-presupuesto" class="page">
         <div class="page-header">
-          <h1>🎯 Presupuesto mensual</h1>
+          <h1>Mi mes</h1>
           <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
             <div class="mes-selector">
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
@@ -1624,27 +1624,27 @@
         <!-- KPI strip -->
         <div class="kpi-grid kpi-grid-4" id="pres-kpi-grid">
           <div class="kpi-card">
-            <div class="kpi-label">💰 Sueldo del mes</div>
+            <div class="kpi-label">Sueldo</div>
             <div class="kpi-value income" id="pres-kpi-sueldo">$0</div>
             <div class="kpi-sub" id="pres-kpi-sueldo-sub">ingresos del mes</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">📊 Total presupuestado</div>
+            <div class="kpi-label">Presupuestado</div>
             <div class="kpi-value" id="pres-kpi-total" style="color:var(--accent)">$0</div>
             <div class="kpi-sub" id="pres-kpi-total-sub">de tu sueldo asignado</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">💸 Gastado efectivo</div>
+            <div class="kpi-label">Gastado</div>
             <div class="kpi-value expense" id="pres-kpi-gastado">$0</div>
             <div class="kpi-sub" id="pres-kpi-gastado-sub">50% compartidos</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">✅ Disponible</div>
+            <div class="kpi-label">Lo que te queda</div>
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
             <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Total presupuestado</div>
           </div>
           <div class="kpi-card" id="pres-kpi-usd-card" style="display:none">
-            <div class="kpi-label">💵 Saldo USD del mes</div>
+            <div class="kpi-label">En dólares</div>
             <div class="kpi-value" id="pres-kpi-saldo-usd">U$S 0,00</div>
             <div class="kpi-sub" id="pres-kpi-saldo-usd-sub">ingresos − gastos USD</div>
           </div>
@@ -1719,7 +1719,7 @@
       <div id="page-config" class="page">
         <div class="page-header">
           <h1>⚙️ Categorías y Fuentes</h1>
-          <div style="font-size:.85rem;color:var(--text-muted)">Los cambios se guardan en tu Google Sheet</div>
+          <div style="font-size:.85rem;color:var(--text-muted)">Tus categorías y fuentes de pago</div>
         </div>
 
         <div class="cfg-grid">
