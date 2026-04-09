@@ -1209,6 +1209,55 @@
   }
   @media (max-width: 768px) { .main { padding: 1rem 1rem 5rem; } }
 
+  /* ─── RADIO BUTTONS RESPONSABILIDAD ──────────────── */
+  .resp-toggle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: .5rem 0;
+    border: none;
+    background: none;
+    width: 100%;
+    font-size: .9rem;
+    color: var(--text-muted);
+    font-family: inherit;
+  }
+  .resp-toggle-header .resp-valor-actual {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .resp-group {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-top: .5rem;
+  }
+  .resp-btn {
+    flex: 1;
+    min-width: 0;
+    padding: .55rem .4rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text-muted);
+    font-size: .82rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: background .12s, color .12s, border-color .12s;
+    font-family: inherit;
+  }
+  .resp-btn.selected {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .resp-btn:hover:not(.selected) {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
 </style>
 </head>
 <body>
@@ -1518,13 +1567,15 @@
               <label>Categoría</label>
               <select id="f-categoria"></select>
             </div>
-            <div class="form-group">
-              <label>¿Cómo se divide?</label>
-              <select id="f-responsabilidad">
-                <option value="Mío">🙋 Mío</option>
-                <option value="Compartido">👫 Compartido</option>
-                <option value="De Ama">💳 De Ama</option>
-              </select>
+            <div class="form-group full" id="resp-container">
+              <button type="button" class="resp-toggle-header" onclick="toggleRespField()">
+                <span>¿Cómo se divide? — <span class="resp-valor-actual" id="resp-label-actual">Solo mío</span></span>
+                <span id="resp-toggle-arrow">▾</span>
+              </button>
+              <div id="resp-field" style="display:none">
+                <div class="resp-group" id="resp-group"></div>
+              </div>
+              <input type="hidden" id="f-responsabilidad" value="Mío">
             </div>
           </div>
           <!-- Fila 4: Fuente -->
@@ -2295,9 +2346,7 @@ function _aplicarCacheCateg(catData) {
   categFuentes         = catData.fuentes          || [];
   categResponsabilidad = catData.responsabilidad  || categResponsabilidad;
   // Poblar selectores con los datos cacheados
-  const selResp = document.getElementById("f-responsabilidad");
-  if (selResp) selResp.innerHTML = categResponsabilidad.map(rv =>
-    `<option value="${rv}">${rv === "Mío" ? "🙋 Mío" : rv === "Compartido" ? "👫 Compartido" : "💳 De " + PARTNER}</option>`).join("");
+  // (f-responsabilidad ahora es hidden input + radio buttons — se inicializa en inicializarRespButtons)
   const filResp = document.getElementById("fil-resp");
   if (filResp) filResp.innerHTML = '<option value="">Todas</option>' +
     categResponsabilidad.map(rv => `<option value="${rv}">${rv}</option>`).join("");
@@ -2339,6 +2388,7 @@ function _renderApp() {
   filtrarTabla();
   inicializarSelectoresCompartidos();
   inicializarSelectoresPresupuesto();
+  inicializarRespButtons();
   navegarA("presupuesto");
 }
 
@@ -3333,11 +3383,10 @@ function duplicarTransaccion(id) {
     document.getElementById("f-monto").value       = t.monto;
     document.getElementById("f-descripcion").value = t.descripcion || "";
     const selCat  = document.getElementById("f-categoria");
-    const selResp = document.getElementById("f-responsabilidad");
     const selFte  = document.getElementById("f-fuente");
     if (selCat)  selCat.value  = t.categoria;
-    if (selResp) selResp.value = t.responsabilidad || "Mío";
     if (selFte)  selFte.value  = t.fuente || "";
+    seleccionarResp(t.responsabilidad || "Mío");
     document.getElementById("f-monto").focus();
   }, 30);
   showToast("📋 Duplicado — revisá los datos antes de guardar", "ok");
@@ -3494,11 +3543,10 @@ async function guardarTransaccion() {
     document.getElementById("f-descripcion").value = "";
     document.getElementById("f-fecha").valueAsDate = new Date();
     const selCat  = document.getElementById("f-categoria");
-    const selResp = document.getElementById("f-responsabilidad");
     const selFte  = document.getElementById("f-fuente");
     if (selCat)  selCat.selectedIndex  = 0;
-    if (selResp) selResp.selectedIndex = 0;
     if (selFte)  selFte.selectedIndex  = 0;
+    resetRespField();
     showToast("✅ Transacción guardada", "ok");
     msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
     setTimeout(() => { msg.innerHTML = ""; }, 3000);
@@ -5487,6 +5535,59 @@ function inicializarDisclosureCompartidos() {
   const expanded = saved !== null ? saved === "1" : defaultExpanded;
   el.style.display  = expanded ? "" : "none";
   btn.textContent   = expanded ? "Ocultar detalle ▴" : "Ver detalle ▾";
+}
+
+// ─── RESPONSABILIDAD RADIO BUTTONS ────────────────────────────
+const RESP_LABELS = {
+  "Mío":        "Solo mío",
+  "Compartido": "Lo pagamos juntos",
+};
+
+function getRespLabel(valor) {
+  if (RESP_LABELS[valor]) return RESP_LABELS[valor];
+  if (valor.startsWith("De ")) return "Lo pagó " + (PARTNER || "tu pareja");
+  return valor;
+}
+
+function inicializarRespButtons() {
+  const grupo = document.getElementById("resp-group");
+  if (!grupo) return;
+  const opciones = [
+    { valor: "Mío",           label: "Solo mío" },
+    { valor: "Compartido",    label: "Lo pagamos juntos" },
+    { valor: "De " + PARTNER, label: "Lo pagó " + (PARTNER || "tu pareja") },
+  ];
+  grupo.innerHTML = opciones.map(op =>
+    `<button type="button" class="resp-btn${op.valor === "Mío" ? " selected" : ""}"
+             data-valor="${op.valor}"
+             onclick="seleccionarResp('${op.valor.replace(/'/g, "\\'")}')">${op.label}</button>`
+  ).join("");
+  document.getElementById("f-responsabilidad").value = "Mío";
+  document.getElementById("resp-label-actual").textContent = "Solo mío";
+}
+
+function seleccionarResp(valor) {
+  document.querySelectorAll(".resp-btn").forEach(b => {
+    b.classList.toggle("selected", b.dataset.valor === valor);
+  });
+  document.getElementById("f-responsabilidad").value = valor;
+  document.getElementById("resp-label-actual").textContent = getRespLabel(valor);
+}
+
+function toggleRespField() {
+  const field = document.getElementById("resp-field");
+  const arrow = document.getElementById("resp-toggle-arrow");
+  const visible = field.style.display !== "none";
+  field.style.display = visible ? "none" : "";
+  arrow.textContent = visible ? "▾" : "▴";
+}
+
+function resetRespField() {
+  seleccionarResp("Mío");
+  const field = document.getElementById("resp-field");
+  const arrow = document.getElementById("resp-toggle-arrow");
+  if (field) field.style.display = "none";
+  if (arrow) arrow.textContent = "▾";
 }
 </script>
 </body>
