@@ -2249,7 +2249,7 @@ async function guardarNuevaPassword() {
     if (error) throw error;
     res.innerHTML = '<span class="ok">✅ Contraseña actualizada. Redirigiendo...</span>';
     localStorage.setItem("fp_sb_password", p1);
-    setTimeout(() => iniciarApp(), 1500);
+    setTimeout(() => { _configurarUsuario(supabaseSession); iniciarApp(); }, 1500);
   } catch(e) {
     res.innerHTML = `<span class="fail">❌ ${e.message || "Error al guardar."}</span>`;
     btn.disabled = false;
@@ -2412,7 +2412,7 @@ async function fetchTipoCambioMEP() {
 async function iniciarApp() {
   document.getElementById("setup-screen").style.display = "none";
   document.getElementById("app").style.display = "block";
-  document.getElementById("sidebar-user").textContent = USUARIO;
+  if (USUARIO) document.getElementById("sidebar-user").textContent = USUARIO;
   if (window.innerWidth <= 768) {
     document.getElementById("mobile-header").style.display = "flex";
   }
