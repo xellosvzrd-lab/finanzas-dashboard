@@ -1144,6 +1144,72 @@
   .edit-btn-secondary:hover { border-color: var(--border2); color: var(--text); }
   #edit-msg { font-size: .82rem; padding: .3rem 0; min-height: 1.2rem; }
 
+  /* ─── TOP NAV ────────────────────────────────────────── */
+  .topnav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topnav-brand {
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--accent);
+    white-space: nowrap;
+    margin-right: .5rem;
+  }
+  .topnav-tabs {
+    display: flex;
+    gap: .25rem;
+    flex: 1;
+  }
+  .topnav .nav-item {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    padding: .5rem .85rem;
+    font-size: .9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color .15s, border-color .15s;
+    font-family: inherit;
+    border-radius: 0;
+  }
+  .topnav .nav-item:hover { color: var(--text); }
+  .topnav .nav-item.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .topnav-logout {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    padding: .4rem .6rem;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+  .topnav-logout:hover { color: var(--text); }
+  @media (max-width: 768px) { .topnav { display: none; } }
+  @media (min-width: 769px) { .bottom-nav { display: none; } }
+
+  /* Layout sin sidebar */
+  .layout { display: block !important; }
+  .main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 5rem;
+  }
+  @media (max-width: 768px) { .main { padding: 1rem 1rem 5rem; } }
+
 </style>
 </head>
 <body>
@@ -1225,66 +1291,38 @@
 <!-- Overlay oscuro al abrir sidebar en mobile -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
+<!-- Top nav (desktop) -->
+<nav class="topnav" id="topnav">
+  <div class="topnav-brand">
+    💰 <span id="topnav-user"></span>
+  </div>
+  <div class="topnav-tabs">
+    <button class="nav-item" onclick="navegarA('presupuesto')">Mi mes</button>
+    <button class="nav-item" onclick="navegarA('transacciones')">Transacciones</button>
+    <button class="nav-item" onclick="navegarA('compartidos')">Compartidos</button>
+    <button class="nav-item" onclick="navegarA('config')">Categorías</button>
+  </div>
+  <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">↩</button>
+</nav>
+
 <!-- Bottom nav mobile -->
 <nav class="bottom-nav" id="bottom-nav">
-  <button class="bn-item" id="bn-resumen" onclick="navegarA('resumen')">
-    <span class="bn-icon">📊</span><span>Inicio</span>
+  <button class="bn-item" id="bn-presupuesto" onclick="navegarA('presupuesto')">
+    <span class="bn-icon">🗓</span><span>Mi mes</span>
   </button>
   <button class="bn-item" id="bn-transacciones" onclick="navegarA('transacciones')">
-    <span class="bn-icon">📋</span><span>Historial</span>
-  </button>
-  <button class="bn-item bn-nueva" onclick="navegarA('nueva')">
-    <div class="bn-nueva-circle">➕</div>
-    <span class="bn-label">Nueva</span>
+    <span class="bn-icon">📋</span><span>Gastos</span>
   </button>
   <button class="bn-item" id="bn-compartidos" onclick="navegarA('compartidos')">
     <span class="bn-icon">👫</span><span>Compartidos</span>
   </button>
-  <button class="bn-item" id="bn-menu" onclick="toggleSidebar()">
-    <span class="bn-icon">☰</span><span>Menú</span>
+  <button class="bn-item" id="bn-config" onclick="navegarA('config')">
+    <span class="bn-icon">⚙️</span><span>Categorías</span>
   </button>
 </nav>
 
 <div id="app">
   <div class="layout">
-
-    <!-- SIDEBAR -->
-    <nav class="sidebar">
-      <div class="sidebar-logo">
-        <h2>💰 Finanzas</h2>
-        <span id="sidebar-user">Daniel</span>
-      </div>
-      <div class="nav-item active" onclick="navegarA('resumen')">
-        <span class="nav-icon">📊</span> Resumen
-      </div>
-      <div class="nav-item" onclick="navegarA('transacciones')">
-        <span class="nav-icon">📋</span> Transacciones
-      </div>
-      <div class="nav-sep">Carga</div>
-      <div class="nav-item" onclick="navegarA('nueva')">
-        <span class="nav-icon">➕</span> Nueva
-      </div>
-      <div class="nav-sep">Análisis</div>
-      <div class="nav-item" onclick="navegarA('compartidos')">
-        <span class="nav-icon">👫</span> Compartidos
-      </div>
-      <div class="nav-item" onclick="navegarA('presupuesto')">
-        <span class="nav-icon">🎯</span> Presupuesto
-      </div>
-      <div class="nav-item" onclick="navegarA('anual')">
-        <span class="nav-icon">📅</span> Año completo
-      </div>
-      <div class="nav-sep">Config</div>
-      <div class="nav-item" onclick="navegarA('config')">
-        <span class="nav-icon">⚙️</span> Configuración
-      </div>
-      <div class="nav-item" onclick="navegarA('importar')">
-        <span class="nav-icon">📥</span> Importar PDF
-      </div>
-      <div class="sidebar-bottom">
-        <button class="config-btn" onclick="volverConfig()">⚙️ Cambiar configuración</button>
-      </div>
-    </nav>
 
     <!-- MAIN -->
     <main class="main">
@@ -1292,7 +1330,7 @@
       <div id="error-carga" style="display:none;margin:1rem;padding:.75rem 1rem;background:var(--card);border:1px solid var(--red);border-left:3px solid var(--red);border-radius:10px;color:var(--red);font-size:.87rem;"></div>
 
       <!-- ── PÁGINA RESUMEN ────────────────────────────── -->
-      <div id="page-resumen" class="page active">
+      <div id="page-resumen" class="page">
         <div class="page-header">
           <h1>Resumen del mes</h1>
           <div class="mes-selector">
@@ -1370,7 +1408,7 @@
           <h1>Historial de transacciones</h1>
           <div style="display:flex;gap:.5rem;align-items:center">
             <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">📥 CSV</button>
-            <button class="btn btn-primary" onclick="navegarA('nueva')">+ Nueva</button>
+            <button class="btn btn-primary" onclick="navegarA('nueva')">+ Anotar</button>
           </div>
         </div>
         <div class="table-filters">
@@ -2277,13 +2315,12 @@ function _normalizarCategorias() {
 }
 
 function _renderApp() {
-  _normalizarCategorias(); // unificar capitalización antes de renderizar
+  _normalizarCategorias();
   setTipo("Gasto");
-  cargarResumenMes();
-  cargarEvolucion(); // fusionado en Resumen
   filtrarTabla();
   inicializarSelectoresCompartidos();
   inicializarSelectoresPresupuesto();
+  navegarA("presupuesto");
 }
 
 // ─── FETCH CON TIMEOUT ────────────────────────────────────────
@@ -2344,6 +2381,8 @@ function _actualizarStringsUsuario() {
   }
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) sidebarUser.textContent = USUARIO;
+  const topnavUser = document.getElementById("topnav-user");
+  if (topnavUser) topnavUser.textContent = USUARIO;
 }
 
 async function guardarNombre() {
@@ -2386,7 +2425,8 @@ async function fetchTipoCambioMEP() {
 async function iniciarApp() {
   document.getElementById("setup-screen").style.display = "none";
   document.getElementById("app").style.display = "block";
-  if (USUARIO) document.getElementById("sidebar-user").textContent = USUARIO;
+  if (USUARIO) { const su = document.getElementById("sidebar-user"); if (su) su.textContent = USUARIO; }
+  if (USUARIO) { const tu = document.getElementById("topnav-user"); if (tu) tu.textContent = USUARIO; }
   if (window.innerWidth <= 768) {
     document.getElementById("mobile-header").style.display = "flex";
   }
@@ -4126,22 +4166,38 @@ function cargarAnual() {
 }
 
 function navegarA(pagina) {
+  // Aliases para compatibilidad con código interno
+  const alias = { mimes: "presupuesto", categorias: "config" };
+  pagina = alias[pagina] || pagina;
+
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-  document.getElementById("page-" + pagina).classList.add("active");
-  const navIdx = { resumen: 0, transacciones: 1, nueva: 2, compartidos: 3, presupuesto: 4, anual: 5, config: 6, importar: 7 };
-  const navItems = document.querySelectorAll(".nav-item");
-  if (navIdx[pagina] !== undefined) navItems[navIdx[pagina]].classList.add("active");
-  // Sincronizar bottom nav
-  ["bn-resumen","bn-transacciones","bn-compartidos","bn-menu"].forEach(id => {
+  const page = document.getElementById("page-" + pagina);
+  if (page) page.classList.add("active");
+
+  // Top nav (desktop) — 4 tabs en orden: presupuesto, transacciones, compartidos, config
+  const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3 };
+  document.querySelectorAll(".topnav .nav-item").forEach((n, i) => {
+    n.classList.toggle("active", i === navMap[pagina]);
+  });
+
+  // Bottom nav (mobile)
+  ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config"].forEach(id => {
     document.getElementById(id)?.classList.remove("active");
   });
-  const bnMap = { resumen:"bn-resumen", transacciones:"bn-transacciones", compartidos:"bn-compartidos" };
+  const bnMap = {
+    presupuesto: "bn-presupuesto",
+    transacciones: "bn-transacciones",
+    compartidos: "bn-compartidos",
+    config: "bn-config"
+  };
   if (bnMap[pagina]) document.getElementById(bnMap[pagina])?.classList.add("active");
-  if (pagina === "compartidos") cargarCompartidos();
-  if (pagina === "presupuesto") cargarPresupuesto();
-  if (pagina === "anual")       cargarAnual();
-  if (pagina === "config")      renderizarConfig();
+
+  // Cargar datos de la página destino
+  if (pagina === "compartidos")  cargarCompartidos();
+  if (pagina === "presupuesto")  cargarPresupuesto();
+  if (pagina === "anual")        cargarAnual();
+  if (pagina === "config")       renderizarConfig();
+
   closeSidebar();
   window.scrollTo(0, 0);
 }
