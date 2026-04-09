@@ -1690,8 +1690,18 @@
         <!-- Anillo de progreso total -->
         <div id="pres-ring-container"></div>
 
+        <!-- Toggle desglose -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
+          <button id="btn-toggle-desglose"
+                  onclick="toggleDesglose()"
+                  style="background:none;border:1px solid var(--border);border-radius:8px;
+                         padding:.4rem .9rem;font-size:.83rem;color:var(--text-muted);cursor:pointer;">
+            Ver desglose ▾
+          </button>
+        </div>
+
         <!-- Tabla presupuesto vs ejecución -->
-        <div class="chart-card" style="padding:0;overflow:hidden">
+        <div id="pres-desglose" class="chart-card" style="padding:0;overflow:hidden">
           <table class="data-table">
             <thead>
               <tr>
@@ -4275,6 +4285,7 @@ async function cargarPresupuesto() {
     data.forEach(d => { presupuestoActual[d.categoria] = d.porcentaje; });
   } catch(e) { console.warn("Error cargando presupuesto:", e); }
   renderPresupuesto();
+  inicializarDisclosureMimes();
 }
 
 async function guardarPresupuesto() {
@@ -5422,6 +5433,27 @@ async function confirmarImportPDF() {
     btn.disabled = false;
     btn.textContent = "✅ Importar transacciones";
   }
+}
+
+function toggleDesglose() {
+  const el  = document.getElementById("pres-desglose");
+  const btn = document.getElementById("btn-toggle-desglose");
+  const visible = el.style.display !== "none";
+  el.style.display = visible ? "none" : "";
+  btn.textContent  = visible ? "Ver desglose ▾" : "Ocultar desglose ▴";
+  try { localStorage.setItem(USUARIO + "_disclosure_mimes", visible ? "0" : "1"); } catch(e) {}
+}
+
+function inicializarDisclosureMimes() {
+  const el  = document.getElementById("pres-desglose");
+  const btn = document.getElementById("btn-toggle-desglose");
+  if (!el || !btn) return;
+  // Default: Daniel expandido, Ama colapsado. Override si hay valor guardado.
+  const saved = localStorage.getItem(USUARIO + "_disclosure_mimes");
+  const defaultExpanded = USUARIO.toLowerCase() !== "ama";
+  const expanded = saved !== null ? saved === "1" : defaultExpanded;
+  el.style.display  = expanded ? "" : "none";
+  btn.textContent   = expanded ? "Ocultar desglose ▴" : "Ver desglose ▾";
 }
 </script>
 </body>
