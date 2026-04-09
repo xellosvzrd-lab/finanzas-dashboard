@@ -64,7 +64,7 @@
     justify-content: center;
     min-height: 100vh;
     padding: 2rem;
-    background: radial-gradient(ellipse at 50% 0%, rgba(124,110,255,0.14) 0%, var(--bg) 60%);
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,132,90,0.14) 0%, var(--bg) 60%);
   }
   .setup-card {
     background: var(--card);
@@ -73,7 +73,7 @@
     padding: 2.5rem;
     width: 100%;
     max-width: 520px;
-    box-shadow: var(--shadow), 0 0 80px rgba(124,110,255,0.07);
+    box-shadow: var(--shadow), 0 0 80px rgba(200,132,90,0.07);
   }
   .setup-card h1 { font-size: 1.7rem; margin-bottom: .4rem; font-weight: 800; letter-spacing: -.03em; }
   .setup-card p  { color: var(--text-muted); margin-bottom: 1.8rem; font-size: .92rem; line-height: 1.6; }
@@ -91,7 +91,7 @@
   }
   .setup-card input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
   .hint {
-    background: var(--accent-dim); border: 1px solid rgba(124,110,255,.22);
+    background: var(--accent-dim); border: 1px solid var(--border);
     border-radius: 9px; padding: 1rem 1.1rem; font-size: .82rem; color: var(--text-muted);
     margin-bottom: 1.5rem; line-height: 1.65;
   }
@@ -108,25 +108,20 @@
 
   .sidebar {
     width: 230px;
-    background: rgba(7,7,20,0.92);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    border-right: 1px solid rgba(255,255,255,0.055);
+    background: var(--card);
+    border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
     padding: 0 0 1.5rem; position: fixed;
     height: 100vh; z-index: 10; overflow-y: auto;
   }
   .sidebar-logo {
     padding: 1.4rem 1.5rem 1.2rem;
-    border-bottom: 1px solid rgba(255,255,255,0.055);
+    border-bottom: 1px solid var(--border);
     margin-bottom: .6rem;
-    background: linear-gradient(160deg, rgba(124,110,255,0.16) 0%, rgba(240,111,160,0.07) 100%);
   }
   .sidebar-logo h2 {
     font-size: 1.05rem; font-weight: 800; letter-spacing: -.02em;
-    background: linear-gradient(135deg, #fff 0%, rgba(180,165,255,0.9) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text);
   }
   .sidebar-logo span {
     font-size: .76rem; color: var(--text-muted);
@@ -145,11 +140,10 @@
     border-left: 2px solid transparent; transition: all .16s;
     margin: .04rem 0;
   }
-  .nav-item:hover { background: var(--accent-dim); color: var(--text); border-left-color: rgba(124,110,255,0.35); }
+  .nav-item:hover { background: var(--accent-dim); color: var(--text); border-left-color: var(--accent); }
   .nav-item.active {
-    color: #fff; border-left-color: var(--accent);
-    background: linear-gradient(90deg, rgba(124,110,255,0.18) 0%, transparent 100%);
-    box-shadow: inset 0 0 24px rgba(124,110,255,0.06);
+    color: var(--accent); border-left-color: var(--accent);
+    background: var(--accent-dim);
   }
   .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--accent)); }
   .nav-icon { font-size: 1rem; width: 1.25rem; text-align: center; }
@@ -199,12 +193,10 @@
     gap: 1rem; margin-bottom: 1.8rem;
   }
   .kpi-card {
-    background: rgba(12,12,34,0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.3rem 1.5rem;
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass);
+    box-shadow: var(--shadow);
     position: relative; overflow: hidden;
     transition: border-color .25s, transform .2s, box-shadow .25s;
     animation: fadeUp .45s ease both;
@@ -221,13 +213,13 @@
   }
   .kpi-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(255,255,255,0.12);
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass), 0 0 36px rgba(124,110,255,0.1);
+    border-color: var(--border2);
+    box-shadow: var(--shadow), 0 0 36px rgba(200,132,90,0.1);
   }
   /* Acento de color superior según tipo de KPI */
   .kpi-card:has(.income)::before      { background: linear-gradient(90deg, var(--green), transparent 65%); box-shadow: 0 0 12px rgba(52,211,153,0.5); }
   .kpi-card:has(.expense)::before     { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
-  .kpi-card:has(.balance-pos)::before { background: linear-gradient(90deg, var(--accent), transparent 65%); box-shadow: 0 0 12px rgba(124,110,255,0.5); }
+  .kpi-card:has(.balance-pos)::before { background: linear-gradient(90deg, var(--accent), transparent 65%); box-shadow: 0 0 12px rgba(200,132,90,0.5); }
   .kpi-card:has(.balance-neg)::before { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
 
   .kpi-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; font-weight: 600; }
@@ -264,17 +256,15 @@
   @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
 
   .chart-card {
-    background: rgba(12,12,34,0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.4rem;
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass);
+    box-shadow: var(--shadow);
     transition: border-color .25s, box-shadow .25s;
   }
   .chart-card:hover {
-    border-color: rgba(255,255,255,0.11);
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass), 0 0 28px rgba(124,110,255,0.08);
+    border-color: var(--border2);
+    box-shadow: var(--shadow), 0 0 28px rgba(200,132,90,0.08);
   }
   .chart-card.full { grid-column: 1 / -1; }
   .chart-title {
@@ -373,14 +363,12 @@
   @media (max-width: 900px) { .comp-grid { grid-template-columns: 1fr; } }
 
   .comp-balance-card {
-    background: rgba(12,12,34,0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(240,111,160,0.28);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1.4rem 1.8rem;
     margin-bottom: 1.25rem;
-    box-shadow: var(--shadow), 0 0 40px rgba(240,111,160,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: var(--shadow), 0 0 40px rgba(240,111,160,0.1);
     display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
   }
   .comp-balance-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
@@ -473,12 +461,11 @@
   /* ─── ANILLO DE PROGRESO TOTAL ──────────────────────────────── */
   .pres-ring-card {
     display: flex; align-items: center; gap: 2.5rem; flex-wrap: wrap;
-    background: rgba(12,12,34,0.6);
-    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.5rem 2rem;
     margin-bottom: 1.5rem;
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass);
+    box-shadow: var(--shadow);
     animation: fadeUp .4s .1s ease both;
   }
   .pres-ring-stats { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: .75rem; }
@@ -565,7 +552,7 @@
   .pdf-cat-select.sin-cat { border-color: var(--yellow); color: var(--yellow); }
 
   .imp-instrucciones {
-    background: var(--accent-dim); border: 1px solid rgba(124,110,255,.2);
+    background: var(--accent-dim); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.2rem 1.5rem;
     margin-bottom: 1.5rem; font-size: .87rem; line-height: 1.7;
   }
@@ -582,7 +569,7 @@
   .imp-formato-tabla th {
     background: var(--accent-dim); color: var(--accent);
     padding: .4rem .75rem; text-align: left;
-    border: 1px solid rgba(124,110,255,.2);
+    border: 1px solid var(--border);
   }
   .imp-formato-tabla td {
     padding: .35rem .75rem; border: 1px solid rgba(255,255,255,.07);
@@ -646,12 +633,10 @@
 
   /* ─── FORMULARIO NUEVA TRANSACCIÓN ─────────────────────── */
   .form-card {
-    background: rgba(12,12,34,0.7);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); padding: 2rem; max-width: 600px;
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass);
+    box-shadow: var(--shadow);
   }
   .form-card h2 { font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: 700; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
@@ -715,11 +700,11 @@
     gap: .45rem; font-family: inherit; letter-spacing: -.01em;
   }
   .btn-primary {
-    background: linear-gradient(135deg, var(--accent) 0%, #a06bf5 100%);
+    background: var(--accent);
     color: #fff; box-shadow: 0 4px 16px var(--accent-glow);
   }
   .btn-primary:hover {
-    background: linear-gradient(135deg, #8d80ff 0%, #b07eff 100%);
+    background: var(--accent); opacity: .88;
     transform: translateY(-2px); box-shadow: 0 6px 22px var(--accent-glow);
   }
   .btn-primary:active { transform: translateY(0); }
@@ -801,11 +786,10 @@
   .ama-debe-card {
     display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
     background: rgba(240,111,160,0.07);
-    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(240,111,160,0.28);
     border-radius: var(--radius); padding: 1.25rem 1.8rem;
     margin-bottom: 1.8rem;
-    box-shadow: 0 0 40px rgba(240,111,160,0.08), inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: 0 0 40px rgba(240,111,160,0.08);
     animation: fadeUp .45s .28s ease both;
   }
   .ama-icon {
@@ -855,9 +839,7 @@
   }
   .mobile-logo {
     font-size: .95rem; font-weight: 800; letter-spacing: -.02em;
-    background: linear-gradient(135deg, #fff 0%, rgba(180,165,255,0.9) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text);
   }
   .hamburger-btn {
     background: none; border: none; cursor: pointer;
@@ -908,7 +890,7 @@
   }
   .bn-nueva-circle {
     width: 52px; height: 52px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #a06bf5);
+    background: var(--accent);
     box-shadow: 0 4px 16px var(--accent-glow);
     display: flex; align-items: center; justify-content: center;
     font-size: 1.6rem; margin-bottom: 2px;
@@ -1028,10 +1010,8 @@
   }
   .edit-overlay.open { display: flex; }
   .edit-modal {
-    background: rgba(12,12,34,0.85);
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(255,255,255,0.07);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     width: 100%; max-width: 480px; max-height: 92vh;
@@ -1040,7 +1020,7 @@
   .edit-modal-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.2rem 1.5rem .9rem;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--border);
   }
   .edit-modal-header h3 { font-size: 1rem; font-weight: 700; margin: 0; }
   .edit-close-btn {
@@ -1050,7 +1030,7 @@
   }
   .edit-close-btn:hover { background: var(--red-dim); color: var(--red); }
   .edit-modal-body  { padding: 1.2rem 1.5rem; display: flex; flex-direction: column; gap: .9rem; }
-  .edit-modal-footer { padding: .9rem 1.5rem 1.3rem; display: flex; gap: .6rem; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.07); }
+  .edit-modal-footer { padding: .9rem 1.5rem 1.3rem; display: flex; gap: .6rem; justify-content: flex-end; border-top: 1px solid var(--border); }
 
   /* ─── MODAL MODO RÁFAGA ──────────────────────────────────── */
   .rafaga-overlay {
@@ -1061,9 +1041,8 @@
   }
   .rafaga-overlay.open { display: flex; }
   .rafaga-modal {
-    background: rgba(12,12,34,0.92); backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); box-shadow: var(--shadow);
     width: 100%; max-width: 1100px; margin: auto;
     animation: fadeUp .22s ease;
@@ -1071,7 +1050,7 @@
   .rafaga-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.1rem 1.5rem .9rem;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--border);
   }
   .rafaga-header h3 { font-size: 1rem; font-weight: 700; margin: 0; }
   .rafaga-body { padding: 1rem 1.2rem; overflow-x: auto; }
@@ -1082,15 +1061,15 @@
     text-align: left; padding: .4rem .5rem;
     color: var(--text-muted); font-weight: 600;
     text-transform: uppercase; font-size: .68rem; letter-spacing: .05em;
-    border-bottom: 1px solid rgba(255,255,255,0.08); white-space: nowrap;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
   }
   .rafaga-table td {
     padding: .32rem .38rem; vertical-align: middle;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border);
   }
   .rafaga-table td input, .rafaga-table td select {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--bg2);
+    border: 1px solid var(--border);
     border-radius: 6px; color: var(--text);
     padding: .3rem .42rem; font-size: .81rem; width: 100%;
     transition: border-color .15s;
@@ -1112,16 +1091,16 @@
   .rafaga-footer {
     padding: .85rem 1.2rem 1.1rem;
     display: flex; gap: .6rem; align-items: center;
-    border-top: 1px solid rgba(255,255,255,0.07); flex-wrap: wrap;
+    border-top: 1px solid var(--border); flex-wrap: wrap;
   }
   .rafaga-add-btn {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: var(--bg2);
+    border: 1px solid var(--border);
     color: var(--text); border-radius: 8px;
     padding: .42rem .88rem; font-size: .83rem;
     cursor: pointer; transition: background .15s;
   }
-  .rafaga-add-btn:hover { background: rgba(255,255,255,0.11); }
+  .rafaga-add-btn:hover { background: var(--accent-dim); }
   .rafaga-count { color: var(--text-muted); font-size: .78rem; }
   .rafaga-row-err td { background: rgba(220,50,50,0.07); }
   .btn-rafaga {
