@@ -1939,6 +1939,28 @@
   </div>
 </div>
 
+<!-- ── MODAL: setup nombre (primera vez) ──────────── -->
+<div id="modal-nombre" style="display:none;position:fixed;inset:0;z-index:9999;
+     background:rgba(0,0,0,.7);align-items:center;justify-content:center;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;
+              padding:2rem;max-width:360px;width:90%;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:.5rem;">👋</div>
+    <h2 style="margin:0 0 .5rem;font-size:1.2rem;">¿Cómo te llamás?</h2>
+    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 1.25rem;">
+      Lo usamos para separar tus gastos de los de tu pareja. Solo la primera vez.
+    </p>
+    <input type="text" id="input-nombre" placeholder="Ej: Daniel o Ama"
+           style="width:100%;box-sizing:border-box;padding:.65rem .9rem;border-radius:8px;
+                  border:1px solid var(--border);background:var(--bg2);color:var(--text);
+                  font-size:1rem;margin-bottom:1rem;"
+           onkeydown="if(event.key==='Enter') guardarNombre()">
+    <button class="btn btn-primary" style="width:100%" onclick="guardarNombre()">
+      Guardar →
+    </button>
+    <div id="modal-nombre-msg" style="margin-top:.75rem;font-size:.82rem;min-height:1rem;"></div>
+  </div>
+</div>
+
 <!-- MODAL MODO RÁFAGA -->
 <div class="rafaga-overlay" id="rafaga-overlay" onclick="if(event.target===this)cerrarRafaga()">
   <div class="rafaga-modal" role="dialog" aria-modal="true" aria-labelledby="rafaga-title">
