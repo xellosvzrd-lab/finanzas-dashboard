@@ -5438,6 +5438,7 @@ async function confirmarImportPDF() {
 function toggleDesglose() {
   const el  = document.getElementById("pres-desglose");
   const btn = document.getElementById("btn-toggle-desglose");
+  if (!el || !btn) return;
   const visible = el.style.display !== "none";
   el.style.display = visible ? "none" : "";
   btn.textContent  = visible ? "Ver desglose ▾" : "Ocultar desglose ▴";
