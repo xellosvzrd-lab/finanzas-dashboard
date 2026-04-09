@@ -104,7 +104,7 @@
   #app { display: none; }
 
   /* ─── SIDEBAR ───────────────────────────────────────────── */
-  .layout { display: flex; min-height: 100vh; }
+  .layout { display: block; min-height: 100vh; }
 
   .sidebar {
     width: 230px;
@@ -1202,7 +1202,6 @@
   @media (min-width: 769px) { .bottom-nav { display: none; } }
 
   /* Layout sin sidebar */
-  .layout { display: block !important; }
   .main {
     max-width: 960px;
     margin: 0 auto;
@@ -4207,13 +4206,15 @@ function toggleSidebar() {
   const sidebar = document.querySelector(".sidebar");
   const overlay = document.getElementById("sidebar-overlay");
   const icon    = document.getElementById("hamburger-icon");
-  const open    = sidebar.classList.toggle("open");
-  overlay.classList.toggle("open", open);
-  icon.textContent = open ? "✕" : "☰";
+  if (!sidebar) return;
+  const open = sidebar.classList.toggle("open");
+  if (overlay) overlay.classList.toggle("open", open);
+  if (icon)    icon.textContent = open ? "✕" : "☰";
 }
 function closeSidebar() {
-  document.querySelector(".sidebar").classList.remove("open");
-  document.getElementById("sidebar-overlay").classList.remove("open");
+  const sidebar = document.querySelector(".sidebar");
+  if (sidebar) sidebar.classList.remove("open");
+  document.getElementById("sidebar-overlay")?.classList.remove("open");
   const icon = document.getElementById("hamburger-icon");
   if (icon) icon.textContent = "☰";
 }
