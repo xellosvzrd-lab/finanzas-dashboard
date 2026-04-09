@@ -1572,8 +1572,18 @@
           <div class="comp-balance-sub" id="comp-balance-sub">—</div>
         </div>
 
+        <!-- Toggle detalle compartidos -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
+          <button id="btn-toggle-compartidos"
+                  class="config-btn"
+                  onclick="toggleDetalleCompartidos()"
+                  style="font-size:.83rem;">
+            Ver detalle ▾
+          </button>
+        </div>
+
         <!-- Dos tablas side-by-side -->
-        <div class="comp-grid">
+        <div id="comp-detalle" class="comp-grid">
 
           <!-- Tabla izquierda: Compartidos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
@@ -3945,6 +3955,7 @@ function cargarCompartidos() {
   } else {
     balSub.textContent = "✅ Están a mano — sin deuda pendiente";
   }
+  inicializarDisclosureCompartidos();
 }
 
 // ─── LIQUIDACIÓN DE COMPARTIDOS ───────────────────────────────
@@ -5455,6 +5466,27 @@ function inicializarDisclosureMimes() {
   const expanded = saved !== null ? saved === "1" : defaultExpanded;
   el.style.display  = expanded ? "" : "none";
   btn.textContent   = expanded ? "Ocultar desglose ▴" : "Ver desglose ▾";
+}
+
+function toggleDetalleCompartidos() {
+  const el  = document.getElementById("comp-detalle");
+  const btn = document.getElementById("btn-toggle-compartidos");
+  if (!el || !btn) return;
+  const visible = el.style.display !== "none";
+  el.style.display = visible ? "none" : "";
+  btn.textContent  = visible ? "Ver detalle ▾" : "Ocultar detalle ▴";
+  try { localStorage.setItem(USUARIO + "_disclosure_compartidos", visible ? "0" : "1"); } catch(e) {}
+}
+
+function inicializarDisclosureCompartidos() {
+  const el  = document.getElementById("comp-detalle");
+  const btn = document.getElementById("btn-toggle-compartidos");
+  if (!el || !btn) return;
+  const saved = localStorage.getItem(USUARIO + "_disclosure_compartidos");
+  const defaultExpanded = USUARIO.toLowerCase() !== "ama";
+  const expanded = saved !== null ? saved === "1" : defaultExpanded;
+  el.style.display  = expanded ? "" : "none";
+  btn.textContent   = expanded ? "Ocultar detalle ▴" : "Ver detalle ▾";
 }
 </script>
 </body>
