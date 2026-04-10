@@ -3806,7 +3806,8 @@ async function guardarRafaga() {
       tr.classList.add("rafaga-row-err");
     } else {
       validas.push({ fecha, tipo, categoria: cat, monto, descripcion: desc,
-                     usuario: USUARIO, responsabilidad: resp, fuente, moneda });
+                     usuario: USUARIO, responsabilidad: resp, fuente, moneda,
+                     mes_liquidacion: _esFuenteTC(fuente) && fecha ? fecha.substring(0, 7) : null });
     }
   });
 
