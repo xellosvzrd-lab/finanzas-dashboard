@@ -198,6 +198,7 @@
     border-radius: var(--radius); padding: 1.3rem 1.5rem;
     box-shadow: var(--shadow);
     min-width: 0;
+    container-type: inline-size;
     position: relative; overflow: hidden;
     transition: border-color .25s, transform .2s, box-shadow .25s;
     animation: fadeUp .45s ease both;
@@ -224,7 +225,7 @@
   .kpi-card:has(.balance-neg)::before { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
 
   .kpi-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; font-weight: 600; }
-  .kpi-value { font-size: 1.65rem; font-weight: 800; letter-spacing: -.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi-value { font-size: clamp(0.75rem, 9cqw, 1.65rem); font-weight: 800; letter-spacing: -.025em; white-space: nowrap; overflow: hidden; }
   .kpi-value.income      { color: var(--green); }
   .kpi-value.expense     { color: var(--red); }
   .kpi-value.balance-pos { color: var(--accent); }
@@ -423,7 +424,7 @@
   }
   .cfg-del-btn:hover { color: var(--red); background: var(--red-dim); }
   .cfg-add-row {
-    display: flex; gap: .5rem; margin-top: .35rem;
+    display: flex; gap: .5rem; margin-top: .35rem; flex-wrap: wrap;
   }
   .cfg-input {
     flex: 1; background: var(--bg2); border: 1px solid var(--border);
@@ -432,7 +433,7 @@
     transition: border-color .15s;
   }
   .cfg-input:focus { outline: none; border-color: var(--accent); }
-  .cfg-add-btn { white-space: nowrap; padding: .5rem 1rem; font-size: .84rem; }
+  .cfg-add-btn { white-space: nowrap; padding: .5rem 1rem; font-size: .84rem; flex-shrink: 0; }
   .cfg-msg { font-size: .8rem; min-height: 1.2em; margin-top: .4rem; }
 
   /* ─── PÁGINA PRESUPUESTO ─────────────────────────────────── */
@@ -931,7 +932,6 @@
     .kpi-grid-4, .kpi-grid-5 { grid-template-columns: repeat(2, 1fr); }
 
     /* KPI cards más compactas */
-    .kpi-value { font-size: 1.15rem; }
     .kpi-card { padding: .85rem .95rem; }
 
     /* Formulario en 1 columna */
@@ -998,7 +998,6 @@
   /* Tipo y Moneda se ocultan en teléfonos muy pequeños */
   @media (max-width: 440px) {
     .col-hide-xs { display: none !important; }
-    .kpi-value { font-size: .95rem; }
     .kpi-label { font-size: .6rem; }
     .kpi-card { padding: .7rem .75rem; }
     .main { padding: 4.2rem .6rem 1.5rem; }
