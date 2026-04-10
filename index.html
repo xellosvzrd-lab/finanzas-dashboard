@@ -435,6 +435,36 @@
   .cfg-input:focus { outline: none; border-color: var(--accent); }
   .cfg-add-btn { white-space: nowrap; padding: .5rem 1rem; font-size: .84rem; flex-shrink: 0; }
   .cfg-msg { font-size: .8rem; min-height: 1.2em; margin-top: .4rem; }
+  .tc-badge {
+    background: var(--accent); color: #fff;
+    font-size: .68rem; padding: .1rem .38rem;
+    border-radius: .25rem; vertical-align: middle;
+    font-weight: 600; letter-spacing: .02em; flex-shrink: 0;
+  }
+  .cfg-reclasif-btn {
+    background: none; border: 1px solid var(--border);
+    cursor: pointer; color: var(--text-muted); font-size: .75rem;
+    padding: .15rem .4rem; border-radius: 5px; flex-shrink: 0;
+    transition: color .15s, border-color .15s;
+  }
+  .cfg-reclasif-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .cfg-confirm-inline {
+    font-size: .8rem; padding: .4rem .5rem; margin-top: .25rem;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; display: flex; align-items: flex-start;
+    gap: .5rem; flex-wrap: wrap;
+  }
+  .cfg-confirm-inline span { flex: 1; line-height: 1.4; }
+  .fecha-liq-label {
+    font-size: .71rem; color: var(--text-muted); margin-top: .1rem; white-space: normal;
+  }
+  .fecha-liq-pendiente {
+    display: inline-block; font-size: .69rem; font-weight: 600;
+    color: #f59e0b; background: rgba(245,158,11,.12);
+    border: 1px solid rgba(245,158,11,.3);
+    border-radius: .25rem; padding: .05rem .3rem;
+    margin-top: .15rem; white-space: normal;
+  }
 
   /* ─── PÁGINA PRESUPUESTO ─────────────────────────────────── */
   .pres-input {
@@ -1383,7 +1413,9 @@
     <button class="nav-item" onclick="navegarA('compartidos')">Compartidos</button>
     <button class="nav-item" onclick="navegarA('config')">Categorías</button>
   </div>
-  <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">↩</button>
+  <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+  </button>
 </nav>
 
 <!-- Bottom nav mobile -->
@@ -1489,6 +1521,7 @@
           <h1>Historial de transacciones</h1>
           <div style="display:flex;gap:.5rem;align-items:center">
             <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">CSV</button>
+            <button class="btn btn-ghost" onclick="navegarA('importar')" title="Importar desde archivo o PDF">Importar</button>
             <button class="btn btn-primary" onclick="navegarA('nueva')">+ Anotar</button>
           </div>
         </div>
@@ -1605,13 +1638,18 @@
               <select id="f-responsabilidad"></select>
             </div>
           </div>
-          <!-- Fila 4: Fuente -->
+          <!-- Fila 4: Fuente + Mes de liquidación (TC) -->
           <div class="form-row">
-            <div class="form-group full">
+            <div class="form-group">
               <label>Fuente / Medio de pago</label>
-              <select id="f-fuente">
+              <select id="f-fuente" onchange="_actualizarMesLiqField(this.value)">
                 <option value="">— Sin especificar —</option>
               </select>
+            </div>
+            <div class="form-group" id="f-mes-liq-row" style="display:none">
+              <label>Mes de liquidación <span style="font-size:.8rem;color:var(--text-muted)">¿A qué mes?</span></label>
+              <input type="month" id="f-mes-liq">
+              <div id="f-mes-liq-err" style="font-size:.8rem;color:var(--red);min-height:1em;margin-top:.25rem"></div>
             </div>
           </div>
           <!-- Fila 5: Descripción -->
@@ -1893,6 +1931,17 @@
             <div id="cfg-msg-fuente" class="cfg-msg"></div>
           </div>
 
+          <!-- Tarjetas de crédito -->
+          <div class="chart-card">
+            <div class="chart-title">Tarjetas de crédito <span class="tc-badge">TC</span></div>
+            <div id="cfg-lista-fuentetc" class="cfg-lista"></div>
+            <div class="cfg-add-row">
+              <input type="text" id="cfg-nueva-fuentetc" placeholder="Nueva tarjeta..." class="cfg-input">
+              <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('FUENTE_TC')">+ Agregar</button>
+            </div>
+            <div id="cfg-msg-fuentetc" class="cfg-msg"></div>
+          </div>
+
         </div><!-- /cfg-grid -->
       </div><!-- /page-config -->
 
@@ -1949,6 +1998,7 @@
           <div class="imp-actions">
             <button class="btn btn-primary" onclick="parsearImport()">Previsualizar</button>
             <button class="btn btn-outline" onclick="limpiarImport()">Limpiar</button>
+            <button class="btn btn-ghost" onclick="descargarTemplateCSV()" title="Descargar archivo de ejemplo para completar">⬇ Template</button>
           </div>
         </div>
 
@@ -2160,6 +2210,11 @@
         <label>Fuente / Medio de pago</label>
         <select id="edit-fuente"></select>
       </div>
+      <div class="edit-field" id="edit-mes-liq-row" style="display:none">
+        <label>Mes de liquidación <span style="font-size:.8rem;color:var(--text-muted)">¿A qué mes corresponde?</span></label>
+        <input type="month" id="edit-mes-liq">
+        <div id="edit-mes-liq-err" style="font-size:.8rem;color:var(--red);min-height:1em;margin-top:.25rem"></div>
+      </div>
       <div class="edit-field">
         <label>Descripción</label>
         <textarea id="edit-descripcion" placeholder="Descripción opcional..."></textarea>
@@ -2204,6 +2259,7 @@ const CATS_TRANSFERENCIA = ["Internas"];
 let categGasto           = [];
 let categIngreso         = [];
 let categFuentes         = [];
+let categFuentesTC       = [];
 let categResponsabilidad = ["Mío","Compartido","De Ama"];
 
 let chartCat       = null;
@@ -2380,18 +2436,20 @@ function _aplicarCacheCateg(catData) {
   categGasto           = catData.gasto           || [];
   categIngreso         = catData.ingreso          || [];
   categFuentes         = catData.fuentes          || [];
+  categFuentesTC       = catData.fuentesTC        || [];
   categResponsabilidad = catData.responsabilidad  || categResponsabilidad;
   // Poblar selectores con los datos cacheados
   // (f-responsabilidad ahora es hidden input + radio buttons — se inicializa en inicializarRespButtons)
   const filResp = document.getElementById("fil-resp");
   if (filResp) filResp.innerHTML = '<option value="">Todas</option>' +
     categResponsabilidad.map(rv => `<option value="${rv}">${rv}</option>`).join("");
+  const todasFuentes = [...categFuentes, ...categFuentesTC];
   const selFuente = document.getElementById("f-fuente");
   if (selFuente) selFuente.innerHTML = '<option value="">— Sin especificar —</option>' +
-    categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+    todasFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
   const filFuente = document.getElementById("fil-fuente");
   if (filFuente) filFuente.innerHTML = '<option value="">Todas las fuentes</option>' +
-    categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+    todasFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
   _restaurarFiltros();
 }
 
@@ -2400,7 +2458,7 @@ function _normalizarCategorias() {
   if (!categGasto.length && !categIngreso.length) return;
   const allCats   = [...categGasto, ...categIngreso];
   const catLookup  = Object.fromEntries(allCats.map(c => [c.toLowerCase().trim(), c]));
-  const fuenteLookup = Object.fromEntries(categFuentes.map(f => [f.toLowerCase().trim(), f]));
+  const fuenteLookup = Object.fromEntries([...categFuentes, ...categFuentesTC].map(f => [f.toLowerCase().trim(), f]));
   const respLookup   = Object.fromEntries(categResponsabilidad.map(r => [r.toLowerCase().trim(), r]));
   allTransac.forEach(t => {
     if (t.categoria) {
@@ -2584,6 +2642,7 @@ async function cargarCategorias() {
       gasto:           data.filter(r => r.tipo === 'GASTO').map(r => r.valor).sort(),
       ingreso:         data.filter(r => r.tipo === 'INGRESO').map(r => r.valor).sort(),
       fuentes:         data.filter(r => r.tipo === 'FUENTE').map(r => r.valor),
+      fuentesTC:       data.filter(r => r.tipo === 'FUENTE_TC').map(r => r.valor),
       responsabilidad: categResponsabilidad
     };
     _aplicarCacheCateg(catData);
@@ -2743,8 +2802,8 @@ async function cargarResumenMes() {
 
   // Todas las transacciones del mes (ambos usuarios — necesario para Comp y "De Daniel")
   const dataMesAll = allTransac.filter(t => {
-    const d = new Date(t.fecha + "T12:00:00");
-    return (d.getMonth() + 1) === parseInt(mes) && d.getFullYear() === parseInt(anio);
+    const { year, month } = getMesLiquidacion(t);
+    return month === parseInt(mes) && year === parseInt(anio);
   });
   // Solo las de Daniel (para KPI ingresos y drill-down)
   const datos = dataMesAll.filter(t => (t.usuario || "Daniel") === USUARIO);
@@ -2843,8 +2902,8 @@ async function cargarResumenMes() {
     const prevLabel   = MESES_CORTO[prevMesNum];
 
     const prevDataAll = allTransac.filter(t => {
-      const d = new Date(t.fecha + "T12:00:00");
-      return (d.getMonth() + 1) === prevMesNum && d.getFullYear() === prevAnioNum;
+      const { year, month } = getMesLiquidacion(t);
+      return month === prevMesNum && year === prevAnioNum;
     });
     const prevDatos = prevDataAll.filter(t => (t.usuario || "Daniel") === USUARIO);
 
@@ -3094,8 +3153,8 @@ function cargarEvolucion() {
   // 1. Agrupar transacciones por mes
   const monthTxs = {};
   allTransac.filter(t => !esTransferencia(t) && (t.usuario || "Daniel") === USUARIO).forEach(t => {
-    const d = new Date(t.fecha + "T12:00:00");
-    const k = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+    const { year, month } = getMesLiquidacion(t);
+    const k = year + "-" + String(month).padStart(2,"0");
     if (!monthTxs[k]) monthTxs[k] = [];
     monthTxs[k].push(t);
   });
@@ -3244,10 +3303,10 @@ function filtrarTabla() {
 
   let datos = allTransac.filter(t => {
     if (_pendingDelete && t.id === _pendingDelete.id) return false;
-    const d = new Date(t.fecha + "T12:00:00");
+    const { year: tYear, month: tMonth } = getMesLiquidacion(t);
     const okUsuario = (t.usuario || "Daniel") === USUARIO;
-    const okMes    = !mes    || (d.getMonth()+1) === parseInt(mes);
-    const okAnio   = !anio   || d.getFullYear()  === parseInt(anio);
+    const okMes    = !mes    || tMonth === parseInt(mes);
+    const okAnio   = !anio   || tYear  === parseInt(anio);
     const okTipo   = !tipo   || t.tipo === tipo;
     const okCat    = todasCats || catsSelec.has(t.categoria);
     const okFuente = !fuente || (t.fuente || "") === fuente;
@@ -3293,9 +3352,24 @@ function filtrarTabla() {
     const monBadge = mon === "USD"
       ? `<span class="badge-moneda usd">USD</span>`
       : `<span class="badge-moneda ars">ARS</span>`;
+    // Sub-etiqueta de liquidación: mostrar si TC con mes distinto, o badge pendiente si TC sin mes
+    let fechaExtra = "";
+    if (_esFuenteTC(t.fuente || "")) {
+      if (t.mes_liquidacion && /^\d{4}-(0[1-9]|1[0-2])$/.test(t.mes_liquidacion)) {
+        const fechaD  = new Date(t.fecha + "T12:00:00");
+        const fechaYM = `${fechaD.getFullYear()}-${String(fechaD.getMonth()+1).padStart(2,"0")}`;
+        if (t.mes_liquidacion !== fechaYM) {
+          const [ly, lm] = t.mes_liquidacion.split("-").map(Number);
+          const mesAbrev = new Date(ly, lm-1, 1).toLocaleDateString("es-AR", { month: "short" });
+          fechaExtra = `<div class="fecha-liq-label">Liq. ${mesAbrev} ${ly}</div>`;
+        }
+      } else if (!t.mes_liquidacion) {
+        fechaExtra = `<div class="fecha-liq-pendiente">Liq. pendiente</div>`;
+      }
+    }
     return `
     <tr>
-      <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}</td>
+      <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}${fechaExtra}</td>
       <td class="col-hide-xs"><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
       <td>${t.categoria}</td>
       <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${t.fuente || "—"}</td>
@@ -3327,10 +3401,10 @@ function exportarCSV() {
     catsSelec.size === document.querySelectorAll("#fil-cat-options input").length;
 
   const datos = allTransac.filter(t => {
-    const d = new Date(t.fecha + "T12:00:00");
+    const { year: tYear, month: tMonth } = getMesLiquidacion(t);
     return (t.usuario || "Daniel") === USUARIO
-      && (!mes    || (d.getMonth()+1) === parseInt(mes))
-      && (!anio   || d.getFullYear()  === parseInt(anio))
+      && (!mes    || tMonth === parseInt(mes))
+      && (!anio   || tYear  === parseInt(anio))
       && (!tipo   || t.tipo === tipo)
       && (todasCats || catsSelec.has(t.categoria))
       && (!fuente || (t.fuente || "") === fuente)
@@ -3453,14 +3527,22 @@ function abrirEditorTransaccion(id) {
   selCat.innerHTML = cats.map(c => `<option value="${c}" ${c === t.categoria ? "selected" : ""}>${c}</option>`).join("");
 
   const selFuente = document.getElementById("edit-fuente");
+  const todasFuentesEdit = [...categFuentes, ...categFuentesTC];
   selFuente.innerHTML = `<option value="">— Sin especificar —</option>` +
-    categFuentes.map(f => `<option value="${f}" ${f === (t.fuente || "") ? "selected" : ""}>${f}</option>`).join("");
+    todasFuentesEdit.map(f => `<option value="${f}" ${f === (t.fuente || "") ? "selected" : ""}>${f}</option>`).join("");
+  selFuente.onchange = function() { _actualizarEditMesLiqField(this.value); };
+
+  _actualizarEditMesLiqField(t.fuente || "");
+  const editMesLiq = document.getElementById("edit-mes-liq");
+  if (editMesLiq) editMesLiq.value = t.mes_liquidacion || "";
 
   document.getElementById("edit-tipo").onchange = function() {
     const cs = this.value === "Gasto" ? categGasto : categIngreso;
     selCat.innerHTML = cs.map(c => `<option value="${c}">${c}</option>`).join("");
   };
 
+  const editMesLiqErr = document.getElementById("edit-mes-liq-err");
+  if (editMesLiqErr) editMesLiqErr.textContent = "";
   document.getElementById("edit-msg").textContent = "";
   document.getElementById("edit-guardar-btn").disabled = false;
   document.getElementById("edit-guardar-btn").textContent = "Guardar cambios";
@@ -3483,10 +3565,16 @@ async function guardarEdicionTransaccion() {
   const resp   = document.getElementById("edit-responsabilidad").value;
   const fuente = document.getElementById("edit-fuente").value;
   const desc   = document.getElementById("edit-descripcion").value;
+  const mesLiq = _esFuenteTC(fuente) ? (document.getElementById("edit-mes-liq")?.value || "") : "";
   const msg    = document.getElementById("edit-msg");
 
   if (!fecha || isNaN(monto) || monto <= 0 || !cat) {
     msg.innerHTML = '<span style="color:var(--red)">Completá fecha, monto y categoría.</span>';
+    return;
+  }
+  if (_esFuenteTC(fuente) && !mesLiq) {
+    const err = document.getElementById("edit-mes-liq-err");
+    if (err) err.textContent = "Seleccioná el mes de liquidación.";
     return;
   }
 
@@ -3498,12 +3586,20 @@ async function guardarEdicionTransaccion() {
   try {
     const { error } = await supabaseClient
       .from('transacciones')
-      .update({ fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda })
+      .update({ fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda,
+                mes_liquidacion: mesLiq || null })
       .eq('id', editandoId);
-    if (error) throw error;
+    if (error) {
+      if (error.code === '42703' || error.message?.includes('mes_liquidacion')) {
+        msg.innerHTML = '<span style="color:var(--red)">❌ Columna mes_liquidacion no encontrada. Ejecutá el SQL en Supabase primero.</span>';
+        btn.disabled = false; btn.textContent = "Guardar cambios"; return;
+      }
+      throw error;
+    }
     allTransac = allTransac.map(t =>
       t.id === editandoId
-        ? { ...t, fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda }
+        ? { ...t, fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda,
+            mes_liquidacion: mesLiq || null }
         : t
     );
     guardarCacheTransac();
@@ -3550,10 +3646,16 @@ async function guardarTransaccion() {
   const desc    = document.getElementById("f-descripcion").value;
   const resp    = document.getElementById("f-responsabilidad")?.value || "Mío";
   const fuente  = document.getElementById("f-fuente")?.value || "";
+  const mesLiq  = _esFuenteTC(fuente) ? (document.getElementById("f-mes-liq")?.value || "") : "";
   const msg   = document.getElementById("form-msg");
 
   if (!fecha || isNaN(monto) || monto <= 0 || !cat) {
     msg.innerHTML = '<span style="color:var(--red)">Completá fecha, monto y categoría.</span>';
+    return;
+  }
+  if (_esFuenteTC(fuente) && !mesLiq) {
+    const err = document.getElementById("f-mes-liq-err");
+    if (err) err.textContent = "Seleccioná el mes de liquidación.";
     return;
   }
 
@@ -3567,9 +3669,16 @@ async function guardarTransaccion() {
       .from('transacciones')
       .insert({ id: crypto.randomUUID(), fecha, tipo: tipoActual, categoria: cat, monto, descripcion: desc,
                 usuario: USUARIO, responsabilidad: resp, fuente, moneda: monedaActual,
+                mes_liquidacion: mesLiq || null,
                 user_id: supabaseSession.user.id })
       .select().single();
-    if (error) throw error;
+    if (error) {
+      if (error.code === '42703' || error.message?.includes('mes_liquidacion')) {
+        msg.innerHTML = '<span style="color:var(--red)">❌ Columna mes_liquidacion no encontrada. Ejecutá el SQL en Supabase primero.</span>';
+        btn.disabled = false; btn.textContent = "Guardar"; return;
+      }
+      throw error;
+    }
     allTransac.push({ ...data, monto: parseFloat(data.monto) });
     cargarResumenMes();
     cargarEvolucion();
@@ -3581,7 +3690,7 @@ async function guardarTransaccion() {
     const selCat  = document.getElementById("f-categoria");
     const selFte  = document.getElementById("f-fuente");
     if (selCat)  selCat.selectedIndex  = 0;
-    if (selFte)  selFte.selectedIndex  = 0;
+    if (selFte)  { selFte.selectedIndex = 0; _actualizarMesLiqField(""); }
     resetRespField();
     showToast("✅ Transacción guardada", "ok");
     msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
@@ -3617,7 +3726,18 @@ function _optsCategRafaga(tipo) {
 
 function _optsFuenteRafaga() {
   return '<option value="">— Sin especificar —</option>' +
-    categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+    [...categFuentes, ...categFuentesTC].map(f => `<option value="${f}">${f}</option>`).join("");
+}
+
+function _rafagaActualizarMesLiq(sel) {
+  const inp = sel.parentElement.querySelector(".rf-mes-liq");
+  if (!inp) return;
+  if (_esFuenteTC(sel.value)) {
+    inp.style.display = "";
+  } else {
+    inp.style.display = "none";
+    inp.value = "";
+  }
 }
 
 function _optsRespRafaga() {
@@ -3648,7 +3768,10 @@ function agregarFilaRafaga() {
     </td>
     <td><input type="text" class="rf-desc rafaga-desc" placeholder="Descripción opcional"></td>
     <td><select class="rf-resp">${_optsRespRafaga()}</select></td>
-    <td><select class="rf-fuente">${_optsFuenteRafaga()}</select></td>
+    <td>
+      <select class="rf-fuente" onchange="_rafagaActualizarMesLiq(this)">${_optsFuenteRafaga()}</select>
+      <input type="month" class="rf-mes-liq" style="display:none;margin-top:.3rem;width:100%" title="Mes de liquidación">
+    </td>
     <td class="td-del"><button class="rafaga-del-btn" onclick="eliminarFilaRafaga(this)" title="Eliminar fila">✕</button></td>
   `;
   tbody.appendChild(tr);
@@ -3686,19 +3809,23 @@ async function guardarRafaga() {
     const desc   = tr.querySelector(".rf-desc").value.trim();
     const resp   = tr.querySelector(".rf-resp").value;
     const fuente = tr.querySelector(".rf-fuente").value;
+    const mesLiqInp = tr.querySelector(".rf-mes-liq");
+    const mesLiq = _esFuenteTC(fuente) ? (mesLiqInp?.value || "") : "";
 
     tr.classList.remove("rafaga-row-err");
     const err = [];
     if (!fecha) err.push("fecha");
     if (!cat)   err.push("categoría");
     if (isNaN(monto) || monto <= 0) err.push("monto");
+    if (_esFuenteTC(fuente) && !mesLiq) err.push("mes liquidación");
 
     if (err.length) {
       errores++;
       tr.classList.add("rafaga-row-err");
     } else {
       validas.push({ fecha, tipo, categoria: cat, monto, descripcion: desc,
-                     usuario: USUARIO, responsabilidad: resp, fuente, moneda });
+                     usuario: USUARIO, responsabilidad: resp, fuente, moneda,
+                     mes_liquidacion: mesLiq || null });
     }
   });
 
@@ -3768,13 +3895,13 @@ function cargarCompartidos() {
 
   // Filtrar transacciones del mes/año seleccionado — gastos para compPorCat y reembolsos
   const datos = allTransac.filter(t => {
-    const d = new Date(t.fecha + "T12:00:00");
-    return (d.getMonth() + 1) === mes && d.getFullYear() === anio && t.tipo === "Gasto";
+    const { year, month } = getMesLiquidacion(t);
+    return month === mes && year === anio && t.tipo === "Gasto";
   });
   // Ingresos del mes — los compartidos reducen lo que se debe
   const datosIngresos = allTransac.filter(t => {
-    const d = new Date(t.fecha + "T12:00:00");
-    return (d.getMonth() + 1) === mes && d.getFullYear() === anio && t.tipo === "Ingreso";
+    const { year, month } = getMesLiquidacion(t);
+    return month === mes && year === anio && t.tipo === "Ingreso";
   });
 
   // ── COMPARTIDOS ──────────────────────────────────────────────
@@ -4054,9 +4181,9 @@ function abrirLiquidar(cat, monto, tipo) {
     esIngreso
       ? `Registrar cobro de ${fmt(monto)} de ${PARTNER}`
       : `Registrar pago de ${fmt(monto)} a ${PARTNER}`;
-  // Poblar fuentes
+  // Poblar fuentes (incluye tarjetas de crédito)
   const sel = document.getElementById("liq-fuente");
-  sel.innerHTML = categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+  sel.innerHTML = [...categFuentes, ...categFuentesTC].map(f => `<option value="${f}">${f}</option>`).join("");
   const modal = document.getElementById("liq-modal");
   modal.style.display = "flex";
 }
@@ -4120,8 +4247,8 @@ function cargarAnual() {
 
   // Transacciones ARS del año (para chart + tabla ARS)
   const txsAnioARS = allTransac.filter(t => {
-    const d = new Date(t.fecha + "T12:00:00");
-    return d.getFullYear() === anio
+    const { year } = getMesLiquidacion(t);
+    return year === anio
       && (t.usuario || "Daniel") === USUARIO
       && !esTransferencia(t)
       && (t.moneda || "ARS") === "ARS";
@@ -4129,8 +4256,8 @@ function cargarAnual() {
 
   // Transacciones USD del año (para tabla USD)
   const txsAnioUSD = allTransac.filter(t => {
-    const d = new Date(t.fecha + "T12:00:00");
-    return d.getFullYear() === anio
+    const { year } = getMesLiquidacion(t);
+    return year === anio
       && (t.usuario || "Daniel") === USUARIO
       && !esTransferencia(t)
       && (t.moneda || "ARS") === "USD";
@@ -4141,7 +4268,7 @@ function cargarAnual() {
   for (let m = 1; m <= 12; m++) byMes[m] = { ingresos: 0, gastos: 0, cats: {} };
 
   txsAnioARS.forEach(t => {
-    const m = new Date(t.fecha + "T12:00:00").getMonth() + 1;
+    const { month: m } = getMesLiquidacion(t);
     const monto = Math.abs(Number(t.monto));
     if (t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)) {
       byMes[m].ingresos += monto;
@@ -4216,7 +4343,7 @@ function cargarAnual() {
   const catTotalsUSD = {};
   const catMesesUSD  = {};
   txsAnioUSD.filter(t => t.tipo === "Gasto").forEach(t => {
-    const m = new Date(t.fecha + "T12:00:00").getMonth() + 1;
+    const { month: m } = getMesLiquidacion(t);
     const monto = Math.abs(Number(t.monto));
     catTotalsUSD[t.categoria] = (catTotalsUSD[t.categoria] || 0) + monto;
     if (!catMesesUSD[t.categoria]) catMesesUSD[t.categoria] = new Set();
@@ -4513,8 +4640,8 @@ function renderPresupuesto() {
 
   // Todas las transacciones del mes (ambos usuarios, necesario para el cálculo Compartido)
   const dataMes = allTransac.filter(t => {
-    const d = new Date(t.fecha + "T12:00:00");
-    return (d.getMonth() + 1) === mes && d.getFullYear() === anio;
+    const { year, month } = getMesLiquidacion(t);
+    return month === mes && year === anio;
   });
   // Solo las transacciones de Daniel (para "Mío" y KPI sueldo)
   const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO);
@@ -4707,8 +4834,8 @@ function actualizarKpisPres() {
   const anio = parseInt(document.getElementById("pres-anio").value);
 
   const dataMes = allTransac.filter(t => {
-    const d = new Date(t.fecha + "T12:00:00");
-    return (d.getMonth() + 1) === mes && d.getFullYear() === anio;
+    const { year, month } = getMesLiquidacion(t);
+    return month === mes && year === anio;
   });
   const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO);
 
@@ -4793,9 +4920,10 @@ function actualizarKpisPres() {
 
 // ─── CATEGORÍAS Y FUENTES — PÁGINA CONFIGURACIÓN ─────────────
 function renderizarConfig() {
-  _renderLista("gasto",   categGasto,   "GASTO");
-  _renderLista("ingreso", categIngreso, "INGRESO");
-  _renderLista("fuente",  categFuentes, "FUENTE");
+  _renderLista("gasto",      categGasto,   "GASTO");
+  _renderLista("ingreso",    categIngreso, "INGRESO");
+  _renderListaFuentes("fuente",   categFuentes,   "FUENTE");
+  _renderListaFuentes("fuentetc", categFuentesTC, "FUENTE_TC");
 }
 
 function _renderLista(tipo, items, tipoAPI) {
@@ -4812,9 +4940,30 @@ function _renderLista(tipo, items, tipoAPI) {
     </div>`).join("");
 }
 
+function _renderListaFuentes(tipo, items, tipoAPI) {
+  const el = document.getElementById("cfg-lista-" + tipo);
+  if (!el) return;
+  if (!items.length) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin ítems</div>';
+    return;
+  }
+  const esTC = tipoAPI === "FUENTE_TC";
+  const reclasifLabel = esTC ? "→ pago inmediato" : "→ TC";
+  el.innerHTML = items.map(item => {
+    const esc = item.replace(/'/g, "\\'");
+    return `<div class="cfg-item">
+      ${esTC ? '<span class="tc-badge">TC</span>' : ''}
+      <span class="cfg-item-name" style="${esTC ? 'margin-left:.4rem' : ''}">${item}</span>
+      <button class="cfg-reclasif-btn" onclick="confirmarReclasificarFuente('${esc}','${tipoAPI}')" title="Cambiar tipo">${reclasifLabel}</button>
+      <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}','${esc}',this)" title="Eliminar">✕</button>
+    </div>`;
+  }).join("");
+}
+
 async function agregarCategoria(tipoAPI) {
-  const inputId = "cfg-nueva-" + tipoAPI.toLowerCase();
-  const msgId   = "cfg-msg-"   + tipoAPI.toLowerCase();
+  const tipoKey = tipoAPI === 'FUENTE_TC' ? 'fuentetc' : tipoAPI.toLowerCase();
+  const inputId = "cfg-nueva-" + tipoKey;
+  const msgId   = "cfg-msg-"   + tipoKey;
   const input   = document.getElementById(inputId);
   const msg     = document.getElementById(msgId);
   const valor   = input.value.trim();
@@ -4826,10 +4975,11 @@ async function agregarCategoria(tipoAPI) {
       .from('categorias')
       .insert({ tipo: tipoAPI, valor, usuario: USUARIO, user_id: supabaseSession.user.id });
     if (error) throw error;
-    if      (tipoAPI === "GASTO")   { categGasto.push(valor);   categGasto.sort(); }
-    else if (tipoAPI === "INGRESO") { categIngreso.push(valor); categIngreso.sort(); }
-    else if (tipoAPI === "FUENTE")  { categFuentes.push(valor); }
-    guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, responsabilidad: categResponsabilidad });
+    if      (tipoAPI === "GASTO")     { categGasto.push(valor);     categGasto.sort(); }
+    else if (tipoAPI === "INGRESO")   { categIngreso.push(valor);   categIngreso.sort(); }
+    else if (tipoAPI === "FUENTE")    { categFuentes.push(valor); }
+    else if (tipoAPI === "FUENTE_TC") { categFuentesTC.push(valor); }
+    guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, fuentesTC: categFuentesTC, responsabilidad: categResponsabilidad });
     renderizarConfig();
     _refrescarSelectores();
     input.value = "";
@@ -4843,16 +4993,17 @@ async function agregarCategoria(tipoAPI) {
 async function eliminarCategoria(tipoAPI, valor, btn) {
   if (!confirm(`¿Eliminar "${valor}" de ${tipoAPI}?`)) return;
   btn.disabled = true;
-  const tipo = tipoAPI.toLowerCase();
-  const msgEl = document.getElementById("cfg-msg-" + tipo);
+  const tipoKey = tipoAPI === 'FUENTE_TC' ? 'fuentetc' : tipoAPI.toLowerCase();
+  const msgEl = document.getElementById("cfg-msg-" + tipoKey);
   try {
     const { error } = await supabaseClient
       .from('categorias').delete().eq('tipo', tipoAPI).eq('valor', valor);
     if (error) throw error;
-    if      (tipoAPI === "GASTO")   categGasto   = categGasto.filter(x => x !== valor);
-    else if (tipoAPI === "INGRESO") categIngreso = categIngreso.filter(x => x !== valor);
-    else if (tipoAPI === "FUENTE")  categFuentes = categFuentes.filter(x => x !== valor);
-    guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, responsabilidad: categResponsabilidad });
+    if      (tipoAPI === "GASTO")     categGasto     = categGasto.filter(x => x !== valor);
+    else if (tipoAPI === "INGRESO")   categIngreso   = categIngreso.filter(x => x !== valor);
+    else if (tipoAPI === "FUENTE")    categFuentes   = categFuentes.filter(x => x !== valor);
+    else if (tipoAPI === "FUENTE_TC") categFuentesTC = categFuentesTC.filter(x => x !== valor);
+    guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, fuentesTC: categFuentesTC, responsabilidad: categResponsabilidad });
     renderizarConfig();
     _refrescarSelectores();
     if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" eliminado.</span>`; }
@@ -4863,14 +5014,89 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
   setTimeout(() => { if (msgEl) msgEl.innerHTML = ""; }, 3000);
 }
 
+async function confirmarReclasificarFuente(valor, tipoActual) {
+  const tipoKey = tipoActual === 'FUENTE_TC' ? 'fuentetc' : 'fuente';
+  const msgEl = document.getElementById("cfg-msg-" + tipoKey);
+  if (!msgEl) return;
+  msgEl.innerHTML = "⏳ Verificando...";
+
+  try {
+    const { count, error } = await supabaseClient
+      .from('transacciones')
+      .select('*', { count: 'exact', head: true })
+      .eq('fuente', valor)
+      .eq('usuario', USUARIO);
+    if (error) throw error;
+
+    const nuevoTipo  = tipoActual === 'FUENTE_TC' ? 'FUENTE' : 'FUENTE_TC';
+    const nuevoLabel = nuevoTipo  === 'FUENTE_TC' ? 'tarjeta de crédito' : 'pago inmediato';
+    const esc = valor.replace(/'/g, "\\'");
+
+    if (count > 0) {
+      msgEl.innerHTML = `<div class="cfg-confirm-inline">
+        <span>${count} transacción${count !== 1 ? 'es' : ''} de esta fuente seguirán usando su fecha original. ¿Marcar como ${nuevoLabel}?</span>
+        <button class="btn btn-primary" style="font-size:.8rem;padding:.3rem .7rem" onclick="ejecutarReclasificarFuente('${esc}','${tipoActual}')">Confirmar</button>
+        <button class="btn" style="font-size:.8rem;padding:.3rem .7rem" onclick="renderizarConfig()">Cancelar</button>
+      </div>`;
+    } else {
+      await ejecutarReclasificarFuente(valor, tipoActual);
+    }
+  } catch(e) {
+    msgEl.innerHTML = `<span style="color:var(--red)">❌ ${e.message || "Error de conexión."}</span>`;
+    setTimeout(() => { msgEl.innerHTML = ""; }, 3000);
+  }
+}
+
+async function ejecutarReclasificarFuente(valor, tipoActual) {
+  const tipoKey = tipoActual === 'FUENTE_TC' ? 'fuentetc' : 'fuente';
+  const msgEl = document.getElementById("cfg-msg-" + tipoKey);
+  if (msgEl) msgEl.innerHTML = "⏳ Guardando...";
+
+  const nuevoTipo  = tipoActual === 'FUENTE_TC' ? 'FUENTE' : 'FUENTE_TC';
+  const nuevoLabel = nuevoTipo  === 'FUENTE_TC' ? 'tarjeta de crédito' : 'pago inmediato';
+
+  try {
+    const { error } = await supabaseClient
+      .from('categorias')
+      .update({ tipo: nuevoTipo })
+      .eq('tipo', tipoActual)
+      .eq('valor', valor);
+    if (error) throw error;
+
+    if (nuevoTipo === 'FUENTE_TC') {
+      categFuentes   = categFuentes.filter(x => x !== valor);
+      categFuentesTC = [...categFuentesTC, valor];
+    } else {
+      categFuentesTC = categFuentesTC.filter(x => x !== valor);
+      categFuentes   = [...categFuentes, valor];
+    }
+    guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, fuentesTC: categFuentesTC, responsabilidad: categResponsabilidad });
+    renderizarConfig();
+    _refrescarSelectores();
+
+    const destKey = nuevoTipo === 'FUENTE_TC' ? 'fuentetc' : 'fuente';
+    const destEl  = document.getElementById("cfg-msg-" + destKey);
+    if (destEl) {
+      destEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" marcado como ${nuevoLabel}.</span>`;
+      setTimeout(() => { destEl.innerHTML = ""; }, 3000);
+    }
+  } catch(e) {
+    if (msgEl) {
+      msgEl.innerHTML = `<span style="color:var(--red)">❌ ${e.message || "Error de conexión."}</span>`;
+      setTimeout(() => { msgEl.innerHTML = ""; }, 3000);
+    }
+  }
+}
+
 // Refresca todos los selects del formulario y filtros
 function _refrescarSelectores() {
+  const todasFuentes = [...categFuentes, ...categFuentesTC];
   // Formulario fuente
   const selFuente = document.getElementById("f-fuente");
   if (selFuente) {
     const curVal = selFuente.value;
     selFuente.innerHTML = '<option value="">— Sin especificar —</option>' +
-      categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+      todasFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
     selFuente.value = curVal;
   }
   // Filtro fuente
@@ -4878,7 +5104,7 @@ function _refrescarSelectores() {
   if (filFuente) {
     const curVal = filFuente.value;
     filFuente.innerHTML = '<option value="">Todas las fuentes</option>' +
-      categFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+      todasFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
     filFuente.value = curVal;
   }
   // Formulario categoría (según tipo actual)
@@ -4902,7 +5128,7 @@ function parsearImport() {
 
   lineas.forEach((linea, idx) => {
     const cols = linea.split(sep).map(c => c.trim());
-    const [fechaRaw="", tipo="", categoria="", montoRaw="", descripcion="", resp="", fuente="", monedaRaw=""] = cols;
+    const [fechaRaw="", tipo="", categoria="", montoRaw="", descripcion="", resp="", fuente="", monedaRaw="", mesLiqRaw=""] = cols;
 
     const errList = [];
 
@@ -4942,8 +5168,9 @@ function parsearImport() {
     const monedaUp = monedaRaw.toUpperCase().trim();
     const monedaVal = monedaUp === "USD" ? "USD" : "ARS";
 
+    const fechaFinal = fechaValida || fechaRaw;
     const fila = {
-      fecha: fechaValida || fechaRaw,
+      fecha: fechaFinal,
       tipo: tipoNorm,
       categoria,
       monto: isNaN(monto) ? 0 : monto,
@@ -4951,6 +5178,9 @@ function parsearImport() {
       responsabilidad: respVal,
       fuente,
       moneda: monedaVal,
+      mes_liquidacion: _esFuenteTC(fuente)
+        ? (/^\d{4}-(0[1-9]|1[0-2])$/.test(mesLiqRaw) ? mesLiqRaw : (fechaFinal ? fechaFinal.substring(0, 7) : null))
+        : null,
       usuario: USUARIO,
       errores: errList
     };
@@ -5043,6 +5273,29 @@ function limpiarImport() {
   importFilas = [];
 }
 
+function descargarTemplateCSV() {
+  const hoy  = new Date();
+  const mes  = String(hoy.getMonth() + 1).padStart(2, "0");
+  const anio = hoy.getFullYear();
+  const fuenteEj = categFuentes[0]   || "Efectivo";
+  const fuenteTC = categFuentesTC[0] || "";
+  const catEj    = categGasto[0]     || "Alimentación";
+  // mes_liquidacion: solo para TC y solo cuando la fecha de compra ≠ mes del resumen
+  const lineas = [
+    "fecha;tipo;categoria;monto;descripcion;responsabilidad;fuente;moneda;mes_liquidacion",
+    `15/${mes}/${anio};Gasto;${catEj};4500;Ejemplo gasto;Mío;${fuenteEj};ARS;`,
+    `01/${mes}/${anio};Ingreso;Sueldo;180000;Sueldo ${mes}/${anio};Mío;;ARS;`,
+    fuenteTC
+      ? `15/01/${anio};Gasto;${catEj};8000;Compra enero en TC;Mío;${fuenteTC};ARS;${anio}-${mes}`
+      : `15/01/${anio};Gasto;${catEj};8000;Compra TC (mes_liq distinto);Mío;;ARS;${anio}-${mes}`,
+  ];
+  const blob = new Blob([lineas.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url; a.download = `template-${anio}-${mes}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ─── TOAST ────────────────────────────────────────────────────
 function showToast(msg, tipo) {
   const t = document.getElementById("toast");
@@ -5095,8 +5348,8 @@ function renderSparklines(curMes, curAnio) {
     const m    = d.getMonth() + 1;
     const y    = d.getFullYear();
     const all  = allTransac.filter(t => {
-      const td = new Date(t.fecha + "T12:00:00");
-      return (td.getMonth() + 1) === m && td.getFullYear() === y;
+      const { year: ty, month: tm } = getMesLiquidacion(t);
+      return tm === m && ty === y;
     });
     const mine = all.filter(t => (t.usuario || "Daniel") === USUARIO);
     const ing  = mine.filter(t => t.tipo === "Ingreso" && !esTransferencia(t)
@@ -5170,6 +5423,52 @@ function fmtFecha(s) {
   const d = new Date(s + "T12:00:00");
   return d.toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" });
 }
+// Retorna { year, month } (month base-1) para asignación de mes presupuestario.
+// Para tarjetas de crédito usa mes_liquidacion si está presente y es válido;
+// para el resto (o como fallback) usa la fecha de la transacción.
+function getMesLiquidacion(t) {
+  if (t.mes_liquidacion && /^\d{4}-(0[1-9]|1[0-2])$/.test(t.mes_liquidacion)) {
+    const [y, m] = t.mes_liquidacion.split('-').map(Number);
+    return { year: y, month: m };
+  }
+  const d = new Date(t.fecha + 'T12:00:00');
+  return { year: d.getFullYear(), month: d.getMonth() + 1 };
+}
+// Retorna true si la fuente dada es de tipo tarjeta de crédito (FUENTE_TC)
+function _esFuenteTC(fuente) {
+  return !!fuente && categFuentesTC.includes(fuente);
+}
+
+// Muestra/oculta el campo mes_liquidacion en el formulario de nueva transacción
+function _actualizarMesLiqField(fuente) {
+  const row = document.getElementById("f-mes-liq-row");
+  const inp = document.getElementById("f-mes-liq");
+  const err = document.getElementById("f-mes-liq-err");
+  if (!row || !inp) return;
+  if (_esFuenteTC(fuente)) {
+    row.style.display = "";
+  } else {
+    row.style.display = "none";
+    inp.value = "";
+    if (err) err.textContent = "";
+  }
+}
+
+// Muestra/oculta el campo mes_liquidacion en el modal de edición
+function _actualizarEditMesLiqField(fuente) {
+  const row = document.getElementById("edit-mes-liq-row");
+  const inp = document.getElementById("edit-mes-liq");
+  const err = document.getElementById("edit-mes-liq-err");
+  if (!row || !inp) return;
+  if (_esFuenteTC(fuente)) {
+    row.style.display = "";
+  } else {
+    row.style.display = "none";
+    inp.value = "";
+    if (err) err.textContent = "";
+  }
+}
+
 // Acepta tanto punto como coma como separador decimal (convención argentina: 1.234,56)
 function parsearDecimal(val) {
   return parseFloat(String(val || 0).replace(',', '.')) || 0;
@@ -5400,6 +5699,7 @@ function _parsearTextoResumen(texto, fuente) {
       fuente,
       usuario: USUARIO,
       responsabilidad: "Mío",
+      mes_liquidacion: _esFuenteTC(fuente) ? fecha.substring(0, 7) : null,
     });
   }
   return resultado;
