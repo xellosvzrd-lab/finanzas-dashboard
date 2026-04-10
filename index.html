@@ -1814,8 +1814,6 @@
         </p>
         <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
 
-        <!-- FAB -->
-        <button class="fab" onclick="navegarA('nueva')" title="Nueva transacción">+</button>
       </div><!-- /page-presupuesto -->
 
       <!-- ── PÁGINA AÑO COMPLETO ────────────────────────── -->
@@ -2048,6 +2046,9 @@
         </div><!-- /imp-tab-pdf -->
 
       </div><!-- /page-importar -->
+
+      <!-- FAB: visible en todas las pestañas excepto Nueva transacción -->
+      <button class="fab" id="btn-fab-nueva" onclick="navegarA('nueva')" title="Nueva transacción">+</button>
 
     </main>
   </div>
@@ -4302,6 +4303,10 @@ function navegarA(pagina) {
   if (pagina === "presupuesto")  cargarPresupuesto();
   if (pagina === "anual")        cargarAnual();
   if (pagina === "config")       renderizarConfig();
+
+  // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)
+  const fab = document.getElementById("btn-fab-nueva");
+  if (fab) fab.style.display = pagina === "nueva" ? "none" : "";
 
   closeSidebar();
   window.scrollTo(0, 0);
