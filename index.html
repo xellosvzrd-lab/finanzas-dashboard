@@ -1636,19 +1636,16 @@
               <select id="f-responsabilidad"></select>
             </div>
           </div>
-          <!-- Fila 4: Fuente -->
+          <!-- Fila 4: Fuente + Mes de liquidación (TC) -->
           <div class="form-row">
-            <div class="form-group full">
+            <div class="form-group">
               <label>Fuente / Medio de pago</label>
               <select id="f-fuente" onchange="_actualizarMesLiqField(this.value)">
                 <option value="">— Sin especificar —</option>
               </select>
             </div>
-          </div>
-          <!-- Fila 4.5: Mes de liquidación (solo tarjetas de crédito) -->
-          <div class="form-row" id="f-mes-liq-row" style="display:none">
-            <div class="form-group full">
-              <label>Mes de liquidación <span style="font-size:.8rem;color:var(--text-muted)">¿A qué mes corresponde?</span></label>
+            <div class="form-group" id="f-mes-liq-row" style="display:none">
+              <label>Mes de liquidación <span style="font-size:.8rem;color:var(--text-muted)">¿A qué mes?</span></label>
               <input type="month" id="f-mes-liq">
               <div id="f-mes-liq-err" style="font-size:.8rem;color:var(--red);min-height:1em;margin-top:.25rem"></div>
             </div>
@@ -3730,6 +3727,17 @@ function _optsFuenteRafaga() {
     [...categFuentes, ...categFuentesTC].map(f => `<option value="${f}">${f}</option>`).join("");
 }
 
+function _rafagaActualizarMesLiq(sel) {
+  const inp = sel.parentElement.querySelector(".rf-mes-liq");
+  if (!inp) return;
+  if (_esFuenteTC(sel.value)) {
+    inp.style.display = "";
+  } else {
+    inp.style.display = "none";
+    inp.value = "";
+  }
+}
+
 function _optsRespRafaga() {
   return categResponsabilidad.map(r => `<option value="${r}">${r}</option>`).join("");
 }
@@ -3758,7 +3766,10 @@ function agregarFilaRafaga() {
     </td>
     <td><input type="text" class="rf-desc rafaga-desc" placeholder="Descripción opcional"></td>
     <td><select class="rf-resp">${_optsRespRafaga()}</select></td>
-    <td><select class="rf-fuente">${_optsFuenteRafaga()}</select></td>
+    <td>
+      <select class="rf-fuente" onchange="_rafagaActualizarMesLiq(this)">${_optsFuenteRafaga()}</select>
+      <input type="month" class="rf-mes-liq" style="display:none;margin-top:.3rem;width:100%" title="Mes de liquidación">
+    </td>
     <td class="td-del"><button class="rafaga-del-btn" onclick="eliminarFilaRafaga(this)" title="Eliminar fila">✕</button></td>
   `;
   tbody.appendChild(tr);
@@ -3796,12 +3807,15 @@ async function guardarRafaga() {
     const desc   = tr.querySelector(".rf-desc").value.trim();
     const resp   = tr.querySelector(".rf-resp").value;
     const fuente = tr.querySelector(".rf-fuente").value;
+    const mesLiqInp = tr.querySelector(".rf-mes-liq");
+    const mesLiq = _esFuenteTC(fuente) ? (mesLiqInp?.value || "") : "";
 
     tr.classList.remove("rafaga-row-err");
     const err = [];
     if (!fecha) err.push("fecha");
     if (!cat)   err.push("categoría");
     if (isNaN(monto) || monto <= 0) err.push("monto");
+    if (_esFuenteTC(fuente) && !mesLiq) err.push("mes liquidación");
 
     if (err.length) {
       errores++;
@@ -3809,7 +3823,7 @@ async function guardarRafaga() {
     } else {
       validas.push({ fecha, tipo, categoria: cat, monto, descripcion: desc,
                      usuario: USUARIO, responsabilidad: resp, fuente, moneda,
-                     mes_liquidacion: _esFuenteTC(fuente) && fecha ? fecha.substring(0, 7) : null });
+                     mes_liquidacion: mesLiq || null });
     }
   });
 
@@ -5112,7 +5126,7 @@ function parsearImport() {
 
   lineas.forEach((linea, idx) => {
     const cols = linea.split(sep).map(c => c.trim());
-    const [fechaRaw="", tipo="", categoria="", montoRaw="", descripcion="", resp="", fuente="", monedaRaw=""] = cols;
+    const [fechaRaw="", tipo="", categoria="", montoRaw="", descripcion="", resp="", fuente="", monedaRaw="", mesLiqRaw=""] = cols;
 
     const errList = [];
 
@@ -5162,7 +5176,9 @@ function parsearImport() {
       responsabilidad: respVal,
       fuente,
       moneda: monedaVal,
-      mes_liquidacion: _esFuenteTC(fuente) && fechaFinal ? fechaFinal.substring(0, 7) : null,
+      mes_liquidacion: _esFuenteTC(fuente)
+        ? (/^\d{4}-(0[1-9]|1[0-2])$/.test(mesLiqRaw) ? mesLiqRaw : (fechaFinal ? fechaFinal.substring(0, 7) : null))
+        : null,
       usuario: USUARIO,
       errores: errList
     };
@@ -5259,13 +5275,17 @@ function descargarTemplateCSV() {
   const hoy  = new Date();
   const mes  = String(hoy.getMonth() + 1).padStart(2, "0");
   const anio = hoy.getFullYear();
-  const fuenteEj = categFuentes[0] || "Efectivo";
-  const catEj    = categGasto[0]   || "Alimentación";
+  const fuenteEj = categFuentes[0]   || "Efectivo";
+  const fuenteTC = categFuentesTC[0] || "";
+  const catEj    = categGasto[0]     || "Alimentación";
+  // mes_liquidacion: solo para TC y solo cuando la fecha de compra ≠ mes del resumen
   const lineas = [
-    "fecha;tipo;categoria;monto;descripcion;responsabilidad;fuente;moneda",
-    `15/${mes}/${anio};Gasto;${catEj};4500;Ejemplo gasto;Mío;${fuenteEj};ARS`,
-    `01/${mes}/${anio};Ingreso;Sueldo;180000;Sueldo ${mes}/${anio};Mío;;ARS`,
-    `10/${mes}/${anio};Gasto;${catEj};1200;Otro gasto;Compartido;;ARS`,
+    "fecha;tipo;categoria;monto;descripcion;responsabilidad;fuente;moneda;mes_liquidacion",
+    `15/${mes}/${anio};Gasto;${catEj};4500;Ejemplo gasto;Mío;${fuenteEj};ARS;`,
+    `01/${mes}/${anio};Ingreso;Sueldo;180000;Sueldo ${mes}/${anio};Mío;;ARS;`,
+    fuenteTC
+      ? `15/01/${anio};Gasto;${catEj};8000;Compra enero en TC;Mío;${fuenteTC};ARS;${anio}-${mes}`
+      : `15/01/${anio};Gasto;${catEj};8000;Compra TC (mes_liq distinto);Mío;;ARS;${anio}-${mes}`,
   ];
   const blob = new Blob([lineas.join("\n")], { type: "text/csv;charset=utf-8;" });
   const url  = URL.createObjectURL(blob);
