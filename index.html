@@ -1519,6 +1519,7 @@
           <h1>Historial de transacciones</h1>
           <div style="display:flex;gap:.5rem;align-items:center">
             <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">CSV</button>
+            <button class="btn btn-ghost" onclick="navegarA('importar')" title="Importar desde archivo o PDF">Importar</button>
             <button class="btn btn-primary" onclick="navegarA('nueva')">+ Anotar</button>
           </div>
         </div>
@@ -1998,6 +1999,7 @@
           <div class="imp-actions">
             <button class="btn btn-primary" onclick="parsearImport()">Previsualizar</button>
             <button class="btn btn-outline" onclick="limpiarImport()">Limpiar</button>
+            <button class="btn btn-ghost" onclick="descargarTemplateCSV()" title="Descargar archivo de ejemplo para completar">⬇ Template</button>
           </div>
         </div>
 
@@ -5251,6 +5253,25 @@ function limpiarImport() {
   document.getElementById("imp-preview-wrap").style.display = "none";
   document.getElementById("imp-result-msg").style.display = "none";
   importFilas = [];
+}
+
+function descargarTemplateCSV() {
+  const hoy  = new Date();
+  const mes  = String(hoy.getMonth() + 1).padStart(2, "0");
+  const anio = hoy.getFullYear();
+  const fuenteEj = categFuentes[0] || "Efectivo";
+  const catEj    = categGasto[0]   || "Alimentación";
+  const lineas = [
+    "fecha;tipo;categoria;monto;descripcion;responsabilidad;fuente;moneda",
+    `15/${mes}/${anio};Gasto;${catEj};4500;Ejemplo gasto;Mío;${fuenteEj};ARS`,
+    `01/${mes}/${anio};Ingreso;Sueldo;180000;Sueldo ${mes}/${anio};Mío;;ARS`,
+    `10/${mes}/${anio};Gasto;${catEj};1200;Otro gasto;Compartido;;ARS`,
+  ];
+  const blob = new Blob([lineas.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url; a.download = `template-${anio}-${mes}.csv`; a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ─── TOAST ────────────────────────────────────────────────────
