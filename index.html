@@ -197,6 +197,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.3rem 1.5rem;
     box-shadow: var(--shadow);
+    min-width: 0;
     position: relative; overflow: hidden;
     transition: border-color .25s, transform .2s, box-shadow .25s;
     animation: fadeUp .45s ease both;
@@ -223,7 +224,7 @@
   .kpi-card:has(.balance-neg)::before { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
 
   .kpi-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; font-weight: 600; }
-  .kpi-value { font-size: 1.65rem; font-weight: 800; letter-spacing: -.025em; }
+  .kpi-value { font-size: 1.65rem; font-weight: 800; letter-spacing: -.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .kpi-value.income      { color: var(--green); }
   .kpi-value.expense     { color: var(--red); }
   .kpi-value.balance-pos { color: var(--accent); }
@@ -360,7 +361,14 @@
     gap: 1.25rem;
     margin-top: 1.25rem;
   }
+  .comp-grid > * { min-width: 0; }
   @media (max-width: 900px) { .comp-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 768px) {
+    .comp-grid table { font-size: .8rem; }
+    .comp-grid thead th,
+    .comp-grid tbody td { padding: .4rem .5rem; white-space: nowrap; }
+    .comp-grid tbody td:first-child { white-space: normal; max-width: 90px; word-break: break-word; }
+  }
 
   .comp-balance-card {
     background: var(--card);
@@ -923,8 +931,8 @@
     .kpi-grid-4, .kpi-grid-5 { grid-template-columns: repeat(2, 1fr); }
 
     /* KPI cards más compactas */
-    .kpi-value { font-size: 1.3rem; }
-    .kpi-card { padding: 1rem 1.1rem; }
+    .kpi-value { font-size: 1.15rem; }
+    .kpi-card { padding: .85rem .95rem; }
 
     /* Formulario en 1 columna */
     .form-row { grid-template-columns: 1fr; }
@@ -990,10 +998,11 @@
   /* Tipo y Moneda se ocultan en teléfonos muy pequeños */
   @media (max-width: 440px) {
     .col-hide-xs { display: none !important; }
-    .kpi-value { font-size: 1.1rem; }
-    .kpi-label { font-size: .65rem; }
+    .kpi-value { font-size: .95rem; }
+    .kpi-label { font-size: .6rem; }
+    .kpi-card { padding: .7rem .75rem; }
     .main { padding: 4.2rem .6rem 1.5rem; }
-    .kpi-grid { gap: .55rem; }
+    .kpi-grid { gap: .5rem; }
     tbody td, thead th { padding: .42rem .45rem; font-size: .79rem; }
   }
   /* ─── MODAL EDITAR TRANSACCIÓN ───────────────────────────── */
