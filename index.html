@@ -1802,9 +1802,14 @@
             <div class="kpi-sub" id="pres-kpi-gastado-sub">50% compartidos</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Lo que te queda</div>
+            <div class="kpi-label">Margen planeado</div>
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
-            <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Total presupuestado</div>
+            <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Presupuestado</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Lo que te queda</div>
+            <div class="kpi-value" id="pres-kpi-saldo-real">$0</div>
+            <div class="kpi-sub">Sueldo − Gastado real</div>
           </div>
           <div class="kpi-card" id="pres-kpi-usd-card" style="display:none">
             <div class="kpi-label">En dólares</div>
@@ -4733,9 +4738,17 @@ function renderPresupuesto() {
   const kpiDisp = document.getElementById("pres-kpi-disponible");
   kpiDisp.textContent = fmt(disponible);
   kpiDisp.className = "kpi-value " + (disponible >= 0 ? "balance-pos" : "expense");
+
+  const saldoReal = sueldoEfectivo - totalGasto;
+  const kpiSaldoReal = document.getElementById("pres-kpi-saldo-real");
+  if (kpiSaldoReal) {
+    kpiSaldoReal.textContent = fmt(saldoReal);
+    kpiSaldoReal.className = "kpi-value " + (saldoReal >= 0 ? "balance-pos" : "expense");
+  }
+
   const subDisp = document.getElementById("pres-kpi-disponible-sub");
   if (subDisp) {
-    subDisp.textContent = "Sueldo − Total presupuestado";
+    subDisp.textContent = "Sueldo − Presupuestado";
   }
 
   // KPI Saldo USD (solo Ama)
@@ -4911,6 +4924,13 @@ function actualizarKpisPres() {
   const kpiDisp = document.getElementById("pres-kpi-disponible");
   kpiDisp.textContent = fmt(disponible);
   kpiDisp.className = "kpi-value " + (disponible >= 0 ? "balance-pos" : "expense");
+
+  const saldoReal = sueldoEfectivo - totalGasto;
+  const kpiSaldoReal = document.getElementById("pres-kpi-saldo-real");
+  if (kpiSaldoReal) {
+    kpiSaldoReal.textContent = fmt(saldoReal);
+    kpiSaldoReal.className = "kpi-value " + (saldoReal >= 0 ? "balance-pos" : "expense");
+  }
 
   const subTotal = document.getElementById("pres-kpi-total-sub");
   if (subTotal) {
