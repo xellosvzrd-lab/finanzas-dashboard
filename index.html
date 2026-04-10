@@ -1594,15 +1594,9 @@
               <label>Categoría</label>
               <select id="f-categoria"></select>
             </div>
-            <div class="form-group full" id="resp-container">
-              <button type="button" class="resp-toggle-header" onclick="toggleRespField()">
-                <span>¿Cómo se divide? — <span class="resp-valor-actual" id="resp-label-actual">Solo mío</span></span>
-                <span id="resp-toggle-arrow">▾</span>
-              </button>
-              <div id="resp-field" style="display:none">
-                <div class="resp-group" id="resp-group"></div>
-              </div>
-              <input type="hidden" id="f-responsabilidad" value="Mío">
+            <div class="form-group">
+              <label>¿Cómo se divide?</label>
+              <select id="f-responsabilidad"></select>
             </div>
           </div>
           <!-- Fila 4: Fuente -->
@@ -5567,57 +5561,28 @@ function inicializarDisclosureCompartidos() {
   btn.textContent   = expanded ? "Ocultar detalle ▴" : "Ver detalle ▾";
 }
 
-// ─── RESPONSABILIDAD RADIO BUTTONS ────────────────────────────
-const RESP_LABELS = {
-  "Mío":        "Solo mío",
-  "Compartido": "Lo pagamos juntos",
-};
-
-function getRespLabel(valor) {
-  if (RESP_LABELS[valor]) return RESP_LABELS[valor];
-  if (valor.startsWith("De ")) return "Lo pagó " + (PARTNER || "tu pareja");
-  return valor;
-}
-
+// ─── RESPONSABILIDAD SELECT ────────────────────────────────────
 function inicializarRespButtons() {
-  const grupo = document.getElementById("resp-group");
-  if (!grupo) return;
+  const sel = document.getElementById("f-responsabilidad");
+  if (!sel) return;
   const opciones = [
     { valor: "Mío",           label: "Solo mío" },
     { valor: "Compartido",    label: "Lo pagamos juntos" },
     { valor: "De " + PARTNER, label: "Lo pagó " + (PARTNER || "tu pareja") },
   ];
-  grupo.innerHTML = opciones.map(op =>
-    `<button type="button" class="resp-btn${op.valor === "Mío" ? " selected" : ""}"
-             data-valor="${op.valor}"
-             onclick="seleccionarResp('${op.valor.replace(/'/g, "\\'")}')">${op.label}</button>`
+  sel.innerHTML = opciones.map(op =>
+    `<option value="${op.valor}">${op.label}</option>`
   ).join("");
-  document.getElementById("f-responsabilidad").value = "Mío";
-  document.getElementById("resp-label-actual").textContent = "Solo mío";
+  sel.value = "Mío";
 }
 
 function seleccionarResp(valor) {
-  document.querySelectorAll(".resp-btn").forEach(b => {
-    b.classList.toggle("selected", b.dataset.valor === valor);
-  });
-  document.getElementById("f-responsabilidad").value = valor;
-  document.getElementById("resp-label-actual").textContent = getRespLabel(valor);
-}
-
-function toggleRespField() {
-  const field = document.getElementById("resp-field");
-  const arrow = document.getElementById("resp-toggle-arrow");
-  const visible = field.style.display !== "none";
-  field.style.display = visible ? "none" : "";
-  arrow.textContent = visible ? "▾" : "▴";
+  const sel = document.getElementById("f-responsabilidad");
+  if (sel) sel.value = valor;
 }
 
 function resetRespField() {
   seleccionarResp("Mío");
-  const field = document.getElementById("resp-field");
-  const arrow = document.getElementById("resp-toggle-arrow");
-  if (field) field.style.display = "none";
-  if (arrow) arrow.textContent = "▾";
 }
 </script>
 </body>
