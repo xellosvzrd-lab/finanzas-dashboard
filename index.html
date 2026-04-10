@@ -1383,16 +1383,16 @@
 <!-- Bottom nav mobile -->
 <nav class="bottom-nav" id="bottom-nav">
   <button class="bn-item" id="bn-presupuesto" onclick="navegarA('presupuesto')">
-    <span class="bn-icon">🗓</span><span>Mi mes</span>
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span><span>Mi mes</span>
   </button>
   <button class="bn-item" id="bn-transacciones" onclick="navegarA('transacciones')">
-    <span class="bn-icon">📋</span><span>Gastos</span>
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></span><span>Gastos</span>
   </button>
   <button class="bn-item" id="bn-compartidos" onclick="navegarA('compartidos')">
-    <span class="bn-icon">👫</span><span>Compartidos</span>
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span>Compartidos</span>
   </button>
   <button class="bn-item" id="bn-config" onclick="navegarA('config')">
-    <span class="bn-icon">⚙️</span><span>Categorías</span>
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span>Categorías</span>
   </button>
 </nav>
 
@@ -1482,7 +1482,7 @@
         <div class="page-header">
           <h1>Historial de transacciones</h1>
           <div style="display:flex;gap:.5rem;align-items:center">
-            <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">📥 CSV</button>
+            <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">CSV</button>
             <button class="btn btn-primary" onclick="navegarA('nueva')">+ Anotar</button>
           </div>
         </div>
@@ -1510,9 +1510,9 @@
           </select>
           <select id="fil-resp" onchange="filtrarTabla()">
             <option value="">Todas</option>
-            <option value="Mío">🙋 Mío</option>
-            <option value="Compartido">👫 Compartido</option>
-            <option value="De Ama">💳 De Ama</option>
+            <option value="Mío">Mío</option>
+            <option value="Compartido">Compartido</option>
+            <option value="De Ama">De Ama</option>
           </select>
           <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="filtrarTabla()">
         </div>
@@ -1557,7 +1557,7 @@
       <div id="page-nueva" class="page">
         <div class="page-header" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.6rem">
           <h1 style="margin:0">Nueva transacción</h1>
-          <button class="btn-rafaga" onclick="abrirRafaga()" title="Cargar varias transacciones de una vez">⚡ Carga múltiple</button>
+          <button class="btn-rafaga" onclick="abrirRafaga()" title="Cargar varias transacciones de una vez">Carga múltiple</button>
         </div>
         <div class="form-card">
           <!-- Fila 1: Tipo + Moneda lado a lado -->
@@ -1565,8 +1565,8 @@
             <div class="form-group">
               <label>Tipo</label>
               <div class="tipo-toggle">
-                <button class="tipo-btn active-expense" id="btn-gasto"  onclick="setTipo('Gasto')">💸 Gasto</button>
-                <button class="tipo-btn"                id="btn-ingreso" onclick="setTipo('Ingreso')">💰 Ingreso</button>
+                <button class="tipo-btn active-expense" id="btn-gasto"  onclick="setTipo('Gasto')">Gasto</button>
+                <button class="tipo-btn"                id="btn-ingreso" onclick="setTipo('Ingreso')">Ingreso</button>
               </div>
             </div>
             <div class="form-group">
@@ -1617,7 +1617,7 @@
           </div>
           <div style="display:flex; gap:.75rem; margin-top:.5rem">
             <button class="btn btn-primary" id="btn-guardar" onclick="guardarTransaccion()">
-              💾 Guardar
+              Guardar
             </button>
             <button class="btn btn-outline" onclick="navegarA('transacciones')">Cancelar</button>
           </div>
@@ -1628,7 +1628,7 @@
       <!-- ── PÁGINA COMPARTIDOS ────────────────────────── -->
       <div id="page-compartidos" class="page">
         <div class="page-header">
-          <h1 id="comp-titulo">👫 Compartidos con Ama</h1>
+          <h1 id="comp-titulo">Compartidos con Ama</h1>
         </div>
 
         <!-- Selector de mes -->
@@ -1660,7 +1660,7 @@
           <!-- Tabla izquierda: Compartidos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 style="font-size:1rem;font-weight:700;color:var(--yellow)">👫 Compartidos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(cada uno paga la mitad)</span></h3>
+              <h3 style="font-size:1rem;font-weight:700;color:var(--yellow)">Compartidos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(cada uno paga la mitad)</span></h3>
             </div>
             <div class="table-wrap">
               <table>
@@ -1686,7 +1686,7 @@
           <!-- Tabla derecha: Reembolsos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 style="font-size:1rem;font-weight:700;color:var(--accent2)">💳 Reembolsos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos individuales cruzados)</span></h3>
+              <h3 style="font-size:1rem;font-weight:700;color:var(--accent2)">Reembolsos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos individuales cruzados)</span></h3>
             </div>
             <div class="table-wrap">
               <table>
@@ -1736,7 +1736,7 @@
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
-            <button class="btn btn-primary" onclick="guardarPresupuesto()">💾 Guardar presupuesto</button>
+            <button class="btn btn-primary" onclick="guardarPresupuesto()">Guardar presupuesto</button>
           </div>
         </div>
 
@@ -1850,7 +1850,7 @@
       <!-- ── PÁGINA CATEGORÍAS Y FUENTES ──────────────────── -->
       <div id="page-config" class="page">
         <div class="page-header">
-          <h1>⚙️ Categorías y Fuentes</h1>
+          <h1>Categorías y Fuentes</h1>
           <div style="font-size:.85rem;color:var(--text-muted)">Tus categorías y fuentes de pago</div>
         </div>
 
@@ -1858,7 +1858,7 @@
 
           <!-- Categorías Gasto -->
           <div class="chart-card">
-            <div class="chart-title">💸 Categorías de Gasto</div>
+            <div class="chart-title">Categorías de Gasto</div>
             <div id="cfg-lista-gasto" class="cfg-lista"></div>
             <div class="cfg-add-row">
               <input type="text" id="cfg-nueva-gasto" placeholder="Nueva categoría..." class="cfg-input">
@@ -1869,7 +1869,7 @@
 
           <!-- Categorías Ingreso -->
           <div class="chart-card">
-            <div class="chart-title">💰 Categorías de Ingreso</div>
+            <div class="chart-title">Categorías de Ingreso</div>
             <div id="cfg-lista-ingreso" class="cfg-lista"></div>
             <div class="cfg-add-row">
               <input type="text" id="cfg-nueva-ingreso" placeholder="Nueva categoría..." class="cfg-input">
@@ -1880,7 +1880,7 @@
 
           <!-- Fuentes -->
           <div class="chart-card">
-            <div class="chart-title">🏦 Fuentes / Medios de pago</div>
+            <div class="chart-title">Fuentes / Medios de pago</div>
             <div id="cfg-lista-fuente" class="cfg-lista"></div>
             <div class="cfg-add-row">
               <input type="text" id="cfg-nueva-fuente" placeholder="Nueva fuente..." class="cfg-input">
@@ -1895,13 +1895,13 @@
       <!-- ── PÁGINA IMPORTAR DATOS ──────────────────────── -->
       <div id="page-importar" class="page">
         <div class="page-header">
-          <h1>📥 Importar datos</h1>
+          <h1>Importar datos</h1>
         </div>
 
         <!-- Tabs -->
         <div class="imp-tabs">
-          <button class="imp-tab active" id="imp-tab-btn-paste" onclick="impSwitchTab('paste')">📋 Copiar / Pegar</button>
-          <button class="imp-tab" id="imp-tab-btn-pdf" onclick="impSwitchTab('pdf')">📄 Resumen de tarjeta (PDF)</button>
+          <button class="imp-tab active" id="imp-tab-btn-paste" onclick="impSwitchTab('paste')">Copiar / Pegar</button>
+          <button class="imp-tab" id="imp-tab-btn-pdf" onclick="impSwitchTab('pdf')">Resumen de tarjeta (PDF)</button>
         </div>
 
         <!-- ── TAB: COPIAR/PEGAR ── -->
@@ -1943,8 +1943,8 @@
             placeholder="Pegá acá las filas (Tab o ; como separador)...&#10;15/01/2025	Gasto	Mercado	4500	Supermercado	Compartido	Galicia	ARS&#10;01/01/2025	Ingreso	Sueldo	180000	Sueldo enero	Mío	Galicia	ARS&#10;10/02/2025	Ingreso	Freelance	500	Pago cliente	Mío	Galicia	USD"></textarea>
 
           <div class="imp-actions">
-            <button class="btn btn-primary" onclick="parsearImport()">🔍 Previsualizar</button>
-            <button class="btn btn-outline" onclick="limpiarImport()">🗑 Limpiar</button>
+            <button class="btn btn-primary" onclick="parsearImport()">Previsualizar</button>
+            <button class="btn btn-outline" onclick="limpiarImport()">Limpiar</button>
           </div>
         </div>
 
@@ -2005,8 +2005,8 @@
           <div id="pdf-parse-progress" class="pdf-parse-progress">⏳ Leyendo PDFs...</div>
 
           <div class="imp-actions" id="pdf-actions" style="display:none">
-            <button class="btn btn-primary" onclick="parsearPDFs()">🔍 Leer y previsualizar</button>
-            <button class="btn btn-outline" onclick="pdfLimpiarTodo()">🗑 Limpiar</button>
+            <button class="btn btn-primary" onclick="parsearPDFs()">Leer y previsualizar</button>
+            <button class="btn btn-outline" onclick="pdfLimpiarTodo()">Limpiar</button>
           </div>
 
           <!-- Preview PDF (reutiliza la misma estructura) -->
@@ -2071,7 +2071,7 @@
 <div class="rafaga-overlay" id="rafaga-overlay" onclick="if(event.target===this)cerrarRafaga()">
   <div class="rafaga-modal" role="dialog" aria-modal="true" aria-labelledby="rafaga-title">
     <div class="rafaga-header">
-      <h3 id="rafaga-title">⚡ Modo Ráfaga — Carga múltiple</h3>
+      <h3 id="rafaga-title">Modo Ráfaga — Carga múltiple</h3>
       <button class="edit-close-btn" onclick="cerrarRafaga()" title="Cerrar">✕</button>
     </div>
     <div class="rafaga-body">
@@ -2094,10 +2094,10 @@
       </table>
     </div>
     <div class="rafaga-footer">
-      <button class="rafaga-add-btn" onclick="agregarFilaRafaga()">➕ Agregar fila</button>
+      <button class="rafaga-add-btn" onclick="agregarFilaRafaga()">+ Agregar fila</button>
       <span class="rafaga-count" id="rafaga-count">3 filas</span>
       <button class="btn btn-outline" onclick="cerrarRafaga()" style="margin-left:auto">Cancelar</button>
-      <button class="btn btn-primary" id="rafaga-guardar-btn" onclick="guardarRafaga()">💾 Guardar todo (3)</button>
+      <button class="btn btn-primary" id="rafaga-guardar-btn" onclick="guardarRafaga()">Guardar todo (3)</button>
     </div>
     <div id="rafaga-msg" style="padding:.4rem 1.2rem .8rem; font-size:.82rem; min-height:1.2em;"></div>
   </div>
@@ -2107,7 +2107,7 @@
 <div class="edit-overlay" id="edit-overlay" onclick="if(event.target===this)cerrarEditorTransaccion()">
   <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
     <div class="edit-modal-header">
-      <h3 id="edit-modal-title">✏️ Editar transacción</h3>
+      <h3 id="edit-modal-title">Editar transacción</h3>
       <button class="edit-close-btn" onclick="cerrarEditorTransaccion()" title="Cerrar">✕</button>
     </div>
     <div class="edit-modal-body">
@@ -2119,8 +2119,8 @@
         <div class="edit-field">
           <label>Tipo</label>
           <select id="edit-tipo">
-            <option value="Gasto">💸 Gasto</option>
-            <option value="Ingreso">💰 Ingreso</option>
+            <option value="Gasto">Gasto</option>
+            <option value="Ingreso">Ingreso</option>
           </select>
         </div>
       </div>
@@ -2144,9 +2144,9 @@
       <div class="edit-field">
         <label>Responsabilidad</label>
         <select id="edit-responsabilidad">
-          <option value="Mío">🙋 Mío</option>
-          <option value="Compartido">👫 Compartido</option>
-          <option value="De Ama">💳 De Ama</option>
+          <option value="Mío">Mío</option>
+          <option value="Compartido">Compartido</option>
+          <option value="De Ama">De Ama</option>
         </select>
       </div>
       <div class="edit-field">
@@ -2161,7 +2161,7 @@
     </div>
     <div class="edit-modal-footer">
       <button class="edit-btn edit-btn-secondary" onclick="cerrarEditorTransaccion()">Cancelar</button>
-      <button class="edit-btn edit-btn-primary" id="edit-guardar-btn" onclick="guardarEdicionTransaccion()">💾 Guardar cambios</button>
+      <button class="edit-btn edit-btn-primary" id="edit-guardar-btn" onclick="guardarEdicionTransaccion()">Guardar cambios</button>
     </div>
   </div>
 </div>
@@ -2176,6 +2176,11 @@
 // ─── SUPABASE CONFIG ─────────────────────────────────────────
 const SUPABASE_URL = "https://eutarjfnlkcehhigqqxr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1dGFyamZubGtjZWhoaWdxcXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTA0MTQsImV4cCI6MjA5MTA4NjQxNH0._7-AO_9_12PumXjDfcAWkgKyS4s_kXZTxb8EKSdxlAg";
+
+// ─── SVG ICONS ────────────────────────────────────────────────
+const IC_COPY  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+const IC_EDIT  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+const IC_TRASH = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
 
 // ─── ESTADO GLOBAL ───────────────────────────────────────────
 let supabaseClient  = null;
@@ -2453,7 +2458,7 @@ function _configurarUsuario(session) {
 
 function _actualizarStringsUsuario() {
   const tit = document.getElementById("comp-titulo");
-  if (tit) tit.textContent = "👫 Compartidos con " + PARTNER;
+  if (tit) tit.textContent = "Compartidos con " + PARTNER;
   const nota = document.getElementById("comp-nota");
   if (nota) nota.textContent = `* Neto por categoría: positivo = ${PARTNER} te debe · negativo = vos le debés a ${PARTNER}.`;
   const thU = document.getElementById("comp-th-usuario");
@@ -3272,7 +3277,7 @@ function filtrarTabla() {
     return;
   }
 
-  const respEmoji = { "Mío": "🙋", "Compartido": "👫", "De Ama": "💳" };
+  const respEmoji = {};
   const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", "De Ama": "var(--accent2)" };
 
   tbody.innerHTML = datos.map(t => {
@@ -3292,9 +3297,9 @@ function filtrarTabla() {
       <td style="text-align:right;font-weight:600;white-space:nowrap;color:${t.tipo==="Ingreso"?"var(--green)":"var(--red)"}">${fmtMoneda(t.monto, mon)}</td>
       <td class="col-hide-xs">${monBadge}</td>
       <td style="white-space:nowrap">
-        <button class="delete-btn" onclick="duplicarTransaccion('${t.id}')" title="Duplicar" style="margin-right:.2rem">📋</button>
-        <button class="delete-btn" onclick="abrirEditorTransaccion('${t.id}')" title="Editar" style="margin-right:.2rem">✏️</button>
-        <button class="delete-btn" onclick="eliminarTransaccion('${t.id}')" title="Eliminar">🗑️</button>
+        <button class="delete-btn" onclick="duplicarTransaccion('${t.id}')" title="Duplicar" style="margin-right:.2rem">${IC_COPY}</button>
+        <button class="delete-btn" onclick="abrirEditorTransaccion('${t.id}')" title="Editar" style="margin-right:.2rem">${IC_EDIT}</button>
+        <button class="delete-btn" onclick="eliminarTransaccion('${t.id}')" title="Eliminar">${IC_TRASH}</button>
       </td>
     </tr>`
   }).join("");
@@ -3451,7 +3456,7 @@ function abrirEditorTransaccion(id) {
 
   document.getElementById("edit-msg").textContent = "";
   document.getElementById("edit-guardar-btn").disabled = false;
-  document.getElementById("edit-guardar-btn").textContent = "💾 Guardar cambios";
+  document.getElementById("edit-guardar-btn").textContent = "Guardar cambios";
   document.getElementById("edit-overlay").classList.add("open");
   document.getElementById("edit-fecha").focus();
 }
@@ -3503,7 +3508,7 @@ async function guardarEdicionTransaccion() {
   } catch(e) {
     msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión al guardar</span>';
     btn.disabled = false;
-    btn.textContent = "💾 Guardar cambios";
+    btn.textContent = "Guardar cambios";
   }
 }
 
@@ -3579,7 +3584,7 @@ async function guardarTransaccion() {
   }
 
   btn.disabled = false;
-  btn.textContent = "💾 Guardar";
+  btn.textContent = "Guardar";
 }
 
 // ─── MODO RÁFAGA ──────────────────────────────────────────────
@@ -3622,8 +3627,8 @@ function agregarFilaRafaga() {
     <td><input type="date" class="rf-fecha" value="${hoy}"></td>
     <td>
       <select class="rf-tipo" onchange="this.closest('tr').querySelector('.rf-cat').innerHTML=_optsCategRafaga(this.value)">
-        <option value="Gasto">💸 Gasto</option>
-        <option value="Ingreso">💰 Ingreso</option>
+        <option value="Gasto">Gasto</option>
+        <option value="Ingreso">Ingreso</option>
       </select>
     </td>
     <td><select class="rf-cat">${_optsCategRafaga("Gasto")}</select></td>
@@ -3654,7 +3659,7 @@ function eliminarFilaRafaga(btn) {
 function actualizarContadorRafaga() {
   const n = document.getElementById("rafaga-tbody").children.length;
   document.getElementById("rafaga-count").textContent = `${n} fila${n !== 1 ? "s" : ""}`;
-  document.getElementById("rafaga-guardar-btn").textContent = `💾 Guardar todo (${n})`;
+  document.getElementById("rafaga-guardar-btn").textContent = `Guardar todo (${n})`;
 }
 
 async function guardarRafaga() {
@@ -3715,7 +3720,7 @@ async function guardarRafaga() {
   } catch(e) {
     msg.innerHTML = `<span style="color:var(--red)">❌ Error de conexión: ${e.message}</span>`;
     btn.disabled = false;
-    btn.textContent = `💾 Guardar todo (${validas.length})`;
+    btn.textContent = `Guardar todo (${validas.length})`;
   }
 }
 
@@ -5441,7 +5446,7 @@ function _renderPDFPreview() {
     : "";
 
   const respOpts = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De " + PARTNER])
-    .map(r => `<option value="${r}">${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De " + PARTNER}</option>`)
+    .map(r => `<option value="${r}">${r}</option>`)
     .join("");
 
   tbody.innerHTML = pdfFilasParsed.map((f, i) => {
@@ -5453,7 +5458,7 @@ function _renderPDFPreview() {
       ? `<span class="badge-moneda usd">USD</span>`
       : `<span class="badge-moneda ars">ARS</span>`;
     const respOptsRow = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De " + PARTNER])
-      .map(r => `<option value="${r}" ${r === (f.responsabilidad||"Mío") ? "selected" : ""}>${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De " + PARTNER}</option>`)
+      .map(r => `<option value="${r}" ${r === (f.responsabilidad||"Mío") ? "selected" : ""}>${r}</option>`)
       .join("");
     return `<tr>
       <td>${i+1}</td>
