@@ -25,7 +25,7 @@
 - **Archivo:** `index.html` (~5340 líneas) — repo local en `~/Documents/ProyectosClaude/finanzas-dashboard-live/`
 - **Autenticación:** Supabase email + password. Ambos usuarios (Daniel y Ama) comparten la misma URL.
 - **Usuario dinámico:** `USUARIO` se determina desde `session.user.user_metadata.nombre` al login. Si no está seteado, se muestra un modal de bienvenida la primera vez.
-- **Render principal:** `_renderApp()` → `_normalizarCategorias()` + `cargarResumenMes()` + `cargarEvolucion()` + `filtrarTabla()` + `inicializarSelectoresCompartidos()` + `inicializarSelectoresPresupuesto()`
+- **Render principal:** `_renderApp()` → `_normalizarCategorias()` + `setTipo("Gasto")` + `filtrarTabla()` + `inicializarSelectoresCompartidos()` + `inicializarSelectoresPresupuesto()` + `inicializarRespButtons()` + `navegarA("presupuesto")`
 
 ---
 
@@ -52,25 +52,33 @@ let chartEvolCombo = null;  // gráfico doble eje en Resumen (reemplazó chartEv
 
 ---
 
-## 4. Navegación (navIdx)
+## 4. Navegación
 
-Después de eliminar la pestaña Evolución, el orden actual del sidebar es:
+**La sidebar fue eliminada** (PR UX refresh, 2026-04-10). La navegación principal son 4 tabs:
 
-| idx | pagina | Dashboard |
+| Tab | Página HTML | Label visible |
 |---|---|---|
-| 0 | resumen | ambos |
-| 1 | transacciones | ambos |
-| 2 | nueva | ambos |
-| 3 | compartidos | ambos |
-| 4 | presupuesto | ambos |
-| 5 | config | ambos |
-| 6 | importar | ambos |
+| Mi mes | `page-presupuesto` | Mi mes |
+| Transacciones | `page-transacciones` | Gastos |
+| Compartidos | `page-compartidos` | Compartidos |
+| Categorías | `page-config` | Categorías |
+
+Las páginas `page-resumen`, `page-nueva`, `page-anual`, `page-importar` siguen existiendo en el HTML pero no están en el nav principal.
 
 ```javascript
-const navIdx = { resumen: 0, transacciones: 1, nueva: 2, compartidos: 3, presupuesto: 4, config: 5, importar: 7 };
+function navegarA(pagina) {
+  // alias: "mimes" → "presupuesto", "categorias" → "config"
+  // muestra/oculta .page divs, actualiza .topnav .nav-item y bottom nav #bn-*
+  // llama cargarCompartidos(), cargarPresupuesto(), cargarAnual(), renderizarConfig() según destino
+}
 ```
 
-La pestaña **Evolución fue eliminada** del nav — su gráfico (doble eje: barras ingresos/gastos + línea balance acumulado) vive ahora al final de la página Resumen en `<canvas id="chart-evol-combo">`.
+**Desktop:** `<nav class="topnav">` con 4 `.nav-item` buttons.
+**Mobile:** `<nav class="bottom-nav">` con 4 items (`#bn-presupuesto`, `#bn-transacciones`, `#bn-compartidos`, `#bn-config`).
+
+`_renderApp()` llama `navegarA("presupuesto")` al final → landing post-login es Mi mes.
+
+**FAB:** botón flotante `<button class="fab">` dentro de `page-presupuesto` → `navegarA('nueva')`. Posición: fijo bottom-right, encima del bottom nav en mobile.
 
 ---
 
@@ -99,6 +107,22 @@ fmtMoneda(n, moneda)  // USD → "U$S 1,234.56"
 fmtShort(n)      // $1.2k / $1.2M
 fmtFecha(s)      // "12 ene. 2026"
 ```
+
+### Progressive disclosure (Mi mes y Compartidos)
+```javascript
+toggleDesglose()                 // toggle tabla categorías en Mi mes
+inicializarDisclosureMimes()     // llamada al final de cargarPresupuesto()
+toggleDetalleCompartidos()       // toggle tabla detalle en Compartidos
+inicializarDisclosureCompartidos() // llamada al final de cargarCompartidos()
+```
+- Default Daniel=expandido, Ama=colapsado
+- Persistido en localStorage: `USUARIO + "_disclosure_mimes"` / `"_disclosure_compartidos"`
+
+### Responsabilidad en formulario (Nueva transacción)
+`<select id="f-responsabilidad">` — populado dinámicamente por `inicializarRespButtons()`.
+Labels visuales: "Solo mío" / "Lo pagamos juntos" / "Lo pagó [PARTNER]".
+Valores canónicos que van a la BD: `"Mío"` / `"Compartido"` / `"De " + PARTNER`.
+Resetear con `resetRespField()` tras guardar. Llamar `seleccionarResp(valor)` al duplicar.
 
 ### Editar transacción (workaround)
 El backend **no tiene** `updateTransaccion`. Se usa delete + add:

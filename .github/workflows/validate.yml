@@ -34,15 +34,15 @@ jobs:
           check() {
             grep -q "$1" index.html && echo "✅ $2" || { echo "❌ Falta: $2"; exit 1; }
           }
-          check "getTransacciones"    "endpoint getTransacciones"
-          check "addTransaccion"      "endpoint addTransaccion"
-          check "deleteTransaccion"   "endpoint deleteTransaccion"
-          check "API_URL"             "constante API_URL"
-          check "USUARIO"             "constante USUARIO"
-          check "allTransac"          "array allTransac"
-          check "cargarResumenMes"    "función cargarResumenMes"
-          check "filtrarTabla"        "función filtrarTabla"
-          check "cargarCompartidos"   "función cargarCompartidos"
+          check "cargarTodasTransacciones" "función cargarTodasTransacciones"
+          check "guardarTransaccion"       "función guardarTransaccion"
+          check "eliminarTransaccion"      "función eliminarTransaccion"
+          check "SUPABASE_URL"             "constante SUPABASE_URL"
+          check "USUARIO"                  "constante USUARIO"
+          check "allTransac"               "array allTransac"
+          check "cargarResumenMes"         "función cargarResumenMes"
+          check "filtrarTabla"             "función filtrarTabla"
+          check "cargarCompartidos"        "función cargarCompartidos"
 
       - name: Extraer JS inline y verificar sintaxis
         run: |

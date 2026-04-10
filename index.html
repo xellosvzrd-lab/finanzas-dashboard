@@ -15,47 +15,42 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    /* Backgrounds */
-    --bg:      #07071a;
-    --bg2:     #0d0d22;
-    --bg3:     #0a0a1c;
-    --card:    #10102a;
-    --border:  #1c1c3a;
-    --border2: #2c2c50;
+    /* Backgrounds — tema cálido */
+    --bg:      #FAF8F5;
+    --bg2:     #F2EEE9;
+    --bg3:     #EDE8E3;
+    --card:    #FFFFFF;
+    --border:  #EDE8E3;
+    --border2: #D4CFC9;
 
-    /* Accent system */
-    --accent:      #7c6eff;
-    --accent-dim:  rgba(124,110,255,0.13);
-    --accent-glow: rgba(124,110,255,0.28);
-    --accent2:     #f06fa0;
-    --accent2-dim: rgba(240,111,160,0.13);
+    /* Accent: terracota */
+    --accent:      #C8845A;
+    --accent-dim:  rgba(200,132,90,0.13);
+    --accent-glow: rgba(200,132,90,0.28);
+    --accent2:     #C8845A;
+    --accent2-dim: rgba(200,132,90,0.13);
 
-    /* Semantic colors con versión dim */
-    --green:      #34d399;
-    --green-dim:  rgba(52,211,153,0.11);
-    --red:        #f87171;
-    --red-dim:    rgba(248,113,113,0.11);
-    --yellow:     #fbbf24;
-    --yellow-dim: rgba(251,191,36,0.11);
+    /* Semantic colors */
+    --green:      #5A8C6B;
+    --green-dim:  rgba(90,140,107,0.11);
+    --red:        #C85A5A;
+    --red-dim:    rgba(200,90,90,0.11);
+    --yellow:     #C8A45A;
+    --yellow-dim: rgba(200,164,90,0.11);
 
     /* Text */
-    --text:       #e4e4f0;
-    --text-muted: #6060a0;
+    --text:       #2D2926;
+    --text-muted: #8C7B72;
 
     --radius: 14px;
-    --shadow: 0 8px 40px rgba(0,0,0,0.55);
-    --glass:  rgba(255,255,255,0.035);
-    --glass-border: rgba(255,255,255,0.07);
+    --shadow: 0 1px 3px rgba(45,41,38,0.08);
+    --glass:  rgba(255,255,255,0.6);
+    --glass-border: rgba(45,41,38,0.06);
   }
 
   body {
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: var(--bg);
-    background-image:
-      radial-gradient(ellipse 90% 55% at 12% -8%, rgba(124,110,255,0.22) 0%, transparent 55%),
-      radial-gradient(ellipse 65% 45% at 92% 105%, rgba(240,111,160,0.13) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(52,211,153,0.04) 0%, transparent 60%);
-    background-attachment: fixed;
     color: var(--text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -69,7 +64,7 @@
     justify-content: center;
     min-height: 100vh;
     padding: 2rem;
-    background: radial-gradient(ellipse at 50% 0%, rgba(124,110,255,0.14) 0%, var(--bg) 60%);
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,132,90,0.14) 0%, var(--bg) 60%);
   }
   .setup-card {
     background: var(--card);
@@ -78,7 +73,7 @@
     padding: 2.5rem;
     width: 100%;
     max-width: 520px;
-    box-shadow: var(--shadow), 0 0 80px rgba(124,110,255,0.07);
+    box-shadow: var(--shadow), 0 0 80px rgba(200,132,90,0.07);
   }
   .setup-card h1 { font-size: 1.7rem; margin-bottom: .4rem; font-weight: 800; letter-spacing: -.03em; }
   .setup-card p  { color: var(--text-muted); margin-bottom: 1.8rem; font-size: .92rem; line-height: 1.6; }
@@ -96,7 +91,7 @@
   }
   .setup-card input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
   .hint {
-    background: var(--accent-dim); border: 1px solid rgba(124,110,255,.22);
+    background: var(--accent-dim); border: 1px solid var(--border);
     border-radius: 9px; padding: 1rem 1.1rem; font-size: .82rem; color: var(--text-muted);
     margin-bottom: 1.5rem; line-height: 1.65;
   }
@@ -109,29 +104,24 @@
   #app { display: none; }
 
   /* ─── SIDEBAR ───────────────────────────────────────────── */
-  .layout { display: flex; min-height: 100vh; }
+  .layout { display: block; min-height: 100vh; }
 
   .sidebar {
     width: 230px;
-    background: rgba(7,7,20,0.92);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    border-right: 1px solid rgba(255,255,255,0.055);
+    background: var(--card);
+    border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
     padding: 0 0 1.5rem; position: fixed;
     height: 100vh; z-index: 10; overflow-y: auto;
   }
   .sidebar-logo {
     padding: 1.4rem 1.5rem 1.2rem;
-    border-bottom: 1px solid rgba(255,255,255,0.055);
+    border-bottom: 1px solid var(--border);
     margin-bottom: .6rem;
-    background: linear-gradient(160deg, rgba(124,110,255,0.16) 0%, rgba(240,111,160,0.07) 100%);
   }
   .sidebar-logo h2 {
     font-size: 1.05rem; font-weight: 800; letter-spacing: -.02em;
-    background: linear-gradient(135deg, #fff 0%, rgba(180,165,255,0.9) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text);
   }
   .sidebar-logo span {
     font-size: .76rem; color: var(--text-muted);
@@ -150,11 +140,10 @@
     border-left: 2px solid transparent; transition: all .16s;
     margin: .04rem 0;
   }
-  .nav-item:hover { background: var(--accent-dim); color: var(--text); border-left-color: rgba(124,110,255,0.35); }
+  .nav-item:hover { background: var(--accent-dim); color: var(--text); border-left-color: var(--accent); }
   .nav-item.active {
-    color: #fff; border-left-color: var(--accent);
-    background: linear-gradient(90deg, rgba(124,110,255,0.18) 0%, transparent 100%);
-    box-shadow: inset 0 0 24px rgba(124,110,255,0.06);
+    color: var(--accent); border-left-color: var(--accent);
+    background: var(--accent-dim);
   }
   .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--accent)); }
   .nav-icon { font-size: 1rem; width: 1.25rem; text-align: center; }
@@ -204,12 +193,12 @@
     gap: 1rem; margin-bottom: 1.8rem;
   }
   .kpi-card {
-    background: rgba(12,12,34,0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.3rem 1.5rem;
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass);
+    box-shadow: var(--shadow);
+    min-width: 0;
+    container-type: inline-size;
     position: relative; overflow: hidden;
     transition: border-color .25s, transform .2s, box-shadow .25s;
     animation: fadeUp .45s ease both;
@@ -226,17 +215,17 @@
   }
   .kpi-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(255,255,255,0.12);
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass), 0 0 36px rgba(124,110,255,0.1);
+    border-color: var(--border2);
+    box-shadow: var(--shadow), 0 0 36px rgba(200,132,90,0.1);
   }
   /* Acento de color superior según tipo de KPI */
   .kpi-card:has(.income)::before      { background: linear-gradient(90deg, var(--green), transparent 65%); box-shadow: 0 0 12px rgba(52,211,153,0.5); }
   .kpi-card:has(.expense)::before     { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
-  .kpi-card:has(.balance-pos)::before { background: linear-gradient(90deg, var(--accent), transparent 65%); box-shadow: 0 0 12px rgba(124,110,255,0.5); }
+  .kpi-card:has(.balance-pos)::before { background: linear-gradient(90deg, var(--accent), transparent 65%); box-shadow: 0 0 12px rgba(200,132,90,0.5); }
   .kpi-card:has(.balance-neg)::before { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
 
   .kpi-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; font-weight: 600; }
-  .kpi-value { font-size: 1.65rem; font-weight: 800; letter-spacing: -.025em; }
+  .kpi-value { font-size: clamp(0.75rem, 9cqw, 1.65rem); font-weight: 800; letter-spacing: -.025em; white-space: nowrap; overflow: hidden; }
   .kpi-value.income      { color: var(--green); }
   .kpi-value.expense     { color: var(--red); }
   .kpi-value.balance-pos { color: var(--accent); }
@@ -269,17 +258,15 @@
   @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
 
   .chart-card {
-    background: rgba(12,12,34,0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.4rem;
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass);
+    box-shadow: var(--shadow);
     transition: border-color .25s, box-shadow .25s;
   }
   .chart-card:hover {
-    border-color: rgba(255,255,255,0.11);
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass), 0 0 28px rgba(124,110,255,0.08);
+    border-color: var(--border2);
+    box-shadow: var(--shadow), 0 0 28px rgba(200,132,90,0.08);
   }
   .chart-card.full { grid-column: 1 / -1; }
   .chart-title {
@@ -375,17 +362,22 @@
     gap: 1.25rem;
     margin-top: 1.25rem;
   }
+  .comp-grid > * { min-width: 0; }
   @media (max-width: 900px) { .comp-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 768px) {
+    .comp-grid table { font-size: .8rem; }
+    .comp-grid thead th,
+    .comp-grid tbody td { padding: .4rem .5rem; white-space: nowrap; }
+    .comp-grid tbody td:first-child { white-space: normal; max-width: 90px; word-break: break-word; }
+  }
 
   .comp-balance-card {
-    background: rgba(12,12,34,0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(240,111,160,0.28);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1.4rem 1.8rem;
     margin-bottom: 1.25rem;
-    box-shadow: var(--shadow), 0 0 40px rgba(240,111,160,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: var(--shadow), 0 0 40px rgba(240,111,160,0.1);
     display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
   }
   .comp-balance-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
@@ -432,7 +424,7 @@
   }
   .cfg-del-btn:hover { color: var(--red); background: var(--red-dim); }
   .cfg-add-row {
-    display: flex; gap: .5rem; margin-top: .35rem;
+    display: flex; gap: .5rem; margin-top: .35rem; flex-wrap: wrap;
   }
   .cfg-input {
     flex: 1; background: var(--bg2); border: 1px solid var(--border);
@@ -441,7 +433,7 @@
     transition: border-color .15s;
   }
   .cfg-input:focus { outline: none; border-color: var(--accent); }
-  .cfg-add-btn { white-space: nowrap; padding: .5rem 1rem; font-size: .84rem; }
+  .cfg-add-btn { white-space: nowrap; padding: .5rem 1rem; font-size: .84rem; flex-shrink: 0; }
   .cfg-msg { font-size: .8rem; min-height: 1.2em; margin-top: .4rem; }
 
   /* ─── PÁGINA PRESUPUESTO ─────────────────────────────────── */
@@ -478,12 +470,11 @@
   /* ─── ANILLO DE PROGRESO TOTAL ──────────────────────────────── */
   .pres-ring-card {
     display: flex; align-items: center; gap: 2.5rem; flex-wrap: wrap;
-    background: rgba(12,12,34,0.6);
-    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.5rem 2rem;
     margin-bottom: 1.5rem;
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass);
+    box-shadow: var(--shadow);
     animation: fadeUp .4s .1s ease both;
   }
   .pres-ring-stats { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: .75rem; }
@@ -570,7 +561,7 @@
   .pdf-cat-select.sin-cat { border-color: var(--yellow); color: var(--yellow); }
 
   .imp-instrucciones {
-    background: var(--accent-dim); border: 1px solid rgba(124,110,255,.2);
+    background: var(--accent-dim); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.2rem 1.5rem;
     margin-bottom: 1.5rem; font-size: .87rem; line-height: 1.7;
   }
@@ -587,7 +578,7 @@
   .imp-formato-tabla th {
     background: var(--accent-dim); color: var(--accent);
     padding: .4rem .75rem; text-align: left;
-    border: 1px solid rgba(124,110,255,.2);
+    border: 1px solid var(--border);
   }
   .imp-formato-tabla td {
     padding: .35rem .75rem; border: 1px solid rgba(255,255,255,.07);
@@ -651,12 +642,10 @@
 
   /* ─── FORMULARIO NUEVA TRANSACCIÓN ─────────────────────── */
   .form-card {
-    background: rgba(12,12,34,0.7);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); padding: 2rem; max-width: 600px;
-    box-shadow: var(--shadow), inset 0 1px 0 var(--glass);
+    box-shadow: var(--shadow);
   }
   .form-card h2 { font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: 700; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
@@ -720,11 +709,11 @@
     gap: .45rem; font-family: inherit; letter-spacing: -.01em;
   }
   .btn-primary {
-    background: linear-gradient(135deg, var(--accent) 0%, #a06bf5 100%);
+    background: var(--accent);
     color: #fff; box-shadow: 0 4px 16px var(--accent-glow);
   }
   .btn-primary:hover {
-    background: linear-gradient(135deg, #8d80ff 0%, #b07eff 100%);
+    background: var(--accent); opacity: .88;
     transform: translateY(-2px); box-shadow: 0 6px 22px var(--accent-glow);
   }
   .btn-primary:active { transform: translateY(0); }
@@ -806,11 +795,10 @@
   .ama-debe-card {
     display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
     background: rgba(240,111,160,0.07);
-    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(240,111,160,0.28);
     border-radius: var(--radius); padding: 1.25rem 1.8rem;
     margin-bottom: 1.8rem;
-    box-shadow: 0 0 40px rgba(240,111,160,0.08), inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: 0 0 40px rgba(240,111,160,0.08);
     animation: fadeUp .45s .28s ease both;
   }
   .ama-icon {
@@ -860,9 +848,7 @@
   }
   .mobile-logo {
     font-size: .95rem; font-weight: 800; letter-spacing: -.02em;
-    background: linear-gradient(135deg, #fff 0%, rgba(180,165,255,0.9) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text);
   }
   .hamburger-btn {
     background: none; border: none; cursor: pointer;
@@ -913,7 +899,7 @@
   }
   .bn-nueva-circle {
     width: 52px; height: 52px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #a06bf5);
+    background: var(--accent);
     box-shadow: 0 4px 16px var(--accent-glow);
     display: flex; align-items: center; justify-content: center;
     font-size: 1.6rem; margin-bottom: 2px;
@@ -946,8 +932,7 @@
     .kpi-grid-4, .kpi-grid-5 { grid-template-columns: repeat(2, 1fr); }
 
     /* KPI cards más compactas */
-    .kpi-value { font-size: 1.3rem; }
-    .kpi-card { padding: 1rem 1.1rem; }
+    .kpi-card { padding: .85rem .95rem; }
 
     /* Formulario en 1 columna */
     .form-row { grid-template-columns: 1fr; }
@@ -1013,10 +998,10 @@
   /* Tipo y Moneda se ocultan en teléfonos muy pequeños */
   @media (max-width: 440px) {
     .col-hide-xs { display: none !important; }
-    .kpi-value { font-size: 1.1rem; }
-    .kpi-label { font-size: .65rem; }
+    .kpi-label { font-size: .6rem; }
+    .kpi-card { padding: .7rem .75rem; }
     .main { padding: 4.2rem .6rem 1.5rem; }
-    .kpi-grid { gap: .55rem; }
+    .kpi-grid { gap: .5rem; }
     tbody td, thead th { padding: .42rem .45rem; font-size: .79rem; }
   }
   /* ─── MODAL EDITAR TRANSACCIÓN ───────────────────────────── */
@@ -1033,10 +1018,8 @@
   }
   .edit-overlay.open { display: flex; }
   .edit-modal {
-    background: rgba(12,12,34,0.85);
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(255,255,255,0.07);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     width: 100%; max-width: 480px; max-height: 92vh;
@@ -1045,7 +1028,7 @@
   .edit-modal-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.2rem 1.5rem .9rem;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--border);
   }
   .edit-modal-header h3 { font-size: 1rem; font-weight: 700; margin: 0; }
   .edit-close-btn {
@@ -1055,7 +1038,7 @@
   }
   .edit-close-btn:hover { background: var(--red-dim); color: var(--red); }
   .edit-modal-body  { padding: 1.2rem 1.5rem; display: flex; flex-direction: column; gap: .9rem; }
-  .edit-modal-footer { padding: .9rem 1.5rem 1.3rem; display: flex; gap: .6rem; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.07); }
+  .edit-modal-footer { padding: .9rem 1.5rem 1.3rem; display: flex; gap: .6rem; justify-content: flex-end; border-top: 1px solid var(--border); }
 
   /* ─── MODAL MODO RÁFAGA ──────────────────────────────────── */
   .rafaga-overlay {
@@ -1066,9 +1049,8 @@
   }
   .rafaga-overlay.open { display: flex; }
   .rafaga-modal {
-    background: rgba(12,12,34,0.92); backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius); box-shadow: var(--shadow);
     width: 100%; max-width: 1100px; margin: auto;
     animation: fadeUp .22s ease;
@@ -1076,7 +1058,7 @@
   .rafaga-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.1rem 1.5rem .9rem;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--border);
   }
   .rafaga-header h3 { font-size: 1rem; font-weight: 700; margin: 0; }
   .rafaga-body { padding: 1rem 1.2rem; overflow-x: auto; }
@@ -1087,15 +1069,15 @@
     text-align: left; padding: .4rem .5rem;
     color: var(--text-muted); font-weight: 600;
     text-transform: uppercase; font-size: .68rem; letter-spacing: .05em;
-    border-bottom: 1px solid rgba(255,255,255,0.08); white-space: nowrap;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
   }
   .rafaga-table td {
     padding: .32rem .38rem; vertical-align: middle;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border);
   }
   .rafaga-table td input, .rafaga-table td select {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--bg2);
+    border: 1px solid var(--border);
     border-radius: 6px; color: var(--text);
     padding: .3rem .42rem; font-size: .81rem; width: 100%;
     transition: border-color .15s;
@@ -1117,16 +1099,16 @@
   .rafaga-footer {
     padding: .85rem 1.2rem 1.1rem;
     display: flex; gap: .6rem; align-items: center;
-    border-top: 1px solid rgba(255,255,255,0.07); flex-wrap: wrap;
+    border-top: 1px solid var(--border); flex-wrap: wrap;
   }
   .rafaga-add-btn {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: var(--bg2);
+    border: 1px solid var(--border);
     color: var(--text); border-radius: 8px;
     padding: .42rem .88rem; font-size: .83rem;
     cursor: pointer; transition: background .15s;
   }
-  .rafaga-add-btn:hover { background: rgba(255,255,255,0.11); }
+  .rafaga-add-btn:hover { background: var(--accent-dim); }
   .rafaga-count { color: var(--text-muted); font-size: .78rem; }
   .rafaga-row-err td { background: rgba(220,50,50,0.07); }
   .btn-rafaga {
@@ -1169,6 +1151,145 @@
   .edit-btn-secondary { background: var(--bg2); color: var(--text-muted); border: 1px solid var(--border); }
   .edit-btn-secondary:hover { border-color: var(--border2); color: var(--text); }
   #edit-msg { font-size: .82rem; padding: .3rem 0; min-height: 1.2rem; }
+
+  /* ─── TOP NAV ────────────────────────────────────────── */
+  .topnav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topnav-brand {
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--accent);
+    white-space: nowrap;
+    margin-right: .5rem;
+  }
+  .topnav-tabs {
+    display: flex;
+    gap: .25rem;
+    flex: 1;
+  }
+  .topnav .nav-item {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    padding: .5rem .85rem;
+    font-size: .9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color .15s, border-color .15s;
+    font-family: inherit;
+    border-radius: 0;
+  }
+  .topnav .nav-item:hover { color: var(--text); }
+  .topnav .nav-item.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .topnav-logout {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    padding: .4rem .6rem;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+  .topnav-logout:hover { color: var(--text); }
+  @media (max-width: 768px) { .topnav { display: none; } }
+  @media (min-width: 769px) { .bottom-nav { display: none; } }
+
+  /* Layout sin sidebar */
+  .main {
+    padding: 1.5rem 2rem 5rem;
+  }
+  @media (max-width: 768px) { .main { padding: 1rem 1rem 5rem; } }
+
+  /* ─── RADIO BUTTONS RESPONSABILIDAD ──────────────── */
+  .resp-toggle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: .5rem 0;
+    border: none;
+    background: none;
+    width: 100%;
+    font-size: .9rem;
+    color: var(--text-muted);
+    font-family: inherit;
+  }
+  .resp-toggle-header .resp-valor-actual {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .resp-group {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-top: .5rem;
+  }
+  .resp-btn {
+    flex: 1;
+    min-width: 0;
+    padding: .55rem .4rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text-muted);
+    font-size: .82rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: background .12s, color .12s, border-color .12s;
+    font-family: inherit;
+  }
+  .resp-btn.selected {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .resp-btn:hover:not(.selected) {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  /* ─── FAB — botón flotante agregar transacción ─── */
+  .fab {
+    position: fixed;
+    bottom: calc(64px + 1.25rem); /* encima del bottom nav */
+    right: 1.25rem;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(200,132,90,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s, box-shadow .15s;
+    z-index: 200;
+  }
+  .fab:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(200,132,90,0.55); }
+  .fab:active { transform: scale(0.95); }
+  @media (min-width: 768px) {
+    .fab { bottom: 1.5rem; } /* sin bottom nav en desktop */
+  }
 
 </style>
 </head>
@@ -1251,66 +1372,38 @@
 <!-- Overlay oscuro al abrir sidebar en mobile -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
+<!-- Top nav (desktop) -->
+<nav class="topnav" id="topnav">
+  <div class="topnav-brand">
+    💰 <span id="topnav-user"></span>
+  </div>
+  <div class="topnav-tabs">
+    <button class="nav-item" onclick="navegarA('presupuesto')">Mi mes</button>
+    <button class="nav-item" onclick="navegarA('transacciones')">Transacciones</button>
+    <button class="nav-item" onclick="navegarA('compartidos')">Compartidos</button>
+    <button class="nav-item" onclick="navegarA('config')">Categorías</button>
+  </div>
+  <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">↩</button>
+</nav>
+
 <!-- Bottom nav mobile -->
 <nav class="bottom-nav" id="bottom-nav">
-  <button class="bn-item" id="bn-resumen" onclick="navegarA('resumen')">
-    <span class="bn-icon">📊</span><span>Inicio</span>
+  <button class="bn-item" id="bn-presupuesto" onclick="navegarA('presupuesto')">
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span><span>Mi mes</span>
   </button>
   <button class="bn-item" id="bn-transacciones" onclick="navegarA('transacciones')">
-    <span class="bn-icon">📋</span><span>Historial</span>
-  </button>
-  <button class="bn-item bn-nueva" onclick="navegarA('nueva')">
-    <div class="bn-nueva-circle">➕</div>
-    <span class="bn-label">Nueva</span>
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></span><span>Gastos</span>
   </button>
   <button class="bn-item" id="bn-compartidos" onclick="navegarA('compartidos')">
-    <span class="bn-icon">👫</span><span>Compartidos</span>
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span>Compartidos</span>
   </button>
-  <button class="bn-item" id="bn-menu" onclick="toggleSidebar()">
-    <span class="bn-icon">☰</span><span>Menú</span>
+  <button class="bn-item" id="bn-config" onclick="navegarA('config')">
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span>Categorías</span>
   </button>
 </nav>
 
 <div id="app">
   <div class="layout">
-
-    <!-- SIDEBAR -->
-    <nav class="sidebar">
-      <div class="sidebar-logo">
-        <h2>💰 Finanzas</h2>
-        <span id="sidebar-user">Daniel</span>
-      </div>
-      <div class="nav-item active" onclick="navegarA('resumen')">
-        <span class="nav-icon">📊</span> Resumen
-      </div>
-      <div class="nav-item" onclick="navegarA('transacciones')">
-        <span class="nav-icon">📋</span> Transacciones
-      </div>
-      <div class="nav-sep">Carga</div>
-      <div class="nav-item" onclick="navegarA('nueva')">
-        <span class="nav-icon">➕</span> Nueva
-      </div>
-      <div class="nav-sep">Análisis</div>
-      <div class="nav-item" onclick="navegarA('compartidos')">
-        <span class="nav-icon">👫</span> Compartidos
-      </div>
-      <div class="nav-item" onclick="navegarA('presupuesto')">
-        <span class="nav-icon">🎯</span> Presupuesto
-      </div>
-      <div class="nav-item" onclick="navegarA('anual')">
-        <span class="nav-icon">📅</span> Año completo
-      </div>
-      <div class="nav-sep">Config</div>
-      <div class="nav-item" onclick="navegarA('config')">
-        <span class="nav-icon">⚙️</span> Configuración
-      </div>
-      <div class="nav-item" onclick="navegarA('importar')">
-        <span class="nav-icon">📥</span> Importar PDF
-      </div>
-      <div class="sidebar-bottom">
-        <button class="config-btn" onclick="volverConfig()">⚙️ Cambiar configuración</button>
-      </div>
-    </nav>
 
     <!-- MAIN -->
     <main class="main">
@@ -1318,7 +1411,7 @@
       <div id="error-carga" style="display:none;margin:1rem;padding:.75rem 1rem;background:var(--card);border:1px solid var(--red);border-left:3px solid var(--red);border-radius:10px;color:var(--red);font-size:.87rem;"></div>
 
       <!-- ── PÁGINA RESUMEN ────────────────────────────── -->
-      <div id="page-resumen" class="page active">
+      <div id="page-resumen" class="page">
         <div class="page-header">
           <h1>Resumen del mes</h1>
           <div class="mes-selector">
@@ -1395,8 +1488,8 @@
         <div class="page-header">
           <h1>Historial de transacciones</h1>
           <div style="display:flex;gap:.5rem;align-items:center">
-            <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">📥 CSV</button>
-            <button class="btn btn-primary" onclick="navegarA('nueva')">+ Nueva</button>
+            <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">CSV</button>
+            <button class="btn btn-primary" onclick="navegarA('nueva')">+ Anotar</button>
           </div>
         </div>
         <div class="table-filters">
@@ -1423,9 +1516,9 @@
           </select>
           <select id="fil-resp" onchange="filtrarTabla()">
             <option value="">Todas</option>
-            <option value="Mío">🙋 Mío</option>
-            <option value="Compartido">👫 Compartido</option>
-            <option value="De Ama">💳 De Ama</option>
+            <option value="Mío">Mío</option>
+            <option value="Compartido">Compartido</option>
+            <option value="De Ama">De Ama</option>
           </select>
           <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="filtrarTabla()">
         </div>
@@ -1470,7 +1563,7 @@
       <div id="page-nueva" class="page">
         <div class="page-header" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.6rem">
           <h1 style="margin:0">Nueva transacción</h1>
-          <button class="btn-rafaga" onclick="abrirRafaga()" title="Cargar varias transacciones de una vez">⚡ Carga múltiple</button>
+          <button class="btn-rafaga" onclick="abrirRafaga()" title="Cargar varias transacciones de una vez">Carga múltiple</button>
         </div>
         <div class="form-card">
           <!-- Fila 1: Tipo + Moneda lado a lado -->
@@ -1478,8 +1571,8 @@
             <div class="form-group">
               <label>Tipo</label>
               <div class="tipo-toggle">
-                <button class="tipo-btn active-expense" id="btn-gasto"  onclick="setTipo('Gasto')">💸 Gasto</button>
-                <button class="tipo-btn"                id="btn-ingreso" onclick="setTipo('Ingreso')">💰 Ingreso</button>
+                <button class="tipo-btn active-expense" id="btn-gasto"  onclick="setTipo('Gasto')">Gasto</button>
+                <button class="tipo-btn"                id="btn-ingreso" onclick="setTipo('Ingreso')">Ingreso</button>
               </div>
             </div>
             <div class="form-group">
@@ -1508,12 +1601,8 @@
               <select id="f-categoria"></select>
             </div>
             <div class="form-group">
-              <label>¿De quién es?</label>
-              <select id="f-responsabilidad">
-                <option value="Mío">🙋 Mío</option>
-                <option value="Compartido">👫 Compartido</option>
-                <option value="De Ama">💳 De Ama</option>
-              </select>
+              <label>¿Cómo se divide?</label>
+              <select id="f-responsabilidad"></select>
             </div>
           </div>
           <!-- Fila 4: Fuente -->
@@ -1534,7 +1623,7 @@
           </div>
           <div style="display:flex; gap:.75rem; margin-top:.5rem">
             <button class="btn btn-primary" id="btn-guardar" onclick="guardarTransaccion()">
-              💾 Guardar
+              Guardar
             </button>
             <button class="btn btn-outline" onclick="navegarA('transacciones')">Cancelar</button>
           </div>
@@ -1545,7 +1634,7 @@
       <!-- ── PÁGINA COMPARTIDOS ────────────────────────── -->
       <div id="page-compartidos" class="page">
         <div class="page-header">
-          <h1 id="comp-titulo">👫 Compartidos con Ama</h1>
+          <h1 id="comp-titulo">Compartidos con Ama</h1>
         </div>
 
         <!-- Selector de mes -->
@@ -1561,13 +1650,23 @@
           <div class="comp-balance-sub" id="comp-balance-sub">—</div>
         </div>
 
+        <!-- Toggle detalle compartidos -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
+          <button id="btn-toggle-compartidos"
+                  class="config-btn"
+                  onclick="toggleDetalleCompartidos()"
+                  style="font-size:.83rem;">
+            Ver detalle ▾
+          </button>
+        </div>
+
         <!-- Dos tablas side-by-side -->
-        <div class="comp-grid">
+        <div id="comp-detalle" class="comp-grid">
 
           <!-- Tabla izquierda: Compartidos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 style="font-size:1rem;font-weight:700;color:var(--yellow)">👫 Compartidos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(cada uno paga la mitad)</span></h3>
+              <h3 style="font-size:1rem;font-weight:700;color:var(--yellow)">Compartidos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(cada uno paga la mitad)</span></h3>
             </div>
             <div class="table-wrap">
               <table>
@@ -1593,7 +1692,7 @@
           <!-- Tabla derecha: Reembolsos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 style="font-size:1rem;font-weight:700;color:var(--accent2)">💳 Reembolsos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos individuales cruzados)</span></h3>
+              <h3 style="font-size:1rem;font-weight:700;color:var(--accent2)">Reembolsos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos individuales cruzados)</span></h3>
             </div>
             <div class="table-wrap">
               <table>
@@ -1637,40 +1736,40 @@
       <!-- ── PÁGINA PRESUPUESTO ────────────────────────────── -->
       <div id="page-presupuesto" class="page">
         <div class="page-header">
-          <h1>🎯 Presupuesto mensual</h1>
+          <h1>Mi mes</h1>
           <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
             <div class="mes-selector">
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
-            <button class="btn btn-primary" onclick="guardarPresupuesto()">💾 Guardar presupuesto</button>
+            <button class="btn btn-primary" onclick="guardarPresupuesto()">Guardar presupuesto</button>
           </div>
         </div>
 
         <!-- KPI strip -->
         <div class="kpi-grid kpi-grid-4" id="pres-kpi-grid">
           <div class="kpi-card">
-            <div class="kpi-label">💰 Sueldo del mes</div>
+            <div class="kpi-label">Sueldo</div>
             <div class="kpi-value income" id="pres-kpi-sueldo">$0</div>
             <div class="kpi-sub" id="pres-kpi-sueldo-sub">ingresos del mes</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">📊 Total presupuestado</div>
+            <div class="kpi-label">Presupuestado</div>
             <div class="kpi-value" id="pres-kpi-total" style="color:var(--accent)">$0</div>
             <div class="kpi-sub" id="pres-kpi-total-sub">de tu sueldo asignado</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">💸 Gastado efectivo</div>
+            <div class="kpi-label">Gastado</div>
             <div class="kpi-value expense" id="pres-kpi-gastado">$0</div>
             <div class="kpi-sub" id="pres-kpi-gastado-sub">50% compartidos</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">✅ Disponible</div>
+            <div class="kpi-label">Lo que te queda</div>
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
             <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Total presupuestado</div>
           </div>
           <div class="kpi-card" id="pres-kpi-usd-card" style="display:none">
-            <div class="kpi-label">💵 Saldo USD del mes</div>
+            <div class="kpi-label">En dólares</div>
             <div class="kpi-value" id="pres-kpi-saldo-usd">U$S 0,00</div>
             <div class="kpi-sub" id="pres-kpi-saldo-usd-sub">ingresos − gastos USD</div>
           </div>
@@ -1679,8 +1778,18 @@
         <!-- Anillo de progreso total -->
         <div id="pres-ring-container"></div>
 
+        <!-- Toggle desglose -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
+          <button id="btn-toggle-desglose"
+                  class="config-btn"
+                  onclick="toggleDesglose()"
+                  style="font-size:.83rem;">
+            Ver desglose ▾
+          </button>
+        </div>
+
         <!-- Tabla presupuesto vs ejecución -->
-        <div class="chart-card" style="padding:0;overflow:hidden">
+        <div id="pres-desglose" class="chart-card" style="padding:0;overflow:hidden">
           <table class="data-table">
             <thead>
               <tr>
@@ -1702,6 +1811,7 @@
           💡 Los valores se ingresan como <strong>% del sueldo</strong> del mes. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → 50% · <strong id="pres-note-partner">De Ama</strong> → 0%.
         </p>
         <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
+
       </div><!-- /page-presupuesto -->
 
       <!-- ── PÁGINA AÑO COMPLETO ────────────────────────── -->
@@ -1744,15 +1854,15 @@
       <!-- ── PÁGINA CATEGORÍAS Y FUENTES ──────────────────── -->
       <div id="page-config" class="page">
         <div class="page-header">
-          <h1>⚙️ Categorías y Fuentes</h1>
-          <div style="font-size:.85rem;color:var(--text-muted)">Los cambios se guardan en tu Google Sheet</div>
+          <h1>Categorías y Fuentes</h1>
+          <div style="font-size:.85rem;color:var(--text-muted)">Tus categorías y fuentes de pago</div>
         </div>
 
         <div class="cfg-grid">
 
           <!-- Categorías Gasto -->
           <div class="chart-card">
-            <div class="chart-title">💸 Categorías de Gasto</div>
+            <div class="chart-title">Categorías de Gasto</div>
             <div id="cfg-lista-gasto" class="cfg-lista"></div>
             <div class="cfg-add-row">
               <input type="text" id="cfg-nueva-gasto" placeholder="Nueva categoría..." class="cfg-input">
@@ -1763,7 +1873,7 @@
 
           <!-- Categorías Ingreso -->
           <div class="chart-card">
-            <div class="chart-title">💰 Categorías de Ingreso</div>
+            <div class="chart-title">Categorías de Ingreso</div>
             <div id="cfg-lista-ingreso" class="cfg-lista"></div>
             <div class="cfg-add-row">
               <input type="text" id="cfg-nueva-ingreso" placeholder="Nueva categoría..." class="cfg-input">
@@ -1774,7 +1884,7 @@
 
           <!-- Fuentes -->
           <div class="chart-card">
-            <div class="chart-title">🏦 Fuentes / Medios de pago</div>
+            <div class="chart-title">Fuentes / Medios de pago</div>
             <div id="cfg-lista-fuente" class="cfg-lista"></div>
             <div class="cfg-add-row">
               <input type="text" id="cfg-nueva-fuente" placeholder="Nueva fuente..." class="cfg-input">
@@ -1789,13 +1899,13 @@
       <!-- ── PÁGINA IMPORTAR DATOS ──────────────────────── -->
       <div id="page-importar" class="page">
         <div class="page-header">
-          <h1>📥 Importar datos</h1>
+          <h1>Importar datos</h1>
         </div>
 
         <!-- Tabs -->
         <div class="imp-tabs">
-          <button class="imp-tab active" id="imp-tab-btn-paste" onclick="impSwitchTab('paste')">📋 Copiar / Pegar</button>
-          <button class="imp-tab" id="imp-tab-btn-pdf" onclick="impSwitchTab('pdf')">📄 Resumen de tarjeta (PDF)</button>
+          <button class="imp-tab active" id="imp-tab-btn-paste" onclick="impSwitchTab('paste')">Copiar / Pegar</button>
+          <button class="imp-tab" id="imp-tab-btn-pdf" onclick="impSwitchTab('pdf')">Resumen de tarjeta (PDF)</button>
         </div>
 
         <!-- ── TAB: COPIAR/PEGAR ── -->
@@ -1837,8 +1947,8 @@
             placeholder="Pegá acá las filas (Tab o ; como separador)...&#10;15/01/2025	Gasto	Mercado	4500	Supermercado	Compartido	Galicia	ARS&#10;01/01/2025	Ingreso	Sueldo	180000	Sueldo enero	Mío	Galicia	ARS&#10;10/02/2025	Ingreso	Freelance	500	Pago cliente	Mío	Galicia	USD"></textarea>
 
           <div class="imp-actions">
-            <button class="btn btn-primary" onclick="parsearImport()">🔍 Previsualizar</button>
-            <button class="btn btn-outline" onclick="limpiarImport()">🗑 Limpiar</button>
+            <button class="btn btn-primary" onclick="parsearImport()">Previsualizar</button>
+            <button class="btn btn-outline" onclick="limpiarImport()">Limpiar</button>
           </div>
         </div>
 
@@ -1899,8 +2009,8 @@
           <div id="pdf-parse-progress" class="pdf-parse-progress">⏳ Leyendo PDFs...</div>
 
           <div class="imp-actions" id="pdf-actions" style="display:none">
-            <button class="btn btn-primary" onclick="parsearPDFs()">🔍 Leer y previsualizar</button>
-            <button class="btn btn-outline" onclick="pdfLimpiarTodo()">🗑 Limpiar</button>
+            <button class="btn btn-primary" onclick="parsearPDFs()">Leer y previsualizar</button>
+            <button class="btn btn-outline" onclick="pdfLimpiarTodo()">Limpiar</button>
           </div>
 
           <!-- Preview PDF (reutiliza la misma estructura) -->
@@ -1935,6 +2045,9 @@
 
       </div><!-- /page-importar -->
 
+      <!-- FAB: visible en todas las pestañas excepto Nueva transacción -->
+      <button class="fab" id="btn-fab-nueva" onclick="navegarA('nueva')" title="Nueva transacción">+</button>
+
     </main>
   </div>
 </div>
@@ -1965,7 +2078,7 @@
 <div class="rafaga-overlay" id="rafaga-overlay" onclick="if(event.target===this)cerrarRafaga()">
   <div class="rafaga-modal" role="dialog" aria-modal="true" aria-labelledby="rafaga-title">
     <div class="rafaga-header">
-      <h3 id="rafaga-title">⚡ Modo Ráfaga — Carga múltiple</h3>
+      <h3 id="rafaga-title">Modo Ráfaga — Carga múltiple</h3>
       <button class="edit-close-btn" onclick="cerrarRafaga()" title="Cerrar">✕</button>
     </div>
     <div class="rafaga-body">
@@ -1988,10 +2101,10 @@
       </table>
     </div>
     <div class="rafaga-footer">
-      <button class="rafaga-add-btn" onclick="agregarFilaRafaga()">➕ Agregar fila</button>
+      <button class="rafaga-add-btn" onclick="agregarFilaRafaga()">+ Agregar fila</button>
       <span class="rafaga-count" id="rafaga-count">3 filas</span>
       <button class="btn btn-outline" onclick="cerrarRafaga()" style="margin-left:auto">Cancelar</button>
-      <button class="btn btn-primary" id="rafaga-guardar-btn" onclick="guardarRafaga()">💾 Guardar todo (3)</button>
+      <button class="btn btn-primary" id="rafaga-guardar-btn" onclick="guardarRafaga()">Guardar todo (3)</button>
     </div>
     <div id="rafaga-msg" style="padding:.4rem 1.2rem .8rem; font-size:.82rem; min-height:1.2em;"></div>
   </div>
@@ -2001,7 +2114,7 @@
 <div class="edit-overlay" id="edit-overlay" onclick="if(event.target===this)cerrarEditorTransaccion()">
   <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
     <div class="edit-modal-header">
-      <h3 id="edit-modal-title">✏️ Editar transacción</h3>
+      <h3 id="edit-modal-title">Editar transacción</h3>
       <button class="edit-close-btn" onclick="cerrarEditorTransaccion()" title="Cerrar">✕</button>
     </div>
     <div class="edit-modal-body">
@@ -2013,8 +2126,8 @@
         <div class="edit-field">
           <label>Tipo</label>
           <select id="edit-tipo">
-            <option value="Gasto">💸 Gasto</option>
-            <option value="Ingreso">💰 Ingreso</option>
+            <option value="Gasto">Gasto</option>
+            <option value="Ingreso">Ingreso</option>
           </select>
         </div>
       </div>
@@ -2038,9 +2151,9 @@
       <div class="edit-field">
         <label>Responsabilidad</label>
         <select id="edit-responsabilidad">
-          <option value="Mío">🙋 Mío</option>
-          <option value="Compartido">👫 Compartido</option>
-          <option value="De Ama">💳 De Ama</option>
+          <option value="Mío">Mío</option>
+          <option value="Compartido">Compartido</option>
+          <option value="De Ama">De Ama</option>
         </select>
       </div>
       <div class="edit-field">
@@ -2055,7 +2168,7 @@
     </div>
     <div class="edit-modal-footer">
       <button class="edit-btn edit-btn-secondary" onclick="cerrarEditorTransaccion()">Cancelar</button>
-      <button class="edit-btn edit-btn-primary" id="edit-guardar-btn" onclick="guardarEdicionTransaccion()">💾 Guardar cambios</button>
+      <button class="edit-btn edit-btn-primary" id="edit-guardar-btn" onclick="guardarEdicionTransaccion()">Guardar cambios</button>
     </div>
   </div>
 </div>
@@ -2070,6 +2183,11 @@
 // ─── SUPABASE CONFIG ─────────────────────────────────────────
 const SUPABASE_URL = "https://eutarjfnlkcehhigqqxr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1dGFyamZubGtjZWhoaWdxcXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTA0MTQsImV4cCI6MjA5MTA4NjQxNH0._7-AO_9_12PumXjDfcAWkgKyS4s_kXZTxb8EKSdxlAg";
+
+// ─── SVG ICONS ────────────────────────────────────────────────
+const IC_COPY  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+const IC_EDIT  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+const IC_TRASH = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
 
 // ─── ESTADO GLOBAL ───────────────────────────────────────────
 let supabaseClient  = null;
@@ -2264,9 +2382,7 @@ function _aplicarCacheCateg(catData) {
   categFuentes         = catData.fuentes          || [];
   categResponsabilidad = catData.responsabilidad  || categResponsabilidad;
   // Poblar selectores con los datos cacheados
-  const selResp = document.getElementById("f-responsabilidad");
-  if (selResp) selResp.innerHTML = categResponsabilidad.map(rv =>
-    `<option value="${rv}">${rv === "Mío" ? "🙋 Mío" : rv === "Compartido" ? "👫 Compartido" : "💳 De " + PARTNER}</option>`).join("");
+  // (f-responsabilidad ahora es hidden input + radio buttons — se inicializa en inicializarRespButtons)
   const filResp = document.getElementById("fil-resp");
   if (filResp) filResp.innerHTML = '<option value="">Todas</option>' +
     categResponsabilidad.map(rv => `<option value="${rv}">${rv}</option>`).join("");
@@ -2303,13 +2419,13 @@ function _normalizarCategorias() {
 }
 
 function _renderApp() {
-  _normalizarCategorias(); // unificar capitalización antes de renderizar
+  _normalizarCategorias();
   setTipo("Gasto");
-  cargarResumenMes();
-  cargarEvolucion(); // fusionado en Resumen
   filtrarTabla();
   inicializarSelectoresCompartidos();
   inicializarSelectoresPresupuesto();
+  inicializarRespButtons();
+  navegarA("presupuesto");
 }
 
 // ─── FETCH CON TIMEOUT ────────────────────────────────────────
@@ -2349,7 +2465,7 @@ function _configurarUsuario(session) {
 
 function _actualizarStringsUsuario() {
   const tit = document.getElementById("comp-titulo");
-  if (tit) tit.textContent = "👫 Compartidos con " + PARTNER;
+  if (tit) tit.textContent = "Compartidos con " + PARTNER;
   const nota = document.getElementById("comp-nota");
   if (nota) nota.textContent = `* Neto por categoría: positivo = ${PARTNER} te debe · negativo = vos le debés a ${PARTNER}.`;
   const thU = document.getElementById("comp-th-usuario");
@@ -2370,6 +2486,8 @@ function _actualizarStringsUsuario() {
   }
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) sidebarUser.textContent = USUARIO;
+  const topnavUser = document.getElementById("topnav-user");
+  if (topnavUser) topnavUser.textContent = USUARIO;
 }
 
 async function guardarNombre() {
@@ -2412,7 +2530,8 @@ async function fetchTipoCambioMEP() {
 async function iniciarApp() {
   document.getElementById("setup-screen").style.display = "none";
   document.getElementById("app").style.display = "block";
-  if (USUARIO) document.getElementById("sidebar-user").textContent = USUARIO;
+  if (USUARIO) { const su = document.getElementById("sidebar-user"); if (su) su.textContent = USUARIO; }
+  if (USUARIO) { const tu = document.getElementById("topnav-user"); if (tu) tu.textContent = USUARIO; }
   if (window.innerWidth <= 768) {
     document.getElementById("mobile-header").style.display = "flex";
   }
@@ -3165,8 +3284,8 @@ function filtrarTabla() {
     return;
   }
 
-  const respEmoji = { "Mío": "🙋", "Compartido": "👫", "De Ama": "💳" };
-  const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", "De Ama": "var(--accent2)" };
+  const respEmoji = {};
+  const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", ["De " + PARTNER]: "var(--accent2)" };
 
   tbody.innerHTML = datos.map(t => {
     const r = t.responsabilidad || "Mío";
@@ -3185,9 +3304,9 @@ function filtrarTabla() {
       <td style="text-align:right;font-weight:600;white-space:nowrap;color:${t.tipo==="Ingreso"?"var(--green)":"var(--red)"}">${fmtMoneda(t.monto, mon)}</td>
       <td class="col-hide-xs">${monBadge}</td>
       <td style="white-space:nowrap">
-        <button class="delete-btn" onclick="duplicarTransaccion('${t.id}')" title="Duplicar" style="margin-right:.2rem">📋</button>
-        <button class="delete-btn" onclick="abrirEditorTransaccion('${t.id}')" title="Editar" style="margin-right:.2rem">✏️</button>
-        <button class="delete-btn" onclick="eliminarTransaccion('${t.id}')" title="Eliminar">🗑️</button>
+        <button class="delete-btn" onclick="duplicarTransaccion('${t.id}')" title="Duplicar" style="margin-right:.2rem">${IC_COPY}</button>
+        <button class="delete-btn" onclick="abrirEditorTransaccion('${t.id}')" title="Editar" style="margin-right:.2rem">${IC_EDIT}</button>
+        <button class="delete-btn" onclick="eliminarTransaccion('${t.id}')" title="Eliminar">${IC_TRASH}</button>
       </td>
     </tr>`
   }).join("");
@@ -3300,11 +3419,10 @@ function duplicarTransaccion(id) {
     document.getElementById("f-monto").value       = t.monto;
     document.getElementById("f-descripcion").value = t.descripcion || "";
     const selCat  = document.getElementById("f-categoria");
-    const selResp = document.getElementById("f-responsabilidad");
     const selFte  = document.getElementById("f-fuente");
     if (selCat)  selCat.value  = t.categoria;
-    if (selResp) selResp.value = t.responsabilidad || "Mío";
     if (selFte)  selFte.value  = t.fuente || "";
+    seleccionarResp(t.responsabilidad || "Mío");
     document.getElementById("f-monto").focus();
   }, 30);
   showToast("📋 Duplicado — revisá los datos antes de guardar", "ok");
@@ -3345,7 +3463,7 @@ function abrirEditorTransaccion(id) {
 
   document.getElementById("edit-msg").textContent = "";
   document.getElementById("edit-guardar-btn").disabled = false;
-  document.getElementById("edit-guardar-btn").textContent = "💾 Guardar cambios";
+  document.getElementById("edit-guardar-btn").textContent = "Guardar cambios";
   document.getElementById("edit-overlay").classList.add("open");
   document.getElementById("edit-fecha").focus();
 }
@@ -3397,7 +3515,7 @@ async function guardarEdicionTransaccion() {
   } catch(e) {
     msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión al guardar</span>';
     btn.disabled = false;
-    btn.textContent = "💾 Guardar cambios";
+    btn.textContent = "Guardar cambios";
   }
 }
 
@@ -3461,11 +3579,10 @@ async function guardarTransaccion() {
     document.getElementById("f-descripcion").value = "";
     document.getElementById("f-fecha").valueAsDate = new Date();
     const selCat  = document.getElementById("f-categoria");
-    const selResp = document.getElementById("f-responsabilidad");
     const selFte  = document.getElementById("f-fuente");
     if (selCat)  selCat.selectedIndex  = 0;
-    if (selResp) selResp.selectedIndex = 0;
     if (selFte)  selFte.selectedIndex  = 0;
+    resetRespField();
     showToast("✅ Transacción guardada", "ok");
     msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
     setTimeout(() => { msg.innerHTML = ""; }, 3000);
@@ -3474,7 +3591,7 @@ async function guardarTransaccion() {
   }
 
   btn.disabled = false;
-  btn.textContent = "💾 Guardar";
+  btn.textContent = "Guardar";
 }
 
 // ─── MODO RÁFAGA ──────────────────────────────────────────────
@@ -3517,8 +3634,8 @@ function agregarFilaRafaga() {
     <td><input type="date" class="rf-fecha" value="${hoy}"></td>
     <td>
       <select class="rf-tipo" onchange="this.closest('tr').querySelector('.rf-cat').innerHTML=_optsCategRafaga(this.value)">
-        <option value="Gasto">💸 Gasto</option>
-        <option value="Ingreso">💰 Ingreso</option>
+        <option value="Gasto">Gasto</option>
+        <option value="Ingreso">Ingreso</option>
       </select>
     </td>
     <td><select class="rf-cat">${_optsCategRafaga("Gasto")}</select></td>
@@ -3549,7 +3666,7 @@ function eliminarFilaRafaga(btn) {
 function actualizarContadorRafaga() {
   const n = document.getElementById("rafaga-tbody").children.length;
   document.getElementById("rafaga-count").textContent = `${n} fila${n !== 1 ? "s" : ""}`;
-  document.getElementById("rafaga-guardar-btn").textContent = `💾 Guardar todo (${n})`;
+  document.getElementById("rafaga-guardar-btn").textContent = `Guardar todo (${n})`;
 }
 
 async function guardarRafaga() {
@@ -3610,7 +3727,7 @@ async function guardarRafaga() {
   } catch(e) {
     msg.innerHTML = `<span style="color:var(--red)">❌ Error de conexión: ${e.message}</span>`;
     btn.disabled = false;
-    btn.textContent = `💾 Guardar todo (${validas.length})`;
+    btn.textContent = `Guardar todo (${validas.length})`;
   }
 }
 
@@ -3922,6 +4039,7 @@ function cargarCompartidos() {
   } else {
     balSub.textContent = "✅ Están a mano — sin deuda pendiente";
   }
+  inicializarDisclosureCompartidos();
 }
 
 // ─── LIQUIDACIÓN DE COMPARTIDOS ───────────────────────────────
@@ -4152,22 +4270,42 @@ function cargarAnual() {
 }
 
 function navegarA(pagina) {
+  // Aliases para compatibilidad con código interno
+  const alias = { mimes: "presupuesto", categorias: "config" };
+  pagina = alias[pagina] || pagina;
+
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-  document.getElementById("page-" + pagina).classList.add("active");
-  const navIdx = { resumen: 0, transacciones: 1, nueva: 2, compartidos: 3, presupuesto: 4, anual: 5, config: 6, importar: 7 };
-  const navItems = document.querySelectorAll(".nav-item");
-  if (navIdx[pagina] !== undefined) navItems[navIdx[pagina]].classList.add("active");
-  // Sincronizar bottom nav
-  ["bn-resumen","bn-transacciones","bn-compartidos","bn-menu"].forEach(id => {
+  const page = document.getElementById("page-" + pagina);
+  if (page) page.classList.add("active");
+
+  // Top nav (desktop) — 4 tabs en orden: presupuesto, transacciones, compartidos, config
+  const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3 };
+  document.querySelectorAll(".topnav .nav-item").forEach((n, i) => {
+    n.classList.toggle("active", i === navMap[pagina]);
+  });
+
+  // Bottom nav (mobile)
+  ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config"].forEach(id => {
     document.getElementById(id)?.classList.remove("active");
   });
-  const bnMap = { resumen:"bn-resumen", transacciones:"bn-transacciones", compartidos:"bn-compartidos" };
+  const bnMap = {
+    presupuesto: "bn-presupuesto",
+    transacciones: "bn-transacciones",
+    compartidos: "bn-compartidos",
+    config: "bn-config"
+  };
   if (bnMap[pagina]) document.getElementById(bnMap[pagina])?.classList.add("active");
-  if (pagina === "compartidos") cargarCompartidos();
-  if (pagina === "presupuesto") cargarPresupuesto();
-  if (pagina === "anual")       cargarAnual();
-  if (pagina === "config")      renderizarConfig();
+
+  // Cargar datos de la página destino
+  if (pagina === "compartidos")  cargarCompartidos();
+  if (pagina === "presupuesto")  cargarPresupuesto();
+  if (pagina === "anual")        cargarAnual();
+  if (pagina === "config")       renderizarConfig();
+
+  // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)
+  const fab = document.getElementById("btn-fab-nueva");
+  if (fab) fab.style.display = pagina === "nueva" ? "none" : "";
+
   closeSidebar();
   window.scrollTo(0, 0);
 }
@@ -4177,13 +4315,15 @@ function toggleSidebar() {
   const sidebar = document.querySelector(".sidebar");
   const overlay = document.getElementById("sidebar-overlay");
   const icon    = document.getElementById("hamburger-icon");
-  const open    = sidebar.classList.toggle("open");
-  overlay.classList.toggle("open", open);
-  icon.textContent = open ? "✕" : "☰";
+  if (!sidebar) return;
+  const open = sidebar.classList.toggle("open");
+  if (overlay) overlay.classList.toggle("open", open);
+  if (icon)    icon.textContent = open ? "✕" : "☰";
 }
 function closeSidebar() {
-  document.querySelector(".sidebar").classList.remove("open");
-  document.getElementById("sidebar-overlay").classList.remove("open");
+  const sidebar = document.querySelector(".sidebar");
+  if (sidebar) sidebar.classList.remove("open");
+  document.getElementById("sidebar-overlay")?.classList.remove("open");
   const icon = document.getElementById("hamburger-icon");
   if (icon) icon.textContent = "☰";
 }
@@ -4244,6 +4384,7 @@ async function cargarPresupuesto() {
     data.forEach(d => { presupuestoActual[d.categoria] = d.porcentaje; });
   } catch(e) { console.warn("Error cargando presupuesto:", e); }
   renderPresupuesto();
+  inicializarDisclosureMimes();
 }
 
 async function guardarPresupuesto() {
@@ -5316,7 +5457,7 @@ function _renderPDFPreview() {
     : "";
 
   const respOpts = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De " + PARTNER])
-    .map(r => `<option value="${r}">${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De " + PARTNER}</option>`)
+    .map(r => `<option value="${r}">${r}</option>`)
     .join("");
 
   tbody.innerHTML = pdfFilasParsed.map((f, i) => {
@@ -5328,7 +5469,7 @@ function _renderPDFPreview() {
       ? `<span class="badge-moneda usd">USD</span>`
       : `<span class="badge-moneda ars">ARS</span>`;
     const respOptsRow = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De " + PARTNER])
-      .map(r => `<option value="${r}" ${r === (f.responsabilidad||"Mío") ? "selected" : ""}>${r === "Mío" ? "🙋 Mío" : r === "Compartido" ? "👫 Compartido" : "💳 De " + PARTNER}</option>`)
+      .map(r => `<option value="${r}" ${r === (f.responsabilidad||"Mío") ? "selected" : ""}>${r}</option>`)
       .join("");
     return `<tr>
       <td>${i+1}</td>
@@ -5391,6 +5532,73 @@ async function confirmarImportPDF() {
     btn.disabled = false;
     btn.textContent = "✅ Importar transacciones";
   }
+}
+
+function toggleDesglose() {
+  const el  = document.getElementById("pres-desglose");
+  const btn = document.getElementById("btn-toggle-desglose");
+  if (!el || !btn) return;
+  const visible = el.style.display !== "none";
+  el.style.display = visible ? "none" : "";
+  btn.textContent  = visible ? "Ver desglose ▾" : "Ocultar desglose ▴";
+  try { localStorage.setItem(USUARIO + "_disclosure_mimes", visible ? "0" : "1"); } catch(e) {}
+}
+
+function inicializarDisclosureMimes() {
+  const el  = document.getElementById("pres-desglose");
+  const btn = document.getElementById("btn-toggle-desglose");
+  if (!el || !btn) return;
+  // Default: Daniel expandido, Ama colapsado. Override si hay valor guardado.
+  const saved = localStorage.getItem(USUARIO + "_disclosure_mimes");
+  const defaultExpanded = USUARIO.toLowerCase() !== "ama";
+  const expanded = saved !== null ? saved === "1" : defaultExpanded;
+  el.style.display  = expanded ? "" : "none";
+  btn.textContent   = expanded ? "Ocultar desglose ▴" : "Ver desglose ▾";
+}
+
+function toggleDetalleCompartidos() {
+  const el  = document.getElementById("comp-detalle");
+  const btn = document.getElementById("btn-toggle-compartidos");
+  if (!el || !btn) return;
+  const visible = el.style.display !== "none";
+  el.style.display = visible ? "none" : "";
+  btn.textContent  = visible ? "Ver detalle ▾" : "Ocultar detalle ▴";
+  try { localStorage.setItem(USUARIO + "_disclosure_compartidos", visible ? "0" : "1"); } catch(e) {}
+}
+
+function inicializarDisclosureCompartidos() {
+  const el  = document.getElementById("comp-detalle");
+  const btn = document.getElementById("btn-toggle-compartidos");
+  if (!el || !btn) return;
+  const saved = localStorage.getItem(USUARIO + "_disclosure_compartidos");
+  const defaultExpanded = USUARIO.toLowerCase() !== "ama";
+  const expanded = saved !== null ? saved === "1" : defaultExpanded;
+  el.style.display  = expanded ? "" : "none";
+  btn.textContent   = expanded ? "Ocultar detalle ▴" : "Ver detalle ▾";
+}
+
+// ─── RESPONSABILIDAD SELECT ────────────────────────────────────
+function inicializarRespButtons() {
+  const sel = document.getElementById("f-responsabilidad");
+  if (!sel) return;
+  const opciones = [
+    { valor: "Mío",           label: "Solo mío" },
+    { valor: "Compartido",    label: "Lo pagamos juntos" },
+    { valor: "De " + PARTNER, label: "Lo pagó " + (PARTNER || "tu pareja") },
+  ];
+  sel.innerHTML = opciones.map(op =>
+    `<option value="${op.valor}">${op.label}</option>`
+  ).join("");
+  sel.value = "Mío";
+}
+
+function seleccionarResp(valor) {
+  const sel = document.getElementById("f-responsabilidad");
+  if (sel) sel.value = valor;
+}
+
+function resetRespField() {
+  seleccionarResp("Mío");
 }
 </script>
 </body>
