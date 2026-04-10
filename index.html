@@ -3278,7 +3278,7 @@ function filtrarTabla() {
   }
 
   const respEmoji = {};
-  const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", "De Ama": "var(--accent2)" };
+  const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", ["De " + PARTNER]: "var(--accent2)" };
 
   tbody.innerHTML = datos.map(t => {
     const r = t.responsabilidad || "Mío";
