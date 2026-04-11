@@ -9,7 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   /* ─── FONTS ──────────────────────────────────────────────── */
-  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Libre+Franklin:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Libre+Franklin:wght@400;500;600;700&display=swap');
 
   /* ─── RESET & BASE ─────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,7 +58,6 @@
     color: var(--text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3,
@@ -69,6 +68,7 @@
   #sub-neto, .comp-balance-value, .ama-value,
   .donut-center-val, .donut-center-sub {
     font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+    text-rendering: optimizeLegibility;
   }
 
   /* ─── PANTALLA DE CONFIGURACIÓN ────────────────────────── */
@@ -496,7 +496,7 @@
   @keyframes barFill { from { width: 0 } to { width: var(--bar-w, 0%) } }
   .pres-bar-fill {
     height: 100%; border-radius: 99px;
-    width: 0; animation: barFill .65s cubic-bezier(0.23, 1, 0.32, 1) .12s both;
+    width: 0; animation: barFill .65s var(--ease-out) .12s both;
   }
   .pres-bar-fill.bar-ok   { background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,.55); }
   .pres-bar-fill.bar-warn { background: var(--yellow); box-shadow: 0 0 8px rgba(251,191,36,.55); }
@@ -719,7 +719,8 @@
   .tipo-btn {
     flex: 1; padding: .5rem; border: none; border-radius: 7px;
     cursor: pointer; font-size: .86rem; font-weight: 600;
-    transition: background .16s var(--ease-out), color .16s var(--ease-out); background: transparent; color: var(--text-muted);
+    background: transparent; color: var(--text-muted);
+    transition: background .16s var(--ease-out), color .16s var(--ease-out);
     font-family: inherit;
   }
   .tipo-btn.active-income  { background: var(--green-dim); color: var(--green); }
@@ -733,7 +734,8 @@
   .moneda-btn {
     flex: 1; padding: .42rem .6rem; border: none; border-radius: 7px;
     cursor: pointer; font-size: .8rem; font-weight: 700;
-    transition: background .16s var(--ease-out), color .16s var(--ease-out); background: transparent; color: var(--text-muted);
+    background: transparent; color: var(--text-muted);
+    transition: background .16s var(--ease-out), color .16s var(--ease-out);
     letter-spacing: .03em; font-family: inherit;
   }
   .moneda-btn.active-ars { background: var(--accent-dim); color: var(--accent); }
@@ -750,7 +752,7 @@
   .btn {
     padding: .65rem 1.4rem; border: none; border-radius: 9px;
     cursor: pointer; font-size: .88rem; font-weight: 600;
-    transition: background .18s var(--ease-out), color .18s var(--ease-out), box-shadow .18s var(--ease-out), transform .15s var(--ease-out); display: inline-flex; align-items: center;
+    transition: background .18s var(--ease-out), color .18s var(--ease-out), box-shadow .18s var(--ease-out), transform .18s var(--ease-out); display: inline-flex; align-items: center;
     gap: .45rem; font-family: inherit; letter-spacing: -.01em;
   }
   .btn-primary {
@@ -761,29 +763,28 @@
     background: var(--accent); opacity: .88;
     transform: translateY(-2px); box-shadow: 0 6px 22px var(--accent-glow);
   }
-  .btn-primary:active { transform: scale(0.97); box-shadow: none; }
+  .btn-primary:active, .btn-ghost:active, .btn-outline:active { transform: scale(0.97); }
+  .btn-primary:active { box-shadow: none; }
   .btn-ghost {
     background: var(--bg2); color: var(--text-muted);
     border: 1px solid var(--border);
   }
   .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
-  .btn-ghost:active { transform: scale(0.97); }
   .refresh-badge {
     display: none; position: fixed; bottom: 5.5rem; right: 1.5rem;
     background: var(--card); border: 1px solid var(--border);
     border-radius: 20px; padding: .35rem .85rem;
     font-size: .78rem; color: var(--text-muted);
     box-shadow: var(--shadow); z-index: 99;
-    animation: fadeIn .2s ease-out;
+    animation: fadeBadge .2s ease-out;
   }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeBadge { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
   .btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
   .btn-outline {
     background: transparent; color: var(--text-muted);
     border: 1px solid var(--border);
   }
   .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-  .btn-outline:active { transform: scale(0.97); }
 
   /* ─── TOAST ─────────────────────────────────────────────── */
   .toast {
