@@ -830,10 +830,13 @@
     border-top-color: var(--accent); border-radius: 50%;
     animation: spin .65s linear infinite;
   }
-  @keyframes spin    { to { transform: rotate(360deg); } }
-  @keyframes fadeUp  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
-  .page.active { animation: fadeIn .24s ease-out both; }
+  @keyframes spin       { to { transform: rotate(360deg); } }
+  @keyframes fadeUp     { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn     { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideRight { from { opacity: 0; transform: translateX( 18px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideLeft  { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: translateX(0); } }
+  .page.active           { animation: slideRight .22s var(--ease-out) both; }
+  .page.active.dir-back  { animation: slideLeft  .22s var(--ease-out) both; }
 
   /* ─── SPARKLINES ────────────────────────────────────────────── */
   .kpi-spark { margin-top: .6rem; height: 34px; opacity: .75; }
@@ -941,6 +944,13 @@
   }
   .bn-item:hover, .bn-item.active { color: var(--accent); }
   .bn-item:active { transform: scale(0.93); }
+  @keyframes bnIconPop {
+    0%   { transform: translateY(0)   scale(1); }
+    40%  { transform: translateY(-4px) scale(1.22); }
+    72%  { transform: translateY(1px)  scale(0.9); }
+    100% { transform: translateY(0)   scale(1); }
+  }
+  .bn-item.active .bn-icon { animation: bnIconPop .34s var(--ease-out); }
   .bn-item .bn-icon { font-size: 1.3rem; line-height: 1; }
   .bn-nueva {
     flex: 1.2; position: relative; overflow: visible;
@@ -1226,6 +1236,17 @@
     display: flex;
     gap: .25rem;
     flex: 1;
+    position: relative;
+  }
+  .topnav-indicator {
+    position: absolute;
+    bottom: -1px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 99px;
+    pointer-events: none;
+    transition: transform .22s var(--ease-out), width .22s var(--ease-out);
+    will-change: transform, width;
   }
   .topnav .nav-item {
     background: none;
@@ -1236,14 +1257,13 @@
     font-size: .9rem;
     font-weight: 500;
     color: var(--text-muted);
-    transition: color .15s, border-color .15s;
+    transition: color .18s var(--ease-out);
     font-family: inherit;
     border-radius: 0;
   }
   .topnav .nav-item:hover { color: var(--text); }
   .topnav .nav-item.active {
     color: var(--accent);
-    border-bottom-color: var(--accent);
   }
   .topnav-logout {
     background: none;
@@ -1338,8 +1358,8 @@
   }
   .fab:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(200,132,90,0.55); }
   .fab:active { transform: scale(0.95); }
-  @media (min-width: 768px) {
-    .fab { bottom: 1.5rem; } /* sin bottom nav en desktop */
+  @media (min-width: 769px) {
+    .fab { bottom: 5rem; } /* sobre el área donde aparecen los toasts (bottom: 1.5rem) */
   }
 
 </style>
@@ -1433,6 +1453,7 @@
     <button class="nav-item" onclick="navegarA('transacciones')">Transacciones</button>
     <button class="nav-item" onclick="navegarA('compartidos')">Compartidos</button>
     <button class="nav-item" onclick="navegarA('config')">Categorías</button>
+    <span class="topnav-indicator" id="topnav-indicator"></span>
   </div>
   <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -3743,6 +3764,8 @@ function abrirRafaga() {
 
 function cerrarRafaga() {
   document.getElementById("rafaga-overlay").classList.remove("open");
+  const btn = document.getElementById("rafaga-guardar-btn");
+  if (btn) btn.disabled = false;
 }
 
 function _optsCategRafaga(tipo) {
@@ -4422,20 +4445,44 @@ function cargarAnual() {
   tbody.innerHTML = html;
 }
 
+const _navOrder = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3 };
+let   _paginaActual = "presupuesto";
+
+function _actualizarNavIndicator() {
+  const indicator = document.getElementById("topnav-indicator");
+  const active    = document.querySelector(".topnav .nav-item.active");
+  if (!indicator || !active) return;
+  const tabsEl = document.querySelector(".topnav-tabs");
+  const tabsRect   = tabsEl.getBoundingClientRect();
+  const activeRect = active.getBoundingClientRect();
+  indicator.style.width     = activeRect.width + "px";
+  indicator.style.transform = `translateX(${activeRect.left - tabsRect.left}px)`;
+}
+
 function navegarA(pagina) {
   // Aliases para compatibilidad con código interno
   const alias = { mimes: "presupuesto", categorias: "config" };
   pagina = alias[pagina] || pagina;
 
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  // Dirección para la transición de página
+  const prevOrder = _navOrder[_paginaActual] ?? -1;
+  const nextOrder = _navOrder[pagina] ?? -1;
+  const goingBack = nextOrder !== -1 && prevOrder !== -1 && nextOrder < prevOrder;
+  _paginaActual = pagina;
+
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active", "dir-back"));
   const page = document.getElementById("page-" + pagina);
-  if (page) page.classList.add("active");
+  if (page) {
+    if (goingBack) page.classList.add("dir-back");
+    page.classList.add("active");
+  }
 
   // Top nav (desktop) — 4 tabs en orden: presupuesto, transacciones, compartidos, config
   const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3 };
   document.querySelectorAll(".topnav .nav-item").forEach((n, i) => {
     n.classList.toggle("active", i === navMap[pagina]);
   });
+  requestAnimationFrame(_actualizarNavIndicator);
 
   // Bottom nav (mobile)
   ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config"].forEach(id => {
@@ -4490,6 +4537,7 @@ window.addEventListener("resize", () => {
     mh.style.display = window.innerWidth <= 768 ? "flex" : "none";
     if (window.innerWidth > 768) closeSidebar(); // cerrar drawer si amplían pantalla
   }
+  requestAnimationFrame(_actualizarNavIndicator);
 });
 
 // ─── PRESUPUESTO ──────────────────────────────────────────────
@@ -4742,29 +4790,29 @@ function renderPresupuesto() {
   const totalGasto   = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
   const disponible   = sueldoEfectivo - totalPresARS;
 
-  // KPIs
+  // KPIs con animación count-up
   const kpiTotal = document.getElementById("pres-kpi-total");
-  kpiTotal.textContent = fmt(totalPresARS);
   kpiTotal.style.color = totalPresARS > sueldoEfectivo && sueldoEfectivo > 0 ? "var(--red)" : "var(--accent)";
+  animateKPI(kpiTotal, totalPresARS, fmt);
 
-  document.getElementById("pres-kpi-sueldo").textContent = fmt(sueldoEfectivo);
+  animateKPI(document.getElementById("pres-kpi-sueldo"), sueldoEfectivo, fmt);
   const sublSueldo = document.getElementById("pres-kpi-sueldo-sub");
   if (sublSueldo) {
     sublSueldo.textContent = USUARIO.toLowerCase() === "ama" && tipoCambioMEP && saldoUSDPres !== 0
       ? `ARS + ${fmtMoneda(Math.abs(saldoUSDPres),"USD")}×$${fmt(tipoCambioMEP).replace(/[^0-9,.]/g,"")} MEP`
       : "ingresos del mes";
   }
-  document.getElementById("pres-kpi-gastado").textContent = fmt(totalGasto);
+  animateKPI(document.getElementById("pres-kpi-gastado"), totalGasto, fmt);
 
   const kpiDisp = document.getElementById("pres-kpi-disponible");
-  kpiDisp.textContent = fmt(disponible);
   kpiDisp.className = "kpi-value " + (disponible >= 0 ? "balance-pos" : "expense");
+  animateKPI(kpiDisp, Math.abs(disponible), v => (disponible < 0 ? "-" : "") + fmt(v));
 
   const saldoReal = sueldoEfectivo - totalGasto;
   const kpiSaldoReal = document.getElementById("pres-kpi-saldo-real");
   if (kpiSaldoReal) {
-    kpiSaldoReal.textContent = fmt(saldoReal);
     kpiSaldoReal.className = "kpi-value " + (saldoReal >= 0 ? "balance-pos" : "expense");
+    animateKPI(kpiSaldoReal, Math.abs(saldoReal), v => (saldoReal < 0 ? "-" : "") + fmt(v));
   }
 
   const subDisp = document.getElementById("pres-kpi-disponible-sub");
