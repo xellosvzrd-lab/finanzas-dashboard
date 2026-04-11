@@ -3764,6 +3764,8 @@ function abrirRafaga() {
 
 function cerrarRafaga() {
   document.getElementById("rafaga-overlay").classList.remove("open");
+  const btn = document.getElementById("rafaga-guardar-btn");
+  if (btn) btn.disabled = false;
 }
 
 function _optsCategRafaga(tipo) {
