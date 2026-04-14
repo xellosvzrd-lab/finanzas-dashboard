@@ -1538,6 +1538,11 @@
             <div class="kpi-trend" id="kpi-ahorro-trend"></div>
             <div class="kpi-spark" id="spark-ahorro"></div>
           </div>
+          <div class="kpi-card" id="kpi-ahorro-cat-card">
+            <div class="kpi-label">Ahorro (categoría)</div>
+            <div class="kpi-value" id="kpi-ahorro-cat" style="color:var(--green)">$0</div>
+            <div class="kpi-sub" id="kpi-ahorro-cat-sub">total acumulado: —</div>
+          </div>
         </div>
 
         <!-- Gráfico categorías -->
@@ -3022,6 +3027,19 @@ async function cargarResumenMes() {
     document.getElementById("kpi-balance-trend").innerHTML  = _tendencia(balance,  prevBalance,  prevLabel, false);
     const ahorroNum = parseFloat(ahorro);
     document.getElementById("kpi-ahorro-trend").innerHTML   = _tendencia(ahorroNum, prevAhorro,  prevLabel, false);
+  }
+
+  // KPI "Ahorro" categoría — monto categorizado como Ahorro (mes actual + acumulado total)
+  const ahorroMesCat = datos
+    .filter(t => t.categoria === "Ahorro" && !esTransferencia(t))
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const ahorroAcumCat = allTransac
+    .filter(t => (t.usuario || "Daniel") === USUARIO && t.categoria === "Ahorro" && !esTransferencia(t))
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const kpiAhorroCatCard = document.getElementById("kpi-ahorro-cat-card");
+  if (kpiAhorroCatCard) {
+    animateKPI(document.getElementById("kpi-ahorro-cat"), ahorroMesCat, fmt);
+    document.getElementById("kpi-ahorro-cat-sub").textContent = `total acumulado: ${fmt(ahorroAcumCat)}`;
   }
 
   // KPI "Ama te debe" — acumulado total (no filtrado por mes)
