@@ -216,7 +216,7 @@
     container-type: inline-size;
     position: relative; overflow: hidden;
     transition: border-color .25s var(--ease-out), transform .2s var(--ease-out), box-shadow .25s var(--ease-out);
-    animation: fadeUp .45s ease-out both;
+    animation: fadeUp .45s var(--ease-out) both;
   }
   .kpi-card:nth-child(1) { animation-delay: .04s; }
   .kpi-card:nth-child(2) { animation-delay: .09s; }
@@ -1356,10 +1356,24 @@
     transition: transform .15s, box-shadow .15s;
     z-index: 200;
   }
+  .fab { animation: fabEntrada .45s var(--ease-out) both; }
   .fab:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(200,132,90,0.55); }
   .fab:active { transform: scale(0.95); }
+  @keyframes fabEntrada {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
   @media (min-width: 769px) {
     .fab { bottom: 5rem; } /* sobre el área donde aparecen los toasts (bottom: 1.5rem) */
+  }
+
+  /* ─── ACCESIBILIDAD: REDUCED MOTION ─────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration:        0.01ms !important;
+      animation-iteration-count: 1      !important;
+      transition-duration:       0.01ms !important;
+    }
   }
 
 </style>
@@ -2315,10 +2329,25 @@ let chartEvolCombo = null;
 
 // ─── PALETA DE COLORES ────────────────────────────────────────
 const PALETTE = [
-  "#7c6eff","#f06fa0","#34d399","#fbbf24","#22d3ee",
-  "#fb923c","#a78bfa","#f472b6","#6ee7b7","#fde68a",
-  "#74b9ff","#e17055"
+  "#C8845A",  // terracotta
+  "#8B9E6E",  // sage
+  "#C4A05A",  // ámbar
+  "#B87A7A",  // rosa polvoso
+  "#7A9888",  // eucalyptus
+  "#C49478",  // albaricoque
+  "#A87A9A",  // malva cálida
+  "#708E6A",  // oliva
+  "#C8887A",  // salmón
+  "#7A8898",  // pizarra cálida
+  "#A87A5A",  // sienna
+  "#9A8870",  // champiñón
 ];
+
+function _catColor(cat) {
+  let h = 0;
+  for (let i = 0; i < cat.length; i++) h = (Math.imul(31, h) + cat.charCodeAt(i)) | 0;
+  return PALETTE[Math.abs(h) % PALETTE.length];
+}
 
 // ─── SORT STATE ───────────────────────────────────────────────
 let sortCol = "fecha";
@@ -3049,12 +3078,13 @@ function renderCatChart(sortedCats) {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
+      animation: { duration: 700, easing: "easeOutQuart" },
       plugins: { legend: { display: false },
         tooltip: { callbacks: { label: ctx => " " + fmt(ctx.raw) } }
       },
       scales: {
-        x: { grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", font: { size: 11 } } },
-        y: { grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72",
+        x: { grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", font: { size: 11, family: "'Libre Franklin', system-ui" } } },
+        y: { grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", font: { family: "'Libre Franklin', system-ui" },
           callback: v => fmtShort(v) } }
       }
     }
@@ -3071,17 +3101,18 @@ function renderDonutChart(ingresos, gastos, balance) {
       labels: ["Ingresos","Gastos"],
       datasets: [{
         data: [ingresos, gastos],
-        backgroundColor: ["rgba(52,211,153,.75)","rgba(248,113,113,.75)"],
-        borderColor: ["rgba(52,211,153,.9)","rgba(248,113,113,.9)"],
+        backgroundColor: ["rgba(90,140,107,.75)","rgba(200,90,90,.75)"],
+        borderColor: ["rgba(90,140,107,.9)","rgba(200,90,90,.9)"],
         borderWidth: 2,
         hoverOffset: 10,
-        hoverBackgroundColor: ["rgba(52,211,153,1)","rgba(248,113,113,1)"],
+        hoverBackgroundColor: ["rgba(90,140,107,1)","rgba(200,90,90,1)"],
       }]
     },
     options: {
       responsive: true, maintainAspectRatio: false, cutout: "70%",
+      animation: { duration: 800, easing: "easeOutQuart" },
       plugins: {
-        legend: { position: "bottom", labels: { color: "#8C7B72", padding: 16, font:{ size:12 }, usePointStyle: true } },
+        legend: { position: "bottom", labels: { color: "#8C7B72", padding: 16, font:{ size:12, family: "'Libre Franklin', system-ui" }, usePointStyle: true } },
         tooltip: { callbacks: {
           label: ctx => " " + fmt(ctx.raw),
           afterLabel: ctx => ctx.dataIndex === 0
@@ -3247,12 +3278,12 @@ function cargarEvolucion() {
       datasets: [
         {
           label: "Ingresos", data: ingArr, type: "bar",
-          backgroundColor: "rgba(52,211,153,.65)", borderColor: "#34d399",
+          backgroundColor: "rgba(90,140,107,.65)", borderColor: "#5A8C6B",
           borderWidth: 1, borderRadius: 4, yAxisID: "y",
         },
         {
           label: "Gastos", data: gasArr, type: "bar",
-          backgroundColor: "rgba(248,113,113,.65)", borderColor: "#f87171",
+          backgroundColor: "rgba(200,90,90,.65)", borderColor: "#C85A5A",
           borderWidth: 1, borderRadius: 4, yAxisID: "y",
         },
         {
@@ -3265,15 +3296,16 @@ function cargarEvolucion() {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
+      animation: { duration: 700, easing: "easeOutQuart" },
       interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: { labels: { color: "#8C7B72" } },
+        legend: { labels: { color: "#8C7B72", font: { family: "'Libre Franklin', system-ui" } } },
         tooltip: { callbacks: { label: ctx => " " + fmt(ctx.raw) } }
       },
       scales: {
-        x: { grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72" } },
-        y:  { position: "left",  grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", callback: v => fmtShort(v) } },
-        y1: { position: "right", grid: { drawOnChartArea: false }, ticks: { color: "#C8845A", callback: v => fmtShort(v) } }
+        x: { grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", font: { family: "'Libre Franklin', system-ui" } } },
+        y:  { position: "left",  grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", font: { family: "'Libre Franklin', system-ui" }, callback: v => fmtShort(v) } },
+        y1: { position: "right", grid: { drawOnChartArea: false }, ticks: { color: "#C8845A", font: { family: "'Libre Franklin', system-ui" }, callback: v => fmtShort(v) } }
       }
     }
   });
@@ -3418,7 +3450,7 @@ function filtrarTabla() {
     <tr>
       <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}${fechaExtra}</td>
       <td class="col-hide-xs"><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
-      <td>${t.categoria}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="width:7px;height:7px;border-radius:50%;background:${_catColor(t.categoria)};flex-shrink:0;opacity:.85"></span>${t.categoria}</span></td>
       <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${t.fuente || "—"}</td>
       <td class="col-hide-sm"><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${r}</span></td>
       <td class="col-hide-sm" style="color:var(--text-muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.descripcion || "—"}</td>
