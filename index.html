@@ -1467,6 +1467,7 @@
     <button class="nav-item" onclick="navegarA('transacciones')">Transacciones</button>
     <button class="nav-item" onclick="navegarA('compartidos')">Compartidos</button>
     <button class="nav-item" onclick="navegarA('config')">Categorías</button>
+    <button class="nav-item" onclick="navegarA('resumen')">Resumen</button>
     <span class="topnav-indicator" id="topnav-indicator"></span>
   </div>
   <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
@@ -1488,6 +1489,9 @@
   <button class="bn-item" id="bn-config" onclick="navegarA('config')">
     <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span>Categorías</span>
   </button>
+  <button class="bn-item" id="bn-resumen" onclick="navegarA('resumen')">
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>Resumen</span>
+  </button>
 </nav>
 
 <div id="app">
@@ -1502,9 +1506,12 @@
       <div id="page-resumen" class="page">
         <div class="page-header">
           <h1>Resumen del mes</h1>
-          <div class="mes-selector">
-            <select id="sel-mes-resumen" onchange="guardarSelFecha();cargarResumenMes()"></select>
-            <select id="sel-anio-resumen" onchange="guardarSelFecha();cargarResumenMes()"></select>
+          <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+            <div class="mes-selector">
+              <select id="sel-mes-resumen" onchange="guardarSelFecha();cargarResumenMes()"></select>
+              <select id="sel-anio-resumen" onchange="guardarSelFecha();cargarResumenMes()"></select>
+            </div>
+            <button class="btn btn-ghost" onclick="navegarA('anual')">Ver análisis anual →</button>
           </div>
         </div>
 
@@ -4482,7 +4489,7 @@ function cargarAnual() {
   tbody.innerHTML = html;
 }
 
-const _navOrder = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3 };
+const _navOrder = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, resumen: 4 };
 let   _paginaActual = "presupuesto";
 
 function _actualizarNavIndicator() {
@@ -4515,21 +4522,22 @@ function navegarA(pagina) {
   }
 
   // Top nav (desktop) — 4 tabs en orden: presupuesto, transacciones, compartidos, config
-  const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3 };
+  const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, resumen: 4 };
   document.querySelectorAll(".topnav .nav-item").forEach((n, i) => {
     n.classList.toggle("active", i === navMap[pagina]);
   });
   requestAnimationFrame(_actualizarNavIndicator);
 
   // Bottom nav (mobile)
-  ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config"].forEach(id => {
+  ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config","bn-resumen"].forEach(id => {
     document.getElementById(id)?.classList.remove("active");
   });
   const bnMap = {
     presupuesto: "bn-presupuesto",
     transacciones: "bn-transacciones",
     compartidos: "bn-compartidos",
-    config: "bn-config"
+    config: "bn-config",
+    resumen: "bn-resumen"
   };
   if (bnMap[pagina]) document.getElementById(bnMap[pagina])?.classList.add("active");
 
@@ -4537,6 +4545,7 @@ function navegarA(pagina) {
   if (pagina === "compartidos")  cargarCompartidos();
   if (pagina === "presupuesto")  cargarPresupuesto();
   if (pagina === "anual")        cargarAnual();
+  if (pagina === "resumen")      cargarResumenMes();
   if (pagina === "config")       renderizarConfig();
 
   // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)
