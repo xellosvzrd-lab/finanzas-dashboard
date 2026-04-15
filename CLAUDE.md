@@ -1,6 +1,40 @@
 # Proyecto Finanzas Personales — Memoria del Proyecto
 
-> Archivo de contexto para Claude. Última actualización: 2026-04-09.
+> Archivo de contexto para Claude. Última actualización: 2026-04-15.
+
+---
+
+## Project Architecture
+- Single-file finance dashboard (`index.html` ~5900+ lines) with HTML/CSS/JS inline
+- Supabase backend — **ONE shared instance**, NOT multiple projects
+- Deployed via Vercel with preview branches (push feature branch → Vercel auto-deploys preview)
+- Navigation tabs: Mi mes | Transacciones | Compartidos | Categorías — pages `page-resumen`, `page-nueva`, `page-anual`, `page-importar` exist in HTML but are NOT in the main nav
+- When adding UI elements, ALWAYS verify which page/tab contains them and that the page is reachable via navigation
+
+## Workflow Rules
+- Implement changes immediately — do NOT present a plan and wait for approval unless explicitly asked to plan first
+- Always `git add`, `git commit`, confirm staged status before claiming changes are on any branch
+- After UI changes, verify the element is visible on the currently active/navigable page
+- When a task is done: stage → commit → push. Do not skip steps.
+
+## Git & Deployment
+- Use feature branches for non-trivial changes, push to get Vercel preview
+- Squash-merge PRs via `gh pr merge --squash`
+- After merge, verify deployment status
+- ONE Supabase project — never suggest running migrations on multiple projects
+
+## UI/Design Preferences
+- Warm-earth palette with terracotta tones (modern, warm, intimate aesthetic)
+- Users: Daniel (dark theme) and Ama (light theme)
+- `PARTNER` variable is dynamic — use it for responsibility labels, never hardcode
+- No dark mode for Daniel's theme by design; Ama has `[data-theme="light"]`
+- Chart.js for all charts with animations enabled
+- Mobile responsiveness is critical — test for overflow and max-width constraints on every UI change
+
+## Context Management
+- For large sessions, save progress to memory files before context window fills up
+- If session is getting long, proactively suggest breaking into a new session with a context handoff
+- Never let session hit 'Prompt is too long' — checkpoint early
 
 ---
 

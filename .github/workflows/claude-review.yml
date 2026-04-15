@@ -1,0 +1,13 @@
+name: Claude PR Review
+on: [pull_request]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          claude -p "Review this PR diff for: 1) UI elements placed on inaccessible pages, 2) uncommitted assumptions, 3) mobile overflow issues. Diff: $(git diff origin/main...HEAD)" --allowedTools "Read,Grep,Glob"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
