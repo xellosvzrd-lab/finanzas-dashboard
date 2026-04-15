@@ -5283,11 +5283,12 @@ function parsearImport() {
     // Validar fecha
     let fechaValida = "";
     if (fechaRaw) {
-      const isSlash = /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(fechaRaw);
+      const isSlash = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(fechaRaw);
       const isDash  = /^\d{4}-\d{2}-\d{2}$/.test(fechaRaw);
       if (isSlash) {
         const [d,m,y] = fechaRaw.split("/");
-        fechaValida = `${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
+        const year = y.length === 2 ? `20${y}` : y;
+        fechaValida = `${year}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
       } else if (isDash) {
         fechaValida = fechaRaw;
       } else {
