@@ -1884,6 +1884,11 @@
             <div class="kpi-value" id="kpi-ahorro-cat" style="color:var(--green)">$0</div>
             <div class="kpi-sub" id="kpi-ahorro-cat-sub">total acumulado: —</div>
           </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Podés gastar por día</div>
+            <div class="kpi-value" id="pres-kpi-diario">—</div>
+            <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
+          </div>
         </div>
 
         <!-- Anillo de progreso total -->
@@ -4861,6 +4866,23 @@ function renderPresupuesto() {
     animateKPI(kpiSaldoReal, Math.abs(saldoReal), v => (saldoReal < 0 ? "-" : "") + fmt(v));
   }
 
+  const kpiDiario = document.getElementById("pres-kpi-diario");
+  if (kpiDiario) {
+    const hoy = new Date();
+    const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
+    if (esEsteMes && saldoReal > 0) {
+      const diasRestantes = new Date(anio, mes, 0).getDate() - hoy.getDate() + 1;
+      const gastoDiario = saldoReal / diasRestantes;
+      kpiDiario.className = "kpi-value balance-pos";
+      animateKPI(kpiDiario, gastoDiario, fmt);
+      document.getElementById("pres-kpi-diario-sub").textContent = `${diasRestantes} días restantes`;
+    } else {
+      kpiDiario.textContent = "—";
+      kpiDiario.className = "kpi-value";
+      document.getElementById("pres-kpi-diario-sub").textContent = saldoReal <= 0 ? "Sin margen disponible" : "Mes histórico";
+    }
+  }
+
   const subDisp = document.getElementById("pres-kpi-disponible-sub");
   if (subDisp) {
     subDisp.textContent = "Sueldo − Presupuestado";
@@ -5058,6 +5080,22 @@ function actualizarKpisPres() {
   if (kpiSaldoReal) {
     kpiSaldoReal.textContent = fmt(saldoReal);
     kpiSaldoReal.className = "kpi-value " + (saldoReal >= 0 ? "balance-pos" : "expense");
+  }
+
+  const kpiDiario2 = document.getElementById("pres-kpi-diario");
+  if (kpiDiario2) {
+    const hoy = new Date();
+    const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
+    if (esEsteMes && saldoReal > 0) {
+      const diasRestantes = new Date(anio, mes, 0).getDate() - hoy.getDate() + 1;
+      kpiDiario2.textContent = fmt(saldoReal / diasRestantes);
+      kpiDiario2.className = "kpi-value balance-pos";
+      document.getElementById("pres-kpi-diario-sub").textContent = `${diasRestantes} días restantes`;
+    } else {
+      kpiDiario2.textContent = "—";
+      kpiDiario2.className = "kpi-value";
+      document.getElementById("pres-kpi-diario-sub").textContent = saldoReal <= 0 ? "Sin margen disponible" : "Mes histórico";
+    }
   }
 
   const subTotal = document.getElementById("pres-kpi-total-sub");

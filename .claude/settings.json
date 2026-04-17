@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' 2>/dev/null | grep -q 'index\\.html$' && jq -r '.tool_input.new_string // .tool_input.content // empty' 2>/dev/null | grep -qE 'page-resumen|page-anual|page-importar|page-nueva' && echo '{\"systemMessage\": \"⚠️  Elemento agregado a una página NO accesible desde el nav principal (resumen/anual/importar/nueva). Verificar que el elemento esté en page-presupuesto, page-transacciones, page-compartidos o page-config.\"}' || true"
+          }
+        ]
+      }
+    ]
+  }
+}
