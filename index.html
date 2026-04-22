@@ -2322,6 +2322,15 @@ const IC_COPY  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
 const IC_EDIT  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
 const IC_TRASH = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
 
+function escapeHtml(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // ─── ESTADO GLOBAL ───────────────────────────────────────────
 let supabaseClient  = null;
 let supabaseSession = null;
@@ -2410,14 +2419,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) { supabaseSession = session; _configurarUsuario(session); iniciarApp(); return; }
 
-  // Sesión expirada — intentar re-login con credenciales guardadas
-  const email    = localStorage.getItem("fp_sb_email");
-  const password = localStorage.getItem("fp_sb_password");
-  if (email && password) {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (!error && data.session) { supabaseSession = data.session; _configurarUsuario(data.session); iniciarApp(); return; }
-  }
-  // No se pudo restaurar — mostrar pantalla de login
+  // No hay sesión activa — mostrar pantalla de login
 });
 
 // ─── CONFIGURACIÓN ────────────────────────────────────────────
@@ -2441,11 +2443,11 @@ async function guardarConfig() {
     if (error) throw error;
     supabaseSession = data.session;
     _configurarUsuario(data.session);
-    localStorage.setItem("fp_sb_email",    email);
-    localStorage.setItem("fp_sb_password", password);
+    localStorage.setItem("fp_sb_email", email);
+    localStorage.removeItem("fp_sb_password");
     iniciarApp();
   } catch(e) {
-    res.innerHTML = `<span class="fail">❌ ${e.message || "Error al conectar"}</span>`;
+    res.innerHTML = `<span class="fail">❌ ${escapeHtml(e.message) || "Error al conectar"}</span>`;
     btn.disabled = false;
     btn.textContent = "Entrar →";
   }
@@ -2495,7 +2497,7 @@ async function enviarResetPassword() {
     res.innerHTML = '<span class="ok">✅ Revisá tu email — te enviamos el link para resetear tu contraseña.</span>';
     btn.textContent = "Enviado";
   } catch(e) {
-    res.innerHTML = `<span class="fail">❌ ${e.message || "Error al enviar."}</span>`;
+    res.innerHTML = `<span class="fail">❌ ${escapeHtml(e.message) || "Error al enviar."}</span>`;
     btn.disabled = false;
     btn.textContent = "Enviar email →";
   }
@@ -2515,10 +2517,10 @@ async function guardarNuevaPassword() {
     const { error } = await supabaseClient.auth.updateUser({ password: p1 });
     if (error) throw error;
     res.innerHTML = '<span class="ok">✅ Contraseña actualizada. Redirigiendo...</span>';
-    localStorage.setItem("fp_sb_password", p1);
+    localStorage.removeItem("fp_sb_password");
     setTimeout(() => { _configurarUsuario(supabaseSession); iniciarApp(); }, 1500);
   } catch(e) {
-    res.innerHTML = `<span class="fail">❌ ${e.message || "Error al guardar."}</span>`;
+    res.innerHTML = `<span class="fail">❌ ${escapeHtml(e.message) || "Error al guardar."}</span>`;
     btn.disabled = false;
     btn.textContent = "Guardar contraseña →";
   }
@@ -2656,7 +2658,7 @@ async function guardarNombre() {
   const { error } = await supabaseClient.auth.updateUser({ data: { nombre } });
 
   if (error) {
-    msg.innerHTML = `<span style="color:var(--red)">Error: ${error.message}</span>`;
+    msg.innerHTML = `<span style="color:var(--red)">Error: ${escapeHtml(error.message)}</span>`;
     return;
   }
 
@@ -3467,10 +3469,10 @@ function filtrarTabla() {
     <tr>
       <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}${fechaExtra}</td>
       <td class="col-hide-xs"><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
-      <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="width:7px;height:7px;border-radius:50%;background:${_catColor(t.categoria)};flex-shrink:0;opacity:.85"></span>${t.categoria}</span></td>
-      <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${t.fuente || "—"}</td>
-      <td class="col-hide-sm"><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${r}</span></td>
-      <td class="col-hide-sm" style="color:var(--text-muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.descripcion || "—"}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="width:7px;height:7px;border-radius:50%;background:${_catColor(t.categoria)};flex-shrink:0;opacity:.85"></span>${escapeHtml(t.categoria)}</span></td>
+      <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${escapeHtml(t.fuente) || "—"}</td>
+      <td class="col-hide-sm"><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${escapeHtml(r)}</span></td>
+      <td class="col-hide-sm" style="color:var(--text-muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(t.descripcion) || "—"}</td>
       <td style="text-align:right;font-weight:600;white-space:nowrap;color:${t.tipo==="Ingreso"?"var(--green)":"var(--red)"}">${fmtMoneda(t.monto, mon)}</td>
       <td class="col-hide-xs">${monBadge}</td>
       <td style="white-space:nowrap">
@@ -3792,7 +3794,7 @@ async function guardarTransaccion() {
     msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
     setTimeout(() => { msg.innerHTML = ""; }, 3000);
   } catch(e) {
-    msg.innerHTML = `<span style="color:var(--red)">❌ ${e.message || e}</span>`;
+    msg.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message || String(e))}</span>`;
   }
 
   btn.disabled = false;
@@ -3950,7 +3952,7 @@ async function guardarRafaga() {
     await cargarTodasTransacciones();
     _renderApp();
   } catch(e) {
-    msg.innerHTML = `<span style="color:var(--red)">❌ Error de conexión: ${e.message}</span>`;
+    msg.innerHTML = `<span style="color:var(--red)">❌ Error de conexión: ${escapeHtml(e.message)}</span>`;
     btn.disabled = false;
     btn.textContent = `Guardar todo (${validas.length})`;
   }
@@ -5171,7 +5173,7 @@ async function agregarCategoria(tipoAPI) {
     input.value = "";
     msg.innerHTML = `<span style="color:var(--green)">✅ "${valor}" agregado.</span>`;
   } catch(e) {
-    msg.innerHTML = `<span style="color:var(--red)">❌ ${e.message || "Error de conexión."}</span>`;
+    msg.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message) || "Error de conexión."}</span>`;
   }
   setTimeout(() => { msg.innerHTML = ""; }, 3000);
 }
@@ -5228,7 +5230,7 @@ async function confirmarReclasificarFuente(valor, tipoActual) {
       await ejecutarReclasificarFuente(valor, tipoActual);
     }
   } catch(e) {
-    msgEl.innerHTML = `<span style="color:var(--red)">❌ ${e.message || "Error de conexión."}</span>`;
+    msgEl.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message) || "Error de conexión."}</span>`;
     setTimeout(() => { msgEl.innerHTML = ""; }, 3000);
   }
 }
@@ -5268,7 +5270,7 @@ async function ejecutarReclasificarFuente(valor, tipoActual) {
     }
   } catch(e) {
     if (msgEl) {
-      msgEl.innerHTML = `<span style="color:var(--red)">❌ ${e.message || "Error de conexión."}</span>`;
+      msgEl.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message) || "Error de conexión."}</span>`;
       setTimeout(() => { msgEl.innerHTML = ""; }, 3000);
     }
   }
