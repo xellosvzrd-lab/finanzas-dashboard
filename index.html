@@ -232,13 +232,25 @@
   .kpi-card:hover {
     transform: translateY(-3px);
     border-color: var(--border2);
-    box-shadow: var(--shadow), 0 0 36px rgba(200,132,90,0.1);
+    box-shadow: var(--shadow), 0 0 48px rgba(200,132,90,0.18);
   }
   /* Acento de color superior según tipo de KPI */
   .kpi-card:has(.income)::before      { background: linear-gradient(90deg, var(--green), transparent 65%); box-shadow: 0 0 12px rgba(52,211,153,0.5); }
   .kpi-card:has(.expense)::before     { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
   .kpi-card:has(.balance-pos)::before { background: linear-gradient(90deg, var(--accent), transparent 65%); box-shadow: 0 0 12px rgba(200,132,90,0.5); }
   .kpi-card:has(.balance-neg)::before { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
+  /* Shine sweep on hover */
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -80%;
+    width: 50%; height: 100%;
+    background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.08) 50%, transparent 80%);
+    transform: skewX(-20deg);
+    transition: left .6s var(--ease-out);
+    pointer-events: none;
+  }
+  .kpi-card:hover::after { left: 160%; }
 
   .kpi-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; font-weight: 600; }
   .kpi-value { font-size: clamp(0.75rem, 9cqw, 1.65rem); font-weight: 800; letter-spacing: -.025em; white-space: nowrap; overflow: hidden; }
@@ -356,8 +368,13 @@
     border-bottom: 1px solid var(--border); font-weight: 600;
     position: sticky; top: 0; z-index: 1;
   }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background .13s; }
-  tbody tr:hover { background: var(--accent-dim); }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .13s, transform .13s var(--ease-out);
+    animation: fadeUp .28s var(--ease-out) both;
+    animation-delay: calc(var(--row-i, 0) * 30ms);
+  }
+  tbody tr:hover { background: var(--accent-dim); transform: translateX(2px); }
   tbody td { padding: .7rem 1rem; }
   .badge {
     display: inline-block; padding: .18rem .65rem;
@@ -498,10 +515,20 @@
   .pres-bar-fill {
     height: 100%; border-radius: 99px;
     width: 0; animation: barFill .65s var(--ease-out) .12s both;
+    position: relative; overflow: hidden;
   }
   .pres-bar-fill.bar-ok   { background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,.55); }
   .pres-bar-fill.bar-warn { background: var(--yellow); box-shadow: 0 0 8px rgba(251,191,36,.55); }
   .pres-bar-fill.bar-over { background: var(--red);   box-shadow: 0 0 8px rgba(248,113,113,.55); }
+  .pres-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: barShimmer 1s var(--ease-out) .85s both;
+  }
+  @keyframes barShimmer { from { left: -100%; } to { left: 150%; } }
   .pres-bar-pct  { font-size: .71rem; color: var(--text-muted); min-width: 38px; text-align: right; font-weight: 600; }
 
   /* ─── FILAS DE ESTADO ───────────────────────────────────────── */
@@ -548,6 +575,7 @@
 
   .empty-state {
     text-align: center; padding: 3rem; color: var(--text-muted); font-size: .9rem;
+    animation: fadeUp .35s var(--ease-out) both;
   }
 
   /* ─── IMPORTAR DATOS ────────────────────────────────────── */
@@ -793,11 +821,12 @@
     background: var(--card); border: 1px solid var(--border2);
     border-radius: 11px; padding: .85rem 1.25rem; font-size: .86rem;
     box-shadow: var(--shadow); z-index: 1000;
-    transform: translateY(10px); opacity: 0; transition: transform .22s var(--ease-out), opacity .18s ease-out;
+    transform: translateY(12px) scale(0.96); opacity: 0;
+    transition: transform .24s var(--ease-out), opacity .2s ease-out;
     display: flex; align-items: center; gap: .5rem; font-family: inherit;
     overflow: hidden;
   }
-  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.show { transform: translateY(0) scale(1); opacity: 1; }
   .toast.toast-ok  { border-left: 3px solid var(--green); }
   .toast.toast-err { border-left: 3px solid var(--red); }
   .toast-undo-bar {
@@ -1360,8 +1389,22 @@
   .fab { animation: fabEntrada .45s var(--ease-out) both; }
   .fab:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(200,132,90,0.55); }
   .fab:active { transform: scale(0.95); }
+  .fab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: fabPulse 3s ease-out 3s infinite;
+    z-index: -1;
+    pointer-events: none;
+  }
+  @keyframes fabPulse {
+    0%   { transform: scale(1);   opacity: .45; }
+    100% { transform: scale(2.2); opacity: 0;   }
+  }
   @keyframes fabEntrada {
-    from { transform: scale(0.4); opacity: 0; }
+    from { transform: scale(0.6); opacity: 0; }
     to   { transform: scale(1);   opacity: 1; }
   }
   @media (min-width: 769px) {
@@ -3445,7 +3488,7 @@ function filtrarTabla() {
   const respEmoji = {};
   const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", ["De " + PARTNER]: "var(--accent2)" };
 
-  tbody.innerHTML = datos.map(t => {
+  tbody.innerHTML = datos.map((t, i) => {
     const r = t.responsabilidad || "Mío";
     const mon = t.moneda || "ARS";
     const monBadge = mon === "USD"
@@ -3467,7 +3510,7 @@ function filtrarTabla() {
       }
     }
     return `
-    <tr>
+    <tr style="--row-i:${Math.min(i, 16)}">
       <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}${fechaExtra}</td>
       <td class="col-hide-xs"><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
       <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="width:7px;height:7px;border-radius:50%;background:${_catColor(t.categoria)};flex-shrink:0;opacity:.85"></span>${escapeHtml(t.categoria)}</span></td>
