@@ -239,6 +239,11 @@
   .kpi-card:has(.expense)::before     { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
   .kpi-card:has(.balance-pos)::before { background: linear-gradient(90deg, var(--accent), transparent 65%); box-shadow: 0 0 12px rgba(200,132,90,0.5); }
   .kpi-card:has(.balance-neg)::before { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
+  /* Tinte semántico de fondo por tipo */
+  .kpi-card:has(.income)      { background: linear-gradient(145deg, var(--card) 50%, rgba(90,140,107,0.06) 100%); }
+  .kpi-card:has(.expense)     { background: linear-gradient(145deg, var(--card) 50%, rgba(200,90,90,0.06) 100%); }
+  .kpi-card:has(.balance-pos) { background: linear-gradient(145deg, var(--card) 50%, rgba(200,132,90,0.06) 100%); }
+  .kpi-card:has(.balance-neg) { background: linear-gradient(145deg, var(--card) 50%, rgba(200,90,90,0.06) 100%); }
   /* Shine sweep on hover */
   .kpi-card::after {
     content: '';
@@ -251,6 +256,21 @@
     pointer-events: none;
   }
   .kpi-card:hover::after { left: 160%; }
+  /* Icon badge en KPI cards */
+  .kpi-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: .55rem; flex-shrink: 0;
+  }
+  .kpi-icon.ico-green  { background: var(--green-dim);  color: var(--green); }
+  .kpi-icon.ico-red    { background: var(--red-dim);    color: var(--red); }
+  .kpi-icon.ico-accent { background: var(--accent-dim); color: var(--accent); }
+  .kpi-icon.ico-yellow { background: var(--yellow-dim); color: var(--yellow); }
+  .kpi-icon.ico-muted  { background: var(--bg3);        color: var(--text-muted); }
+  @media (max-width: 768px) {
+    .kpi-icon { width: 26px; height: 26px; border-radius: 7px; margin-bottom: .35rem; }
+    .kpi-icon svg { width: 13px; height: 13px; }
+  }
 
   .kpi-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; font-weight: 600; }
   .kpi-value { font-size: clamp(0.75rem, 9cqw, 1.65rem); font-weight: 800; letter-spacing: -.025em; white-space: nowrap; overflow: hidden; }
@@ -286,7 +306,7 @@
   @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
 
   .chart-card {
-    background: var(--card);
+    background: linear-gradient(145deg, var(--card) 60%, var(--bg2) 100%);
     border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.4rem;
     box-shadow: var(--shadow);
@@ -1290,6 +1310,7 @@
     transition: color .18s var(--ease-out);
     font-family: inherit;
     border-radius: 0;
+    display: flex; align-items: center; gap: .38rem;
   }
   .topnav .nav-item:hover { color: var(--text); }
   .topnav .nav-item.active {
@@ -1507,11 +1528,11 @@
     💰 <span id="topnav-user"></span>
   </div>
   <div class="topnav-tabs">
-    <button class="nav-item" onclick="navegarA('presupuesto')">Mi mes</button>
-    <button class="nav-item" onclick="navegarA('transacciones')">Transacciones</button>
-    <button class="nav-item" onclick="navegarA('compartidos')">Compartidos</button>
-    <button class="nav-item" onclick="navegarA('config')">Categorías</button>
-    <button class="nav-item" onclick="navegarA('resumen')">Resumen</button>
+    <button class="nav-item" onclick="navegarA('presupuesto')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mi mes</button>
+    <button class="nav-item" onclick="navegarA('transacciones')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transacciones</button>
+    <button class="nav-item" onclick="navegarA('compartidos')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Compartidos</button>
+    <button class="nav-item" onclick="navegarA('config')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorías</button>
+    <button class="nav-item" onclick="navegarA('resumen')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Resumen</button>
     <span class="topnav-indicator" id="topnav-indicator"></span>
   </div>
   <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
@@ -1562,6 +1583,7 @@
         <!-- KPIs -->
         <div class="kpi-grid">
           <div class="kpi-card">
+            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
             <div class="kpi-label">Ingresos</div>
             <div class="kpi-value income" id="kpi-ingresos">$0</div>
             <div class="kpi-sub" id="kpi-ingresos-sub">—</div>
@@ -1569,6 +1591,7 @@
             <div class="kpi-spark" id="spark-ingresos"></div>
           </div>
           <div class="kpi-card">
+            <div class="kpi-icon ico-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
             <div class="kpi-label">Gastos</div>
             <div class="kpi-value expense" id="kpi-gastos">$0</div>
             <div class="kpi-sub" id="kpi-gastos-sub">—</div>
@@ -1576,6 +1599,7 @@
             <div class="kpi-spark" id="spark-gastos"></div>
           </div>
           <div class="kpi-card">
+            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
             <div class="kpi-label">Balance</div>
             <div class="kpi-value balance-pos" id="kpi-balance">$0</div>
             <div class="kpi-sub" id="kpi-balance-sub">—</div>
@@ -1583,6 +1607,7 @@
             <div class="kpi-spark" id="spark-balance"></div>
           </div>
           <div class="kpi-card">
+            <div class="kpi-icon ico-yellow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></div>
             <div class="kpi-label">Ahorro</div>
             <div class="kpi-value" id="kpi-ahorro" style="color:var(--yellow)">0%</div>
             <div class="kpi-sub">del ingreso mensual</div>
@@ -1894,41 +1919,49 @@
         <!-- KPI strip -->
         <div class="kpi-grid kpi-grid-4" id="pres-kpi-grid">
           <div class="kpi-card">
+            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>
             <div class="kpi-label">Sueldo</div>
             <div class="kpi-value income" id="pres-kpi-sueldo">$0</div>
             <div class="kpi-sub" id="pres-kpi-sueldo-sub">ingresos del mes</div>
           </div>
           <div class="kpi-card">
+            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div>
             <div class="kpi-label">Presupuestado</div>
             <div class="kpi-value" id="pres-kpi-total" style="color:var(--accent)">$0</div>
             <div class="kpi-sub" id="pres-kpi-total-sub">de tu sueldo asignado</div>
           </div>
           <div class="kpi-card">
+            <div class="kpi-icon ico-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
             <div class="kpi-label">Gastado</div>
             <div class="kpi-value expense" id="pres-kpi-gastado">$0</div>
             <div class="kpi-sub" id="pres-kpi-gastado-sub">50% compartidos</div>
           </div>
           <div class="kpi-card">
+            <div class="kpi-icon ico-muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
             <div class="kpi-label">Margen planeado</div>
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
             <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Presupuestado</div>
           </div>
           <div class="kpi-card">
+            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
             <div class="kpi-label">Lo que te queda</div>
             <div class="kpi-value" id="pres-kpi-saldo-real">$0</div>
             <div class="kpi-sub">Sueldo − Gastado real</div>
           </div>
           <div class="kpi-card" id="pres-kpi-usd-card" style="display:none">
+            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
             <div class="kpi-label">En dólares</div>
             <div class="kpi-value" id="pres-kpi-saldo-usd">U$S 0,00</div>
             <div class="kpi-sub" id="pres-kpi-saldo-usd-sub">ingresos − gastos USD</div>
           </div>
           <div class="kpi-card" id="kpi-ahorro-cat-card">
+            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
             <div class="kpi-label">Ahorro (categoría)</div>
             <div class="kpi-value" id="kpi-ahorro-cat" style="color:var(--green)">$0</div>
             <div class="kpi-sub" id="kpi-ahorro-cat-sub">total acumulado: —</div>
           </div>
           <div class="kpi-card">
+            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
             <div class="kpi-label">Podés gastar por día</div>
             <div class="kpi-value" id="pres-kpi-diario">—</div>
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
