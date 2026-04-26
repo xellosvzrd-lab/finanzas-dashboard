@@ -284,6 +284,15 @@
   .kpi-trend.down { color: var(--red); }
   .kpi-trend.flat { color: var(--text-muted); }
 
+  /* ─── HERO KPI CARD ─────────────────────────────────────── */
+  .kpi-hero { grid-column: span 2; }
+  .kpi-hero .kpi-value { font-size: clamp(1.1rem, 5vw, 1.8rem); }
+  .kpi-hero-bar-wrap { width: 100%; height: 6px; background: var(--bg3); border-radius: 99px; overflow: hidden; margin-top: .6rem; }
+  .kpi-hero-bar-fill { height: 100%; border-radius: 99px; width: 0%; transition: width .6s var(--ease-out, ease); }
+  .kpi-hero-bar-fill.bar-ok   { background: var(--green); }
+  .kpi-hero-bar-fill.bar-warn { background: var(--yellow); }
+  .kpi-hero-bar-fill.bar-over { background: var(--red); }
+
   /* ─── NAV SEPARATOR ─────────────────────────────────────── */
   .nav-sep {
     padding: .6rem 1.5rem .1rem;
@@ -1918,6 +1927,13 @@
 
         <!-- KPI strip -->
         <div class="kpi-grid kpi-grid-4" id="pres-kpi-grid">
+          <div class="kpi-card kpi-hero">
+            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div class="kpi-label">Lo que te queda</div>
+            <div class="kpi-value" id="pres-kpi-saldo-real">$0</div>
+            <div class="kpi-hero-bar-wrap"><div class="kpi-hero-bar-fill" id="pres-hero-bar"></div></div>
+            <div class="kpi-sub" id="pres-kpi-saldo-real-sub">Sueldo − Gastado real</div>
+          </div>
           <div class="kpi-card">
             <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>
             <div class="kpi-label">Sueldo</div>
@@ -1942,12 +1958,6 @@
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
             <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Presupuestado</div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-            <div class="kpi-label">Lo que te queda</div>
-            <div class="kpi-value" id="pres-kpi-saldo-real">$0</div>
-            <div class="kpi-sub">Sueldo − Gastado real</div>
-          </div>
           <div class="kpi-card" id="pres-kpi-usd-card" style="display:none">
             <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
             <div class="kpi-label">En dólares</div>
@@ -1967,9 +1977,6 @@
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
         </div>
-
-        <!-- Anillo de progreso total -->
-        <div id="pres-ring-container"></div>
 
         <!-- Toggle desglose -->
         <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
@@ -4944,6 +4951,14 @@ function renderPresupuesto() {
     kpiSaldoReal.className = "kpi-value " + (saldoReal >= 0 ? "balance-pos" : "expense");
     animateKPI(kpiSaldoReal, Math.abs(saldoReal), v => (saldoReal < 0 ? "-" : "") + fmt(v));
   }
+  const heroBar = document.getElementById("pres-hero-bar");
+  if (heroBar && sueldoEfectivo > 0) {
+    const pctUsado = Math.min(totalGasto / sueldoEfectivo, 1);
+    heroBar.style.width = (pctUsado * 100).toFixed(1) + "%";
+    heroBar.className = "kpi-hero-bar-fill " + (pctUsado < 0.8 ? "bar-ok" : pctUsado < 1 ? "bar-warn" : "bar-over");
+    const heroSub = document.getElementById("pres-kpi-saldo-real-sub");
+    if (heroSub) heroSub.textContent = `Sueldo − Gastado real · ${Math.round(pctUsado * 100)}% usado`;
+  }
 
   const kpiDiario = document.getElementById("pres-kpi-diario");
   if (kpiDiario) {
@@ -5159,6 +5174,14 @@ function actualizarKpisPres() {
   if (kpiSaldoReal) {
     kpiSaldoReal.textContent = fmt(saldoReal);
     kpiSaldoReal.className = "kpi-value " + (saldoReal >= 0 ? "balance-pos" : "expense");
+  }
+  const heroBar2 = document.getElementById("pres-hero-bar");
+  if (heroBar2 && sueldoEfectivo > 0) {
+    const pctUsado2 = Math.min(totalGasto / sueldoEfectivo, 1);
+    heroBar2.style.width = (pctUsado2 * 100).toFixed(1) + "%";
+    heroBar2.className = "kpi-hero-bar-fill " + (pctUsado2 < 0.8 ? "bar-ok" : pctUsado2 < 1 ? "bar-warn" : "bar-over");
+    const heroSub2 = document.getElementById("pres-kpi-saldo-real-sub");
+    if (heroSub2) heroSub2.textContent = `Sueldo − Gastado real · ${Math.round(pctUsado2 * 100)}% usado`;
   }
 
   const kpiDiario2 = document.getElementById("pres-kpi-diario");
