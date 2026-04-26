@@ -968,6 +968,33 @@
   }
   .hamburger-btn:hover { background: var(--accent-dim); }
 
+  /* ─── MOBILE DRAWER ─────────────────────────────────────── */
+  .mobile-drawer {
+    position: fixed; top: 54px; right: 0;
+    width: 220px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 0 0 0 14px;
+    padding: 1.1rem 1.2rem 1.3rem;
+    z-index: 155;
+    display: flex; flex-direction: column; gap: .8rem;
+    transform: translateX(110%);
+    transition: transform .24s cubic-bezier(.4,0,.2,1);
+    box-shadow: -4px 8px 24px rgba(0,0,0,.28);
+  }
+  .mobile-drawer.open { transform: translateX(0); }
+  .mobile-drawer-user { display: flex; flex-direction: column; gap: .2rem; }
+  .mobile-drawer-name { font-weight: 700; font-size: .95rem; color: var(--text); }
+  .mobile-drawer-sub  { font-size: .72rem; color: var(--text-muted); }
+  .mobile-drawer-sep  { border: none; border-top: 1px solid var(--border); margin: 0; }
+  .mobile-drawer-logout {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    padding: .55rem .75rem; cursor: pointer; font-size: .85rem;
+    color: var(--red); font-family: inherit; font-weight: 600;
+    text-align: left; transition: background .15s;
+  }
+  .mobile-drawer-logout:hover { background: var(--red-dim, rgba(248,113,113,.1)); }
+
+
   /* Overlay oscuro detrás del sidebar en mobile */
   .sidebar-overlay {
     display: none; position: fixed; inset: 0; z-index: 150;
@@ -1528,8 +1555,18 @@
   </button>
 </header>
 
-<!-- Overlay oscuro al abrir sidebar en mobile -->
+<!-- Overlay oscuro al abrir drawer en mobile -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- Mini-drawer mobile: usuario + logout -->
+<div class="mobile-drawer" id="mobile-drawer">
+  <div class="mobile-drawer-user">
+    <span class="mobile-drawer-name" id="mobile-drawer-name">—</span>
+    <span class="mobile-drawer-sub">Mi cuenta</span>
+  </div>
+  <hr class="mobile-drawer-sep">
+  <button class="mobile-drawer-logout" onclick="volverConfig()">🚪 Cerrar sesión</button>
+</div>
 
 <!-- Top nav (desktop) -->
 <nav class="topnav" id="topnav">
@@ -2723,6 +2760,8 @@ function _actualizarStringsUsuario() {
   }
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) sidebarUser.textContent = USUARIO;
+  const drawerName = document.getElementById("mobile-drawer-name");
+  if (drawerName) drawerName.textContent = USUARIO;
   const topnavUser = document.getElementById("topnav-user");
   if (topnavUser) topnavUser.textContent = USUARIO;
 }
@@ -4649,17 +4688,17 @@ function navegarA(pagina) {
 
 // ─── SIDEBAR MOBILE ───────────────────────────────────────────
 function toggleSidebar() {
-  const sidebar = document.querySelector(".sidebar");
+  const drawer  = document.getElementById("mobile-drawer");
   const overlay = document.getElementById("sidebar-overlay");
   const icon    = document.getElementById("hamburger-icon");
-  if (!sidebar) return;
-  const open = sidebar.classList.toggle("open");
+  if (!drawer) return;
+  const open = drawer.classList.toggle("open");
   if (overlay) overlay.classList.toggle("open", open);
   if (icon)    icon.textContent = open ? "✕" : "☰";
 }
 function closeSidebar() {
-  const sidebar = document.querySelector(".sidebar");
-  if (sidebar) sidebar.classList.remove("open");
+  const drawer = document.getElementById("mobile-drawer");
+  if (drawer) drawer.classList.remove("open");
   document.getElementById("sidebar-overlay")?.classList.remove("open");
   const icon = document.getElementById("hamburger-icon");
   if (icon) icon.textContent = "☰";
