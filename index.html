@@ -296,21 +296,27 @@
   .kpi-sparkline-wrap canvas { width: 100% !important; height: 36px !important; }
 
   /* ─── HEATMAP CALENDAR ───────────────────────────────────── */
-  .kpi-heatmap-card { grid-column: span 2; grid-row: span 2; padding: .7rem .75rem .5rem !important; }
-  .heatmap-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; width: 100%; }
-  .heatmap-header { text-align: center; font-size: .52rem; color: var(--text-muted); font-weight: 600; padding-bottom: 2px; }
+  .heatmap-full-card { margin-bottom: 1rem; }
+  .heatmap-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: .75rem; gap: .5rem; flex-wrap: wrap; }
+  .heatmap-top-title { font-size: .78rem; font-weight: 700; color: var(--text); letter-spacing: .01em; }
+  .heatmap-top-stat { font-size: .72rem; color: var(--text-muted); }
+  .heatmap-top-stat strong { color: var(--accent); }
+  .heatmap-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; width: 100%; }
+  .heatmap-header { text-align: center; font-size: .65rem; color: var(--text-muted); font-weight: 600; padding-bottom: 3px; }
   .heatmap-day {
-    aspect-ratio: 1; border-radius: 2px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: .5rem; color: rgba(255,252,249,.55); font-weight: 500;
+    aspect-ratio: 1; border-radius: 4px;
     background: rgba(200,132,90,var(--heat,0));
     border: 1px solid transparent; cursor: default;
-    transition: border-color .1s;
+    transition: border-color .12s, transform .1s;
+    position: relative;
   }
-  .heatmap-day:hover { border-color: var(--accent); color: var(--text); }
+  .heatmap-day:hover { border-color: var(--accent); transform: scale(1.15); z-index: 1; }
   .heatmap-day.heatmap-empty { background: none; border: none; }
-  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); color: var(--accent); font-weight: 700; }
-  .heatmap-day.heatmap-zero  { background: var(--bg3); color: var(--text-muted); }
+  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); box-shadow: 0 0 6px rgba(200,132,90,.35); }
+  .heatmap-day.heatmap-zero  { background: var(--bg3); }
+  .heatmap-legend { display: flex; align-items: center; gap: 4px; margin-top: .6rem; justify-content: flex-end; }
+  .heatmap-legend-label { font-size: .62rem; color: var(--text-muted); }
+  .heatmap-legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
 
   /* ─── HERO KPI CARD ─────────────────────────────────────── */
   .kpi-hero { grid-column: span 2; }
@@ -2140,8 +2146,10 @@
             <div class="kpi-value" id="pres-kpi-diario">—</div>
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
-          <div class="kpi-card kpi-heatmap-card" id="heatmap-mes"></div>
         </div>
+
+        <!-- Heatmap calendario -->
+        <div class="chart-card heatmap-full-card" id="heatmap-mes"></div>
 
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
@@ -5211,18 +5219,35 @@ function renderHeatmapMes() {
   const offset = (new Date(filAnio, filMes - 1, 1).getDay() + 6) % 7;
   const hoy = new Date();
   const isCurrentMonth = filMes === hoy.getMonth() + 1 && filAnio === hoy.getFullYear();
-  const MESES = ["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-  let html = `<div class="kpi-label" style="margin-bottom:.35rem">Gastos · ${MESES[filMes]}</div>`;
-  html += `<div class="heatmap-cal">` + ["L","M","M","J","V","S","D"].map(d => `<div class="heatmap-header">${d}</div>`).join("");
+  const MESES = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+  // Stats para el header
+  const topDay = Object.entries(byDay).sort((a,b) => b[1]-a[1])[0];
+  const daysWithSpend = Object.keys(byDay).length;
+  const statHtml = topDay
+    ? `${daysWithSpend} días activos · pico <strong>${fmt(topDay[1])}</strong> el día ${topDay[0]}`
+    : "Sin gastos este mes";
+
+  let html = `<div class="heatmap-top">
+    <span class="heatmap-top-title">Actividad diaria · ${MESES[filMes]} ${filAnio}</span>
+    <span class="heatmap-top-stat">${statHtml}</span>
+  </div>`;
+  html += `<div class="heatmap-cal">`;
+  html += ["L","M","M","J","V","S","D"].map(d => `<div class="heatmap-header">${d}</div>`).join("");
   for (let i = 0; i < offset; i++) html += `<div class="heatmap-day heatmap-empty"></div>`;
   for (let d = 1; d <= daysInMonth; d++) {
     const g = byDay[d] || 0;
-    const heat = (g / maxG).toFixed(2);
+    const heat = g > 0 ? Math.max(0.12, (g / maxG)).toFixed(2) : 0;
     const isToday = isCurrentMonth && d === hoy.getDate();
     const cls = `heatmap-day${isToday ? " heatmap-today" : ""}${g === 0 ? " heatmap-zero" : ""}`;
-    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}">${d}</div>`;
+    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}"></div>`;
   }
   html += `</div>`;
+  html += `<div class="heatmap-legend">
+    <span class="heatmap-legend-label">Menos</span>
+    ${[0.06,0.18,0.35,0.55,0.75,1].map(v => `<div class="heatmap-legend-swatch" style="background:rgba(200,132,90,${v})"></div>`).join("")}
+    <span class="heatmap-legend-label">Más</span>
+  </div>`;
   el.innerHTML = html;
 }
 
