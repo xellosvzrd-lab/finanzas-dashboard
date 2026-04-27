@@ -563,6 +563,14 @@
   .swipe-row { transition: transform .2s ease, background .2s ease; will-change: transform; position: relative; }
   .swipe-row.swiping { transition: none; }
 
+  /* ─── HEALTH SCORE ──────────────────────────────────────── */
+  .health-score-num { font-size: 2.2rem; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+  .health-score-num.green  { color: var(--green); }
+  .health-score-num.yellow { color: var(--yellow); }
+  .health-score-num.red    { color: var(--red); }
+  .health-score-bar { height: 5px; border-radius: 99px; background: var(--bg3); overflow: hidden; margin: .4rem 0 .35rem; }
+  .health-score-fill { height: 100%; border-radius: 99px; transition: width .6s var(--ease-out, ease); }
+
   /* ─── WEEKLY DIGEST ─────────────────────────────────────── */
   .weekly-digest { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: .6rem .9rem; margin-bottom: .9rem; font-size: .82rem; color: var(--text-muted); line-height: 1.5; }
   .weekly-digest strong { color: var(--text); }
@@ -2155,6 +2163,12 @@
             <div class="kpi-value" id="pres-kpi-diario">—</div>
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
+          <div class="kpi-card" id="pres-health-card" style="grid-column:span 2;display:none">
+            <div class="kpi-label">Salud financiera</div>
+            <div class="health-score-num" id="pres-health-num">—</div>
+            <div class="health-score-bar"><div class="health-score-fill" id="pres-health-bar"></div></div>
+            <div class="kpi-sub" id="pres-health-sub">—</div>
+          </div>
           <div class="kpi-card kpi-heatmap-card" id="heatmap-mes"></div>
         </div>
 
@@ -2301,6 +2315,17 @@
           </div>
 
         </div><!-- /cfg-grid -->
+
+        <!-- ===== WALLETS / PATRIMONIO ===== -->
+        <div style="margin-top:1.5rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+            <h2 style="font-size:1rem;font-weight:700">Wallets · Patrimonio</h2>
+            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormWallet()">+ Agregar</button>
+          </div>
+          <div id="wallet-form-wrap" style="display:none"></div>
+          <div id="wallet-lista"></div>
+          <div id="wallet-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
+        </div>
 
         <!-- ===== PLAZOS FIJOS ===== -->
         <div style="margin-top:1.5rem">
@@ -5581,6 +5606,9 @@ function renderPresupuesto() {
     if (inp && saved && parseFloat(saved) > 0) { inp.value = saved; renderInflacion(); }
   } catch {}
 
+  // Sprint 5 — health score
+  renderHealthScore(sueldoEfectivo, totalGasto, gastoPorCat);
+
   // Sprint 4 — weekly digest
   renderWeeklyDigest();
 
@@ -5717,6 +5745,7 @@ function renderizarConfig() {
   _renderLista("ingreso",    categIngreso, "INGRESO");
   _renderListaFuentes("fuente",   categFuentes,   "FUENTE");
   _renderListaFuentes("fuentetc", categFuentesTC, "FUENTE_TC");
+  renderWallets();
   renderPlazos();
 }
 
@@ -6694,6 +6723,131 @@ function seleccionarResp(valor) {
 
 function resetRespField() {
   seleccionarResp("Mío");
+}
+
+// ===== HEALTH SCORE =====
+function renderHealthScore(sueldoEfectivo, totalGasto, gastoPorCat) {
+  const card = document.getElementById("pres-health-card");
+  const numEl = document.getElementById("pres-health-num");
+  const barEl = document.getElementById("pres-health-bar");
+  const subEl = document.getElementById("pres-health-sub");
+  if (!card || sueldoEfectivo <= 0) { if (card) card.style.display = "none"; return; }
+
+  const saldoReal = sueldoEfectivo - totalGasto;
+
+  // Savings rate (40pts) — full at ≥20% savings
+  const savingsRate = saldoReal / sueldoEfectivo;
+  const savingsPts = Math.round(Math.max(0, Math.min(1, savingsRate / 0.2)) * 40);
+
+  // Budget adherence (35pts) — % of budgeted cats on track
+  const budgetedCats = Object.entries(presupuestoActual).filter(([,v]) => v > 0);
+  let adherencePts = 35;
+  if (budgetedCats.length > 0) {
+    const onTrack = budgetedCats.filter(([cat]) => {
+      const budget = (presupuestoActual[cat] / 100) * sueldoEfectivo;
+      return budget > 0 && (gastoPorCat[cat] || 0) <= budget;
+    }).length;
+    adherencePts = Math.round((onTrack / budgetedCats.length) * 35);
+  }
+
+  // Pace (25pts) — skip if <3 days elapsed
+  let pacePts = 25;
+  const hoy = new Date();
+  const mes  = parseInt(document.getElementById("pres-mes")?.value || 0);
+  const anio = parseInt(document.getElementById("pres-anio")?.value || 0);
+  const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
+  if (esEsteMes && hoy.getDate() >= 3) {
+    const proyectado = (totalGasto / hoy.getDate()) * new Date(anio, mes, 0).getDate();
+    const paceRatio = proyectado / sueldoEfectivo;
+    pacePts = Math.round(Math.max(0, Math.min(1, (1 - paceRatio) / 0.1)) * 25);
+  }
+
+  const score = savingsPts + adherencePts + pacePts;
+  const cls = score >= 70 ? "green" : score >= 40 ? "yellow" : "red";
+  const barColor = score >= 70 ? "var(--green)" : score >= 40 ? "var(--yellow)" : "var(--red)";
+
+  card.style.display = "";
+  numEl.textContent = score;
+  numEl.className = `health-score-num ${cls}`;
+  barEl.style.width = score + "%";
+  barEl.style.background = barColor;
+  subEl.textContent = `Ahorro ${savingsPts}/40 · Presupuesto ${adherencePts}/35 · Ritmo ${pacePts}/25`;
+}
+
+// ===== WALLETS / PATRIMONIO =====
+function _walletsKey() { return USUARIO + "_wallets"; }
+function loadWallets() {
+  try { return JSON.parse(localStorage.getItem(_walletsKey()) || "[]"); } catch { return []; }
+}
+function saveWallets(arr) {
+  try { localStorage.setItem(_walletsKey(), JSON.stringify(arr)); } catch {}
+}
+
+function renderWallets() {
+  const lista = document.getElementById("wallet-lista");
+  const totalEl = document.getElementById("wallet-total");
+  if (!lista) return;
+  const wallets = loadWallets();
+  if (!wallets.length) {
+    lista.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin wallets registradas.</div>';
+    if (totalEl) totalEl.innerHTML = "";
+    return;
+  }
+  lista.innerHTML = wallets.map(w => `
+    <div class="plazo-card" style="display:flex;align-items:center;justify-content:space-between;gap:.75rem">
+      <div>
+        <div style="font-weight:700;font-size:.88rem">${escapeHtml(w.nombre)}</div>
+        <div style="font-size:.77rem;color:var(--text-muted)">${w.moneda === "USD" ? "USD" : "ARS"}</div>
+      </div>
+      <div style="font-weight:700;font-size:.95rem">${w.moneda === "USD" ? fmtMoneda(w.monto,"USD") : fmt(w.monto)}</div>
+      <button class="cfg-del-btn" onclick="eliminarWallet(${JSON.stringify(w.id)})" title="Eliminar">✕</button>
+    </div>`).join("");
+  const totalARS = wallets.filter(w => w.moneda === "ARS").reduce((s,w) => s + w.monto, 0);
+  const totalUSD = wallets.filter(w => w.moneda === "USD").reduce((s,w) => s + w.monto, 0);
+  const totalARSequiv = tipoCambioMEP > 0 ? totalARS + totalUSD * tipoCambioMEP : totalARS;
+  let html = `<strong>Total ARS:</strong> ${fmt(totalARS)}`;
+  if (totalUSD > 0) html += ` · <strong>USD:</strong> ${fmtMoneda(totalUSD,"USD")}`;
+  if (tipoCambioMEP > 0 && totalUSD > 0) html += ` · <strong>Equivalente:</strong> ${fmt(totalARSequiv)}`;
+  if (totalEl) totalEl.innerHTML = html;
+}
+
+function abrirFormWallet() {
+  const wrap = document.getElementById("wallet-form-wrap");
+  if (!wrap) return;
+  wrap.style.display = "";
+  wrap.innerHTML = `<div class="plazo-form">
+    <input class="plazo-form-full" id="wf-nombre" placeholder="Nombre (ej: Brubank, Cash USD)" type="text">
+    <input id="wf-monto" placeholder="Monto" type="text" inputmode="decimal">
+    <select id="wf-moneda" style="padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem">
+      <option value="ARS">ARS</option><option value="USD">USD / USDT</option>
+    </select>
+    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn" style="font-size:.82rem" onclick="cerrarFormWallet()">Cancelar</button>
+      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarWallet()">Guardar</button>
+    </div>
+  </div>`;
+}
+
+function cerrarFormWallet() {
+  const wrap = document.getElementById("wallet-form-wrap");
+  if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
+}
+
+function guardarWallet() {
+  const nombre = document.getElementById("wf-nombre")?.value.trim();
+  const monto  = parsearDecimal(document.getElementById("wf-monto")?.value);
+  const moneda = document.getElementById("wf-moneda")?.value || "ARS";
+  if (!nombre || !monto) { showToast("⚠️ Completá nombre y monto", "error"); return; }
+  const wallets = loadWallets();
+  wallets.push({ id: crypto.randomUUID(), nombre, monto, moneda });
+  saveWallets(wallets);
+  cerrarFormWallet();
+  renderWallets();
+}
+
+function eliminarWallet(id) {
+  saveWallets(loadWallets().filter(w => w.id !== id));
+  renderWallets();
 }
 
 // ===== SWIPE EN TRANSACCIONES =====
