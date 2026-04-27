@@ -296,19 +296,19 @@
   .kpi-sparkline-wrap canvas { width: 100% !important; height: 36px !important; }
 
   /* ─── HEATMAP CALENDAR ───────────────────────────────────── */
-  .heatmap-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
-  .heatmap-header { text-align: center; font-size: .57rem; color: var(--text-muted); font-weight: 600; padding-bottom: 2px; }
+  .kpi-heatmap-card { grid-column: span 2; grid-row: span 2; padding: .7rem .75rem .5rem !important; }
+  .heatmap-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; width: 100%; }
+  .heatmap-header { text-align: center; font-size: .52rem; color: var(--text-muted); font-weight: 600; padding-bottom: 2px; }
   .heatmap-day {
-    aspect-ratio: 1; border-radius: 3px; display: flex; align-items: center; justify-content: center;
-    font-size: .58rem; color: var(--text-muted); cursor: default;
-    background: rgba(200,132,90,var(--heat,0)); border: 1px solid transparent;
+    aspect-ratio: 1; border-radius: 2px;
+    background: rgba(200,132,90,var(--heat,0));
+    border: 1px solid transparent; cursor: default;
     transition: border-color .1s;
   }
-  .heatmap-day:hover { border-color: var(--accent); color: var(--text); }
+  .heatmap-day:hover { border-color: var(--accent); }
   .heatmap-day.heatmap-empty { background: none; border: none; }
-  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); color: var(--accent); font-weight: 700; }
+  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); }
   .heatmap-day.heatmap-zero  { background: var(--bg3); }
-  #heatmap-mes { padding: .5rem .6rem .3rem; }
 
   /* ─── HERO KPI CARD ─────────────────────────────────────── */
   .kpi-hero { grid-column: span 2; }
@@ -2096,6 +2096,7 @@
             <div class="kpi-value" id="pres-kpi-diario">—</div>
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
+          <div class="kpi-card kpi-heatmap-card" id="heatmap-mes"></div>
         </div>
 
         <!-- Proyección cierre de mes -->
@@ -2103,9 +2104,6 @@
 
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
-
-        <!-- Heatmap de gastos -->
-        <div id="heatmap-mes" style="margin-bottom:.6rem"></div>
 
         <!-- Toggle desglose -->
         <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
@@ -5142,14 +5140,16 @@ function renderHeatmapMes() {
   const offset = (new Date(filAnio, filMes - 1, 1).getDay() + 6) % 7;
   const hoy = new Date();
   const isCurrentMonth = filMes === hoy.getMonth() + 1 && filAnio === hoy.getFullYear();
-  let html = `<div class="heatmap-cal">` + ["L","M","M","J","V","S","D"].map(d => `<div class="heatmap-header">${d}</div>`).join("");
+  const MESES = ["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  let html = `<div class="kpi-label" style="margin-bottom:.35rem">Gastos · ${MESES[filMes]}</div>`;
+  html += `<div class="heatmap-cal">` + ["L","M","M","J","V","S","D"].map(d => `<div class="heatmap-header">${d}</div>`).join("");
   for (let i = 0; i < offset; i++) html += `<div class="heatmap-day heatmap-empty"></div>`;
   for (let d = 1; d <= daysInMonth; d++) {
     const g = byDay[d] || 0;
     const heat = (g / maxG).toFixed(2);
     const isToday = isCurrentMonth && d === hoy.getDate();
     const cls = `heatmap-day${isToday ? " heatmap-today" : ""}${g === 0 ? " heatmap-zero" : ""}`;
-    html += `<div class="${cls}" style="--heat:${heat}" title="${g > 0 ? fmt(g) : "Sin gastos"}">${d}</div>`;
+    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}"></div>`;
   }
   html += `</div>`;
   el.innerHTML = html;
