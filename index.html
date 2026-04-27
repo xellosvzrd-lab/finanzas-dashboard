@@ -547,6 +547,26 @@
   .inflacion-input { width: 64px; padding: .3rem .5rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .83rem; font-family: inherit; text-align: center; }
   .inflacion-result { margin-left: auto; font-weight: 700; font-size: .85rem; }
 
+  /* ─── LIQ-MODAL BOTTOM-SHEET MOBILE ─────────────────────── */
+  @media (max-width: 768px) {
+    #liq-modal { align-items: flex-end !important; }
+    .liq-inner {
+      width: 100% !important; max-width: 100% !important; min-width: 0 !important;
+      border-radius: 16px 16px 0 0 !important;
+      padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
+      transform: translateY(100%); transition: transform .28s cubic-bezier(.4,0,.2,1);
+    }
+    #liq-modal[style*="flex"] .liq-inner { transform: translateY(0); }
+  }
+
+  /* ─── SWIPE EN TRANSACCIONES ─────────────────────────────── */
+  .swipe-row { transition: transform .2s ease, background .2s ease; will-change: transform; position: relative; }
+  .swipe-row.swiping { transition: none; }
+
+  /* ─── WEEKLY DIGEST ─────────────────────────────────────── */
+  .weekly-digest { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: .6rem .9rem; margin-bottom: .9rem; font-size: .82rem; color: var(--text-muted); line-height: 1.5; }
+  .weekly-digest strong { color: var(--text); }
+
   /* ─── PÁGINA CATEGORÍAS Y FUENTES ───────────────────────── */
   .cfg-grid {
     display: grid;
@@ -1253,6 +1273,17 @@
     animation: fadeIn .18s ease-out;
   }
   .edit-overlay.open { display: flex; }
+  @media (max-width: 768px) {
+    .edit-overlay { align-items: flex-end; padding: 0; }
+    .edit-modal {
+      max-width: 100%; border-radius: 16px 16px 0 0;
+      max-height: 90vh; overflow-y: auto; overscroll-behavior: contain;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      transform: translateY(100%); transition: transform .28s cubic-bezier(.4,0,.2,1);
+      animation: none;
+    }
+    .edit-overlay.open .edit-modal { transform: translateY(0); }
+  }
   .edit-modal {
     background: var(--card);
     border: 1px solid var(--border);
@@ -2038,7 +2069,7 @@
 
         <!-- Modal liquidación -->
         <div id="liq-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center;">
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;min-width:280px;max-width:340px;width:90%">
+          <div class="liq-inner" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;min-width:280px;max-width:340px;width:90%">
             <div style="font-weight:700;font-size:1rem;margin-bottom:.3rem" id="liq-titulo">Liquidar</div>
             <div style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem" id="liq-subtitulo"></div>
             <label style="font-size:.83rem;color:var(--text-muted);display:block;margin-bottom:.35rem">Fuente de pago</label>
@@ -2126,6 +2157,9 @@
           </div>
           <div class="kpi-card kpi-heatmap-card" id="heatmap-mes"></div>
         </div>
+
+        <!-- Weekly digest -->
+        <div id="pres-weekly-digest" class="weekly-digest" style="display:none"></div>
 
         <!-- Inflación implícita -->
         <div class="inflacion-banner" id="pres-inflacion-wrap">
@@ -5547,6 +5581,9 @@ function renderPresupuesto() {
     if (inp && saved && parseFloat(saved) > 0) { inp.value = saved; renderInflacion(); }
   } catch {}
 
+  // Sprint 4 — weekly digest
+  renderWeeklyDigest();
+
   // Sprint 2 — heatmap + sparklines (después de HTML escrito)
   renderHeatmapMes();
   const monthly = buildMonthlyData(6);
@@ -6657,6 +6694,89 @@ function seleccionarResp(valor) {
 
 function resetRespField() {
   seleccionarResp("Mío");
+}
+
+// ===== SWIPE EN TRANSACCIONES =====
+(function initSwipe() {
+  let startX = 0, startY = 0, activeRow = null, committed = false;
+  const THRESHOLD = 65, MAX = 90;
+
+  document.addEventListener("touchstart", e => {
+    const row = e.target.closest("#tbody-transacciones tr");
+    if (!row || e.target.closest("button") || e.target.closest("select")) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    activeRow = row;
+    committed = false;
+    row.classList.add("swipe-row");
+  }, { passive: true });
+
+  document.addEventListener("touchmove", e => {
+    if (!activeRow) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    if (!committed && Math.abs(dy) > Math.abs(dx)) { activeRow = null; return; }
+    committed = true;
+    e.preventDefault();
+    activeRow.classList.add("swiping");
+    const clamped = Math.max(-MAX, Math.min(MAX, dx));
+    activeRow.style.transform = `translateX(${clamped}px)`;
+    activeRow.style.background = clamped < -20 ? "rgba(248,113,113,.08)" : clamped > 20 ? "rgba(52,211,153,.08)" : "";
+  }, { passive: false });
+
+  document.addEventListener("touchend", e => {
+    if (!activeRow) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    const row = activeRow;
+    activeRow = null;
+    row.classList.remove("swiping");
+    row.style.transform = "";
+    row.style.background = "";
+    if (!committed) return;
+    if (dx < -THRESHOLD) {
+      const id = row.dataset.id || row.querySelector("[onclick*='eliminarTransaccion']")?.getAttribute("onclick")?.match(/'([^']+)'/)?.[1];
+      if (id) eliminarTransaccion(id);
+    } else if (dx > THRESHOLD) {
+      const id = row.dataset.id || row.querySelector("[onclick*='abrirEditorTransaccion']")?.getAttribute("onclick")?.match(/'([^']+)'/)?.[1];
+      if (id) abrirEditorTransaccion(id);
+    }
+  }, { passive: true });
+})();
+
+// ===== WEEKLY DIGEST =====
+function renderWeeklyDigest() {
+  const el = document.getElementById("pres-weekly-digest");
+  if (!el) return;
+  const hoy = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const weekStart = new Date(hoy); weekStart.setDate(hoy.getDate() - 6);
+  const prevStart = new Date(weekStart); prevStart.setDate(weekStart.getDate() - 7);
+  const prevEnd   = new Date(weekStart); prevEnd.setDate(weekStart.getDate() - 1);
+  const isoHoy = toISO(hoy), isoWk = toISO(weekStart), isoPrevS = toISO(prevStart), isoPrevE = toISO(prevEnd);
+
+  const isThisWeek = t => t.fecha >= isoWk && t.fecha <= isoHoy;
+  const isLastWeek = t => t.fecha >= isoPrevS && t.fecha <= isoPrevE;
+  const isGasto = t => t.tipo === "Gasto" && (t.usuario || "Daniel") === USUARIO && (t.moneda || "ARS") === "ARS" && !esTransferencia(t);
+
+  const thisWeekTxs = allTransac.filter(t => isThisWeek(t) && isGasto(t));
+  if (!thisWeekTxs.length) { el.style.display = "none"; return; }
+
+  const totalThis = thisWeekTxs.reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const totalPrev = allTransac.filter(t => isLastWeek(t) && isGasto(t)).reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+
+  const byCat = {};
+  thisWeekTxs.forEach(t => { byCat[t.categoria] = (byCat[t.categoria] || 0) + Math.abs(Number(t.monto)); });
+  const topCat = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0];
+
+  let delta = "";
+  if (totalPrev > 0) {
+    const pct = ((totalThis - totalPrev) / totalPrev * 100).toFixed(0);
+    delta = pct > 0 ? ` <span style="color:var(--red)">+${pct}% vs semana anterior</span>` : ` <span style="color:var(--green)">${pct}% vs semana anterior</span>`;
+  }
+
+  el.style.display = "";
+  el.innerHTML = `📅 Esta semana: <strong>${fmt(totalThis)}</strong> · mayor gasto en <strong>${escapeHtml(topCat[0])}</strong>${delta}`;
 }
 
 if ('serviceWorker' in navigator) {
