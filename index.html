@@ -527,6 +527,26 @@
   }
   .comp-tfoot-total { font-size: .95rem; font-weight: 800 !important; }
 
+  /* ─── PLAZOS FIJOS ──────────────────────────────────────────── */
+  .plazo-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: .85rem 1rem; margin-bottom: .55rem; }
+  .plazo-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .35rem; }
+  .plazo-desc { font-weight: 700; font-size: .9rem; }
+  .plazo-badge { font-size: .68rem; font-weight: 700; padding: .15rem .45rem; border-radius: 99px; }
+  .plazo-badge.vigente  { background: rgba(52,211,153,.12);  color: var(--green); }
+  .plazo-badge.vence    { background: rgba(251,191,36,.15);  color: var(--yellow); }
+  .plazo-badge.vencido  { background: rgba(248,113,113,.12); color: var(--red); }
+  .plazo-row { display: flex; justify-content: space-between; font-size: .8rem; color: var(--text-muted); margin-top: .2rem; }
+  .plazo-row strong { color: var(--text); }
+  .plazo-form { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: .75rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .plazo-form input { padding: .45rem .6rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .85rem; font-family: inherit; width: 100%; box-sizing: border-box; }
+  .plazo-form input:focus { outline: none; border-color: var(--accent); }
+  .plazo-form-full { grid-column: 1 / -1; }
+
+  /* ─── INFLACIÓN IMPLÍCITA ───────────────────────────────────── */
+  .inflacion-banner { display: flex; align-items: center; gap: .6rem; padding: .6rem .9rem; border-radius: 9px; margin-bottom: .9rem; background: var(--bg2); border: 1px solid var(--border); font-size: .83rem; flex-wrap: wrap; }
+  .inflacion-input { width: 64px; padding: .3rem .5rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .83rem; font-family: inherit; text-align: center; }
+  .inflacion-result { margin-left: auto; font-weight: 700; font-size: .85rem; }
+
   /* ─── PÁGINA CATEGORÍAS Y FUENTES ───────────────────────── */
   .cfg-grid {
     display: grid;
@@ -2086,6 +2106,12 @@
             <div class="kpi-value" id="pres-kpi-saldo-usd">U$S 0,00</div>
             <div class="kpi-sub" id="pres-kpi-saldo-usd-sub">ingresos − gastos USD</div>
           </div>
+          <div class="kpi-card" id="pres-kpi-mep-card" style="display:none">
+            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+            <div class="kpi-label">Saldo en USD</div>
+            <div class="kpi-value" id="pres-kpi-mep-val">U$S 0</div>
+            <div class="kpi-sub" id="pres-kpi-mep-sub">Lo que te queda ÷ MEP</div>
+          </div>
           <div class="kpi-card" id="kpi-ahorro-cat-card">
             <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
             <div class="kpi-label">Ahorro (categoría)</div>
@@ -2099,6 +2125,13 @@
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
           <div class="kpi-card kpi-heatmap-card" id="heatmap-mes"></div>
+        </div>
+
+        <!-- Inflación implícita -->
+        <div class="inflacion-banner" id="pres-inflacion-wrap">
+          <span style="color:var(--text-muted);font-size:.78rem">IPC mes %</span>
+          <input type="text" inputmode="decimal" class="inflacion-input" id="pres-inflacion-input" placeholder="0" oninput="renderInflacion()">
+          <span id="pres-inflacion-result" class="inflacion-result" style="display:none"></span>
         </div>
 
         <!-- Proyección cierre de mes -->
@@ -2234,6 +2267,17 @@
           </div>
 
         </div><!-- /cfg-grid -->
+
+        <!-- ===== PLAZOS FIJOS ===== -->
+        <div style="margin-top:1.5rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+            <h2 style="font-size:1rem;font-weight:700">Plazos Fijos</h2>
+            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Agregar</button>
+          </div>
+          <div id="plazo-form-wrap" style="display:none"></div>
+          <div id="plazo-lista"></div>
+        </div>
+
       </div><!-- /page-config -->
 
       <!-- ── PÁGINA IMPORTAR DATOS ──────────────────────── -->
@@ -4935,7 +4979,7 @@ async function cargarPresupuesto() {
   const fetchList = [
     supabaseClient.from('presupuesto').select('*').eq('mes', mes).eq('anio', anio)
   ];
-  if (USUARIO.toLowerCase() === "ama") fetchList.push(fetchTipoCambioMEP());
+  fetchList.push(fetchTipoCambioMEP());
   const [presRes] = await Promise.allSettled(fetchList);
   try {
     const { data, error } = presRes.value;
@@ -5339,6 +5383,24 @@ function renderPresupuesto() {
     if (heroSub) heroSub.textContent = `Sueldo − Gastado real · ${Math.round(pctUsado * 100)}% usado`;
   }
 
+  // KPI Saldo en USD (ambos usuarios si hay MEP)
+  const mepCard = document.getElementById("pres-kpi-mep-card");
+  if (mepCard) {
+    if (tipoCambioMEP > 0 && saldoReal !== 0) {
+      const saldoUSD = saldoReal / tipoCambioMEP;
+      const mepVal = document.getElementById("pres-kpi-mep-val");
+      const mepSub = document.getElementById("pres-kpi-mep-sub");
+      if (mepVal) {
+        mepVal.textContent = fmtMoneda(Math.abs(saldoUSD), "USD");
+        mepVal.className = "kpi-value " + (saldoUSD >= 0 ? "balance-pos" : "expense");
+      }
+      if (mepSub) mepSub.textContent = `MEP $${fmt(tipoCambioMEP).replace(/[^0-9,.]/g,"")}`;
+      mepCard.style.display = "";
+    } else {
+      mepCard.style.display = "none";
+    }
+  }
+
   const kpiDiario = document.getElementById("pres-kpi-diario");
   if (kpiDiario) {
     const hoy = new Date();
@@ -5478,6 +5540,13 @@ function renderPresupuesto() {
     </tr>`;
   }
 
+  // Cargar inflación guardada
+  try {
+    const saved = localStorage.getItem(_inflacionKey ? _inflacionKey() : "");
+    const inp = document.getElementById("pres-inflacion-input");
+    if (inp && saved && parseFloat(saved) > 0) { inp.value = saved; renderInflacion(); }
+  } catch {}
+
   // Sprint 2 — heatmap + sparklines (después de HTML escrito)
   renderHeatmapMes();
   const monthly = buildMonthlyData(6);
@@ -5611,6 +5680,7 @@ function renderizarConfig() {
   _renderLista("ingreso",    categIngreso, "INGRESO");
   _renderListaFuentes("fuente",   categFuentes,   "FUENTE");
   _renderListaFuentes("fuentetc", categFuentesTC, "FUENTE_TC");
+  renderPlazos();
 }
 
 function _renderLista(tipo, items, tipoAPI) {
@@ -6591,6 +6661,116 @@ function resetRespField() {
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+// ===== PLAZOS FIJOS =====
+function _plazosKey() { return USUARIO + "_plazos"; }
+function loadPlazos() {
+  try { return JSON.parse(localStorage.getItem(_plazosKey()) || "[]"); } catch { return []; }
+}
+function savePlazos(arr) {
+  try { localStorage.setItem(_plazosKey(), JSON.stringify(arr)); } catch {}
+}
+
+function renderPlazos() {
+  const el = document.getElementById("plazo-lista");
+  if (!el) return;
+  const plazos = loadPlazos();
+  if (!plazos.length) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin plazos registrados.</div>';
+    return;
+  }
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  el.innerHTML = plazos.map(p => {
+    const venc = new Date(p.fechaVencimiento + "T00:00:00");
+    const inicio = new Date(p.fechaInicio + "T00:00:00");
+    const dias = Math.round((venc - inicio) / 86400000);
+    const rend = p.monto * (p.tna / 100) * (dias / 365);
+    const diffDias = Math.round((venc - hoy) / 86400000);
+    const badge = diffDias < 0 ? "vencido" : diffDias === 0 ? "vence" : "vigente";
+    const badgeTxt = diffDias < 0 ? "Vencido" : diffDias === 0 ? "Vence hoy" : `${diffDias}d restantes`;
+    return `<div class="plazo-card">
+      <div class="plazo-header">
+        <span class="plazo-desc">${escapeHtml(p.descripcion)}</span>
+        <span class="plazo-badge ${badge}">${badgeTxt}</span>
+      </div>
+      <div class="plazo-row"><span>Capital</span><strong>${fmt(p.monto)}</strong></div>
+      <div class="plazo-row"><span>TNA</span><strong>${p.tna}%</strong></div>
+      <div class="plazo-row"><span>Rendimiento esperado</span><strong style="color:var(--green)">${fmt(rend)}</strong></div>
+      <div class="plazo-row"><span>Total al vencimiento</span><strong>${fmt(p.monto + rend)}</strong></div>
+      <div class="plazo-row"><span>${p.fechaInicio} → ${p.fechaVencimiento}</span>
+        <button class="cfg-del-btn" onclick="eliminarPlazo(${JSON.stringify(p.id)})" title="Eliminar">✕</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function abrirFormPlazo() {
+  const wrap = document.getElementById("plazo-form-wrap");
+  if (!wrap) return;
+  const hoy = new Date().toISOString().slice(0,10);
+  wrap.style.display = "";
+  wrap.innerHTML = `<div class="plazo-form">
+    <input class="plazo-form-full" id="pf-desc" placeholder="Descripción (ej: Plazo Fijo Nación)" type="text">
+    <input id="pf-monto" placeholder="Monto ARS" type="text" inputmode="decimal">
+    <input id="pf-tna" placeholder="TNA %" type="text" inputmode="decimal">
+    <input id="pf-inicio" type="date" value="${hoy}">
+    <input id="pf-venc" type="date">
+    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn" style="font-size:.82rem" onclick="cerrarFormPlazo()">Cancelar</button>
+      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPlazo()">Guardar</button>
+    </div>
+  </div>`;
+}
+
+function cerrarFormPlazo() {
+  const wrap = document.getElementById("plazo-form-wrap");
+  if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
+}
+
+function guardarPlazo() {
+  const desc  = document.getElementById("pf-desc")?.value.trim();
+  const monto = parsearDecimal(document.getElementById("pf-monto")?.value);
+  const tna   = parsearDecimal(document.getElementById("pf-tna")?.value);
+  const ini   = document.getElementById("pf-inicio")?.value;
+  const venc  = document.getElementById("pf-venc")?.value;
+  if (!desc || !monto || !tna || !ini || !venc) { showToast("⚠️ Completá todos los campos", "error"); return; }
+  if (venc <= ini) { showToast("⚠️ Vencimiento debe ser posterior al inicio", "error"); return; }
+  const plazos = loadPlazos();
+  plazos.push({ id: crypto.randomUUID(), descripcion: desc, monto, tna, fechaInicio: ini, fechaVencimiento: venc });
+  savePlazos(plazos);
+  cerrarFormPlazo();
+  renderPlazos();
+}
+
+function eliminarPlazo(id) {
+  const plazos = loadPlazos().filter(p => p.id !== id);
+  savePlazos(plazos);
+  renderPlazos();
+}
+
+// ===== INFLACIÓN IMPLÍCITA =====
+function _inflacionKey() { return USUARIO + "_inflacion"; }
+
+function renderInflacion() {
+  const input = document.getElementById("pres-inflacion-input");
+  const result = document.getElementById("pres-inflacion-result");
+  if (!input || !result) return;
+  const ipc = parsearDecimal(input.value);
+  try { localStorage.setItem(_inflacionKey(), String(ipc)); } catch {}
+  if (!ipc || ipc <= 0) { result.style.display = "none"; return; }
+  const monthly = buildMonthlyData(3);
+  if (monthly.length < 2) { result.style.display = "none"; return; }
+  const avgPrev = (monthly.slice(0,-1).reduce((s,d) => s + d.gastado, 0)) / (monthly.length - 1);
+  const curr = monthly[monthly.length - 1].gastado;
+  if (!avgPrev) { result.style.display = "none"; return; }
+  const crecGasto = ((curr - avgPrev) / avgPrev) * 100;
+  const diff = crecGasto - ipc;
+  const sign = diff > 0 ? "+" : "";
+  const color = diff > 0 ? "var(--red)" : "var(--green)";
+  result.style.display = "";
+  result.style.color = color;
+  result.textContent = `Tu gasto ${sign}${diff.toFixed(1)}% vs IPC`;
 }
 </script>
 </body>
