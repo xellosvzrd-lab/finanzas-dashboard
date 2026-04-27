@@ -472,6 +472,32 @@
   .tendencia-chip.down { background: rgba(52,211,153,.12);  color: var(--green); }
   .tendencia-chip.flat { background: var(--bg3); color: var(--text-muted); font-weight: 400; font-size: .76rem; }
 
+  /* ─── PROYECCIÓN CIERRE DE MES ──────────────────────────────── */
+  .proyeccion-banner {
+    display: flex; align-items: center; gap: .65rem;
+    padding: .7rem 1rem; border-radius: 10px; margin-bottom: 1rem;
+    font-size: .84rem; font-weight: 600;
+    border: 1px solid var(--border);
+  }
+  .proyeccion-banner.ok  { background: rgba(52,211,153,.08); border-color: rgba(52,211,153,.25); color: var(--green); }
+  .proyeccion-banner.warn{ background: rgba(251,191,36,.08);  border-color: rgba(251,191,36,.25);  color: var(--yellow); }
+  .proyeccion-banner.over{ background: rgba(248,113,113,.08); border-color: rgba(248,113,113,.25); color: var(--red); }
+  .proyeccion-banner span{ color: var(--text-muted); font-weight: 400; font-size: .8rem; margin-left: auto; }
+
+  /* ─── PACING POR CATEGORÍA ───────────────────────────────────── */
+  .pres-pacing { font-size: .68rem; font-weight: 700; padding: .15rem .4rem; border-radius: 99px; margin-left: .4rem; vertical-align: middle; }
+  .pres-pacing.ok   { background: rgba(52,211,153,.12);  color: var(--green); }
+  .pres-pacing.warn { background: rgba(251,191,36,.12);  color: var(--yellow); }
+  .pres-pacing.over { background: rgba(248,113,113,.12); color: var(--red); }
+
+  /* ─── FAIRNESS SCORE ─────────────────────────────────────────── */
+  .comp-fairness { margin-top: .9rem; padding: .75rem 1rem; background: var(--bg2); border-radius: 10px; border: 1px solid var(--border); }
+  .comp-fairness-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; margin-bottom: .5rem; }
+  .comp-fairness-bar-wrap { height: 8px; border-radius: 99px; overflow: hidden; display: flex; margin-bottom: .45rem; }
+  .comp-fairness-bar-a { background: var(--accent2); transition: width .5s var(--ease-out, ease); }
+  .comp-fairness-bar-b { background: var(--accent);  flex: 1; }
+  .comp-fairness-names { display: flex; justify-content: space-between; font-size: .78rem; font-weight: 600; }
+
   .comp-tfoot-row td {
     padding: .7rem 1rem !important;
     font-weight: 700;
@@ -1889,6 +1915,17 @@
           <div class="comp-balance-value" id="comp-balance-valor">$0</div>
           <div class="comp-balance-sub" id="comp-balance-sub">—</div>
           <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
+          <div class="comp-fairness" id="comp-fairness" style="display:none">
+            <div class="comp-fairness-label">Contribución compartidos (ARS)</div>
+            <div class="comp-fairness-bar-wrap">
+              <div class="comp-fairness-bar-a" id="comp-fairness-bar-a"></div>
+              <div class="comp-fairness-bar-b"></div>
+            </div>
+            <div class="comp-fairness-names">
+              <span id="comp-fairness-a">—</span>
+              <span id="comp-fairness-b">—</span>
+            </div>
+          </div>
         </div>
 
         <!-- Toggle detalle compartidos -->
@@ -2039,6 +2076,9 @@
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
         </div>
+
+        <!-- Proyección cierre de mes -->
+        <div id="pres-proyeccion" style="display:none"></div>
 
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
@@ -3942,6 +3982,7 @@ async function guardarTransaccion() {
     if (selFte)  { selFte.selectedIndex = 0; _actualizarMesLiqField(""); }
     resetRespField();
     showToast("✅ Transacción guardada", "ok");
+    if (navigator.vibrate) navigator.vibrate(50);
     msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
     setTimeout(() => { msg.innerHTML = ""; }, 3000);
   } catch(e) {
@@ -4417,6 +4458,22 @@ function cargarCompartidos() {
   } else {
     balSub.textContent = "✅ Están a mano — sin deuda pendiente";
   }
+  // ── FAIRNESS SCORE ───────────────────────────────────────────
+  const fairnessEl = document.getElementById("comp-fairness");
+  if (fairnessEl) {
+    const totalAmbos = totalCompDanielARS + totalCompAmaARS;
+    if (totalAmbos > 0.01) {
+      const pctUsuario = totalCompDanielARS / totalAmbos;
+      const pctPartner = totalCompAmaARS / totalAmbos;
+      document.getElementById("comp-fairness-bar-a").style.width = (pctUsuario * 100).toFixed(1) + "%";
+      document.getElementById("comp-fairness-a").textContent = `${USUARIO} ${Math.round(pctUsuario * 100)}%`;
+      document.getElementById("comp-fairness-b").textContent = `${PARTNER} ${Math.round(pctPartner * 100)}%`;
+      fairnessEl.style.display = "";
+    } else {
+      fairnessEl.style.display = "none";
+    }
+  }
+
   // ── SETTLEMENT ITEMS para "Saldar todo" ──────────────────────
   _settlementItems = [];
   filasCompARS.forEach(r => {
@@ -4541,6 +4598,7 @@ async function confirmarLiquidar() {
     if (error) throw error;
     allTransac.push({ ...data, monto: parseFloat(data.monto) });
     showToast(`✅ ${tipo} de ${fmt(monto)} registrado`, "ok");
+    if (navigator.vibrate) navigator.vibrate(50);
   } catch(e) {
     showToast(`❌ Error: ${e.message}`, "error");
   }
@@ -5065,6 +5123,27 @@ function renderPresupuesto() {
   const totalGasto   = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
   const disponible   = sueldoEfectivo - totalPresARS;
 
+  // ── PROYECCIÓN CIERRE DE MES ─────────────────────────────────
+  (function renderProyeccion() {
+    const elProy = document.getElementById("pres-proyeccion");
+    if (!elProy) return;
+    const hoy = new Date();
+    const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
+    const daysInMonth = new Date(anio, mes, 0).getDate();
+    const daysElapsed = hoy.getDate();
+    if (!esEsteMes || sueldoEfectivo <= 0 || daysElapsed < 3) { elProy.style.display = "none"; return; }
+    const proyectado = (totalGasto / daysElapsed) * daysInMonth;
+    const diff = sueldoEfectivo - proyectado;
+    const absDiff = Math.abs(diff);
+    const cls = diff >= 0 ? (proyectado > sueldoEfectivo * 0.9 ? "warn" : "ok") : "over";
+    const icon = cls === "ok" ? "📈" : cls === "warn" ? "⚠️" : "🔴";
+    const msg  = diff >= 0
+      ? `${icon} A este ritmo cerrarás el mes con <strong>${fmt(absDiff)}</strong> de margen`
+      : `${icon} A este ritmo <strong>gastarás ${fmt(absDiff)} más</strong> que tu sueldo`;
+    elProy.style.display = "";
+    elProy.innerHTML = `<div class="proyeccion-banner ${cls}">${msg}<span>día ${daysElapsed}/${daysInMonth}</span></div>`;
+  })();
+
   // ── ALERTAS DE TENDENCIA ─────────────────────────────────────
   (function renderTendencias() {
     const prevMes  = mes === 1 ? 12 : mes - 1;
@@ -5200,6 +5279,11 @@ function renderPresupuesto() {
 
   // Tabla
   const tbody = document.getElementById("pres-tbody");
+  // Pacing: días transcurridos vs días del mes (solo mes actual)
+  const hoyPacing = new Date();
+  const esEsteMesPacing = mes === hoyPacing.getMonth() + 1 && anio === hoyPacing.getFullYear();
+  const daysPct = esEsteMesPacing ? hoyPacing.getDate() / new Date(anio, mes, 0).getDate() : null;
+
   tbody.innerHTML = categGasto.map(cat => {
     const pct_sueldo = presupuestoActual[cat] || 0;     // % guardado
     const pres       = (pct_sueldo / 100) * sueldoEfectivo;     // monto ARS calculado
@@ -5216,6 +5300,16 @@ function renderPresupuesto() {
     const dotColor  = isOver ? "var(--red)" : isWarn ? "var(--yellow)" : pres > 0 ? "var(--green)" : "var(--border2)";
     const barClass  = isOver ? "bar-over" : isWarn ? "bar-warn" : "bar-ok";
     const restColor = isOver ? "var(--red)" : isWarn ? "var(--yellow)" : "var(--green)";
+
+    // Pacing badge — solo mes actual, solo si hay presupuesto y sueldo
+    let pacingHtml = "";
+    if (daysPct !== null && pres > 0 && sueldoEfectivo > 0) {
+      const spendPct = gasto / pres; // 0-1+
+      const threshold = Math.min(daysPct + 0.10, 1);
+      if (spendPct > 1)          pacingHtml = `<span class="pres-pacing over">Excedido</span>`;
+      else if (spendPct > threshold) pacingHtml = `<span class="pres-pacing warn">Cuidado</span>`;
+      else                           pacingHtml = `<span class="pres-pacing ok">En track</span>`;
+    }
 
     const gastoStr = gasto > 0
       ? `<span style="color:${isOver ? "var(--red)" : "var(--text)"};font-weight:600">${fmt(gasto)}</span>`
@@ -5237,7 +5331,7 @@ function renderPresupuesto() {
         : "";
 
     return `<tr class="${rowCls}">
-      <td><span class="pres-status-dot" style="background:${dotColor}"></span>${cat}</td>
+      <td><span class="pres-status-dot" style="background:${dotColor}"></span>${cat}${pacingHtml}</td>
       <td style="text-align:right">
         <div style="display:flex;align-items:center;justify-content:flex-end;gap:.3rem">
           <input type="text" inputmode="decimal" class="pres-input" data-cat="${cat}"
