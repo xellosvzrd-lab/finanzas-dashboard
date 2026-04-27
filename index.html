@@ -291,6 +291,25 @@
   .kpi-trend.down { color: var(--red); }
   .kpi-trend.flat { color: var(--text-muted); }
 
+  /* ─── SPARKLINES ────────────────────────────────────────── */
+  .kpi-sparkline-wrap { margin-top: .5rem; height: 36px; }
+  .kpi-sparkline-wrap canvas { width: 100% !important; height: 36px !important; }
+
+  /* ─── HEATMAP CALENDAR ───────────────────────────────────── */
+  .heatmap-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-bottom: .8rem; }
+  .heatmap-header { text-align: center; font-size: .62rem; color: var(--text-muted); font-weight: 600; padding-bottom: 2px; }
+  .heatmap-day {
+    aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    font-size: .65rem; color: var(--text-muted); cursor: default;
+    background: rgba(200,132,90,var(--heat,0)); border: 1px solid transparent;
+    transition: border-color .1s;
+  }
+  .heatmap-day:hover { border-color: var(--accent); }
+  .heatmap-day.heatmap-empty { background: none; border: none; }
+  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); color: var(--accent); font-weight: 700; }
+  .heatmap-day.heatmap-zero  { background: var(--bg3); }
+  #heatmap-mes { padding: .75rem 1rem .2rem; }
+
   /* ─── HERO KPI CARD ─────────────────────────────────────── */
   .kpi-hero { grid-column: span 2; }
   .kpi-hero .kpi-value { font-size: clamp(1.1rem, 5vw, 1.8rem); }
@@ -1784,6 +1803,7 @@
           <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="filtrarTabla()">
         </div>
         <div class="chart-card" style="padding:0; overflow:hidden">
+          <div id="heatmap-mes"></div>
           <div class="tabla-subtotal" id="tabla-subtotal">
             <div class="sub-neto-main">
               <span class="sub-neto-lbl">Neto del período</span>
@@ -2038,6 +2058,7 @@
             <div class="kpi-label">Sueldo</div>
             <div class="kpi-value income" id="pres-kpi-sueldo">$0</div>
             <div class="kpi-sub" id="pres-kpi-sueldo-sub">ingresos del mes</div>
+            <div class="kpi-sparkline-wrap"><canvas id="spark-sueldo"></canvas></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div>
@@ -2050,6 +2071,7 @@
             <div class="kpi-label">Gastado</div>
             <div class="kpi-value expense" id="pres-kpi-gastado">$0</div>
             <div class="kpi-sub" id="pres-kpi-gastado-sub">50% compartidos</div>
+            <div class="kpi-sparkline-wrap"><canvas id="spark-gastado"></canvas></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-icon ico-muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
@@ -2082,6 +2104,12 @@
 
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
+
+        <!-- Waterfall chart -->
+        <div id="chart-waterfall-wrap" class="chart-card" style="display:none;padding:1rem 1rem .6rem;margin-bottom:1rem">
+          <div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:.6rem">Flujo del mes</div>
+          <div style="height:200px"><canvas id="chart-waterfall"></canvas></div>
+        </div>
 
         <!-- Toggle desglose -->
         <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
@@ -3673,6 +3701,7 @@ function filtrarTabla() {
       </td>
     </tr>`
   }).join("");
+  renderHeatmapMes();
 }
 
 // ─── EXPORTAR CSV ────────────────────────────────────────────
@@ -4501,6 +4530,9 @@ function cargarCompartidos() {
 // ─── LIQUIDACIÓN DE COMPARTIDOS ───────────────────────────────
 let _liqPendiente = null; // { cat, monto, tipo }
 let _settlementItems = []; // { cat, monto, tipo, moneda } — para saldar todo
+let chartWaterfall = null;
+let chartSparklines = {};
+let _lastHeatmapMes = null;
 
 function abrirLiquidar(cat, monto, tipo) {
   _liqPendiente = { cat, monto, tipo };
@@ -5041,7 +5073,132 @@ function montoEfectivoGasto(t) {
   return m; // "Mío"
 }
 
+function destroyPresupuestoCharts() {
+  if (chartWaterfall) { chartWaterfall.destroy(); chartWaterfall = null; }
+  Object.values(chartSparklines).forEach(c => c && c.destroy());
+  chartSparklines = {};
+}
+
+function buildMonthlyData(nMeses) {
+  const hoy = new Date();
+  const result = [];
+  for (let i = nMeses - 1; i >= 0; i--) {
+    let m = hoy.getMonth() + 1 - i;
+    let y = hoy.getFullYear();
+    while (m <= 0) { m += 12; y--; }
+    const dataMes = allTransac.filter(t => {
+      const { year, month } = getMesLiquidacion(t);
+      return month === m && year === y;
+    });
+    const dataUsuario = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO);
+    const sueldo = dataUsuario
+      .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria) && (t.moneda || "ARS") === "ARS")
+      .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+    const gastado = categGasto
+      .filter(c => !esTransferencia({ categoria: c }))
+      .reduce((total, cat) => {
+        const mio  = dataUsuario.filter(t => t.tipo==="Gasto" && t.categoria===cat && (t.responsabilidad||"Mío")==="Mío" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
+        const comp = dataMes.filter(t => t.tipo==="Gasto" && t.categoria===cat && t.responsabilidad==="Compartido" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
+        return total + mio + comp * 0.5;
+      }, 0);
+    result.push({ m, y, sueldo, gastado });
+  }
+  return result;
+}
+
+function renderSparklines(monthly) {
+  const sparkCfg = (data, color) => ({
+    type: "line",
+    data: { labels: data.map((_,i) => i), datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: true, backgroundColor: color.replace("rgb","rgba").replace(")",",0.08)"), tension: 0.4, pointRadius: 0 }] },
+    options: { responsive: false, animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
+  });
+  const pairs = [
+    ["spark-sueldo",  monthly.map(d => d.sueldo),  "rgb(52,211,153)"],
+    ["spark-gastado", monthly.map(d => d.gastado), "rgb(248,113,113)"],
+  ];
+  pairs.forEach(([id, data, color]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    chartSparklines[id] = new Chart(el, sparkCfg(data, color));
+  });
+}
+
+function renderWaterfallChart(gastoPorCat, sueldoEfectivo, totalGasto) {
+  const wrap = document.getElementById("chart-waterfall-wrap");
+  const el   = document.getElementById("chart-waterfall");
+  if (!el || sueldoEfectivo <= 0) { if (wrap) wrap.style.display = "none"; return; }
+  const cats = categGasto
+    .filter(c => (gastoPorCat[c] || 0) > 0 && !CATS_TRANSFERENCIA.includes(c))
+    .sort((a, b) => (gastoPorCat[b] || 0) - (gastoPorCat[a] || 0));
+  const labels = ["Sueldo", ...cats.map(c => c.length > 12 ? c.slice(0,11)+"…" : c), "Neto"];
+  const data = [], colors = [];
+  data.push([0, sueldoEfectivo]);
+  colors.push("rgba(52,211,153,0.75)");
+  let running = sueldoEfectivo;
+  cats.forEach(cat => {
+    const g = gastoPorCat[cat] || 0;
+    data.push([Math.max(0, running - g), running]);
+    running -= g;
+    colors.push("rgba(200,132,90,0.8)");
+  });
+  const neto = sueldoEfectivo - totalGasto;
+  data.push([0, Math.max(0, neto)]);
+  colors.push(neto >= 0 ? "rgba(52,211,153,0.75)" : "rgba(248,113,113,0.75)");
+  if (wrap) wrap.style.display = "";
+  chartWaterfall = new Chart(el, {
+    type: "bar",
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 3, borderSkipped: false }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => Array.isArray(ctx.raw) ? fmt(ctx.raw[1] - ctx.raw[0]) : fmt(ctx.raw) } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: "rgba(200,185,178,0.7)", font: { size: 9 }, maxRotation: 45, minRotation: 30 } },
+        y: { beginAtZero: true, suggestedMin: Math.min(0, neto), grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "rgba(200,185,178,0.7)", callback: v => fmtShort(v) } }
+      }
+    }
+  });
+}
+
+function renderHeatmapMes() {
+  const filMes  = parseInt(document.getElementById("fil-mes")?.value || 0);
+  const filAnio = parseInt(document.getElementById("fil-anio")?.value || 0);
+  if (!filMes || !filAnio) return;
+  const cacheKey = `${filMes}-${filAnio}`;
+  if (cacheKey === _lastHeatmapMes) return;
+  _lastHeatmapMes = cacheKey;
+  const el = document.getElementById("heatmap-mes");
+  if (!el) return;
+  const byDay = {};
+  allTransac.forEach(t => {
+    const { year, month } = getMesLiquidacion(t);
+    if (month !== filMes || year !== filAnio) return;
+    if (t.tipo !== "Gasto") return;
+    if ((t.usuario || "Daniel") !== USUARIO) return;
+    if ((t.moneda || "ARS") !== "ARS") return;
+    if (esTransferencia(t)) return;
+    const d = parseInt((t.fecha || "").split("-")[2] || 0);
+    if (d) byDay[d] = (byDay[d] || 0) + Math.abs(Number(t.monto));
+  });
+  const maxG = Math.max(...Object.values(byDay), 1);
+  const daysInMonth = new Date(filAnio, filMes, 0).getDate();
+  const offset = (new Date(filAnio, filMes - 1, 1).getDay() + 6) % 7;
+  const hoy = new Date();
+  const isCurrentMonth = filMes === hoy.getMonth() + 1 && filAnio === hoy.getFullYear();
+  let html = `<div class="heatmap-cal">` + ["L","M","M","J","V","S","D"].map(d => `<div class="heatmap-header">${d}</div>`).join("");
+  for (let i = 0; i < offset; i++) html += `<div class="heatmap-day heatmap-empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const g = byDay[d] || 0;
+    const heat = (g / maxG).toFixed(2);
+    const isToday = isCurrentMonth && d === hoy.getDate();
+    const cls = `heatmap-day${isToday ? " heatmap-today" : ""}${g === 0 ? " heatmap-zero" : ""}`;
+    html += `<div class="${cls}" style="--heat:${heat}" title="${g > 0 ? fmt(g) : "Sin gastos"}">${d}</div>`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
 function renderPresupuesto() {
+  destroyPresupuestoCharts();
   const mes  = parseInt(document.getElementById("pres-mes").value);
   const anio = parseInt(document.getElementById("pres-anio").value);
 
@@ -5361,6 +5518,11 @@ function renderPresupuesto() {
       <td><strong style="color:var(--text-muted)">${totalEjec}% ejecutado</strong></td>
     </tr>`;
   }
+
+  // Sprint 2 — waterfall + sparklines (después de HTML escrito)
+  renderWaterfallChart(gastoPorCat, sueldoEfectivo, totalGasto);
+  const monthly = buildMonthlyData(6);
+  renderSparklines(monthly);
 }
 
 // Actualiza solo los KPIs al cambiar un input (sin re-renderizar la tabla)
