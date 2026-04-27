@@ -547,12 +547,6 @@
   .swipe-row.swiping { transition: none; }
 
   /* ─── HEALTH SCORE ──────────────────────────────────────── */
-  .health-score-num { font-size: 2.2rem; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
-  .health-score-num.green  { color: var(--green); }
-  .health-score-num.yellow { color: var(--yellow); }
-  .health-score-num.red    { color: var(--red); }
-  .health-score-bar { height: 5px; border-radius: 99px; background: var(--bg3); overflow: hidden; margin: .4rem 0 .35rem; }
-  .health-score-fill { height: 100%; border-radius: 99px; transition: width .6s var(--ease-out, ease); }
 
   /* ─── PÁGINA CATEGORÍAS Y FUENTES ───────────────────────── */
   .cfg-grid {
@@ -1687,6 +1681,7 @@
     <button class="nav-item" onclick="navegarA('transacciones')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transacciones</button>
     <button class="nav-item" onclick="navegarA('compartidos')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Compartidos</button>
     <button class="nav-item" onclick="navegarA('config')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorías</button>
+    <button class="nav-item" onclick="navegarA('inversiones')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Inversiones</button>
     <button class="nav-item" onclick="navegarA('resumen')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Resumen</button>
     <span class="topnav-indicator" id="topnav-indicator"></span>
   </div>
@@ -1708,6 +1703,9 @@
   </button>
   <button class="bn-item" id="bn-config" onclick="navegarA('config')">
     <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span>Categorías</span>
+  </button>
+  <button class="bn-item" id="bn-inversiones" onclick="navegarA('inversiones')">
+    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></span><span>Inversiones</span>
   </button>
   <button class="bn-item" id="bn-resumen" onclick="navegarA('resumen')">
     <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>Resumen</span>
@@ -2142,12 +2140,6 @@
             <div class="kpi-value" id="pres-kpi-diario">—</div>
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
-          <div class="kpi-card" id="pres-health-card" style="grid-column:span 2;display:none">
-            <div class="kpi-label">Salud financiera</div>
-            <div class="health-score-num" id="pres-health-num">—</div>
-            <div class="health-score-bar"><div class="health-score-fill" id="pres-health-bar"></div></div>
-            <div class="kpi-sub" id="pres-health-sub">—</div>
-          </div>
           <div class="kpi-card kpi-heatmap-card" id="heatmap-mes"></div>
         </div>
 
@@ -2282,8 +2274,16 @@
 
         </div><!-- /cfg-grid -->
 
-        <!-- ===== WALLETS / PATRIMONIO ===== -->
-        <div style="margin-top:1.5rem">
+      </div><!-- /page-config -->
+
+      <!-- ── PÁGINA INVERSIONES ────────────────────────────── -->
+      <div id="page-inversiones" class="page">
+        <div class="page-header">
+          <h1>Inversiones</h1>
+        </div>
+
+        <!-- Wallets / Patrimonio -->
+        <div style="margin-bottom:1.5rem">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
             <h2 style="font-size:1rem;font-weight:700">Wallets · Patrimonio</h2>
             <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormWallet()">+ Agregar</button>
@@ -2293,8 +2293,8 @@
           <div id="wallet-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
         </div>
 
-        <!-- ===== PLAZOS FIJOS ===== -->
-        <div style="margin-top:1.5rem">
+        <!-- Plazos Fijos -->
+        <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
             <h2 style="font-size:1rem;font-weight:700">Plazos Fijos</h2>
             <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Agregar</button>
@@ -2303,7 +2303,7 @@
           <div id="plazo-lista"></div>
         </div>
 
-      </div><!-- /page-config -->
+      </div><!-- /page-inversiones -->
 
       <!-- ── PÁGINA IMPORTAR DATOS ──────────────────────── -->
       <div id="page-importar" class="page">
@@ -4871,7 +4871,7 @@ function cargarAnual() {
   tbody.innerHTML = html;
 }
 
-const _navOrder = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, resumen: 4 };
+const _navOrder = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
 let   _paginaActual = "presupuesto";
 
 function _actualizarNavIndicator() {
@@ -4904,14 +4904,14 @@ function navegarA(pagina) {
   }
 
   // Top nav (desktop) — 4 tabs en orden: presupuesto, transacciones, compartidos, config
-  const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, resumen: 4 };
+  const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
   document.querySelectorAll(".topnav .nav-item").forEach((n, i) => {
     n.classList.toggle("active", i === navMap[pagina]);
   });
   requestAnimationFrame(_actualizarNavIndicator);
 
   // Bottom nav (mobile)
-  ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config","bn-resumen"].forEach(id => {
+  ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config","bn-inversiones","bn-resumen"].forEach(id => {
     document.getElementById(id)?.classList.remove("active");
   });
   const bnMap = {
@@ -4919,6 +4919,7 @@ function navegarA(pagina) {
     transacciones: "bn-transacciones",
     compartidos: "bn-compartidos",
     config: "bn-config",
+    inversiones: "bn-inversiones",
     resumen: "bn-resumen"
   };
   if (bnMap[pagina]) document.getElementById(bnMap[pagina])?.classList.add("active");
@@ -4929,6 +4930,7 @@ function navegarA(pagina) {
   if (pagina === "anual")        cargarAnual();
   if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); }
   if (pagina === "config")       renderizarConfig();
+  if (pagina === "inversiones")  { renderWallets(); renderPlazos(); }
 
   // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)
   const fab = document.getElementById("btn-fab-nueva");
@@ -5544,9 +5546,6 @@ function renderPresupuesto() {
     </tr>`;
   }
 
-  // Sprint 5 — health score
-  renderHealthScore(sueldoEfectivo, totalGasto, gastoPorCat);
-
   // Sprint 2 — heatmap + sparklines (después de HTML escrito)
   renderHeatmapMes();
   const monthly = buildMonthlyData(6);
@@ -5680,8 +5679,6 @@ function renderizarConfig() {
   _renderLista("ingreso",    categIngreso, "INGRESO");
   _renderListaFuentes("fuente",   categFuentes,   "FUENTE");
   _renderListaFuentes("fuentetc", categFuentesTC, "FUENTE_TC");
-  renderWallets();
-  renderPlazos();
 }
 
 function _renderLista(tipo, items, tipoAPI) {
@@ -6661,54 +6658,6 @@ function resetRespField() {
 }
 
 // ===== HEALTH SCORE =====
-function renderHealthScore(sueldoEfectivo, totalGasto, gastoPorCat) {
-  const card = document.getElementById("pres-health-card");
-  const numEl = document.getElementById("pres-health-num");
-  const barEl = document.getElementById("pres-health-bar");
-  const subEl = document.getElementById("pres-health-sub");
-  if (!card || sueldoEfectivo <= 0) { if (card) card.style.display = "none"; return; }
-
-  const saldoReal = sueldoEfectivo - totalGasto;
-
-  // Savings rate (40pts) — full at ≥20% savings
-  const savingsRate = saldoReal / sueldoEfectivo;
-  const savingsPts = Math.round(Math.max(0, Math.min(1, savingsRate / 0.2)) * 40);
-
-  // Budget adherence (35pts) — % of budgeted cats on track
-  const budgetedCats = Object.entries(presupuestoActual).filter(([,v]) => v > 0);
-  let adherencePts = 35;
-  if (budgetedCats.length > 0) {
-    const onTrack = budgetedCats.filter(([cat]) => {
-      const budget = (presupuestoActual[cat] / 100) * sueldoEfectivo;
-      return budget > 0 && (gastoPorCat[cat] || 0) <= budget;
-    }).length;
-    adherencePts = Math.round((onTrack / budgetedCats.length) * 35);
-  }
-
-  // Pace (25pts) — skip if <3 days elapsed
-  let pacePts = 25;
-  const hoy = new Date();
-  const mes  = parseInt(document.getElementById("pres-mes")?.value || 0);
-  const anio = parseInt(document.getElementById("pres-anio")?.value || 0);
-  const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
-  if (esEsteMes && hoy.getDate() >= 3) {
-    const proyectado = (totalGasto / hoy.getDate()) * new Date(anio, mes, 0).getDate();
-    const paceRatio = proyectado / sueldoEfectivo;
-    pacePts = Math.round(Math.max(0, Math.min(1, (1 - paceRatio) / 0.1)) * 25);
-  }
-
-  const score = savingsPts + adherencePts + pacePts;
-  const cls = score >= 70 ? "green" : score >= 40 ? "yellow" : "red";
-  const barColor = score >= 70 ? "var(--green)" : score >= 40 ? "var(--yellow)" : "var(--red)";
-
-  card.style.display = "";
-  numEl.textContent = score;
-  numEl.className = `health-score-num ${cls}`;
-  barEl.style.width = score + "%";
-  barEl.style.background = barColor;
-  subEl.textContent = `Ahorro ${savingsPts}/40 · Presupuesto ${adherencePts}/35 · Ritmo ${pacePts}/25`;
-}
-
 // ===== WALLETS / PATRIMONIO =====
 function _walletsKey() { return USUARIO + "_wallets"; }
 function loadWallets() {
@@ -6735,7 +6684,7 @@ function renderWallets() {
         <div style="font-size:.77rem;color:var(--text-muted)">${w.moneda === "USD" ? "USD" : "ARS"}</div>
       </div>
       <div style="font-weight:700;font-size:.95rem">${w.moneda === "USD" ? fmtMoneda(w.monto,"USD") : fmt(w.monto)}</div>
-      <button class="cfg-del-btn" onclick="eliminarWallet(${JSON.stringify(w.id)})" title="Eliminar">✕</button>
+      <button class="cfg-del-btn" onclick="eliminarWallet('${w.id}')" title="Eliminar">✕</button>
     </div>`).join("");
   const totalARS = wallets.filter(w => w.moneda === "ARS").reduce((s,w) => s + w.monto, 0);
   const totalUSD = wallets.filter(w => w.moneda === "USD").reduce((s,w) => s + w.monto, 0);
@@ -6872,7 +6821,7 @@ function renderPlazos() {
       <div class="plazo-row"><span>Rendimiento esperado</span><strong style="color:var(--green)">${fmt(rend)}</strong></div>
       <div class="plazo-row"><span>Total al vencimiento</span><strong>${fmt(p.monto + rend)}</strong></div>
       <div class="plazo-row"><span>${p.fechaInicio} → ${p.fechaVencimiento}</span>
-        <button class="cfg-del-btn" onclick="eliminarPlazo(${JSON.stringify(p.id)})" title="Eliminar">✕</button>
+        <button class="cfg-del-btn" onclick="eliminarPlazo('${p.id}')" title="Eliminar">✕</button>
       </div>
     </div>`;
   }).join("");
