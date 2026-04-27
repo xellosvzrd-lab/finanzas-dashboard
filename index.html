@@ -493,18 +493,6 @@
   .tendencia-chip.down { background: rgba(52,211,153,.12);  color: var(--green); }
   .tendencia-chip.flat { background: var(--bg3); color: var(--text-muted); font-weight: 400; font-size: .76rem; }
 
-  /* ─── PROYECCIÓN CIERRE DE MES ──────────────────────────────── */
-  .proyeccion-banner {
-    display: flex; align-items: center; gap: .65rem;
-    padding: .7rem 1rem; border-radius: 10px; margin-bottom: 1rem;
-    font-size: .84rem; font-weight: 600;
-    border: 1px solid var(--border);
-  }
-  .proyeccion-banner.ok  { background: rgba(52,211,153,.08); border-color: rgba(52,211,153,.25); color: var(--green); }
-  .proyeccion-banner.warn{ background: rgba(251,191,36,.08);  border-color: rgba(251,191,36,.25);  color: var(--yellow); }
-  .proyeccion-banner.over{ background: rgba(248,113,113,.08); border-color: rgba(248,113,113,.25); color: var(--red); }
-  .proyeccion-banner span{ color: var(--text-muted); font-weight: 400; font-size: .8rem; margin-left: auto; }
-
   /* ─── PACING POR CATEGORÍA ───────────────────────────────────── */
   .pres-pacing { font-size: .68rem; font-weight: 700; padding: .15rem .4rem; border-radius: 99px; margin-left: .4rem; vertical-align: middle; }
   .pres-pacing.ok   { background: rgba(52,211,153,.12);  color: var(--green); }
@@ -542,11 +530,6 @@
   .plazo-form input:focus { outline: none; border-color: var(--accent); }
   .plazo-form-full { grid-column: 1 / -1; }
 
-  /* ─── INFLACIÓN IMPLÍCITA ───────────────────────────────────── */
-  .inflacion-banner { display: flex; align-items: center; gap: .6rem; padding: .6rem .9rem; border-radius: 9px; margin-bottom: .9rem; background: var(--bg2); border: 1px solid var(--border); font-size: .83rem; flex-wrap: wrap; }
-  .inflacion-input { width: 64px; padding: .3rem .5rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .83rem; font-family: inherit; text-align: center; }
-  .inflacion-result { margin-left: auto; font-weight: 700; font-size: .85rem; }
-
   /* ─── LIQ-MODAL BOTTOM-SHEET MOBILE ─────────────────────── */
   @media (max-width: 768px) {
     #liq-modal { align-items: flex-end !important; }
@@ -570,10 +553,6 @@
   .health-score-num.red    { color: var(--red); }
   .health-score-bar { height: 5px; border-radius: 99px; background: var(--bg3); overflow: hidden; margin: .4rem 0 .35rem; }
   .health-score-fill { height: 100%; border-radius: 99px; transition: width .6s var(--ease-out, ease); }
-
-  /* ─── WEEKLY DIGEST ─────────────────────────────────────── */
-  .weekly-digest { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: .6rem .9rem; margin-bottom: .9rem; font-size: .82rem; color: var(--text-muted); line-height: 1.5; }
-  .weekly-digest strong { color: var(--text); }
 
   /* ─── PÁGINA CATEGORÍAS Y FUENTES ───────────────────────── */
   .cfg-grid {
@@ -2171,19 +2150,6 @@
           </div>
           <div class="kpi-card kpi-heatmap-card" id="heatmap-mes"></div>
         </div>
-
-        <!-- Weekly digest -->
-        <div id="pres-weekly-digest" class="weekly-digest" style="display:none"></div>
-
-        <!-- Inflación implícita -->
-        <div class="inflacion-banner" id="pres-inflacion-wrap">
-          <span style="color:var(--text-muted);font-size:.78rem">IPC mes %</span>
-          <input type="text" inputmode="decimal" class="inflacion-input" id="pres-inflacion-input" placeholder="0" oninput="renderInflacion()">
-          <span id="pres-inflacion-result" class="inflacion-result" style="display:none"></span>
-        </div>
-
-        <!-- Proyección cierre de mes -->
-        <div id="pres-proyeccion" style="display:none"></div>
 
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
@@ -5341,27 +5307,6 @@ function renderPresupuesto() {
   const totalGasto   = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
   const disponible   = sueldoEfectivo - totalPresARS;
 
-  // ── PROYECCIÓN CIERRE DE MES ─────────────────────────────────
-  (function renderProyeccion() {
-    const elProy = document.getElementById("pres-proyeccion");
-    if (!elProy) return;
-    const hoy = new Date();
-    const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
-    const daysInMonth = new Date(anio, mes, 0).getDate();
-    const daysElapsed = hoy.getDate();
-    if (!esEsteMes || sueldoEfectivo <= 0 || daysElapsed < 3) { elProy.style.display = "none"; return; }
-    const proyectado = (totalGasto / daysElapsed) * daysInMonth;
-    const diff = sueldoEfectivo - proyectado;
-    const absDiff = Math.abs(diff);
-    const cls = diff >= 0 ? (proyectado > sueldoEfectivo * 0.9 ? "warn" : "ok") : "over";
-    const icon = cls === "ok" ? "📈" : cls === "warn" ? "⚠️" : "🔴";
-    const msg  = diff >= 0
-      ? `${icon} A este ritmo cerrarás el mes con <strong>${fmt(absDiff)}</strong> de margen`
-      : `${icon} A este ritmo <strong>gastarás ${fmt(absDiff)} más</strong> que tu sueldo`;
-    elProy.style.display = "";
-    elProy.innerHTML = `<div class="proyeccion-banner ${cls}">${msg}<span>día ${daysElapsed}/${daysInMonth}</span></div>`;
-  })();
-
   // ── ALERTAS DE TENDENCIA ─────────────────────────────────────
   (function renderTendencias() {
     const prevMes  = mes === 1 ? 12 : mes - 1;
@@ -5599,18 +5544,8 @@ function renderPresupuesto() {
     </tr>`;
   }
 
-  // Cargar inflación guardada
-  try {
-    const saved = localStorage.getItem(_inflacionKey ? _inflacionKey() : "");
-    const inp = document.getElementById("pres-inflacion-input");
-    if (inp && saved && parseFloat(saved) > 0) { inp.value = saved; renderInflacion(); }
-  } catch {}
-
   // Sprint 5 — health score
   renderHealthScore(sueldoEfectivo, totalGasto, gastoPorCat);
-
-  // Sprint 4 — weekly digest
-  renderWeeklyDigest();
 
   // Sprint 2 — heatmap + sparklines (después de HTML escrito)
   renderHeatmapMes();
@@ -6897,42 +6832,6 @@ function eliminarWallet(id) {
   }, { passive: true });
 })();
 
-// ===== WEEKLY DIGEST =====
-function renderWeeklyDigest() {
-  const el = document.getElementById("pres-weekly-digest");
-  if (!el) return;
-  const hoy = new Date();
-  const pad = n => String(n).padStart(2, "0");
-  const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  const weekStart = new Date(hoy); weekStart.setDate(hoy.getDate() - 6);
-  const prevStart = new Date(weekStart); prevStart.setDate(weekStart.getDate() - 7);
-  const prevEnd   = new Date(weekStart); prevEnd.setDate(weekStart.getDate() - 1);
-  const isoHoy = toISO(hoy), isoWk = toISO(weekStart), isoPrevS = toISO(prevStart), isoPrevE = toISO(prevEnd);
-
-  const isThisWeek = t => t.fecha >= isoWk && t.fecha <= isoHoy;
-  const isLastWeek = t => t.fecha >= isoPrevS && t.fecha <= isoPrevE;
-  const isGasto = t => t.tipo === "Gasto" && (t.usuario || "Daniel") === USUARIO && (t.moneda || "ARS") === "ARS" && !esTransferencia(t);
-
-  const thisWeekTxs = allTransac.filter(t => isThisWeek(t) && isGasto(t));
-  if (!thisWeekTxs.length) { el.style.display = "none"; return; }
-
-  const totalThis = thisWeekTxs.reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const totalPrev = allTransac.filter(t => isLastWeek(t) && isGasto(t)).reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-
-  const byCat = {};
-  thisWeekTxs.forEach(t => { byCat[t.categoria] = (byCat[t.categoria] || 0) + Math.abs(Number(t.monto)); });
-  const topCat = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0];
-
-  let delta = "";
-  if (totalPrev > 0) {
-    const pct = ((totalThis - totalPrev) / totalPrev * 100).toFixed(0);
-    delta = pct > 0 ? ` <span style="color:var(--red)">+${pct}% vs semana anterior</span>` : ` <span style="color:var(--green)">${pct}% vs semana anterior</span>`;
-  }
-
-  el.style.display = "";
-  el.innerHTML = `📅 Esta semana: <strong>${fmt(totalThis)}</strong> · mayor gasto en <strong>${escapeHtml(topCat[0])}</strong>${delta}`;
-}
-
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
@@ -7023,29 +6922,6 @@ function eliminarPlazo(id) {
   renderPlazos();
 }
 
-// ===== INFLACIÓN IMPLÍCITA =====
-function _inflacionKey() { return USUARIO + "_inflacion"; }
-
-function renderInflacion() {
-  const input = document.getElementById("pres-inflacion-input");
-  const result = document.getElementById("pres-inflacion-result");
-  if (!input || !result) return;
-  const ipc = parsearDecimal(input.value);
-  try { localStorage.setItem(_inflacionKey(), String(ipc)); } catch {}
-  if (!ipc || ipc <= 0) { result.style.display = "none"; return; }
-  const monthly = buildMonthlyData(3);
-  if (monthly.length < 2) { result.style.display = "none"; return; }
-  const avgPrev = (monthly.slice(0,-1).reduce((s,d) => s + d.gastado, 0)) / (monthly.length - 1);
-  const curr = monthly[monthly.length - 1].gastado;
-  if (!avgPrev) { result.style.display = "none"; return; }
-  const crecGasto = ((curr - avgPrev) / avgPrev) * 100;
-  const diff = crecGasto - ipc;
-  const sign = diff > 0 ? "+" : "";
-  const color = diff > 0 ? "var(--red)" : "var(--green)";
-  result.style.display = "";
-  result.style.color = color;
-  result.textContent = `Tu gasto ${sign}${diff.toFixed(1)}% vs IPC`;
-}
 </script>
 </body>
 </html>
