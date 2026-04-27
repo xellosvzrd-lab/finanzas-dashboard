@@ -296,27 +296,25 @@
   .kpi-sparkline-wrap canvas { width: 100% !important; height: 36px !important; }
 
   /* ─── HEATMAP CALENDAR ───────────────────────────────────── */
-  .heatmap-full-card { margin-bottom: 1rem; }
-  .heatmap-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: .75rem; gap: .5rem; flex-wrap: wrap; }
-  .heatmap-top-title { font-size: .78rem; font-weight: 700; color: var(--text); letter-spacing: .01em; }
-  .heatmap-top-stat { font-size: .72rem; color: var(--text-muted); }
+  .heatmap-full-card { margin-bottom: 1rem; padding: .85rem 1rem .7rem !important; }
+  .heatmap-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; gap: .5rem; }
+  .heatmap-top-title { font-size: .75rem; font-weight: 700; color: var(--text); }
+  .heatmap-top-stat { font-size: .68rem; color: var(--text-muted); }
   .heatmap-top-stat strong { color: var(--accent); }
-  .heatmap-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; width: 100%; }
-  .heatmap-header { text-align: center; font-size: .65rem; color: var(--text-muted); font-weight: 600; padding-bottom: 3px; }
+  .heatmap-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; width: 100%; }
+  .heatmap-header { text-align: center; font-size: .58rem; color: var(--text-muted); font-weight: 600; padding-bottom: 2px; }
   .heatmap-day {
-    aspect-ratio: 1; border-radius: 4px;
+    height: 26px; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .55rem; color: rgba(255,252,249,.7); font-weight: 600;
     background: rgba(200,132,90,var(--heat,0));
     border: 1px solid transparent; cursor: default;
     transition: border-color .12s, transform .1s;
-    position: relative;
   }
-  .heatmap-day:hover { border-color: var(--accent); transform: scale(1.15); z-index: 1; }
+  .heatmap-day:hover { border-color: var(--accent); transform: scale(1.12); z-index: 1; }
   .heatmap-day.heatmap-empty { background: none; border: none; }
-  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); box-shadow: 0 0 6px rgba(200,132,90,.35); }
-  .heatmap-day.heatmap-zero  { background: var(--bg3); }
-  .heatmap-legend { display: flex; align-items: center; gap: 4px; margin-top: .6rem; justify-content: flex-end; }
-  .heatmap-legend-label { font-size: .62rem; color: var(--text-muted); }
-  .heatmap-legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); color: var(--accent); font-weight: 800; }
+  .heatmap-day.heatmap-zero  { background: var(--bg3); color: var(--text-muted); }
 
   /* ─── HERO KPI CARD ─────────────────────────────────────── */
   .kpi-hero { grid-column: span 2; }
@@ -2122,12 +2120,6 @@
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
             <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Presupuestado</div>
           </div>
-          <div class="kpi-card" id="pres-kpi-usd-card" style="display:none">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-            <div class="kpi-label">En dólares</div>
-            <div class="kpi-value" id="pres-kpi-saldo-usd">U$S 0,00</div>
-            <div class="kpi-sub" id="pres-kpi-saldo-usd-sub">ingresos − gastos USD</div>
-          </div>
           <div class="kpi-card" id="pres-kpi-mep-card" style="display:none">
             <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
             <div class="kpi-label">Saldo en USD</div>
@@ -2919,14 +2911,6 @@ function _actualizarStringsUsuario() {
   if (gastSub) gastSub.textContent = `50% compartidos · sin "De ${PARTNER}"`;
   const noteP = document.getElementById("pres-note-partner");
   if (noteP) noteP.textContent = "De " + PARTNER;
-  const usdCard = document.getElementById("pres-kpi-usd-card");
-  if (usdCard) {
-    usdCard.style.display = USUARIO.toLowerCase() === "ama" ? "" : "none";
-    const grid = document.getElementById("pres-kpi-grid");
-    if (grid) {
-      grid.className = USUARIO.toLowerCase() === "ama" ? "kpi-grid kpi-grid-5" : "kpi-grid kpi-grid-4";
-    }
-  }
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) sidebarUser.textContent = USUARIO;
   const drawerName = document.getElementById("mobile-drawer-name");
@@ -5240,14 +5224,9 @@ function renderHeatmapMes() {
     const heat = g > 0 ? Math.max(0.12, (g / maxG)).toFixed(2) : 0;
     const isToday = isCurrentMonth && d === hoy.getDate();
     const cls = `heatmap-day${isToday ? " heatmap-today" : ""}${g === 0 ? " heatmap-zero" : ""}`;
-    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}"></div>`;
+    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}">${d}</div>`;
   }
   html += `</div>`;
-  html += `<div class="heatmap-legend">
-    <span class="heatmap-legend-label">Menos</span>
-    ${[0.06,0.18,0.35,0.55,0.75,1].map(v => `<div class="heatmap-legend-swatch" style="background:rgba(200,132,90,${v})"></div>`).join("")}
-    <span class="heatmap-legend-label">Más</span>
-  </div>`;
   el.innerHTML = html;
 }
 
@@ -5452,16 +5431,6 @@ function renderPresupuesto() {
   const subDisp = document.getElementById("pres-kpi-disponible-sub");
   if (subDisp) {
     subDisp.textContent = "Sueldo − Presupuestado";
-  }
-
-  // KPI Saldo USD (solo Ama)
-  const usdKpi = document.getElementById("pres-kpi-saldo-usd");
-  if (usdKpi && USUARIO.toLowerCase() === "ama") {
-    usdKpi.textContent = fmtMoneda(Math.abs(saldoUSDPres), "USD");
-    usdKpi.style.color = saldoUSDPres >= 0 ? "var(--green)" : "var(--red)";
-    const usdSub = document.getElementById("pres-kpi-saldo-usd-sub");
-    if (usdSub) usdSub.textContent =
-      fmtMoneda(ingresosUSDPres,"USD") + " ingresados · " + fmtMoneda(gastosUSDPres,"USD") + " gastados";
   }
 
   // KPI "Ahorro" categoría — mes actual + acumulado total
