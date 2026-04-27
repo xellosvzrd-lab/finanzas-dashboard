@@ -301,14 +301,16 @@
   .heatmap-header { text-align: center; font-size: .52rem; color: var(--text-muted); font-weight: 600; padding-bottom: 2px; }
   .heatmap-day {
     aspect-ratio: 1; border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .5rem; color: rgba(255,252,249,.55); font-weight: 500;
     background: rgba(200,132,90,var(--heat,0));
     border: 1px solid transparent; cursor: default;
     transition: border-color .1s;
   }
-  .heatmap-day:hover { border-color: var(--accent); }
+  .heatmap-day:hover { border-color: var(--accent); color: var(--text); }
   .heatmap-day.heatmap-empty { background: none; border: none; }
-  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); }
-  .heatmap-day.heatmap-zero  { background: var(--bg3); }
+  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); color: var(--accent); font-weight: 700; }
+  .heatmap-day.heatmap-zero  { background: var(--bg3); color: var(--text-muted); }
 
   /* ─── HERO KPI CARD ─────────────────────────────────────── */
   .kpi-hero { grid-column: span 2; }
@@ -5098,11 +5100,11 @@ function buildMonthlyData(nMeses) {
   return result;
 }
 
-function renderSparklines(monthly) {
+function renderKpiSparklines(monthly) {
   const sparkCfg = (data, color) => ({
     type: "line",
-    data: { labels: data.map((_,i) => i), datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: true, backgroundColor: color.replace("rgb","rgba").replace(")",",0.08)"), tension: 0.4, pointRadius: 0 }] },
-    options: { responsive: false, animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
+    data: { labels: data.map((_,i) => i), datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: true, backgroundColor: color.replace("rgb","rgba").replace(")",",0.1)"), tension: 0.4, pointRadius: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
   });
   const pairs = [
     ["spark-sueldo",  monthly.map(d => d.sueldo),  "rgb(52,211,153)"],
@@ -5149,7 +5151,7 @@ function renderHeatmapMes() {
     const heat = (g / maxG).toFixed(2);
     const isToday = isCurrentMonth && d === hoy.getDate();
     const cls = `heatmap-day${isToday ? " heatmap-today" : ""}${g === 0 ? " heatmap-zero" : ""}`;
-    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}"></div>`;
+    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}">${d}</div>`;
   }
   html += `</div>`;
   el.innerHTML = html;
@@ -5480,7 +5482,7 @@ function renderPresupuesto() {
   // Sprint 2 — heatmap + sparklines (después de HTML escrito)
   renderHeatmapMes();
   const monthly = buildMonthlyData(6);
-  renderSparklines(monthly);
+  renderKpiSparklines(monthly);
 }
 
 // Actualiza solo los KPIs al cambiar un input (sin re-renderizar la tabla)
