@@ -6815,6 +6815,8 @@ function renderPlazos() {
   }
   const hoy = new Date(); hoy.setHours(0,0,0,0);
   el.innerHTML = plazos.map(p => {
+    const moneda = p.moneda || "ARS";
+    const fmtP = v => moneda === "USD" ? fmtMoneda(v, "USD") : fmt(v);
     const venc = new Date(p.fechaVencimiento + "T00:00:00");
     const inicio = new Date(p.fechaInicio + "T00:00:00");
     const dias = Math.round((venc - inicio) / 86400000);
@@ -6827,10 +6829,10 @@ function renderPlazos() {
         <span class="plazo-desc">${escapeHtml(p.descripcion)}</span>
         <span class="plazo-badge ${badge}">${badgeTxt}</span>
       </div>
-      <div class="plazo-row"><span>Capital</span><strong>${fmt(p.monto)}</strong></div>
+      <div class="plazo-row"><span>Capital</span><strong>${fmtP(p.monto)} <span style="font-size:.7rem;color:var(--text-muted)">${moneda}</span></strong></div>
       <div class="plazo-row"><span>TNA</span><strong>${p.tna}%</strong></div>
-      <div class="plazo-row"><span>Rendimiento esperado</span><strong style="color:var(--green)">${fmt(rend)}</strong></div>
-      <div class="plazo-row"><span>Total al vencimiento</span><strong>${fmt(p.monto + rend)}</strong></div>
+      <div class="plazo-row"><span>Rendimiento esperado</span><strong style="color:var(--green)">${fmtP(rend)}</strong></div>
+      <div class="plazo-row"><span>Total al vencimiento</span><strong>${fmtP(p.monto + rend)}</strong></div>
       <div class="plazo-row"><span>${p.fechaInicio} → ${p.fechaVencimiento}</span>
         <button class="cfg-del-btn" onclick="eliminarPlazo('${p.id}')" title="Eliminar">✕</button>
       </div>
@@ -6845,7 +6847,11 @@ function abrirFormPlazo() {
   wrap.style.display = "";
   wrap.innerHTML = `<div class="plazo-form">
     <input class="plazo-form-full" id="pf-desc" placeholder="Descripción (ej: Plazo Fijo Nación)" type="text">
-    <input id="pf-monto" placeholder="Monto ARS" type="text" inputmode="decimal">
+    <input id="pf-monto" placeholder="Monto" type="text" inputmode="decimal">
+    <select id="pf-moneda" style="padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem">
+      <option value="ARS">ARS</option>
+      <option value="USD">USD</option>
+    </select>
     <input id="pf-tna" placeholder="TNA %" type="text" inputmode="decimal">
     <input id="pf-inicio" type="date" value="${hoy}">
     <input id="pf-venc" type="date">
@@ -6862,15 +6868,16 @@ function cerrarFormPlazo() {
 }
 
 function guardarPlazo() {
-  const desc  = document.getElementById("pf-desc")?.value.trim();
-  const monto = parsearDecimal(document.getElementById("pf-monto")?.value);
-  const tna   = parsearDecimal(document.getElementById("pf-tna")?.value);
-  const ini   = document.getElementById("pf-inicio")?.value;
-  const venc  = document.getElementById("pf-venc")?.value;
+  const desc   = document.getElementById("pf-desc")?.value.trim();
+  const monto  = parsearDecimal(document.getElementById("pf-monto")?.value);
+  const moneda = document.getElementById("pf-moneda")?.value || "ARS";
+  const tna    = parsearDecimal(document.getElementById("pf-tna")?.value);
+  const ini    = document.getElementById("pf-inicio")?.value;
+  const venc   = document.getElementById("pf-venc")?.value;
   if (!desc || !monto || !tna || !ini || !venc) { showToast("⚠️ Completá todos los campos", "error"); return; }
   if (venc <= ini) { showToast("⚠️ Vencimiento debe ser posterior al inicio", "error"); return; }
   const plazos = loadPlazos();
-  plazos.push({ id: crypto.randomUUID(), descripcion: desc, monto, tna, fechaInicio: ini, fechaVencimiento: venc });
+  plazos.push({ id: crypto.randomUUID(), descripcion: desc, monto, moneda, tna, fechaInicio: ini, fechaVencimiento: venc });
   savePlazos(plazos);
   cerrarFormPlazo();
   renderPlazos();
