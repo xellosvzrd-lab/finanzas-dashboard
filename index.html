@@ -2290,22 +2290,30 @@
         <!-- Plazos Fijos -->
         <div style="margin-bottom:1.5rem">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-            <h2 style="font-size:1rem;font-weight:700">Plazos Fijos</h2>
+            <h2 style="font-size:1rem;font-weight:700;cursor:pointer" onclick="toggleInvSection('plazos')">
+              Plazos Fijos <span id="inv-toggle-plazos" style="font-size:.75rem;color:var(--text-muted)">▴</span>
+            </h2>
             <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Agregar</button>
           </div>
-          <div id="plazo-form-wrap" style="display:none"></div>
-          <div id="plazo-lista"></div>
+          <div id="inv-body-plazos">
+            <div id="plazo-form-wrap" style="display:none"></div>
+            <div id="plazo-lista"></div>
+          </div>
         </div>
 
         <!-- Acciones & Cripto -->
         <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-            <h2 style="font-size:1rem;font-weight:700">Acciones & Cripto</h2>
+            <h2 style="font-size:1rem;font-weight:700;cursor:pointer" onclick="toggleInvSection('acciones')">
+              Acciones & Cripto <span id="inv-toggle-acciones" style="font-size:.75rem;color:var(--text-muted)">▴</span>
+            </h2>
             <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()">+ Agregar</button>
           </div>
-          <div id="accion-form-wrap" style="display:none"></div>
-          <div id="accion-lista"></div>
-          <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
+          <div id="inv-body-acciones">
+            <div id="accion-form-wrap" style="display:none"></div>
+            <div id="accion-lista"></div>
+            <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
+          </div>
         </div>
 
       </div><!-- /page-inversiones -->
@@ -4929,7 +4937,7 @@ function navegarA(pagina) {
   if (pagina === "anual")        cargarAnual();
   if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); }
   if (pagina === "config")       renderizarConfig();
-  if (pagina === "inversiones")  { renderPlazos(); renderAcciones(); }
+  if (pagina === "inversiones")  { inicializarDisclosureInversiones(); renderPlazos(); renderAcciones(); }
 
   // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)
   const fab = document.getElementById("btn-fab-nueva");
@@ -6634,6 +6642,28 @@ function toggleDetalleCompartidos() {
   el.style.display = visible ? "none" : "";
   btn.textContent  = visible ? "Ver detalle ▾" : "Ocultar detalle ▴";
   try { localStorage.setItem(USUARIO + "_disclosure_compartidos", visible ? "0" : "1"); } catch(e) {}
+}
+
+function toggleInvSection(seccion) {
+  const body = document.getElementById("inv-body-" + seccion);
+  const arrow = document.getElementById("inv-toggle-" + seccion);
+  if (!body) return;
+  const visible = body.style.display !== "none";
+  body.style.display = visible ? "none" : "";
+  if (arrow) arrow.textContent = visible ? "▾" : "▴";
+  try { localStorage.setItem(USUARIO + "_inv_" + seccion, visible ? "0" : "1"); } catch {}
+}
+
+function inicializarDisclosureInversiones() {
+  ["plazos", "acciones"].forEach(sec => {
+    const body  = document.getElementById("inv-body-" + sec);
+    const arrow = document.getElementById("inv-toggle-" + sec);
+    if (!body) return;
+    const saved = localStorage.getItem(USUARIO + "_inv_" + sec);
+    const expanded = saved !== null ? saved === "1" : true;
+    body.style.display = expanded ? "" : "none";
+    if (arrow) arrow.textContent = expanded ? "▴" : "▾";
+  });
 }
 
 function inicializarDisclosureCompartidos() {
