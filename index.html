@@ -312,6 +312,8 @@
     transition: border-color .12s, transform .1s;
   }
   .heatmap-day:hover { border-color: var(--accent); transform: scale(1.12); z-index: 1; }
+  .heatmap-day.heatmap-clickable { cursor: pointer; }
+  .heatmap-day.heatmap-clickable:hover { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,132,90,.25); }
   .heatmap-day.heatmap-empty { background: none; border: none; }
   .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); color: var(--accent); font-weight: 800; }
   .heatmap-day.heatmap-zero  { background: var(--bg3); color: var(--text-muted); }
@@ -1815,8 +1817,8 @@
           </div>
         </div>
         <div class="table-filters">
-          <select id="fil-mes" onchange="guardarSelFecha();filtrarTabla()"></select>
-          <select id="fil-anio" onchange="guardarSelFecha();filtrarTabla()"></select>
+          <select id="fil-mes" onchange="_filFechaExacta=null;guardarSelFecha();filtrarTabla()"></select>
+          <select id="fil-anio" onchange="_filFechaExacta=null;guardarSelFecha();filtrarTabla()"></select>
           <select id="fil-tipo" onchange="filtrarTabla()">
             <option value="">Todos los tipos</option>
             <option value="Ingreso">Ingresos</option>
@@ -3688,7 +3690,8 @@ function filtrarTabla() {
     const okBus    = !buscar || (t.descripcion||"").toLowerCase().includes(buscar)
                              || t.categoria.toLowerCase().includes(buscar)
                              || (t.fuente||"").toLowerCase().includes(buscar);
-    return okUsuario && okMes && okAnio && okTipo && okCat && okFuente && okResp && okBus;
+    const okFecha  = !_filFechaExacta || t.fecha === _filFechaExacta;
+    return okUsuario && okMes && okAnio && okTipo && okCat && okFuente && okResp && okBus && okFecha;
   });
 
   datos = _sortarDatos(datos);
@@ -4588,6 +4591,7 @@ let _liqPendiente = null; // { cat, monto, tipo }
 let _settlementItems = []; // { cat, monto, tipo, moneda } — para saldar todo
 let chartSparklines = {};
 let _lastHeatmapMes = null;
+let _filFechaExacta = null; // "YYYY-MM-DD" — set by heatmap click, cleared on manual filter change
 
 function abrirLiquidar(cat, monto, tipo) {
   _liqPendiente = { cat, monto, tipo };
@@ -5180,6 +5184,17 @@ function renderKpiSparklines(monthly) {
   });
 }
 
+function irATransaccionesDia(anio, mes, dia) {
+  const pad = n => String(n).padStart(2, "0");
+  _filFechaExacta = `${anio}-${pad(mes)}-${pad(dia)}`;
+  const selMes = document.getElementById("fil-mes");
+  const selAnio = document.getElementById("fil-anio");
+  if (selMes) selMes.value = mes;
+  if (selAnio) selAnio.value = anio;
+  navegarA("transacciones");
+  filtrarTabla();
+}
+
 function renderHeatmapMes() {
   const filMes  = parseInt(document.getElementById("pres-mes")?.value || 0);
   const filAnio = parseInt(document.getElementById("pres-anio")?.value || 0);
@@ -5223,8 +5238,10 @@ function renderHeatmapMes() {
     const g = byDay[d] || 0;
     const heat = g > 0 ? Math.max(0.12, (g / maxG)).toFixed(2) : 0;
     const isToday = isCurrentMonth && d === hoy.getDate();
-    const cls = `heatmap-day${isToday ? " heatmap-today" : ""}${g === 0 ? " heatmap-zero" : ""}`;
-    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}">${d}</div>`;
+    const clickable = g > 0 ? ` heatmap-clickable` : "";
+    const onclick = g > 0 ? ` onclick="irATransaccionesDia(${filAnio},${filMes},${d})"` : "";
+    const cls = `heatmap-day${isToday ? " heatmap-today" : ""}${g === 0 ? " heatmap-zero" : ""}${clickable}`;
+    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}"${onclick}>${d}</div>`;
   }
   html += `</div>`;
   el.innerHTML = html;
