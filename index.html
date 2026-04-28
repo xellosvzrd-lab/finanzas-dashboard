@@ -2284,16 +2284,8 @@
           <h1>Inversiones</h1>
         </div>
 
-        <!-- Wallets / Patrimonio -->
-        <div style="margin-bottom:1.5rem">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-            <h2 style="font-size:1rem;font-weight:700">Wallets · Patrimonio</h2>
-            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormWallet()">+ Agregar</button>
-          </div>
-          <div id="wallet-form-wrap" style="display:none"></div>
-          <div id="wallet-lista"></div>
-          <div id="wallet-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
-        </div>
+        <!-- Totalizador por categoría -->
+        <div id="inv-totales" class="chart-card" style="margin-bottom:1.2rem;padding:.85rem 1rem"></div>
 
         <!-- Plazos Fijos -->
         <div style="margin-bottom:1.5rem">
@@ -4937,7 +4929,7 @@ function navegarA(pagina) {
   if (pagina === "anual")        cargarAnual();
   if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); }
   if (pagina === "config")       renderizarConfig();
-  if (pagina === "inversiones")  { renderWallets(); renderPlazos(); renderAcciones(); }
+  if (pagina === "inversiones")  { renderPlazos(); renderAcciones(); }
 
   // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)
   const fab = document.getElementById("btn-fab-nueva");
@@ -6681,81 +6673,6 @@ function resetRespField() {
 
 // ===== HEALTH SCORE =====
 // ===== WALLETS / PATRIMONIO =====
-function _walletsKey() { return USUARIO + "_wallets"; }
-function loadWallets() {
-  try { return JSON.parse(localStorage.getItem(_walletsKey()) || "[]"); } catch { return []; }
-}
-function saveWallets(arr) {
-  try { localStorage.setItem(_walletsKey(), JSON.stringify(arr)); } catch {}
-}
-
-function renderWallets() {
-  const lista = document.getElementById("wallet-lista");
-  const totalEl = document.getElementById("wallet-total");
-  if (!lista) return;
-  const wallets = loadWallets();
-  if (!wallets.length) {
-    lista.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin wallets registradas.</div>';
-    if (totalEl) totalEl.innerHTML = "";
-    return;
-  }
-  lista.innerHTML = wallets.map(w => `
-    <div class="plazo-card" style="display:flex;align-items:center;justify-content:space-between;gap:.75rem">
-      <div>
-        <div style="font-weight:700;font-size:.88rem">${escapeHtml(w.nombre)}</div>
-        <div style="font-size:.77rem;color:var(--text-muted)">${w.moneda === "USD" ? "USD" : "ARS"}</div>
-      </div>
-      <div style="font-weight:700;font-size:.95rem">${w.moneda === "USD" ? fmtMoneda(w.monto,"USD") : fmt(w.monto)}</div>
-      <button class="cfg-del-btn" onclick="eliminarWallet('${w.id}')" title="Eliminar">✕</button>
-    </div>`).join("");
-  const totalARS = wallets.filter(w => w.moneda === "ARS").reduce((s,w) => s + w.monto, 0);
-  const totalUSD = wallets.filter(w => w.moneda === "USD").reduce((s,w) => s + w.monto, 0);
-  const totalARSequiv = tipoCambioMEP > 0 ? totalARS + totalUSD * tipoCambioMEP : totalARS;
-  let html = `<strong>Total ARS:</strong> ${fmt(totalARS)}`;
-  if (totalUSD > 0) html += ` · <strong>USD:</strong> ${fmtMoneda(totalUSD,"USD")}`;
-  if (tipoCambioMEP > 0 && totalUSD > 0) html += ` · <strong>Equivalente:</strong> ${fmt(totalARSequiv)}`;
-  if (totalEl) totalEl.innerHTML = html;
-}
-
-function abrirFormWallet() {
-  const wrap = document.getElementById("wallet-form-wrap");
-  if (!wrap) return;
-  wrap.style.display = "";
-  wrap.innerHTML = `<div class="plazo-form">
-    <input class="plazo-form-full" id="wf-nombre" placeholder="Nombre (ej: Brubank, Cash USD)" type="text">
-    <input id="wf-monto" placeholder="Monto" type="text" inputmode="decimal">
-    <select id="wf-moneda" style="padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem">
-      <option value="ARS">ARS</option><option value="USD">USD / USDT</option>
-    </select>
-    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
-      <button class="btn" style="font-size:.82rem" onclick="cerrarFormWallet()">Cancelar</button>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarWallet()">Guardar</button>
-    </div>
-  </div>`;
-}
-
-function cerrarFormWallet() {
-  const wrap = document.getElementById("wallet-form-wrap");
-  if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
-}
-
-function guardarWallet() {
-  const nombre = document.getElementById("wf-nombre")?.value.trim();
-  const monto  = parsearDecimal(document.getElementById("wf-monto")?.value);
-  const moneda = document.getElementById("wf-moneda")?.value || "ARS";
-  if (!nombre || !monto) { showToast("⚠️ Completá nombre y monto", "error"); return; }
-  const wallets = loadWallets();
-  wallets.push({ id: crypto.randomUUID(), nombre, monto, moneda });
-  saveWallets(wallets);
-  cerrarFormWallet();
-  renderWallets();
-}
-
-function eliminarWallet(id) {
-  saveWallets(loadWallets().filter(w => w.id !== id));
-  renderWallets();
-}
-
 // ===== SWIPE EN TRANSACCIONES =====
 (function initSwipe() {
   let startX = 0, startY = 0, activeRow = null, committed = false;
@@ -6819,6 +6736,7 @@ function savePlazos(arr) {
 function renderPlazos() {
   const el = document.getElementById("plazo-lista");
   if (!el) return;
+  if (typeof _renderTotalesInversiones === "function") _renderTotalesInversiones(0, 0);
   const plazos = loadPlazos();
   if (!plazos.length) {
     el.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin plazos registrados.</div>';
@@ -6903,6 +6821,16 @@ function eliminarPlazo(id) {
 // ===== ACCIONES & CRIPTO =====
 const _precioCache = {}; // símbolo → { precio, moneda, ts }
 
+// CoinGecko IDs para cripto comunes
+const _geckoIds = {
+  BTC:'bitcoin', ETH:'ethereum', USDT:'tether', BNB:'binancecoin',
+  SOL:'solana', XRP:'ripple', USDC:'usd-coin', ADA:'cardano',
+  DOGE:'dogecoin', AVAX:'avalanche-2', MATIC:'matic-network',
+  DOT:'polkadot', LINK:'chainlink', UNI:'uniswap', LTC:'litecoin',
+  ALGO:'algorand', ATOM:'cosmos', NEAR:'near', OP:'optimism',
+  ARB:'arbitrum', WLD:'worldcoin-wld'
+};
+
 function _accionesKey() { return USUARIO + "_acciones"; }
 function loadAcciones() {
   try { return JSON.parse(localStorage.getItem(_accionesKey()) || "[]"); } catch { return []; }
@@ -6911,28 +6839,86 @@ function saveAcciones(arr) {
   try { localStorage.setItem(_accionesKey(), JSON.stringify(arr)); } catch {}
 }
 
+function _esCripto(simbolo) {
+  // BTC-USD, ETH-USD, SOL-USD, etc.
+  const base = simbolo.replace(/-USD$/i, "");
+  return base in _geckoIds;
+}
+
+async function _fetchPrecioCripto(simbolo) {
+  const base = simbolo.replace(/-USD$/i, "").toUpperCase();
+  const geckoId = _geckoIds[base];
+  if (!geckoId) return null;
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${geckoId}&vs_currencies=usd`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("coingecko " + res.status);
+  const data = await res.json();
+  const precio = data?.[geckoId]?.usd;
+  if (!precio) throw new Error("no price");
+  return { precio, moneda: "USD" };
+}
+
+async function _fetchPrecioAccion(simbolo) {
+  // Yahoo Finance query1 — funciona desde browsers (CORS OK)
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(simbolo)}?interval=1d&range=1d`;
+  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  if (!res.ok) throw new Error("yahoo " + res.status);
+  const data = await res.json();
+  const meta = data?.chart?.result?.[0]?.meta;
+  if (!meta) throw new Error("no meta");
+  const precio = meta.regularMarketPrice ?? meta.chartPreviousClose;
+  const moneda = (meta.currency || "USD").toUpperCase();
+  return { precio, moneda };
+}
+
 async function _fetchPrecio(simbolo) {
   const cache = _precioCache[simbolo];
   if (cache && Date.now() - cache.ts < 5 * 60 * 1000) return cache;
   try {
-    const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(simbolo)}?interval=1d&range=1d`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("http " + res.status);
-    const data = await res.json();
-    const meta = data?.chart?.result?.[0]?.meta;
-    if (!meta) throw new Error("no meta");
-    const precio = meta.regularMarketPrice ?? meta.chartPreviousClose;
-    const moneda = (meta.currency || "USD").toUpperCase();
-    _precioCache[simbolo] = { precio, moneda, ts: Date.now() };
+    const result = _esCripto(simbolo)
+      ? await _fetchPrecioCripto(simbolo)
+      : await _fetchPrecioAccion(simbolo);
+    if (!result) return null;
+    _precioCache[simbolo] = { ...result, ts: Date.now() };
     return _precioCache[simbolo];
   } catch {
     return null;
   }
 }
 
-function _detectarMonedaSimbol(simbolo) {
-  if (simbolo.endsWith(".BA")) return "ARS";
-  return "USD";
+function _renderTotalesInversiones(accionesUSD, accionesARS) {
+  const el = document.getElementById("inv-totales");
+  if (!el) return;
+  const plazos = loadPlazos();
+  const plazosARS = plazos.filter(p => (p.moneda || "ARS") === "ARS").reduce((s,p) => s + p.monto, 0);
+  const plazosUSD = plazos.filter(p => p.moneda === "USD").reduce((s,p) => s + p.monto, 0);
+  const rows = [
+    { label: "Plazos Fijos", ars: plazosARS, usd: plazosUSD },
+    { label: "Acciones & Cripto", ars: accionesARS, usd: accionesUSD },
+  ];
+  const totalARS = rows.reduce((s,r) => s + r.ars, 0);
+  const totalUSD = rows.reduce((s,r) => s + r.usd, 0);
+  el.innerHTML = `
+    <div style="font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:.6rem">Resumen total</div>
+    ${rows.map(r => `
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.8rem;padding:.2rem 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text-muted)">${r.label}</span>
+        <span>
+          ${r.ars > 0 ? `<strong>${fmt(r.ars)}</strong>` : ""}
+          ${r.ars > 0 && r.usd > 0 ? " · " : ""}
+          ${r.usd > 0 ? `<strong>${fmtMoneda(r.usd,"USD")}</strong>` : ""}
+          ${r.ars === 0 && r.usd === 0 ? '<span style="color:var(--text-muted)">—</span>' : ""}
+        </span>
+      </div>`).join("")}
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;padding:.35rem 0;font-weight:700">
+      <span>Total</span>
+      <span>
+        ${totalARS > 0 ? fmt(totalARS) : ""}
+        ${totalARS > 0 && totalUSD > 0 ? " · " : ""}
+        ${totalUSD > 0 ? fmtMoneda(totalUSD,"USD") : ""}
+        ${totalARS === 0 && totalUSD === 0 ? "—" : ""}
+      </span>
+    </div>`;
 }
 
 async function renderAcciones() {
@@ -6940,13 +6926,16 @@ async function renderAcciones() {
   const totalEl = document.getElementById("accion-total");
   if (!lista) return;
   const acciones = loadAcciones();
+
+  _renderTotalesInversiones(0, 0); // render inmediato con valores de plazos
+
   if (!acciones.length) {
     lista.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin acciones ni cripto registradas.</div>';
     if (totalEl) totalEl.innerHTML = "";
     return;
   }
 
-  // Render skeleton mientras carga
+  // Skeleton
   lista.innerHTML = acciones.map(a => `
     <div class="plazo-card" id="accion-card-${a.id}">
       <div class="plazo-header">
@@ -6961,7 +6950,6 @@ async function renderAcciones() {
       </div>
     </div>`).join("");
 
-  // Fetch precios en paralelo
   let totalUSD = 0, totalARS = 0;
   await Promise.all(acciones.map(async a => {
     const cotiz = await _fetchPrecio(a.simbolo);
@@ -6978,8 +6966,7 @@ async function renderAcciones() {
     const fmtV = v => moneda === "ARS" ? fmt(v) : fmtMoneda(v, "USD");
     precioEl.innerHTML = `<span>Cotización</span><strong>${fmtV(precio)} <span style="font-size:.7rem;color:var(--text-muted)">${moneda}</span></strong>`;
     valorEl.innerHTML  = `<span>Valor actual</span><strong style="color:var(--green)">${fmtV(valor)}</strong>`;
-    if (moneda === "ARS") totalARS += valor;
-    else totalUSD += valor;
+    if (moneda === "ARS") totalARS += valor; else totalUSD += valor;
   }));
 
   if (totalEl) {
@@ -6988,6 +6975,7 @@ async function renderAcciones() {
     if (totalUSD > 0) html += (html ? " · " : "") + `<strong>Total USD:</strong> ${fmtMoneda(totalUSD,"USD")}`;
     totalEl.innerHTML = html;
   }
+  _renderTotalesInversiones(totalUSD, totalARS); // actualizar con precios reales
 }
 
 function abrirFormAccion() {
