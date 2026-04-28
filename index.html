@@ -6793,32 +6793,51 @@ function renderPlazos() {
       <div class="plazo-row"><span>Rendimiento esperado</span><strong style="color:var(--green)">${fmtP(rend)}</strong></div>
       <div class="plazo-row"><span>Total al vencimiento</span><strong>${fmtP(p.monto + rend)}</strong></div>
       <div class="plazo-row"><span>${p.fechaInicio} → ${p.fechaVencimiento}</span>
-        <button class="cfg-del-btn" onclick="eliminarPlazo('${p.id}')" title="Eliminar">✕</button>
+        <div style="display:flex;gap:.4rem">
+          <button class="cfg-del-btn" onclick="editarPlazo('${p.id}')" title="Editar" style="color:var(--accent)">✎</button>
+          <button class="cfg-del-btn" onclick="eliminarPlazo('${p.id}')" title="Eliminar">✕</button>
+        </div>
       </div>
     </div>`;
   }).join("");
 }
 
+function _renderFormPlazo(p) {
+  const hoy = new Date().toISOString().slice(0,10);
+  const moneda = p?.moneda || "ARS";
+  return `<div class="plazo-form">
+    ${p ? `<input type="hidden" id="pf-id" value="${p.id}">` : ""}
+    <input class="plazo-form-full" id="pf-desc" placeholder="Descripción (ej: Plazo Fijo Nación)" type="text" value="${escapeHtml(p?.descripcion || '')}">
+    <input id="pf-monto" placeholder="Monto" type="text" inputmode="decimal" value="${p?.monto || ''}">
+    <select id="pf-moneda" style="padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem">
+      <option value="ARS"${moneda==="ARS"?" selected":""}>ARS</option>
+      <option value="USD"${moneda==="USD"?" selected":""}>USD</option>
+    </select>
+    <input id="pf-tna" placeholder="TNA %" type="text" inputmode="decimal" value="${p?.tna || ''}">
+    <input id="pf-inicio" type="date" value="${p?.fechaInicio || hoy}">
+    <input id="pf-venc" type="date" value="${p?.fechaVencimiento || ''}">
+    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn" style="font-size:.82rem" onclick="cerrarFormPlazo()">Cancelar</button>
+      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPlazo()">${p ? "Actualizar" : "Guardar"}</button>
+    </div>
+  </div>`;
+}
+
 function abrirFormPlazo() {
   const wrap = document.getElementById("plazo-form-wrap");
   if (!wrap) return;
-  const hoy = new Date().toISOString().slice(0,10);
   wrap.style.display = "";
-  wrap.innerHTML = `<div class="plazo-form">
-    <input class="plazo-form-full" id="pf-desc" placeholder="Descripción (ej: Plazo Fijo Nación)" type="text">
-    <input id="pf-monto" placeholder="Monto" type="text" inputmode="decimal">
-    <select id="pf-moneda" style="padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem">
-      <option value="ARS">ARS</option>
-      <option value="USD">USD</option>
-    </select>
-    <input id="pf-tna" placeholder="TNA %" type="text" inputmode="decimal">
-    <input id="pf-inicio" type="date" value="${hoy}">
-    <input id="pf-venc" type="date">
-    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
-      <button class="btn" style="font-size:.82rem" onclick="cerrarFormPlazo()">Cancelar</button>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPlazo()">Guardar</button>
-    </div>
-  </div>`;
+  wrap.innerHTML = _renderFormPlazo(null);
+}
+
+function editarPlazo(id) {
+  const plazo = loadPlazos().find(p => p.id === id);
+  if (!plazo) return;
+  const wrap = document.getElementById("plazo-form-wrap");
+  if (!wrap) return;
+  wrap.style.display = "";
+  wrap.innerHTML = _renderFormPlazo(plazo);
+  wrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function cerrarFormPlazo() {
@@ -6835,8 +6854,14 @@ function guardarPlazo() {
   const venc   = document.getElementById("pf-venc")?.value;
   if (!desc || !monto || !tna || !ini || !venc) { showToast("⚠️ Completá todos los campos", "error"); return; }
   if (venc <= ini) { showToast("⚠️ Vencimiento debe ser posterior al inicio", "error"); return; }
+  const editId = document.getElementById("pf-id")?.value;
   const plazos = loadPlazos();
-  plazos.push({ id: crypto.randomUUID(), descripcion: desc, monto, moneda, tna, fechaInicio: ini, fechaVencimiento: venc });
+  if (editId) {
+    const idx = plazos.findIndex(p => p.id === editId);
+    if (idx !== -1) plazos[idx] = { ...plazos[idx], descripcion: desc, monto, moneda, tna, fechaInicio: ini, fechaVencimiento: venc };
+  } else {
+    plazos.push({ id: crypto.randomUUID(), descripcion: desc, monto, moneda, tna, fechaInicio: ini, fechaVencimiento: venc });
+  }
   savePlazos(plazos);
   cerrarFormPlazo();
   renderPlazos();
@@ -6972,7 +6997,10 @@ async function renderAcciones() {
       <div class="plazo-row" id="accion-precio-${a.id}"><span>Cotización</span><strong style="color:var(--text-muted)">cargando…</strong></div>
       <div class="plazo-row" id="accion-valor-${a.id}"><span>Valor actual</span><strong style="color:var(--text-muted)">—</strong></div>
       <div class="plazo-row" style="justify-content:flex-end">
-        <button class="cfg-del-btn" onclick="eliminarAccion('${a.id}')" title="Eliminar">✕</button>
+        <div style="display:flex;gap:.4rem">
+          <button class="cfg-del-btn" onclick="editarAccion('${a.id}')" title="Editar" style="color:var(--accent)">✎</button>
+          <button class="cfg-del-btn" onclick="eliminarAccion('${a.id}')" title="Eliminar">✕</button>
+        </div>
       </div>
     </div>`).join("");
 
@@ -7004,22 +7032,38 @@ async function renderAcciones() {
   _renderTotalesInversiones(totalUSD, totalARS); // actualizar con precios reales
 }
 
+function _renderFormAccion(a) {
+  const hint = `<div class="plazo-form-full" style="font-size:.72rem;color:var(--text-muted);padding:.1rem 0">
+    Acciones argentinas: ticker + <strong>.BA</strong> (ej: GGAL.BA) · Cripto: ticker + <strong>-USD</strong> (ej: BTC-USD)
+  </div>`;
+  return `<div class="plazo-form">
+    ${a ? `<input type="hidden" id="af-id" value="${a.id}">` : ""}
+    <input id="af-simbolo" placeholder="Símbolo (ej: AAPL, BTC-USD, GGAL.BA)" type="text" class="plazo-form-full" style="text-transform:uppercase" value="${a?.simbolo || ''}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
+    <input id="af-cantidad" placeholder="Cantidad / tenencia" type="text" inputmode="decimal" value="${a?.cantidad || ''}">
+    <input id="af-nombre" placeholder="Nombre (opcional)" type="text" value="${escapeHtml(a?.nombre || '')}">
+    ${a ? "" : hint}
+    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn" style="font-size:.82rem" onclick="cerrarFormAccion()">Cancelar</button>
+      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarAccion()">${a ? "Actualizar" : "Guardar"}</button>
+    </div>
+  </div>`;
+}
+
 function abrirFormAccion() {
   const wrap = document.getElementById("accion-form-wrap");
   if (!wrap) return;
   wrap.style.display = "";
-  wrap.innerHTML = `<div class="plazo-form">
-    <input id="af-simbolo" placeholder="Símbolo (ej: AAPL, BTC-USD, GGAL.BA)" type="text" class="plazo-form-full" style="text-transform:uppercase">
-    <input id="af-cantidad" placeholder="Cantidad / tenencia" type="text" inputmode="decimal">
-    <input id="af-nombre" placeholder="Nombre (opcional)" type="text">
-    <div class="plazo-form-full" style="font-size:.72rem;color:var(--text-muted);padding:.1rem 0">
-      Acciones argentinas: ticker + <strong>.BA</strong> (ej: GGAL.BA) · Cripto: ticker + <strong>-USD</strong> (ej: BTC-USD)
-    </div>
-    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
-      <button class="btn" style="font-size:.82rem" onclick="cerrarFormAccion()">Cancelar</button>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarAccion()">Guardar</button>
-    </div>
-  </div>`;
+  wrap.innerHTML = _renderFormAccion(null);
+}
+
+function editarAccion(id) {
+  const accion = loadAcciones().find(a => a.id === id);
+  if (!accion) return;
+  const wrap = document.getElementById("accion-form-wrap");
+  if (!wrap) return;
+  wrap.style.display = "";
+  wrap.innerHTML = _renderFormAccion(accion);
+  wrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function cerrarFormAccion() {
@@ -7028,12 +7072,21 @@ function cerrarFormAccion() {
 }
 
 function guardarAccion() {
-  const simbolo   = (document.getElementById("af-simbolo")?.value || "").trim().toUpperCase();
-  const cantidad  = parsearDecimal(document.getElementById("af-cantidad")?.value);
-  const nombre    = (document.getElementById("af-nombre")?.value || "").trim();
+  const editId  = document.getElementById("af-id")?.value;
+  const simbolo = (document.getElementById("af-simbolo")?.value || "").trim().toUpperCase();
+  const cantidad = parsearDecimal(document.getElementById("af-cantidad")?.value);
+  const nombre   = (document.getElementById("af-nombre")?.value || "").trim();
   if (!simbolo || !cantidad) { showToast("⚠️ Ingresá símbolo y cantidad", "error"); return; }
   const acciones = loadAcciones();
-  acciones.push({ id: crypto.randomUUID(), simbolo, cantidad, nombre });
+  if (editId) {
+    const idx = acciones.findIndex(a => a.id === editId);
+    if (idx !== -1) {
+      acciones[idx] = { ...acciones[idx], cantidad, nombre };
+      delete _precioCache[acciones[idx].simbolo]; // forzar re-fetch si cambió qty
+    }
+  } else {
+    acciones.push({ id: crypto.randomUUID(), simbolo, cantidad, nombre });
+  }
   saveAcciones(acciones);
   cerrarFormAccion();
   renderAcciones();
