@@ -2296,13 +2296,24 @@
         </div>
 
         <!-- Plazos Fijos -->
-        <div>
+        <div style="margin-bottom:1.5rem">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
             <h2 style="font-size:1rem;font-weight:700">Plazos Fijos</h2>
             <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Agregar</button>
           </div>
           <div id="plazo-form-wrap" style="display:none"></div>
           <div id="plazo-lista"></div>
+        </div>
+
+        <!-- Acciones & Cripto -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+            <h2 style="font-size:1rem;font-weight:700">Acciones & Cripto</h2>
+            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()">+ Agregar</button>
+          </div>
+          <div id="accion-form-wrap" style="display:none"></div>
+          <div id="accion-lista"></div>
+          <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
         </div>
 
       </div><!-- /page-inversiones -->
@@ -4926,7 +4937,7 @@ function navegarA(pagina) {
   if (pagina === "anual")        cargarAnual();
   if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); }
   if (pagina === "config")       renderizarConfig();
-  if (pagina === "inversiones")  { renderWallets(); renderPlazos(); }
+  if (pagina === "inversiones")  { renderWallets(); renderPlazos(); renderAcciones(); }
 
   // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)
   const fab = document.getElementById("btn-fab-nueva");
@@ -6887,6 +6898,136 @@ function eliminarPlazo(id) {
   const plazos = loadPlazos().filter(p => p.id !== id);
   savePlazos(plazos);
   renderPlazos();
+}
+
+// ===== ACCIONES & CRIPTO =====
+const _precioCache = {}; // símbolo → { precio, moneda, ts }
+
+function _accionesKey() { return USUARIO + "_acciones"; }
+function loadAcciones() {
+  try { return JSON.parse(localStorage.getItem(_accionesKey()) || "[]"); } catch { return []; }
+}
+function saveAcciones(arr) {
+  try { localStorage.setItem(_accionesKey(), JSON.stringify(arr)); } catch {}
+}
+
+async function _fetchPrecio(simbolo) {
+  const cache = _precioCache[simbolo];
+  if (cache && Date.now() - cache.ts < 5 * 60 * 1000) return cache;
+  try {
+    const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(simbolo)}?interval=1d&range=1d`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("http " + res.status);
+    const data = await res.json();
+    const meta = data?.chart?.result?.[0]?.meta;
+    if (!meta) throw new Error("no meta");
+    const precio = meta.regularMarketPrice ?? meta.chartPreviousClose;
+    const moneda = (meta.currency || "USD").toUpperCase();
+    _precioCache[simbolo] = { precio, moneda, ts: Date.now() };
+    return _precioCache[simbolo];
+  } catch {
+    return null;
+  }
+}
+
+function _detectarMonedaSimbol(simbolo) {
+  if (simbolo.endsWith(".BA")) return "ARS";
+  return "USD";
+}
+
+async function renderAcciones() {
+  const lista = document.getElementById("accion-lista");
+  const totalEl = document.getElementById("accion-total");
+  if (!lista) return;
+  const acciones = loadAcciones();
+  if (!acciones.length) {
+    lista.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin acciones ni cripto registradas.</div>';
+    if (totalEl) totalEl.innerHTML = "";
+    return;
+  }
+
+  // Render skeleton mientras carga
+  lista.innerHTML = acciones.map(a => `
+    <div class="plazo-card" id="accion-card-${a.id}">
+      <div class="plazo-header">
+        <span class="plazo-desc">${escapeHtml(a.simbolo)}</span>
+        <span style="font-size:.72rem;color:var(--text-muted)">${escapeHtml(a.nombre || "")}</span>
+      </div>
+      <div class="plazo-row"><span>Tenencia</span><strong>${a.cantidad}</strong></div>
+      <div class="plazo-row" id="accion-precio-${a.id}"><span>Cotización</span><strong style="color:var(--text-muted)">cargando…</strong></div>
+      <div class="plazo-row" id="accion-valor-${a.id}"><span>Valor actual</span><strong style="color:var(--text-muted)">—</strong></div>
+      <div class="plazo-row" style="justify-content:flex-end">
+        <button class="cfg-del-btn" onclick="eliminarAccion('${a.id}')" title="Eliminar">✕</button>
+      </div>
+    </div>`).join("");
+
+  // Fetch precios en paralelo
+  let totalUSD = 0, totalARS = 0;
+  await Promise.all(acciones.map(async a => {
+    const cotiz = await _fetchPrecio(a.simbolo);
+    const precioEl = document.getElementById(`accion-precio-${a.id}`);
+    const valorEl  = document.getElementById(`accion-valor-${a.id}`);
+    if (!precioEl || !valorEl) return;
+    if (!cotiz) {
+      precioEl.innerHTML = `<span>Cotización</span><strong style="color:var(--red)">sin datos</strong>`;
+      valorEl.innerHTML  = `<span>Valor actual</span><strong>—</strong>`;
+      return;
+    }
+    const { precio, moneda } = cotiz;
+    const valor = precio * a.cantidad;
+    const fmtV = v => moneda === "ARS" ? fmt(v) : fmtMoneda(v, "USD");
+    precioEl.innerHTML = `<span>Cotización</span><strong>${fmtV(precio)} <span style="font-size:.7rem;color:var(--text-muted)">${moneda}</span></strong>`;
+    valorEl.innerHTML  = `<span>Valor actual</span><strong style="color:var(--green)">${fmtV(valor)}</strong>`;
+    if (moneda === "ARS") totalARS += valor;
+    else totalUSD += valor;
+  }));
+
+  if (totalEl) {
+    let html = "";
+    if (totalARS > 0) html += `<strong>Total ARS:</strong> ${fmt(totalARS)}`;
+    if (totalUSD > 0) html += (html ? " · " : "") + `<strong>Total USD:</strong> ${fmtMoneda(totalUSD,"USD")}`;
+    totalEl.innerHTML = html;
+  }
+}
+
+function abrirFormAccion() {
+  const wrap = document.getElementById("accion-form-wrap");
+  if (!wrap) return;
+  wrap.style.display = "";
+  wrap.innerHTML = `<div class="plazo-form">
+    <input id="af-simbolo" placeholder="Símbolo (ej: AAPL, BTC-USD, GGAL.BA)" type="text" class="plazo-form-full" style="text-transform:uppercase">
+    <input id="af-cantidad" placeholder="Cantidad / tenencia" type="text" inputmode="decimal">
+    <input id="af-nombre" placeholder="Nombre (opcional)" type="text">
+    <div class="plazo-form-full" style="font-size:.72rem;color:var(--text-muted);padding:.1rem 0">
+      Acciones argentinas: ticker + <strong>.BA</strong> (ej: GGAL.BA) · Cripto: ticker + <strong>-USD</strong> (ej: BTC-USD)
+    </div>
+    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn" style="font-size:.82rem" onclick="cerrarFormAccion()">Cancelar</button>
+      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarAccion()">Guardar</button>
+    </div>
+  </div>`;
+}
+
+function cerrarFormAccion() {
+  const wrap = document.getElementById("accion-form-wrap");
+  if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
+}
+
+function guardarAccion() {
+  const simbolo   = (document.getElementById("af-simbolo")?.value || "").trim().toUpperCase();
+  const cantidad  = parsearDecimal(document.getElementById("af-cantidad")?.value);
+  const nombre    = (document.getElementById("af-nombre")?.value || "").trim();
+  if (!simbolo || !cantidad) { showToast("⚠️ Ingresá símbolo y cantidad", "error"); return; }
+  const acciones = loadAcciones();
+  acciones.push({ id: crypto.randomUUID(), simbolo, cantidad, nombre });
+  saveAcciones(acciones);
+  cerrarFormAccion();
+  renderAcciones();
+}
+
+function eliminarAccion(id) {
+  saveAcciones(loadAcciones().filter(a => a.id !== id));
+  renderAcciones();
 }
 
 </script>
