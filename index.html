@@ -6846,29 +6846,25 @@ function _esCripto(simbolo) {
 }
 
 async function _fetchPrecioCripto(simbolo) {
+  // Coinbase API — CORS OK, sin key
   const base = simbolo.replace(/-USD$/i, "").toUpperCase();
-  const geckoId = _geckoIds[base];
-  if (!geckoId) return null;
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${geckoId}&vs_currencies=usd`;
+  const url = `https://api.coinbase.com/v2/prices/${base}-USD/spot`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error("coingecko " + res.status);
+  if (!res.ok) throw new Error("coinbase " + res.status);
   const data = await res.json();
-  const precio = data?.[geckoId]?.usd;
+  const precio = parseFloat(data?.data?.amount);
   if (!precio) throw new Error("no price");
   return { precio, moneda: "USD" };
 }
 
 async function _fetchPrecioAccion(simbolo) {
-  // Yahoo Finance query1 — funciona desde browsers (CORS OK)
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(simbolo)}?interval=1d&range=1d`;
-  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-  if (!res.ok) throw new Error("yahoo " + res.status);
+  // Vercel proxy → Yahoo Finance (evita CORS)
+  const url = `/api/quote?symbol=${encodeURIComponent(simbolo)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("proxy " + res.status);
   const data = await res.json();
-  const meta = data?.chart?.result?.[0]?.meta;
-  if (!meta) throw new Error("no meta");
-  const precio = meta.regularMarketPrice ?? meta.chartPreviousClose;
-  const moneda = (meta.currency || "USD").toUpperCase();
-  return { precio, moneda };
+  if (!data.price) throw new Error("no price");
+  return { precio: data.price, moneda: data.currency || "USD" };
 }
 
 async function _fetchPrecio(simbolo) {
