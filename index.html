@@ -6903,19 +6903,25 @@ if ('serviceWorker' in navigator) {
 }
 
 // ===== PLAZOS FIJOS =====
-function _plazosKey() { return USUARIO + "_plazos"; }
-function loadPlazos() {
-  try { return JSON.parse(localStorage.getItem(_plazosKey()) || "[]"); } catch { return []; }
-}
-function savePlazos(arr) {
-  try { localStorage.setItem(_plazosKey(), JSON.stringify(arr)); } catch {}
+let _plazosCache = [];
+
+function _normalizarPlazo(p) {
+  return { ...p, fechaInicio: p.fecha_inicio || p.fechaInicio, fechaVencimiento: p.fecha_vencimiento || p.fechaVencimiento };
 }
 
-function renderPlazos() {
+async function loadPlazos() {
+  const { data, error } = await supabaseClient
+    .from('plazos_fijos').select('*').eq('usuario', USUARIO).order('created_at', { ascending: true });
+  if (error) { console.error('loadPlazos:', error); return []; }
+  _plazosCache = (data || []).map(_normalizarPlazo);
+  return _plazosCache;
+}
+
+async function renderPlazos() {
   const el = document.getElementById("plazo-lista");
   if (!el) return;
-  if (typeof _renderTotalesInversiones === "function") _renderTotalesInversiones(0, 0);
-  const plazos = loadPlazos();
+  _renderTotalesInversiones(0, 0);
+  const plazos = await loadPlazos();
   if (!plazos.length) {
     el.innerHTML = `<div style="text-align:center;padding:2rem 1rem">
       <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/><circle cx="12" cy="13" r="2"/></svg>
@@ -6984,7 +6990,7 @@ function abrirFormPlazo() {
 }
 
 function editarPlazo(id) {
-  const plazo = loadPlazos().find(p => p.id === id);
+  const plazo = _plazosCache.find(p => p.id === id);
   if (!plazo) return;
   const wrap = document.getElementById("plazo-form-wrap");
   if (!wrap) return;
@@ -6998,7 +7004,7 @@ function cerrarFormPlazo() {
   if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
 }
 
-function guardarPlazo() {
+async function guardarPlazo() {
   const desc   = document.getElementById("pf-desc")?.value.trim();
   const monto  = parsearDecimal(document.getElementById("pf-monto")?.value);
   const moneda = document.getElementById("pf-moneda")?.value || "ARS";
@@ -7008,21 +7014,21 @@ function guardarPlazo() {
   if (!desc || !monto || !tna || !ini || !venc) { showToast("⚠️ Completá todos los campos", "error"); return; }
   if (venc <= ini) { showToast("⚠️ Vencimiento debe ser posterior al inicio", "error"); return; }
   const editId = document.getElementById("pf-id")?.value;
-  const plazos = loadPlazos();
+  const row = { descripcion: desc, monto, moneda, tna, fecha_inicio: ini, fecha_vencimiento: venc, usuario: USUARIO, user_id: supabaseSession.user.id };
+  let error;
   if (editId) {
-    const idx = plazos.findIndex(p => p.id === editId);
-    if (idx !== -1) plazos[idx] = { ...plazos[idx], descripcion: desc, monto, moneda, tna, fechaInicio: ini, fechaVencimiento: venc };
+    ({ error } = await supabaseClient.from('plazos_fijos').update(row).eq('id', editId));
   } else {
-    plazos.push({ id: crypto.randomUUID(), descripcion: desc, monto, moneda, tna, fechaInicio: ini, fechaVencimiento: venc });
+    ({ error } = await supabaseClient.from('plazos_fijos').insert(row));
   }
-  savePlazos(plazos);
+  if (error) { showToast("⚠️ Error al guardar", "error"); console.error(error); return; }
   cerrarFormPlazo();
   renderPlazos();
 }
 
-function eliminarPlazo(id) {
-  const plazos = loadPlazos().filter(p => p.id !== id);
-  savePlazos(plazos);
+async function eliminarPlazo(id) {
+  const { error } = await supabaseClient.from('plazos_fijos').delete().eq('id', id);
+  if (error) { showToast("⚠️ Error al eliminar", "error"); return; }
   renderPlazos();
 }
 
@@ -7039,12 +7045,14 @@ const _geckoIds = {
   ARB:'arbitrum', WLD:'worldcoin-wld'
 };
 
-function _accionesKey() { return USUARIO + "_acciones"; }
-function loadAcciones() {
-  try { return JSON.parse(localStorage.getItem(_accionesKey()) || "[]"); } catch { return []; }
-}
-function saveAcciones(arr) {
-  try { localStorage.setItem(_accionesKey(), JSON.stringify(arr)); } catch {}
+let _accionesCache = [];
+
+async function loadAcciones() {
+  const { data, error } = await supabaseClient
+    .from('acciones').select('*').eq('usuario', USUARIO).order('created_at', { ascending: true });
+  if (error) { console.error('loadAcciones:', error); return []; }
+  _accionesCache = data || [];
+  return _accionesCache;
 }
 
 function _esCripto(simbolo) {
@@ -7093,7 +7101,7 @@ async function _fetchPrecio(simbolo) {
 function _renderTotalesInversiones(accionesUSD, accionesARS) {
   const el = document.getElementById("inv-totales");
   if (!el) return;
-  const plazos = loadPlazos();
+  const plazos = _plazosCache;
   const plazosARS = plazos.filter(p => (p.moneda || "ARS") === "ARS").reduce((s,p) => s + p.monto, 0);
   const plazosUSD = plazos.filter(p => p.moneda === "USD").reduce((s,p) => s + p.monto, 0);
   const rows = [
@@ -7151,7 +7159,7 @@ async function renderAcciones() {
   const lista = document.getElementById("accion-lista");
   const totalEl = document.getElementById("accion-total");
   if (!lista) return;
-  const acciones = loadAcciones();
+  const acciones = await loadAcciones();
 
   _renderTotalesInversiones(0, 0); // render inmediato con valores de plazos
 
@@ -7252,7 +7260,7 @@ function abrirFormAccion() {
 }
 
 function editarAccion(id) {
-  const accion = loadAcciones().find(a => a.id === id);
+  const accion = _accionesCache.find(a => a.id === id);
   if (!accion) return;
   const wrap = document.getElementById("accion-form-wrap");
   if (!wrap) return;
@@ -7266,7 +7274,7 @@ function cerrarFormAccion() {
   if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
 }
 
-function guardarAccion() {
+async function guardarAccion() {
   const editId  = document.getElementById("af-id")?.value;
   const simbolo = (document.getElementById("af-simbolo")?.value || "").trim().toUpperCase();
   const cantidad = parsearDecimal(document.getElementById("af-cantidad")?.value);
@@ -7274,23 +7282,22 @@ function guardarAccion() {
   const pcRaw    = (document.getElementById("af-precio-compra")?.value || "").trim();
   const precio_compra = pcRaw ? parsearDecimal(pcRaw) || null : null;
   if (!simbolo || !cantidad) { showToast("⚠️ Ingresá símbolo y cantidad", "error"); return; }
-  const acciones = loadAcciones();
+  let error;
   if (editId) {
-    const idx = acciones.findIndex(a => a.id === editId);
-    if (idx !== -1) {
-      acciones[idx] = { ...acciones[idx], cantidad, nombre, precio_compra };
-      delete _precioCache[acciones[idx].simbolo];
-    }
+    const accion = _accionesCache.find(a => a.id === editId);
+    if (accion) delete _precioCache[accion.simbolo];
+    ({ error } = await supabaseClient.from('acciones').update({ cantidad, nombre, precio_compra }).eq('id', editId));
   } else {
-    acciones.push({ id: crypto.randomUUID(), simbolo, cantidad, nombre, precio_compra });
+    ({ error } = await supabaseClient.from('acciones').insert({ simbolo, cantidad, nombre, precio_compra, usuario: USUARIO, user_id: supabaseSession.user.id }));
   }
-  saveAcciones(acciones);
+  if (error) { showToast("⚠️ Error al guardar", "error"); console.error(error); return; }
   cerrarFormAccion();
   renderAcciones();
 }
 
-function eliminarAccion(id) {
-  saveAcciones(loadAcciones().filter(a => a.id !== id));
+async function eliminarAccion(id) {
+  const { error } = await supabaseClient.from('acciones').delete().eq('id', id);
+  if (error) { showToast("⚠️ Error al eliminar", "error"); return; }
   renderAcciones();
 }
 
