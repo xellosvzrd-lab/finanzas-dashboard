@@ -218,7 +218,7 @@
   .kpi-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 1.3rem 1.5rem;
+    border-radius: var(--radius); padding: .8rem .95rem;
     box-shadow: var(--shadow);
     min-width: 0;
     container-type: inline-size;
@@ -265,9 +265,9 @@
   .kpi-card:hover::after { left: 160%; }
   /* Icon badge en KPI cards */
   .kpi-icon {
-    width: 32px; height: 32px; border-radius: 9px;
+    width: 28px; height: 28px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: .55rem; flex-shrink: 0;
+    margin-bottom: .35rem; flex-shrink: 0;
   }
   .kpi-icon.ico-green  { background: var(--green-dim);  color: var(--green); }
   .kpi-icon.ico-red    { background: var(--red-dim);    color: var(--red); }
@@ -279,7 +279,7 @@
     .kpi-icon svg { width: 13px; height: 13px; }
   }
 
-  .kpi-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .5rem; font-weight: 600; }
+  .kpi-label { font-size: clamp(.5rem, 5.5cqw, .7rem); color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .3rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .kpi-value { font-size: clamp(0.75rem, 9cqw, 1.65rem); font-weight: 800; letter-spacing: -.025em; white-space: nowrap; overflow: hidden; }
   .kpi-value.income      { color: var(--green); }
   .kpi-value.expense     { color: var(--red); }
@@ -319,7 +319,7 @@
   .heatmap-day.heatmap-zero  { background: var(--bg3); color: var(--text-muted); }
 
   /* ─── HERO KPI CARD ─────────────────────────────────────── */
-  .kpi-hero { grid-column: span 2; }
+  .kpi-hero { grid-column: span 2; padding: 1.1rem 1.3rem; }
   .kpi-hero .kpi-value { font-size: clamp(1.1rem, 5vw, 1.8rem); }
   .kpi-hero-bar-wrap { width: 100%; height: 6px; background: var(--bg3); border-radius: 99px; overflow: hidden; margin-top: .6rem; }
   .kpi-hero-bar-fill { height: 100%; border-radius: 99px; width: 0%; transition: width .6s var(--ease-out, ease); }
@@ -1193,7 +1193,8 @@
     .kpi-grid-4, .kpi-grid-5 { grid-template-columns: repeat(2, 1fr); grid-auto-flow: dense; }
 
     /* KPI cards más compactas */
-    .kpi-card { padding: .85rem .95rem; }
+    .kpi-card { padding: .65rem .75rem; }
+    .kpi-hero { padding: .9rem 1rem; }
 
     /* Formulario en 1 columna */
     .form-row { grid-template-columns: 1fr; }
@@ -1259,8 +1260,8 @@
   /* Tipo y Moneda se ocultan en teléfonos muy pequeños */
   @media (max-width: 440px) {
     .col-hide-xs { display: none !important; }
-    .kpi-label { font-size: .6rem; }
-    .kpi-card { padding: .7rem .75rem; }
+    .kpi-card { padding: .55rem .65rem; }
+    .kpi-hero { padding: .8rem .9rem; }
     .main { padding: 4.2rem .6rem 1.5rem; }
     .kpi-grid { gap: .5rem; }
     tbody td, thead th { padding: .42rem .45rem; font-size: .79rem; }
