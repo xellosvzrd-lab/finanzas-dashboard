@@ -279,7 +279,9 @@
     .kpi-icon svg { width: 13px; height: 13px; }
   }
 
-  .kpi-label { font-size: clamp(.5rem, 5.5cqw, .7rem); color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .3rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; font-weight: 600; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  @container (max-width: 160px) { .kpi-label { font-size: .58rem; letter-spacing: .02em; } }
+  @container (max-width: 130px) { .kpi-label { font-size: .5rem; } }
   .kpi-value { font-size: clamp(0.75rem, 9cqw, 1.65rem); font-weight: 800; letter-spacing: -.025em; white-space: nowrap; overflow: hidden; }
   .kpi-value.income      { color: var(--green); }
   .kpi-value.expense     { color: var(--red); }
