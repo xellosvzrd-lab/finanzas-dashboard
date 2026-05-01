@@ -17,7 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   /* ─── FONTS ──────────────────────────────────────────────── */
-  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Libre+Franklin:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Libre+Franklin:wght@400;500;600;700&display=swap');
 
   /* ─── RESET & BASE ─────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -75,7 +75,7 @@
   .chart-title, .comp-title, .pres-title,
   #sub-neto, .comp-balance-value, .ama-value,
   .donut-center-val, .donut-center-sub {
-    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Bricolage Grotesque', system-ui, sans-serif;
     text-rendering: optimizeLegibility;
   }
 
@@ -994,6 +994,24 @@
   @keyframes slideLeft  { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: translateX(0); } }
   .page.active           { animation: slideRight .22s var(--ease-out) both; }
   .page.active.dir-back  { animation: slideLeft  .22s var(--ease-out) both; }
+
+  /* ─── SKELETON SHIMMER ─────────────────────────────────────── */
+  @keyframes shimmer {
+    0%   { background-position: -480px 0; }
+    100% { background-position:  480px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--bg2) 0%, var(--bg3) 40%, var(--bg2) 80%);
+    background-size: 480px 100%;
+    border-radius: 4px;
+    animation: shimmer 1.4s linear infinite;
+    color: transparent !important;
+    display: inline-block;
+  }
+  .skeleton-row  { display: block; height: 38px; width: 100%; border-radius: 8px; margin: .3rem 0; }
+  .skeleton-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: .85rem 1rem; margin-bottom: .55rem; }
+  .skeleton-line { display: block; height: .72rem; border-radius: 4px; margin: .32rem 0; }
+
 
   /* ─── SPARKLINES ────────────────────────────────────────────── */
   .kpi-spark { margin-top: .6rem; height: 34px; opacity: .75; }
@@ -2083,6 +2101,7 @@
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
+            <button class="btn" onclick="sugerirPresupuestoDesdeHistorial()" title="Promedia los últimos 3 meses" style="font-size:.82rem">📊 Sugerir</button>
             <button class="btn btn-primary" onclick="guardarPresupuesto()">Guardar presupuesto</button>
           </div>
         </div>
@@ -2140,6 +2159,12 @@
             <div class="kpi-value" id="pres-kpi-diario">—</div>
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
+          <div class="kpi-card" id="pres-kpi-compartido-card" style="display:none">
+            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="kpi-label" id="pres-kpi-compartido-label">Compartidos</div>
+            <div class="kpi-value" id="pres-kpi-compartido-val">$0</div>
+            <div class="kpi-sub" id="pres-kpi-compartido-sub">—</div>
+          </div>
         </div>
 
         <!-- Heatmap calendario -->
@@ -2171,7 +2196,11 @@
               </tr>
             </thead>
             <tbody id="pres-tbody">
-              <tr><td colspan="5"><div class="loading"><div class="spinner"></div> Cargando...</div></td></tr>
+              <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
+              <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
+              <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
+              <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
+              <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
             </tbody>
             <tfoot id="pres-tfoot"></tfoot>
           </table>
@@ -2297,7 +2326,10 @@
           </div>
           <div id="inv-body-plazos">
             <div id="plazo-form-wrap" style="display:none"></div>
-            <div id="plazo-lista"></div>
+            <div id="plazo-lista">
+              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:30%"></div><div class="skeleton skeleton-line" style="width:70%"></div></div>
+              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:50%"></div><div class="skeleton skeleton-line" style="width:35%"></div><div class="skeleton skeleton-line" style="width:65%"></div></div>
+            </div>
           </div>
         </div>
 
@@ -2311,7 +2343,10 @@
           </div>
           <div id="inv-body-acciones">
             <div id="accion-form-wrap" style="display:none"></div>
-            <div id="accion-lista"></div>
+            <div id="accion-lista">
+              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-line" style="width:60%"></div><div class="skeleton skeleton-line" style="width:50%"></div></div>
+              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:45%"></div></div>
+            </div>
             <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
           </div>
         </div>
@@ -4279,6 +4314,39 @@ function inicializarSelectoresCompartidos() {
   selAnio.onchange = cargarCompartidos;
 }
 
+// Calcula balance compartido del mes/año sin tocar DOM ni DB.
+// + = PARTNER te debe | - = vos le debés a PARTNER
+function _calcularBalanceCompartido(mes, anio) {
+  const datos = allTransac.filter(t => {
+    const { year, month } = getMesLiquidacion(t);
+    return month === mes && year === anio && t.tipo === "Gasto";
+  });
+  const datosIng = allTransac.filter(t => {
+    const { year, month } = getMesLiquidacion(t);
+    return month === mes && year === anio && t.tipo === "Ingreso";
+  });
+  let compNetARS = 0, compNetUSD = 0;
+  const addComp = (t, sign) => {
+    const m = Math.abs(Number(t.monto)) / 2;
+    if ((t.moneda || "ARS").toUpperCase() === "USD") compNetUSD += sign * m;
+    else compNetARS += sign * m;
+  };
+  datos.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t =>
+    addComp(t, (t.usuario || USUARIO) === PARTNER ? -1 : 1));
+  datosIng.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t =>
+    addComp(t, (t.usuario || USUARIO) === PARTNER ? 1 : -1));
+  let aARS = 0, aUSD = 0, bARS = 0, bUSD = 0;
+  datos.filter(t => (t.responsabilidad || "Mío") === "De " + PARTNER && (t.usuario || USUARIO) === USUARIO).forEach(t => {
+    if ((t.moneda || "ARS").toUpperCase() === "USD") aUSD += Math.abs(Number(t.monto));
+    else aARS += Math.abs(Number(t.monto));
+  });
+  datos.filter(t => (t.responsabilidad || "Mío") === "De " + USUARIO && (t.usuario || USUARIO) === PARTNER).forEach(t => {
+    if ((t.moneda || "ARS").toUpperCase() === "USD") bUSD += Math.abs(Number(t.monto));
+    else bARS += Math.abs(Number(t.monto));
+  });
+  return { balanceARS: compNetARS + aARS - bARS, balanceUSD: compNetUSD + aUSD - bUSD };
+}
+
 function cargarCompartidos() {
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
@@ -4602,7 +4670,9 @@ let _liqPendiente = null; // { cat, monto, tipo }
 let _settlementItems = []; // { cat, monto, tipo, moneda } — para saldar todo
 let chartSparklines = {};
 let _lastHeatmapMes = null;
-let _filFechaExacta = null; // "YYYY-MM-DD" — set by heatmap click, cleared on manual filter change
+let _filFechaExacta = null;
+let _accionesRefreshTimer = null;
+let _accionesUltimaActualizacion = null; // "YYYY-MM-DD" — set by heatmap click, cleared on manual filter change
 
 function abrirLiquidar(cat, monto, tipo) {
   _liqPendiente = { cat, monto, tipo };
@@ -4937,7 +5007,7 @@ function navegarA(pagina) {
   if (pagina === "anual")        cargarAnual();
   if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); }
   if (pagina === "config")       renderizarConfig();
-  if (pagina === "inversiones")  { inicializarDisclosureInversiones(); renderPlazos(); renderAcciones(); }
+  if (pagina === "inversiones")  { inicializarDisclosureInversiones(); renderPlazos(); renderAcciones(); _iniciarAutoRefreshAcciones(); }
 
   // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)
   const fab = document.getElementById("btn-fab-nueva");
@@ -5061,7 +5131,57 @@ async function guardarPresupuesto() {
   setTimeout(() => { msg.innerHTML = ""; }, 3500);
 }
 
-// Calcula el monto efectivo de un gasto según responsabilidad
+function sugerirPresupuestoDesdeHistorial() {
+  const hoy = new Date();
+  const meses = [];
+  for (let i = 1; i <= 3; i++) {
+    const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+    meses.push({ mes: d.getMonth() + 1, anio: d.getFullYear() });
+  }
+  const acum = {}, conteo = {};
+  categGasto.forEach(c => { acum[c] = 0; conteo[c] = 0; });
+
+  meses.forEach(({ mes, anio }) => {
+    const dataMes  = allTransac.filter(t => { const { year, month } = getMesLiquidacion(t); return month === mes && year === anio; });
+    const dataMesU = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO);
+    const sueldoARS = dataMesU
+      .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria) && (t.moneda || "ARS") === "ARS")
+      .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+    const ingUSD = dataMesU.filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD").reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+    const gasUSD = dataMesU.filter(t => t.tipo === "Gasto"   && !esTransferencia(t) && (t.moneda || "ARS") === "USD").reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+    const usdARS = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? (ingUSD - gasUSD) * tipoCambioMEP : 0;
+    const sueldo = sueldoARS + usdARS;
+    if (sueldo <= 0) return;
+
+    categGasto.forEach(cat => {
+      const gMio  = dataMesU.filter(t => t.tipo==="Gasto" && t.categoria===cat && (t.responsabilidad||"Mío")==="Mío" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
+      const iMio  = dataMesU.filter(t => t.tipo==="Ingreso" && t.categoria===cat && (t.responsabilidad||"Mío")==="Mío" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
+      const gComp = dataMes.filter(t => t.tipo==="Gasto" && t.categoria===cat && t.responsabilidad==="Compartido" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
+      const iComp = dataMes.filter(t => t.tipo==="Ingreso" && t.categoria===cat && t.responsabilidad==="Compartido" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
+      const gDeU  = dataMes.filter(t => t.tipo==="Gasto" && t.categoria===cat && t.responsabilidad==="De "+USUARIO && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
+      const iDeU  = dataMes.filter(t => t.tipo==="Ingreso" && t.categoria===cat && t.responsabilidad==="De "+USUARIO && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
+      const gastoCat = Math.max(0, gMio - iMio) + Math.max(0, gComp - iComp) * 0.5 + Math.max(0, gDeU - iDeU);
+      acum[cat] += (gastoCat / sueldo) * 100;
+      conteo[cat]++;
+    });
+  });
+
+  let aplicados = 0;
+  document.querySelectorAll("#pres-tbody .pres-input").forEach(inp => {
+    const cat = inp.dataset.cat;
+    if (!conteo[cat]) return;
+    const promedio = acum[cat] / conteo[cat];
+    if (promedio > 0.05) {
+      inp.value = String(Math.round(promedio * 10) / 10).replace(".", ",");
+      aplicados++;
+    }
+  });
+
+  if (!aplicados) { showToast("⚠️ Sin datos en los últimos 3 meses", "error"); return; }
+  actualizarKpisPres();
+  showToast(`✅ Sugerencia aplicada (${aplicados} categorías). Revisá y guardá.`, "success");
+}
+
 // ─── ANILLO DE PROGRESO DEL PRESUPUESTO ───────────────────────
 function renderPresupuestoRing(totalGasto, sueldo, totalPres) {
   const el = document.getElementById("pres-ring-container");
@@ -5448,7 +5568,7 @@ function renderPresupuesto() {
       const gastoDiario = saldoReal / diasRestantes;
       kpiDiario.className = "kpi-value balance-pos";
       animateKPI(kpiDiario, gastoDiario, fmt);
-      document.getElementById("pres-kpi-diario-sub").textContent = `${diasRestantes} días restantes`;
+      document.getElementById("pres-kpi-diario-sub").textContent = `Real disponible ÷ ${diasRestantes}d restantes`;
     } else {
       kpiDiario.textContent = "—";
       kpiDiario.className = "kpi-value";
@@ -5568,6 +5688,34 @@ function renderPresupuesto() {
     </tr>`;
   }
 
+  // KPI: balance compartido
+  (function() {
+    const card   = document.getElementById("pres-kpi-compartido-card");
+    if (!card) return;
+    const { balanceARS, balanceUSD } = _calcularBalanceCompartido(mes, anio);
+    if (Math.abs(balanceARS) < 1 && Math.abs(balanceUSD) < 0.01) { card.style.display = "none"; return; }
+    card.style.display = "";
+    const valEl   = document.getElementById("pres-kpi-compartido-val");
+    const subEl   = document.getElementById("pres-kpi-compartido-sub");
+    const labelEl = document.getElementById("pres-kpi-compartido-label");
+    const parts = [];
+    if (Math.abs(balanceARS) >= 1) parts.push(fmt(Math.abs(balanceARS)));
+    if (Math.abs(balanceUSD) >= 0.01) parts.push(fmtMoneda(Math.abs(balanceUSD), "USD"));
+    if (valEl) valEl.textContent = parts.join(" + ");
+    const teDeben = balanceARS > 0 || (balanceARS === 0 && balanceUSD > 0);
+    if (teDeben && balanceUSD >= 0 && balanceARS >= 0) {
+      if (valEl) valEl.className = "kpi-value balance-pos";
+      if (labelEl) labelEl.textContent = `${PARTNER} te debe`;
+    } else if (!teDeben && balanceUSD <= 0 && balanceARS <= 0) {
+      if (valEl) valEl.className = "kpi-value expense";
+      if (labelEl) labelEl.textContent = `Le debés a ${PARTNER}`;
+    } else {
+      if (valEl) valEl.className = "kpi-value";
+      if (labelEl) labelEl.textContent = "Compartidos";
+    }
+    if (subEl) subEl.textContent = "Ver detalle en Compartidos";
+  })();
+
   // Sprint 2 — heatmap + sparklines (después de HTML escrito)
   renderHeatmapMes();
   const monthly = buildMonthlyData(6);
@@ -5681,7 +5829,7 @@ function actualizarKpisPres() {
       const diasRestantes = new Date(anio, mes, 0).getDate() - hoy.getDate() + 1;
       kpiDiario2.textContent = fmt(saldoReal / diasRestantes);
       kpiDiario2.className = "kpi-value balance-pos";
-      document.getElementById("pres-kpi-diario-sub").textContent = `${diasRestantes} días restantes`;
+      document.getElementById("pres-kpi-diario-sub").textContent = `Real disponible ÷ ${diasRestantes}d restantes`;
     } else {
       kpiDiario2.textContent = "—";
       kpiDiario2.className = "kpi-value";
@@ -6769,7 +6917,12 @@ function renderPlazos() {
   if (typeof _renderTotalesInversiones === "function") _renderTotalesInversiones(0, 0);
   const plazos = loadPlazos();
   if (!plazos.length) {
-    el.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin plazos registrados.</div>';
+    el.innerHTML = `<div style="text-align:center;padding:2rem 1rem">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/><circle cx="12" cy="13" r="2"/></svg>
+      <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">Sin plazos registrados</div>
+      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Registrá tus plazos fijos y mirá el rendimiento estimado.</div>
+      <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Agregar plazo fijo</button>
+    </div>`;
     return;
   }
   const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -6972,6 +7125,28 @@ function _renderTotalesInversiones(accionesUSD, accionesARS) {
     </div>`;
 }
 
+function _tiempoTranscurrido(ts) {
+  if (!ts) return "";
+  const seg = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+  if (seg < 60)  return `hace ${seg}s`;
+  const min = Math.floor(seg / 60);
+  return min < 60 ? `hace ${min}m` : `hace ${Math.floor(min/60)}h`;
+}
+function _iniciarAutoRefreshAcciones() {
+  if (_accionesRefreshTimer) return;
+  _accionesRefreshTimer = setInterval(() => {
+    if (_paginaActual === "inversiones" && document.visibilityState === "visible") {
+      Object.keys(_precioCache).forEach(k => delete _precioCache[k]);
+      renderAcciones();
+    }
+  }, 60000);
+  // Actualizar label de "hace Xs" cada 5s sin re-fetch
+  setInterval(() => {
+    const ts = document.getElementById("accion-ts");
+    if (ts && _accionesUltimaActualizacion) ts.textContent = `Actualizado ${_tiempoTranscurrido(_accionesUltimaActualizacion)}`;
+  }, 5000);
+}
+
 async function renderAcciones() {
   const lista = document.getElementById("accion-lista");
   const totalEl = document.getElementById("accion-total");
@@ -6981,7 +7156,12 @@ async function renderAcciones() {
   _renderTotalesInversiones(0, 0); // render inmediato con valores de plazos
 
   if (!acciones.length) {
-    lista.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin acciones ni cripto registradas.</div>';
+    lista.innerHTML = `<div style="text-align:center;padding:2rem 1rem">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+      <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">Sin acciones ni cripto</div>
+      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Sumá tu cartera para ver cotizaciones en vivo.</div>
+      <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()">+ Agregar tenencia</button>
+    </div>`;
     if (totalEl) totalEl.innerHTML = "";
     return;
   }
@@ -6996,6 +7176,7 @@ async function renderAcciones() {
       <div class="plazo-row"><span>Tenencia</span><strong>${a.cantidad}</strong></div>
       <div class="plazo-row" id="accion-precio-${a.id}"><span>Cotización</span><strong style="color:var(--text-muted)">cargando…</strong></div>
       <div class="plazo-row" id="accion-valor-${a.id}"><span>Valor actual</span><strong style="color:var(--text-muted)">—</strong></div>
+      <div class="plazo-row" id="accion-pnl-${a.id}" style="display:${a.precio_compra ? '' : 'none'}"><span>P&L</span><strong style="color:var(--text-muted)">—</strong></div>
       <div class="plazo-row" style="justify-content:flex-end">
         <div style="display:flex;gap:.4rem">
           <button class="cfg-del-btn" onclick="editarAccion('${a.id}')" title="Editar" style="color:var(--accent)">✎</button>
@@ -7021,15 +7202,28 @@ async function renderAcciones() {
     precioEl.innerHTML = `<span>Cotización</span><strong>${fmtV(precio)} <span style="font-size:.7rem;color:var(--text-muted)">${moneda}</span></strong>`;
     valorEl.innerHTML  = `<span>Valor actual</span><strong style="color:var(--green)">${fmtV(valor)}</strong>`;
     if (moneda === "ARS") totalARS += valor; else totalUSD += valor;
+    const pnlEl = document.getElementById(`accion-pnl-${a.id}`);
+    if (pnlEl && a.precio_compra && a.precio_compra > 0) {
+      const ganancia = (precio - a.precio_compra) * a.cantidad;
+      const pct = ((precio - a.precio_compra) / a.precio_compra) * 100;
+      const color = ganancia >= 0 ? "var(--green)" : "var(--red)";
+      const signo = ganancia >= 0 ? "+" : "−";
+      pnlEl.style.display = "";
+      pnlEl.innerHTML = `<span>P&amp;L</span><strong style="color:${color}">${signo}${fmtV(Math.abs(ganancia))} <small style="font-weight:600">${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%</small></strong>`;
+    } else if (pnlEl) {
+      pnlEl.style.display = "none";
+    }
   }));
 
+  _accionesUltimaActualizacion = Date.now();
   if (totalEl) {
     let html = "";
     if (totalARS > 0) html += `<strong>Total ARS:</strong> ${fmt(totalARS)}`;
     if (totalUSD > 0) html += (html ? " · " : "") + `<strong>Total USD:</strong> ${fmtMoneda(totalUSD,"USD")}`;
+    html += `<span id="accion-ts" style="display:block;margin-top:.2rem;font-size:.7rem;color:var(--text-muted)">Actualizado ${_tiempoTranscurrido(_accionesUltimaActualizacion)}</span>`;
     totalEl.innerHTML = html;
   }
-  _renderTotalesInversiones(totalUSD, totalARS); // actualizar con precios reales
+  _renderTotalesInversiones(totalUSD, totalARS);
 }
 
 function _renderFormAccion(a) {
@@ -7040,6 +7234,7 @@ function _renderFormAccion(a) {
     ${a ? `<input type="hidden" id="af-id" value="${a.id}">` : ""}
     <input id="af-simbolo" placeholder="Símbolo (ej: AAPL, BTC-USD, GGAL.BA)" type="text" class="plazo-form-full" style="text-transform:uppercase" value="${a?.simbolo || ''}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
     <input id="af-cantidad" placeholder="Cantidad / tenencia" type="text" inputmode="decimal" value="${a?.cantidad || ''}">
+    <input id="af-precio-compra" placeholder="Precio compra (opcional, para P&amp;L)" type="text" inputmode="decimal" value="${a?.precio_compra ?? ''}">
     <input id="af-nombre" placeholder="Nombre (opcional)" type="text" value="${escapeHtml(a?.nombre || '')}">
     ${a ? "" : hint}
     <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
@@ -7076,16 +7271,18 @@ function guardarAccion() {
   const simbolo = (document.getElementById("af-simbolo")?.value || "").trim().toUpperCase();
   const cantidad = parsearDecimal(document.getElementById("af-cantidad")?.value);
   const nombre   = (document.getElementById("af-nombre")?.value || "").trim();
+  const pcRaw    = (document.getElementById("af-precio-compra")?.value || "").trim();
+  const precio_compra = pcRaw ? parsearDecimal(pcRaw) || null : null;
   if (!simbolo || !cantidad) { showToast("⚠️ Ingresá símbolo y cantidad", "error"); return; }
   const acciones = loadAcciones();
   if (editId) {
     const idx = acciones.findIndex(a => a.id === editId);
     if (idx !== -1) {
-      acciones[idx] = { ...acciones[idx], cantidad, nombre };
-      delete _precioCache[acciones[idx].simbolo]; // forzar re-fetch si cambió qty
+      acciones[idx] = { ...acciones[idx], cantidad, nombre, precio_compra };
+      delete _precioCache[acciones[idx].simbolo];
     }
   } else {
-    acciones.push({ id: crypto.randomUUID(), simbolo, cantidad, nombre });
+    acciones.push({ id: crypto.randomUUID(), simbolo, cantidad, nombre, precio_compra });
   }
   saveAcciones(acciones);
   cerrarFormAccion();
