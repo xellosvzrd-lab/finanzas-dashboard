@@ -3748,6 +3748,7 @@ document.addEventListener("click", e => {
 
 // ─── TABLA TRANSACCIONES ─────────────────────────────────────
 function filtrarTabla() {
+  const gen = ++_filtroGen;
   inicializarCatOptions();
 
   const mes    = _el("fil-mes").value;
@@ -3801,7 +3802,10 @@ function filtrarTabla() {
 
   const tbody = _el("tabla-body");
   if (!datos.length) {
-    tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">Sin transacciones para este filtro</div></td></tr>';
+    requestAnimationFrame(() => {
+      if (gen !== _filtroGen) return;
+      tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">Sin transacciones para este filtro</div></td></tr>';
+    });
     return;
   }
 
@@ -3846,7 +3850,10 @@ function filtrarTabla() {
       </td>
     </tr>`
   }).join("");
-  requestAnimationFrame(() => { tbody.innerHTML = html; });
+  requestAnimationFrame(() => {
+    if (gen !== _filtroGen) return;
+    tbody.innerHTML = html;
+  });
 }
 
 // ─── EXPORTAR CSV ────────────────────────────────────────────
@@ -4716,6 +4723,7 @@ let _accionesLabelTimer  = null;
 let _filtroDebounce      = null;
 const _$ = {};  // element cache — populated lazily
 function _el(id) { return _$[id] || (_$[id] = document.getElementById(id)); }
+let _filtroGen = 0;  // generation counter — increments on every filtrarTabla() call
 let _accionesUltimaActualizacion = null; // "YYYY-MM-DD" — set by heatmap click, cleared on manual filter change
 
 function abrirLiquidar(cat, monto, tipo) {
