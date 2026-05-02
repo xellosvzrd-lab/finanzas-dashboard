@@ -2361,10 +2361,15 @@
         <!-- Plazos Fijos -->
         <div style="margin-bottom:1.5rem">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-            <h2 style="font-size:1rem;font-weight:700;cursor:pointer" onclick="toggleInvSection('plazos')">
-              Plazos Fijos <span id="inv-toggle-plazos" style="font-size:.75rem;color:var(--text-muted)">▴</span>
+            <h2 style="font-size:1rem;font-weight:700;margin:0">
+              <button style="background:none;border:none;cursor:pointer;font:inherit;color:inherit;display:flex;align-items:center;gap:.4rem;padding:0"
+                      onclick="toggleInvSection('plazos')"
+                      aria-expanded="true" aria-controls="inv-body-plazos"
+                      id="inv-hdr-plazos">
+                Plazos Fijos <span id="inv-toggle-plazos" aria-hidden="true" style="font-size:.75rem;color:var(--text-muted)">▴</span>
+              </button>
             </h2>
-            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Agregar</button>
+            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()" aria-label="Agregar plazo fijo">+ Agregar</button>
           </div>
           <div id="inv-body-plazos">
             <div id="plazo-form-wrap" style="display:none"></div>
@@ -2378,10 +2383,15 @@
         <!-- Acciones & Cripto -->
         <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-            <h2 style="font-size:1rem;font-weight:700;cursor:pointer" onclick="toggleInvSection('acciones')">
-              Acciones & Cripto <span id="inv-toggle-acciones" style="font-size:.75rem;color:var(--text-muted)">▴</span>
+            <h2 style="font-size:1rem;font-weight:700;margin:0">
+              <button style="background:none;border:none;cursor:pointer;font:inherit;color:inherit;display:flex;align-items:center;gap:.4rem;padding:0"
+                      onclick="toggleInvSection('acciones')"
+                      aria-expanded="true" aria-controls="inv-body-acciones"
+                      id="inv-hdr-acciones">
+                Acciones & Cripto <span id="inv-toggle-acciones" aria-hidden="true" style="font-size:.75rem;color:var(--text-muted)">▴</span>
+              </button>
             </h2>
-            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()">+ Agregar</button>
+            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia (acción o cripto)">+ Agregar</button>
           </div>
           <div id="inv-body-acciones">
             <div id="accion-form-wrap" style="display:none"></div>
@@ -6874,6 +6884,8 @@ function toggleInvSection(seccion) {
   body.style.display = visible ? "none" : "";
   if (arrow) arrow.textContent = visible ? "▾" : "▴";
   try { localStorage.setItem(USUARIO + "_inv_" + seccion, visible ? "0" : "1"); } catch {}
+  const hdr = document.getElementById("inv-hdr-" + seccion);
+  if (hdr) hdr.setAttribute("aria-expanded", body.style.display !== "none" ? "true" : "false");
 }
 
 function inicializarDisclosureInversiones() {
@@ -6885,6 +6897,8 @@ function inicializarDisclosureInversiones() {
     const expanded = saved !== null ? saved === "1" : true;
     body.style.display = expanded ? "" : "none";
     if (arrow) arrow.textContent = expanded ? "▴" : "▾";
+    const hdr = document.getElementById("inv-hdr-" + sec);
+    if (hdr) hdr.setAttribute("aria-expanded", body.style.display !== "none" ? "true" : "false");
   });
 }
 
