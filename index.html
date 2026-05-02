@@ -1882,10 +1882,13 @@
             <option value="Gasto">Gastos</option>
           </select>
           <div class="multi-select-wrap" id="fil-cat-wrap">
-            <div class="multi-select-btn" id="fil-cat-btn" onclick="toggleMultiSelect()">
-              <span id="fil-cat-label">Todas las categorías</span><span>▾</span>
-            </div>
-            <div class="multi-select-panel" id="fil-cat-panel" style="display:none">
+            <button class="multi-select-btn" id="fil-cat-btn" onclick="toggleMultiSelect()"
+                    aria-haspopup="listbox" aria-expanded="false" aria-controls="fil-cat-panel"
+                    type="button">
+              <span id="fil-cat-label">Todas las categorías</span><span aria-hidden="true">▾</span>
+            </button>
+            <div class="multi-select-panel" id="fil-cat-panel" style="display:none"
+                 role="listbox" aria-label="Filtrar por categoría" aria-multiselectable="true">
               <label class="multi-select-all">
                 <input type="checkbox" id="fil-cat-all" checked onchange="toggleTodasCats(this)"> Todas
               </label>
@@ -3696,10 +3699,21 @@ function cargarEvolucion() {
 
 // ─── MULTI-SELECT CATEGORÍAS ─────────────────────────────────
 function toggleMultiSelect() {
-  const panel = document.getElementById("fil-cat-panel");
+  const panel = _el("fil-cat-panel");
+  const btn   = _el("fil-cat-btn");
   const isOpen = panel.style.display !== "none";
   panel.style.display = isOpen ? "none" : "block";
-  document.getElementById("fil-cat-btn").classList.toggle("active", !isOpen);
+  btn.classList.toggle("active", !isOpen);
+  btn.setAttribute("aria-expanded", String(!isOpen));
+}
+function _cerrarMultiSelect() {
+  const panel = _el("fil-cat-panel");
+  const btn   = _el("fil-cat-btn");
+  if (panel && panel.style.display !== "none") {
+    panel.style.display = "none";
+    btn.classList.remove("active");
+    btn.setAttribute("aria-expanded", "false");
+  }
 }
 function toggleTodasCats(checkbox) {
   document.querySelectorAll("#fil-cat-options input").forEach(i => i.checked = checkbox.checked);
@@ -3739,12 +3753,13 @@ function inicializarCatOptions() {
     `<label class="multi-select-option"><input type="checkbox" value="${c}" checked onchange="onCatChange()"> ${c}</label>`
   ).join("");
 }
-// Cerrar al click fuera
+// Cerrar al click fuera o Escape
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") _cerrarMultiSelect();
+});
 document.addEventListener("click", e => {
-  if (!e.target.closest("#fil-cat-wrap")) {
-    const panel = document.getElementById("fil-cat-panel");
-    if (panel) { panel.style.display = "none"; document.getElementById("fil-cat-btn").classList.remove("active"); }
-  }
+  const wrap = e.target.closest(".multi-select-wrap");
+  if (!wrap) _cerrarMultiSelect();
 });
 
 // ─── TABLA TRANSACCIONES ─────────────────────────────────────
