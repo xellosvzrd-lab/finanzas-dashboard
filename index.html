@@ -350,6 +350,7 @@
   .heatmap-day:hover { border-color: var(--accent); transform: scale(1.12); z-index: 1; }
   .heatmap-day.heatmap-clickable { cursor: pointer; }
   .heatmap-day.heatmap-clickable:hover { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,132,90,.25); }
+  .heatmap-day.heatmap-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .heatmap-day.heatmap-empty { background: none; border: none; }
   .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); color: var(--accent); font-weight: 800; }
   .heatmap-day.heatmap-zero  { background: var(--bg3); color: var(--text-muted); }
@@ -5424,7 +5425,13 @@ function renderHeatmapMes() {
     const clickable = g > 0 ? ` heatmap-clickable` : "";
     const onclick = g > 0 ? ` onclick="irATransaccionesDia(${filAnio},${filMes},${d})"` : "";
     const cls = `heatmap-day${isToday ? " heatmap-today" : ""}${g === 0 ? " heatmap-zero" : ""}${clickable}`;
-    html += `<div class="${cls}" style="--heat:${heat}" title="${d}/${filMes}: ${g > 0 ? fmt(g) : "Sin gastos"}"${onclick}>${d}</div>`;
+    const label = g > 0
+      ? `Día ${d}: ${fmt(g)} en gastos`
+      : `Día ${d}: sin gastos`;
+    const a11y = g > 0
+      ? ` role="button" tabindex="0" aria-label="${label}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irATransaccionesDia(${filAnio},${filMes},${d})}"`
+      : ` aria-label="${label}" aria-disabled="true"`;
+    html += `<div class="${cls}" style="--heat:${heat}"${onclick}${a11y}>${d}</div>`;
   }
   html += `</div>`;
   el.innerHTML = html;
