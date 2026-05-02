@@ -3750,12 +3750,12 @@ document.addEventListener("click", e => {
 function filtrarTabla() {
   inicializarCatOptions();
 
-  const mes    = document.getElementById("fil-mes").value;
-  const anio   = document.getElementById("fil-anio").value;
-  const tipo   = document.getElementById("fil-tipo").value;
-  const fuente = document.getElementById("fil-fuente")?.value || "";
-  const resp   = document.getElementById("fil-resp")?.value || "";
-  const buscar = document.getElementById("fil-buscar").value.toLowerCase();
+  const mes    = _el("fil-mes").value;
+  const anio   = _el("fil-anio").value;
+  const tipo   = _el("fil-tipo").value;
+  const fuente = _el("fil-fuente")?.value || "";
+  const resp   = _el("fil-resp")?.value || "";
+  const buscar = _el("fil-buscar").value.toLowerCase();
   const catsSelec = new Set(
     [...document.querySelectorAll("#fil-cat-options input:checked")].map(i => i.value)
   );
@@ -3799,7 +3799,7 @@ function filtrarTabla() {
   netoEl.textContent = netoSigno + " " + fmt(Math.abs(netoARS)) + (hayUSDsub?` / ${fmtMoneda(Math.abs(netoUSD),"USD")}`:"");
   netoEl.className = netoARS >= 0 ? "sub-neto-pos" : "sub-neto-neg";
 
-  const tbody = document.getElementById("tabla-body");
+  const tbody = _el("tabla-body");
   if (!datos.length) {
     tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">Sin transacciones para este filtro</div></td></tr>';
     return;
@@ -3808,7 +3808,7 @@ function filtrarTabla() {
   const respEmoji = {};
   const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", ["De " + PARTNER]: "var(--accent)" };
 
-  tbody.innerHTML = datos.map((t, i) => {
+  const html = datos.map((t, i) => {
     const r = t.responsabilidad || "Mío";
     const mon = t.moneda || "ARS";
     const monBadge = mon === "USD"
@@ -3846,6 +3846,7 @@ function filtrarTabla() {
       </td>
     </tr>`
   }).join("");
+  requestAnimationFrame(() => { tbody.innerHTML = html; });
 }
 
 // ─── EXPORTAR CSV ────────────────────────────────────────────
@@ -4713,6 +4714,8 @@ let _filFechaExacta = null;
 let _accionesRefreshTimer = null;
 let _accionesLabelTimer  = null;
 let _filtroDebounce      = null;
+const _$ = {};  // element cache — populated lazily
+function _el(id) { return _$[id] || (_$[id] = document.getElementById(id)); }
 let _accionesUltimaActualizacion = null; // "YYYY-MM-DD" — set by heatmap click, cleared on manual filter change
 
 function abrirLiquidar(cat, monto, tipo) {
