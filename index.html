@@ -107,7 +107,7 @@
   .sidebar-logo h2, .topnav-brand,
   .page-header h1, .setup-card h1,
   .chart-title, .comp-title, .pres-title,
-  #sub-neto, .comp-balance-value, .ama-value,
+  #sub-neto, .comp-balance-value,
   .donut-center-val, .donut-center-sub {
     font-family: 'Bricolage Grotesque', system-ui, sans-serif;
     text-rendering: optimizeLegibility;
@@ -365,13 +365,6 @@
   .kpi-hero-bar-fill.bar-over { background: var(--red); }
 
   /* ─── NAV SEPARATOR ─────────────────────────────────────── */
-  .nav-sep {
-    padding: .6rem 1.5rem .1rem;
-    font-size: .59rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: .1em;
-    color: var(--text-muted); opacity: .45;
-    pointer-events: none; user-select: none;
-  }
 
   /* Grid de 4 KPIs (presupuesto) — en desktop 4 cols, tablet/mobile 2 */
   .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
@@ -1056,29 +1049,7 @@
   .kpi-spark svg { display: block; }
 
   /* ─── BANNER "AMA TE DEBE" ──────────────────────────────────── */
-  .ama-debe-card {
-    display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
-    background: rgba(240,111,160,0.07);
-    border: 1px solid rgba(240,111,160,0.28);
-    border-radius: var(--radius); padding: 1.25rem 1.8rem;
-    margin-bottom: 1.8rem;
-    box-shadow: 0 0 40px rgba(240,111,160,0.08);
-    animation: fadeUp .45s .28s ease-out both;
-  }
-  .ama-icon {
-    font-size: 2.6rem; line-height: 1; flex-shrink: 0;
-    filter: drop-shadow(0 0 14px rgba(240,111,160,0.65));
-    animation: pulse-glow 3s ease-in-out infinite;
-  }
-  @keyframes pulse-glow {
-    0%, 100% { filter: drop-shadow(0 0 10px rgba(240,111,160,0.55)); }
-    50%       { filter: drop-shadow(0 0 22px rgba(240,111,160,0.9)); }
-  }
-  .ama-info { flex: 1; min-width: 140px; }
-  .ama-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-bottom: .2rem; }
-  .ama-value { font-size: 1.9rem; font-weight: 800; color: var(--accent); letter-spacing: -.03em; }
-  .ama-sub   { font-size: .74rem; color: var(--text-muted); margin-top: .15rem; }
-  .ama-cats  { display: flex; gap: .45rem; flex-wrap: wrap; align-items: center; }
+  /* ─── BANNER "AMA TE DEBE" ─────────────────────────────────── */
   .ama-chip  {
     background: rgba(240,111,160,0.13); border: 1px solid rgba(240,111,160,0.22);
     border-radius: 20px; padding: .22rem .7rem; font-size: .72rem;
