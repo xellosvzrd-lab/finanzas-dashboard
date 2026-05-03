@@ -1859,7 +1859,7 @@
         <div class="table-filters">
           <select id="fil-mes" onchange="_filFechaExacta=null;guardarSelFecha();filtrarTabla()"></select>
           <select id="fil-anio" onchange="_filFechaExacta=null;guardarSelFecha();filtrarTabla()"></select>
-          <select id="fil-tipo" onchange="filtrarTabla()">
+          <select id="fil-tipo" onchange="clearTimeout(_filtroDebounce);_filtroDebounce=setTimeout(filtrarTabla,50)">
             <option value="">Todos los tipos</option>
             <option value="Ingreso">Ingresos</option>
             <option value="Gasto">Gastos</option>
@@ -1878,10 +1878,10 @@
               <div id="fil-cat-options"></div>
             </div>
           </div>
-          <select id="fil-fuente" onchange="filtrarTabla()">
+          <select id="fil-fuente" onchange="clearTimeout(_filtroDebounce);_filtroDebounce=setTimeout(filtrarTabla,50)">
             <option value="">Todas las fuentes</option>
           </select>
-          <select id="fil-resp" onchange="filtrarTabla()">
+          <select id="fil-resp" onchange="clearTimeout(_filtroDebounce);_filtroDebounce=setTimeout(filtrarTabla,50)">
             <option value="">Todas</option>
             <option value="Mío">Mío</option>
             <option value="Compartido">Compartido</option>
@@ -2718,6 +2718,24 @@ let chartCat       = null;
 let chartDonut     = null;
 let chartEvolCombo = null;
 
+// ─── COLORES DE GRÁFICOS (tokens → constantes JS) ────────────
+const _C = {
+  muted:      "#8C7B72",   // var(--text-muted)
+  grid:       "rgba(45,41,38,0.06)",
+  accent:     "#C8845A",   // var(--accent)
+  green:      "#5A8C6B",   // var(--green)
+  greenA75:   "rgba(90,140,107,.75)",
+  greenA65:   "rgba(90,140,107,.65)",
+  greenA90:   "rgba(90,140,107,.9)",
+  red:        "#C85A5A",   // var(--red)
+  redA75:     "rgba(200,90,90,.75)",
+  redA65:     "rgba(200,90,90,.65)",
+  redA90:     "rgba(200,90,90,.9)",
+  accentA13:  "rgba(200,132,90,.13)",
+  greenChart: "rgba(52,211,153,0.7)",
+  redChart:   "rgba(248,113,113,0.7)",
+};
+
 // ─── PALETA DE COLORES ────────────────────────────────────────
 const PALETTE = [
   "#C8845A",  // terracotta
@@ -3462,8 +3480,8 @@ function renderCatChart(sortedCats) {
         tooltip: { callbacks: { label: ctx => " " + fmt(ctx.raw) } }
       },
       scales: {
-        x: { grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", font: { size: 11, family: "'Libre Franklin', system-ui" } } },
-        y: { grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", font: { family: "'Libre Franklin', system-ui" },
+        x: { grid: { color: _C.grid }, ticks: { color: _C.muted, font: { size: 11, family: "'Libre Franklin', system-ui" } } },
+        y: { grid: { color: _C.grid }, ticks: { color: _C.muted, font: { family: "'Libre Franklin', system-ui" },
           callback: v => fmtShort(v) } }
       }
     }
@@ -3480,18 +3498,18 @@ function renderDonutChart(ingresos, gastos, balance) {
       labels: ["Ingresos","Gastos"],
       datasets: [{
         data: [ingresos, gastos],
-        backgroundColor: ["rgba(90,140,107,.75)","rgba(200,90,90,.75)"],
-        borderColor: ["rgba(90,140,107,.9)","rgba(200,90,90,.9)"],
+        backgroundColor: [_C.greenA75, _C.redA75],
+        borderColor: [_C.greenA90, _C.redA90],
         borderWidth: 2,
         hoverOffset: 10,
-        hoverBackgroundColor: ["rgba(90,140,107,1)","rgba(200,90,90,1)"],
+        hoverBackgroundColor: [_C.green, _C.red],
       }]
     },
     options: {
       responsive: true, maintainAspectRatio: false, cutout: "70%",
       animation: { duration: 800, easing: "easeOutQuart" },
       plugins: {
-        legend: { position: "bottom", labels: { color: "#8C7B72", padding: 16, font:{ size:12, family: "'Libre Franklin', system-ui" }, usePointStyle: true } },
+        legend: { position: "bottom", labels: { color: _C.muted, padding: 16, font:{ size:12, family: "'Libre Franklin', system-ui" }, usePointStyle: true } },
         tooltip: { callbacks: {
           label: ctx => " " + fmt(ctx.raw),
           afterLabel: ctx => ctx.dataIndex === 0
@@ -3546,9 +3564,9 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
         const efe     = esGasto ? bruto : -bruto;
         const resp    = t.responsabilidad || "Mío";
         const respTag = resp === "Compartido"
-          ? `<span style="color:#a78bfa;font-size:.75rem;">Compartido</span>`
-          : resp === "De Ama"
-          ? `<span style="color:#f59e0b;font-size:.75rem;">De Ama</span>`
+          ? `<span style="color:var(--yellow);font-size:.75rem;">Compartido</span>`
+          : resp.startsWith("De ")
+          ? `<span style="color:var(--accent);font-size:.75rem;">${escapeHtml(resp)}</span>`
           : "";
         const efeColor = efe >= 0 ? "var(--red)" : "var(--green)";
         const efeLabel = efe >= 0 ? fmtVal(bruto) : "−" + fmtVal(bruto);
@@ -3657,18 +3675,18 @@ function cargarEvolucion() {
       datasets: [
         {
           label: "Ingresos", data: ingArr, type: "bar",
-          backgroundColor: "rgba(90,140,107,.65)", borderColor: "#5A8C6B",
+          backgroundColor: _C.greenA65, borderColor: _C.green,
           borderWidth: 1, borderRadius: 4, yAxisID: "y",
         },
         {
           label: "Gastos", data: gasArr, type: "bar",
-          backgroundColor: "rgba(200,90,90,.65)", borderColor: "#C85A5A",
+          backgroundColor: _C.redA65, borderColor: _C.red,
           borderWidth: 1, borderRadius: 4, yAxisID: "y",
         },
         {
           label: "Balance acumulado", data: balArr, type: "line",
-          borderColor: "#C8845A", backgroundColor: "rgba(200,132,90,.13)",
-          fill: false, tension: 0.4, pointRadius: 3, pointBackgroundColor: "#C8845A",
+          borderColor: _C.accent, backgroundColor: _C.accentA13,
+          fill: false, tension: 0.4, pointRadius: 3, pointBackgroundColor: _C.accent,
           yAxisID: "y1", borderWidth: 2,
         }
       ]
@@ -3678,13 +3696,13 @@ function cargarEvolucion() {
       animation: { duration: 700, easing: "easeOutQuart" },
       interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: { labels: { color: "#8C7B72", font: { family: "'Libre Franklin', system-ui" } } },
+        legend: { labels: { color: _C.muted, font: { family: "'Libre Franklin', system-ui" } } },
         tooltip: { callbacks: { label: ctx => " " + fmt(ctx.raw) } }
       },
       scales: {
-        x: { grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", font: { family: "'Libre Franklin', system-ui" } } },
-        y:  { position: "left",  grid: { color: "rgba(45,41,38,0.06)" }, ticks: { color: "#8C7B72", font: { family: "'Libre Franklin', system-ui" }, callback: v => fmtShort(v) } },
-        y1: { position: "right", grid: { drawOnChartArea: false }, ticks: { color: "#C8845A", font: { family: "'Libre Franklin', system-ui" }, callback: v => fmtShort(v) } }
+        x: { grid: { color: _C.grid }, ticks: { color: _C.muted, font: { family: "'Libre Franklin', system-ui" } } },
+        y:  { position: "left",  grid: { color: _C.grid }, ticks: { color: _C.muted, font: { family: "'Libre Franklin', system-ui" }, callback: v => fmtShort(v) } },
+        y1: { position: "right", grid: { drawOnChartArea: false }, ticks: { color: _C.accent, font: { family: "'Libre Franklin', system-ui" }, callback: v => fmtShort(v) } }
       }
     }
   });
