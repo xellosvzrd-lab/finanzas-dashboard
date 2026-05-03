@@ -19,6 +19,16 @@
   /* ─── FONTS ──────────────────────────────────────────────── */
   @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Libre+Franklin:wght@400;500;600;700&display=swap');
 
+  /* ─── SKIP NAVIGATION ──────────────────────────────────── */
+  .skip-link {
+    position: absolute; top: -100%; left: 1rem;
+    background: var(--accent); color: var(--white);
+    padding: .6rem 1.2rem; border-radius: 0 0 8px 8px;
+    font-size: .88rem; font-weight: 700; text-decoration: none;
+    z-index: 9999; transition: top .15s;
+  }
+  .skip-link:focus { top: 0; }
+
   /* ─── RESET & BASE ─────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1618,6 +1628,8 @@
 </head>
 <body>
 
+<a href="#app" class="skip-link">Ir al contenido</a>
+
 <!-- ════════════════════════════════════════════════════════
      PANTALLA DE CONFIGURACIÓN INICIAL
 ════════════════════════════════════════════════════════ -->
@@ -1924,15 +1936,15 @@
           <!-- Fila 1: Tipo + Moneda lado a lado -->
           <div class="form-row">
             <div class="form-group">
-              <label>Tipo</label>
-              <div class="tipo-toggle">
+              <label id="lbl-tipo">Tipo</label>
+              <div class="tipo-toggle" role="group" aria-labelledby="lbl-tipo">
                 <button class="tipo-btn active-expense" id="btn-gasto"  onclick="setTipo('Gasto')">Gasto</button>
                 <button class="tipo-btn"                id="btn-ingreso" onclick="setTipo('Ingreso')">Ingreso</button>
               </div>
             </div>
             <div class="form-group">
-              <label>Moneda</label>
-              <div class="moneda-toggle">
+              <label id="lbl-moneda">Moneda</label>
+              <div class="moneda-toggle" role="group" aria-labelledby="lbl-moneda">
                 <button class="moneda-btn active-ars" id="btn-ars" onclick="setMoneda('ARS')">🇦🇷 ARS</button>
                 <button class="moneda-btn" id="btn-usd" onclick="setMoneda('USD')">🇺🇸 USD</button>
               </div>
@@ -1941,35 +1953,35 @@
           <!-- Fila 2: Fecha + Monto -->
           <div class="form-row">
             <div class="form-group">
-              <label>Fecha</label>
+              <label for="f-fecha">Fecha</label>
               <input type="date" id="f-fecha">
             </div>
             <div class="form-group">
-              <label id="f-monto-label">Monto (ARS $)</label>
+              <label for="f-monto" id="f-monto-label">Monto (ARS $)</label>
               <input type="text" inputmode="decimal" id="f-monto" placeholder="0,00">
             </div>
           </div>
           <!-- Fila 3: Categoría + Responsabilidad -->
           <div class="form-row">
             <div class="form-group">
-              <label>Categoría</label>
+              <label for="f-categoria">Categoría</label>
               <select id="f-categoria"></select>
             </div>
             <div class="form-group">
-              <label>¿Cómo se divide?</label>
+              <label for="f-responsabilidad">¿Cómo se divide?</label>
               <select id="f-responsabilidad"></select>
             </div>
           </div>
           <!-- Fila 4: Fuente + Mes de liquidación (TC) -->
           <div class="form-row">
             <div class="form-group">
-              <label>Fuente / Medio de pago</label>
+              <label for="f-fuente">Fuente / Medio de pago</label>
               <select id="f-fuente" onchange="_actualizarMesLiqField(this.value)">
                 <option value="">— Sin especificar —</option>
               </select>
             </div>
             <div class="form-group" id="f-mes-liq-row" style="display:none">
-              <label>Mes de liquidación <span style="font-size:.8rem;color:var(--text-muted)">¿A qué mes?</span></label>
+              <label for="f-mes-liq">Mes de liquidación <span style="font-size:.8rem;color:var(--text-muted)">¿A qué mes?</span></label>
               <input type="month" id="f-mes-liq">
               <div id="f-mes-liq-err" style="font-size:.8rem;color:var(--red);min-height:1em;margin-top:.25rem"></div>
             </div>
@@ -1977,7 +1989,7 @@
           <!-- Fila 5: Descripción -->
           <div class="form-row">
             <div class="form-group full">
-              <label>Descripción (opcional)</label>
+              <label for="f-descripcion">Descripción (opcional)</label>
               <textarea id="f-descripcion" placeholder="¿En qué gastaste o de dónde vino?" style="min-height:56px"></textarea>
             </div>
           </div>
@@ -2601,11 +2613,11 @@
     <div class="edit-modal-body">
       <div class="edit-field-row">
         <div class="edit-field">
-          <label>Fecha</label>
+          <label for="edit-fecha">Fecha</label>
           <input type="date" id="edit-fecha">
         </div>
         <div class="edit-field">
-          <label>Tipo</label>
+          <label for="edit-tipo">Tipo</label>
           <select id="edit-tipo">
             <option value="Gasto">Gasto</option>
             <option value="Ingreso">Ingreso</option>
@@ -2614,23 +2626,23 @@
       </div>
       <div class="edit-field-row">
         <div class="edit-field">
-          <label>Moneda</label>
+          <label for="edit-moneda">Moneda</label>
           <select id="edit-moneda">
             <option value="ARS">🇦🇷 ARS</option>
             <option value="USD">🇺🇸 USD</option>
           </select>
         </div>
         <div class="edit-field">
-          <label>Monto</label>
+          <label for="edit-monto">Monto</label>
           <input type="text" inputmode="decimal" id="edit-monto" placeholder="0,00">
         </div>
       </div>
       <div class="edit-field">
-        <label>Categoría</label>
+        <label for="edit-categoria">Categoría</label>
         <select id="edit-categoria"></select>
       </div>
       <div class="edit-field">
-        <label>Responsabilidad</label>
+        <label for="edit-responsabilidad">Responsabilidad</label>
         <select id="edit-responsabilidad">
           <option value="Mío">Mío</option>
           <option value="Compartido">Compartido</option>
@@ -2638,16 +2650,16 @@
         </select>
       </div>
       <div class="edit-field">
-        <label>Fuente / Medio de pago</label>
+        <label for="edit-fuente">Fuente / Medio de pago</label>
         <select id="edit-fuente"></select>
       </div>
       <div class="edit-field" id="edit-mes-liq-row" style="display:none">
-        <label>Mes de liquidación <span style="font-size:.8rem;color:var(--text-muted)">¿A qué mes corresponde?</span></label>
+        <label for="edit-mes-liq">Mes de liquidación <span style="font-size:.8rem;color:var(--text-muted)">¿A qué mes corresponde?</span></label>
         <input type="month" id="edit-mes-liq">
         <div id="edit-mes-liq-err" style="font-size:.8rem;color:var(--red);min-height:1em;margin-top:.25rem"></div>
       </div>
       <div class="edit-field">
-        <label>Descripción</label>
+        <label for="edit-descripcion">Descripción</label>
         <textarea id="edit-descripcion" placeholder="Descripción opcional..."></textarea>
       </div>
       <div id="edit-msg"></div>
