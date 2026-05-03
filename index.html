@@ -1866,13 +1866,13 @@
           </select>
           <div class="multi-select-wrap" id="fil-cat-wrap">
             <button class="multi-select-btn" id="fil-cat-btn" onclick="toggleMultiSelect()"
-                    aria-haspopup="listbox" aria-expanded="false" aria-controls="fil-cat-panel"
+                    aria-haspopup="true" aria-expanded="false" aria-controls="fil-cat-panel"
                     type="button">
               <span id="fil-cat-label">Todas las categorías</span><span aria-hidden="true">▾</span>
             </button>
             <div class="multi-select-panel" id="fil-cat-panel" style="display:none"
-                 role="listbox" aria-label="Filtrar por categoría" aria-multiselectable="true">
-              <label class="multi-select-all">
+                 role="group" aria-label="Filtrar por categoría">
+              <label class="multi-select-all" for="fil-cat-all">
                 <input type="checkbox" id="fil-cat-all" checked onchange="toggleTodasCats(this)"> Todas
               </label>
               <div id="fil-cat-options"></div>
@@ -3742,9 +3742,10 @@ function inicializarCatOptions() {
   const el = document.getElementById("fil-cat-options");
   if (el.children.length > 0) return; // ya inicializado
   const cats = [...new Set(allTransac.filter(t => (t.usuario||"Daniel") === USUARIO).map(t => t.categoria))].sort();
-  el.innerHTML = cats.map(c =>
-    `<label class="multi-select-option"><input type="checkbox" value="${c}" checked onchange="onCatChange()"> ${c}</label>`
-  ).join("");
+  el.innerHTML = cats.map((c, i) => {
+    const id = `fil-cat-opt-${i}`;
+    return `<label class="multi-select-option" for="${id}"><input type="checkbox" id="${id}" value="${escapeHtml(c)}" checked onchange="onCatChange()"> ${escapeHtml(c)}</label>`;
+  }).join("");
 }
 // Cerrar al click fuera o Escape
 document.addEventListener("keydown", e => {
