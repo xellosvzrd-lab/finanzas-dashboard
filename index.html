@@ -15,6 +15,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
   /* ─── FONTS ──────────────────────────────────────────────── */
   @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Libre+Franklin:wght@400;500;600;700&display=swap');
@@ -521,6 +522,13 @@
   .comp-balance-value { font-size: 2.6rem; font-weight: 800; letter-spacing: -.045em; line-height: 1; }
   .comp-balance-value.positivo { color: var(--green); }
   .comp-balance-value.negativo { color: var(--red); }
+  .comp-balance-value.a-mano  { color: var(--green); }
+  @keyframes balancePop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  .comp-balance-value.a-mano { animation: balancePop .4s var(--ease-out) both; }
   .comp-balance-sub  { font-size: .83rem; color: var(--text-muted); margin-top: .2rem; }
   .comp-saldar-btn {
     margin-top: .85rem; padding: .5rem 1.2rem;
@@ -2706,6 +2714,19 @@ const IC_COPY  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
 const IC_EDIT  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
 const IC_TRASH = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
 
+function _confettiBrief(opts = {}) {
+  if (typeof confetti !== "function") return;
+  confetti({
+    particleCount: opts.count || 55,
+    spread: opts.spread || 52,
+    colors: opts.colors || ["#C8845A", "#5A8C6B", "#C8A45A", "#EDE8E3", "#C85A5A"],
+    origin: opts.origin || { y: 0.55 },
+    scalar: 0.82,
+    gravity: 1.1,
+    drift: 0,
+  });
+}
+
 function escapeHtml(s) {
   return String(s == null ? "" : s)
     .replace(/&/g, "&amp;")
@@ -3550,7 +3571,7 @@ function renderDonutChart(ingresos, gastos, balance) {
 function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
   const el = document.getElementById("top-gastos-list");
   if (!sortedCatsARS.length && !sortedCatsUSD.length) {
-    el.innerHTML = '<div class="empty-state">Sin gastos este mes</div>';
+    el.innerHTML = '<div class="empty-state">Sin gastos este mes — buen comienzo ✓</div>';
     return;
   }
 
@@ -3851,7 +3872,7 @@ function filtrarTabla() {
   if (!datos.length) {
     requestAnimationFrame(() => {
       if (gen !== _filtroGen) return;
-      tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">Sin transacciones para este filtro</div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">Nada con ese filtro — probá ampliando la búsqueda</div></td></tr>';
     });
     return;
   }
@@ -4124,7 +4145,7 @@ async function guardarEdicionTransaccion() {
     filtrarTabla();
     cargarResumenMes();
     cargarEvolucion();
-    showToast("✅ Transacción actualizada", "ok");
+    showToast("✅ Guardado", "ok");
   } catch(e) {
     msg.innerHTML = '<span style="color:var(--red)">❌ Error de conexión al guardar</span>';
     btn.disabled = false;
@@ -4209,7 +4230,7 @@ async function guardarTransaccion() {
     if (selCat)  selCat.selectedIndex  = 0;
     if (selFte)  { selFte.selectedIndex = 0; _actualizarMesLiqField(""); }
     resetRespField();
-    showToast("✅ Transacción guardada", "ok");
+    showToast("✅ Guardado", "ok");
     if (navigator.vibrate) navigator.vibrate(50);
     msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
     setTimeout(() => { msg.innerHTML = ""; }, 3000);
@@ -4576,7 +4597,7 @@ function cargarCompartidos() {
 
   const tbodyComp = document.getElementById("comp-tabla-compartidos");
   if (!filasCompARS.length && !filasCompUSD.length) {
-    tbodyComp.innerHTML = '<tr><td colspan="4"><div class="empty-state" style="padding:1.5rem">Sin gastos compartidos este mes</div></td></tr>';
+    tbodyComp.innerHTML = '<tr><td colspan="4"><div class="empty-state" style="padding:1.5rem">Sin gastos compartidos este mes ✓</div></td></tr>';
   } else {
     let htmlComp = "";
     if (filasCompARS.length > 0) {
@@ -4695,8 +4716,12 @@ function cargarCompartidos() {
   const balSub = document.getElementById("comp-balance-sub");
 
   const hayUSD = filasCompUSD.length > 0 || catsReembUSD.length > 0;
-  balEl.textContent = fmt(Math.abs(balanceFinalARS)) + (hayUSD && balanceFinalUSD !== 0 ? " + " + fmtMoneda(Math.abs(balanceFinalUSD), "USD") : "");
-  balEl.className   = "comp-balance-value " + (balanceFinalARS >= 0 ? "positivo" : "negativo");
+  const estaAMano = balanceFinalARS === 0 && balanceFinalUSD === 0;
+  balEl.textContent = estaAMano
+    ? "¡A mano!"
+    : fmt(Math.abs(balanceFinalARS)) + (hayUSD && balanceFinalUSD !== 0 ? " + " + fmtMoneda(Math.abs(balanceFinalUSD), "USD") : "");
+  balEl.className = "comp-balance-value " + (estaAMano ? "a-mano" : balanceFinalARS >= 0 ? "positivo" : "negativo");
+  if (estaAMano) _confettiBrief({ count: 40, colors: ["#5A8C6B", "#C8845A", "#EDE8E3"] });
 
   const desglose = [];
   if (totalCompNetARS > 0) desglose.push(`Compartidos ARS: ${fmt(totalCompNetARS)}`);
@@ -4838,8 +4863,12 @@ async function confirmarSaldarTodo() {
     } catch(e) { fail++; }
   }
   _settlementItems = [];
-  if (fail === 0) showToast(`✅ ${ok} liquidación(es) registradas`, "ok");
-  else showToast(`⚠️ ${ok} OK · ${fail} error(es)`, "error");
+  if (fail === 0) {
+    _confettiBrief({ count: 80 });
+    showToast(`🎉 ${ok} liquidación(es) — ¡quedaron a mano!`, "ok");
+  } else {
+    showToast(`⚠️ ${ok} OK · ${fail} error(es)`, "error");
+  }
   cargarCompartidos();
 }
 
