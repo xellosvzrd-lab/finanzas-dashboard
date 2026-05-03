@@ -1088,13 +1088,13 @@
   .mobile-header {
     display: none;
     position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-    background: var(--bg2); border-bottom: 1px solid var(--border);
-    padding: 0 1.2rem; height: 54px;
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 0 1.25rem; height: 58px;
     align-items: center; justify-content: space-between;
   }
   .mobile-logo {
-    font-size: .95rem; font-weight: 800; letter-spacing: -.02em;
-    color: var(--text);
+    font-size: 1rem; font-weight: 800; letter-spacing: -.025em;
+    color: var(--accent);
   }
   .hamburger-btn {
     background: none; border: none; cursor: pointer;
@@ -1106,7 +1106,7 @@
 
   /* ─── MOBILE DRAWER ─────────────────────────────────────── */
   .mobile-drawer {
-    position: fixed; top: 54px; right: 0;
+    position: fixed; top: 58px; right: 0;
     width: 220px;
     background: var(--card); border: 1px solid var(--border);
     border-radius: 0 0 0 14px;
@@ -1153,9 +1153,9 @@
   .bottom-nav {
     display: none;
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-    background: var(--bg2); border-top: 1px solid var(--border);
+    background: var(--card); border-top: 1px solid var(--border);
     height: 62px; align-items: stretch;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.35);
+    box-shadow: 0 -1px 0 var(--border), 0 -8px 24px rgba(45,41,38,0.18);
   }
   .bn-item {
     flex: 1; display: flex; flex-direction: column;
@@ -1163,9 +1163,18 @@
     background: none; border: none; cursor: pointer;
     color: var(--text-muted); font-size: .65rem; font-weight: 600;
     letter-spacing: .03em; text-transform: uppercase;
-    transition: color .15s; padding: 0; font-family: inherit;
+    transition: color .15s, background .15s;
+    padding: 0; font-family: inherit;
+    position: relative; border-radius: 0;
   }
   .bn-item:hover, .bn-item.active { color: var(--accent); }
+  .bn-item.active { background: var(--accent-dim); }
+  .bn-item.active::before {
+    content: ''; position: absolute; top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 28px; height: 2px;
+    background: var(--accent); border-radius: 0 0 3px 3px;
+  }
   .bn-item:active { transform: scale(0.93); }
   @keyframes bnIconPop {
     0%   { transform: translateY(0)   scale(1); }
@@ -1204,7 +1213,7 @@
     .sidebar.open { transform: translateX(0); }
 
     /* Contenido ocupa todo el ancho */
-    .main { margin-left: 0; padding: 4.5rem 1rem 5.5rem; }
+    .main { margin-left: 0; padding: 4.8rem 1.1rem 5.5rem; }
 
     /* Bottom nav */
     .bottom-nav { display: flex; }
@@ -1223,9 +1232,9 @@
     /* Header de página en columna */
     .page-header {
       flex-direction: column; align-items: flex-start;
-      gap: .75rem; margin-bottom: 1.2rem;
+      gap: .75rem; margin-bottom: 1.5rem;
     }
-    .page-header h1 { font-size: 1.2rem; }
+    .page-header h1 { font-size: 1.3rem; letter-spacing: -.035em; }
     .page-header .btn { align-self: flex-start; }
 
     /* Tabla: scroll horizontal suave */
@@ -1247,7 +1256,7 @@
 
     /* Balance de compartidos en columna */
     .comp-balance-card { flex-direction: column; gap: .6rem; padding: 1.1rem 1.2rem; }
-    .comp-balance-value { font-size: 1.8rem; }
+    .comp-balance-value { font-size: 2rem; letter-spacing: -.04em; }
 
     /* Presupuesto: ocultar barra de progreso visual en móvil */
     .pres-bar-bg { display: none; }
@@ -1269,6 +1278,13 @@
     /* Charts: menos alto */
     .chart-card { padding: 1rem; }
     .chart-wrap { height: 210px; }
+
+    /* Anillo de presupuesto: stack vertical en mobile */
+    .pres-ring-card {
+      flex-direction: column; align-items: flex-start;
+      gap: 1.25rem; padding: 1.25rem 1.1rem;
+    }
+    .pres-ring-stats { min-width: 0; width: 100%; }
   }
 
   /* ─── OCULTAR COLUMNAS SECUNDARIAS (≤ 680px) ──────────────── */
