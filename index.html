@@ -5539,7 +5539,7 @@ function renderPresupuesto() {
 
   // Sueldo KPI = ingresos reales del usuario (ARS)
   const sueldo = dataMesDaniel
-    .filter(t => t.tipo === "Ingreso" && categIngreso.includes(t.categoria)
+    .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)
              && (t.moneda || "ARS") === "ARS")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
   // Para Ama: sueldoEfectivo incluye saldo USD × MEP
@@ -5880,7 +5880,7 @@ function actualizarKpisPres() {
   const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO);
 
   const sueldo = dataMesDaniel
-    .filter(t => t.tipo === "Ingreso" && categIngreso.includes(t.categoria)
+    .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)
              && (t.moneda || "ARS") === "ARS")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
   const ingUSDKpi = dataMesDaniel
