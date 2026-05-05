@@ -5559,6 +5559,7 @@ function renderPresupuesto() {
   //   "De Ama" gastos Daniel        → 0% (excluido)
   //   "Mío" ingresos Daniel         → restan al gasto (reintegros propios)
   const gastoPorCat = {};
+  let surplusTotal = 0;
   categGasto.forEach(cat => {
     // Gastos "Mío" de Daniel → 100% (neteado con ingresos "Mío")
     const gastosMio = dataMesDaniel
@@ -5598,8 +5599,11 @@ function renderPresupuesto() {
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
 
+    const netMio  = gastosMio - ingresosMio;
     const netComp = gastosComp - ingresosComp;
-    gastoPorCat[cat] = (gastosMio - ingresosMio) + netComp * 0.5 + Math.max(0, deJGasto - deJIngreso);
+    const netDeJ  = deJGasto - deJIngreso;
+    surplusTotal += Math.max(0, -netMio) + Math.max(0, -netComp) * 0.5 + Math.max(0, -netDeJ);
+    gastoPorCat[cat] = Math.max(0, netMio) + Math.max(0, netComp) * 0.5 + Math.max(0, netDeJ);
   });
 
   // Totales KPI — presupuestoActual[cat] almacena % (0–100), se convierte a monto según sueldoEfectivo
@@ -5672,7 +5676,7 @@ function renderPresupuesto() {
   kpiDisp.className = "kpi-value " + (disponible >= 0 ? "balance-pos" : "expense");
   animateKPI(kpiDisp, Math.abs(disponible), v => (disponible < 0 ? "-" : "") + fmt(v));
 
-  const saldoReal = sueldoEfectivo - totalGasto;
+  const saldoReal = sueldoEfectivo - totalGasto + surplusTotal;
   const kpiSaldoReal = document.getElementById("pres-kpi-saldo-real");
   if (kpiSaldoReal) {
     kpiSaldoReal.className = "kpi-value " + (saldoReal >= 0 ? "balance-pos" : "expense");
@@ -5893,6 +5897,7 @@ function actualizarKpisPres() {
   const sueldoEfectivo = sueldo + usdEnARSKpi;
 
   const gastoPorCat = {};
+  let surplusTotal = 0;
   categGasto.forEach(cat => {
     const gastosMio = dataMesDaniel
       .filter(t => t.tipo === "Gasto" && t.categoria === cat
@@ -5924,8 +5929,11 @@ function actualizarKpisPres() {
                && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    gastoPorCat[cat] = (gastosMio - ingresosMio) + (gastosComp - ingresosComp) * 0.5
-                     + Math.max(0, deJGastoP - deJIngresoP);
+    const netMio  = gastosMio - ingresosMio;
+    const netComp = gastosComp - ingresosComp;
+    const netDeJ  = deJGastoP - deJIngresoP;
+    surplusTotal += Math.max(0, -netMio) + Math.max(0, -netComp) * 0.5 + Math.max(0, -netDeJ);
+    gastoPorCat[cat] = Math.max(0, netMio) + Math.max(0, netComp) * 0.5 + Math.max(0, netDeJ);
   });
 
   // Los inputs almacenan porcentajes (0–100); se convierte a monto con el sueldo
@@ -5952,7 +5960,7 @@ function actualizarKpisPres() {
   kpiDisp.textContent = fmt(disponible);
   kpiDisp.className = "kpi-value " + (disponible >= 0 ? "balance-pos" : "expense");
 
-  const saldoReal = sueldoEfectivo - totalGasto;
+  const saldoReal = sueldoEfectivo - totalGasto + surplusTotal;
   const kpiSaldoReal = document.getElementById("pres-kpi-saldo-real");
   if (kpiSaldoReal) {
     kpiSaldoReal.textContent = fmt(saldoReal);
