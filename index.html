@@ -5598,7 +5598,7 @@ function renderPresupuesto() {
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
 
-    const netComp = Math.max(0, gastosComp - ingresosComp);
+    const netComp = gastosComp - ingresosComp;
     gastoPorCat[cat] = (gastosMio - ingresosMio) + netComp * 0.5 + Math.max(0, deJGasto - deJIngreso);
   });
 
@@ -5924,7 +5924,7 @@ function actualizarKpisPres() {
                && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    gastoPorCat[cat] = (gastosMio - ingresosMio) + Math.max(0, gastosComp - ingresosComp) * 0.5
+    gastoPorCat[cat] = (gastosMio - ingresosMio) + (gastosComp - ingresosComp) * 0.5
                      + Math.max(0, deJGastoP - deJIngresoP);
   });
 
