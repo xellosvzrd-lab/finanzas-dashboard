@@ -5599,7 +5599,7 @@ function renderPresupuesto() {
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
 
     const netComp = Math.max(0, gastosComp - ingresosComp);
-    gastoPorCat[cat] = Math.max(0, gastosMio - ingresosMio) + netComp * 0.5 + Math.max(0, deJGasto - deJIngreso);
+    gastoPorCat[cat] = (gastosMio - ingresosMio) + netComp * 0.5 + Math.max(0, deJGasto - deJIngreso);
   });
 
   // Totales KPI — presupuestoActual[cat] almacena % (0–100), se convierte a monto según sueldoEfectivo
@@ -5924,7 +5924,7 @@ function actualizarKpisPres() {
                && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    gastoPorCat[cat] = Math.max(0, gastosMio - ingresosMio) + Math.max(0, gastosComp - ingresosComp) * 0.5
+    gastoPorCat[cat] = (gastosMio - ingresosMio) + Math.max(0, gastosComp - ingresosComp) * 0.5
                      + Math.max(0, deJGastoP - deJIngresoP);
   });
 
