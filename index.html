@@ -513,11 +513,14 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 1.4rem 1.8rem;
+    padding: 1.2rem 1.6rem;
     margin-bottom: 1.25rem;
     box-shadow: var(--shadow), 0 0 40px rgba(240,111,160,0.1);
-    display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+    display: flex; flex-direction: column; gap: 1rem;
   }
+  .comp-balance-row { display: flex; align-items: center; gap: 1.5rem; }
+  .comp-balance-info { flex: 1; min-width: 0; }
+  .comp-balance-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: .4rem; }
   .comp-balance-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
   .comp-balance-value { font-size: 2.6rem; font-weight: 800; letter-spacing: -.045em; line-height: 1; }
   .comp-balance-value.positivo { color: var(--green); }
@@ -531,26 +534,26 @@
   .comp-balance-value.a-mano { animation: balancePop .4s var(--ease-out) both; }
   .comp-balance-sub  { font-size: .83rem; color: var(--text-muted); margin-top: .2rem; }
   .comp-saldar-btn {
-    margin-top: .85rem; padding: .5rem 1.2rem;
+    padding: .45rem 1.1rem;
     background: var(--accent); color: var(--white); border: none;
-    border-radius: 8px; font-size: .85rem; font-weight: 700;
+    border-radius: 8px; font-size: .83rem; font-weight: 700;
     cursor: pointer; font-family: inherit;
-    transition: opacity .15s;
+    transition: opacity .15s; white-space: nowrap;
   }
   .comp-saldar-btn:hover { opacity: .88; }
   .comp-saldado-badge {
     display: inline-flex; align-items: center; gap: .35rem;
-    margin-top: .85rem; padding: .38rem .9rem;
+    padding: .35rem .85rem;
     background: rgba(52,211,153,.15); color: var(--green);
     border: 1.5px solid rgba(52,211,153,.35);
-    border-radius: 99px; font-size: .82rem; font-weight: 700;
+    border-radius: 99px; font-size: .8rem; font-weight: 700; white-space: nowrap;
   }
   .comp-undo-btn {
-    margin-top: .5rem; padding: .35rem .9rem;
+    padding: .3rem .8rem;
     background: transparent; color: var(--text-muted);
     border: 1px solid var(--border); border-radius: 8px;
-    font-size: .78rem; font-weight: 600; cursor: pointer;
-    font-family: inherit; transition: color .15s, border-color .15s;
+    font-size: .75rem; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: color .15s, border-color .15s; white-space: nowrap;
   }
   .comp-undo-btn:hover { color: var(--red); border-color: var(--red); }
 
@@ -1290,7 +1293,9 @@
     .tabla-subtotal { gap: .6rem; padding: .45rem .75rem; font-size: .8rem; }
 
     /* Balance de compartidos en columna */
-    .comp-balance-card { flex-direction: column; gap: .6rem; padding: 1.1rem 1.2rem; }
+    .comp-balance-card { padding: 1rem 1.2rem; }
+    .comp-balance-row { flex-direction: column; align-items: flex-start; gap: .6rem; }
+    .comp-balance-actions { align-items: flex-start; }
     .comp-balance-value { font-size: 2rem; letter-spacing: -.04em; }
 
     /* Presupuesto: ocultar barra de progreso visual en móvil */
@@ -2071,12 +2076,18 @@
 
         <!-- Balance final destacado -->
         <div id="comp-balance-card" class="comp-balance-card">
-          <div class="comp-balance-label">Balance del mes</div>
-          <div class="comp-balance-value" id="comp-balance-valor">$0</div>
-          <div class="comp-balance-sub" id="comp-balance-sub">—</div>
-          <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
-          <div class="comp-saldado-badge" id="comp-saldado-badge" style="display:none">✓ Mes saldado</div>
-          <button class="comp-undo-btn" id="comp-undo-btn" onclick="deshacerLiquidacion()" style="display:none">↩ Deshacer liquidación</button>
+          <div class="comp-balance-row">
+            <div class="comp-balance-info">
+              <div class="comp-balance-label">Balance del mes</div>
+              <div class="comp-balance-value" id="comp-balance-valor">$0</div>
+              <div class="comp-balance-sub" id="comp-balance-sub">—</div>
+            </div>
+            <div class="comp-balance-actions">
+              <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
+              <div class="comp-saldado-badge" id="comp-saldado-badge" style="display:none">✓ Mes saldado</div>
+              <button class="comp-undo-btn" id="comp-undo-btn" onclick="deshacerLiquidacion()" style="display:none">↩ Deshacer liquidación</button>
+            </div>
+          </div>
           <div class="comp-fairness" id="comp-fairness" style="display:none">
             <div class="comp-fairness-label">Contribución compartidos (ARS)</div>
             <div class="comp-fairness-bar-wrap">
