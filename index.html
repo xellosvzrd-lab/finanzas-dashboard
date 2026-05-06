@@ -354,8 +354,9 @@
   .heatmap-day {
     height: 26px; border-radius: 3px;
     display: flex; align-items: center; justify-content: center;
-    font-size: .55rem; color: rgba(255,252,249,.7); font-weight: 600;
+    font-size: .55rem; font-weight: 600;
     background: rgba(200,132,90,var(--heat,0));
+    color: var(--heat-text, var(--text-muted));
     border: 1px solid transparent; cursor: default;
     transition: border-color .12s, transform .1s;
   }
@@ -5583,7 +5584,10 @@ function renderHeatmapMes() {
     const a11y = g > 0
       ? ` role="button" tabindex="0" aria-label="${label}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irATransaccionesDia(${filAnio},${filMes},${d})}"`
       : ` aria-label="${label}" aria-disabled="true"`;
-    html += `<div class="${cls}" style="--heat:${heat}"${onclick}${a11y}>${d}</div>`;
+    const heatNum = parseFloat(heat);
+    const heatText = heatNum > 0.45 ? 'rgba(255,252,249,.92)' : 'rgba(50,32,20,.75)';
+    const heatStyle = heat > 0 ? `--heat:${heat};--heat-text:${heatText}` : `--heat:0`;
+    html += `<div class="${cls}" style="${heatStyle}"${onclick}${a11y}>${d}</div>`;
   }
   html += `</div>`;
   el.innerHTML = html;
