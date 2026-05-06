@@ -3856,6 +3856,20 @@ document.addEventListener("click", e => {
 });
 
 // ─── TABLA TRANSACCIONES ─────────────────────────────────────
+function _resetFiltros() {
+  const tipo   = document.getElementById("fil-tipo");
+  const fuente = document.getElementById("fil-fuente");
+  const resp   = document.getElementById("fil-resp");
+  const buscar = document.getElementById("fil-buscar");
+  if (tipo)   tipo.value   = "";
+  if (fuente) fuente.value = "";
+  if (resp)   resp.value   = "";
+  if (buscar) buscar.value = "";
+  // Reset multi-select categories to "Todas"
+  const allBox = document.getElementById("fil-cat-all");
+  if (allBox) { allBox.checked = true; toggleTodasCats(allBox); }
+}
+
 function filtrarTabla() {
   const gen = ++_filtroGen;
   inicializarCatOptions();
@@ -4271,6 +4285,8 @@ async function guardarTransaccion() {
     if (selCat)  selCat.selectedIndex  = 0;
     if (selFte)  { selFte.selectedIndex = 0; _actualizarMesLiqField(""); }
     resetRespField();
+    setTipo("Gasto");
+    setMoneda("ARS");
     showToast("✅ Guardado", "ok");
     if (navigator.vibrate) navigator.vibrate(50);
     msg.innerHTML = '<span style="color:var(--green)">✅ Guardado correctamente.</span>';
@@ -5206,6 +5222,9 @@ function navegarA(pagina) {
     resumen: "bn-resumen"
   };
   if (bnMap[pagina]) document.getElementById(bnMap[pagina])?.classList.add("active");
+
+  // Resetear filtros al volver a Transacciones
+  if (pagina === "transacciones") _resetFiltros();
 
   // Cargar datos de la página destino
   if (pagina === "compartidos")  cargarCompartidos();
