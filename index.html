@@ -5535,7 +5535,9 @@ function renderPresupuesto() {
     return month === mes && year === anio;
   });
   // Solo las transacciones de Daniel (para "Mío" y KPI sueldo)
-  const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO);
+  // Excluir Liquidaciones — son transferencias de balance compartido, no gastos/ingresos reales
+  const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO && t.descripcion !== "Liquidación");
+  const dataMesSinLiq = dataMes.filter(t => t.descripcion !== "Liquidación");
 
   // Sueldo KPI = ingresos reales del usuario (ARS)
   const sueldo = dataMesDaniel
@@ -5574,26 +5576,26 @@ function renderPresupuesto() {
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
 
     // Gastos "Compartido" de ambos usuarios → base compartida
-    const gastosComp = dataMes
+    const gastosComp = dataMesSinLiq
       .filter(t => t.tipo === "Gasto" && t.categoria === cat
                && t.responsabilidad === "Compartido"
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
 
     // Ingresos "Compartido" de ambos usuarios → reducen la base compartida
-    const ingresosComp = dataMes
+    const ingresosComp = dataMesSinLiq
       .filter(t => t.tipo === "Ingreso" && t.categoria === cat
                && t.responsabilidad === "Compartido"
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
 
     // Gastos "De [usuario]" del partner → 100% del usuario (partner pagó por él)
-    const deJGasto = dataMes
+    const deJGasto = dataMesSinLiq
       .filter(t => t.tipo === "Gasto" && t.categoria === cat
                && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    const deJIngreso = dataMes
+    const deJIngreso = dataMesSinLiq
       .filter(t => t.tipo === "Ingreso" && t.categoria === cat
                && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
@@ -5881,7 +5883,8 @@ function actualizarKpisPres() {
     const { year, month } = getMesLiquidacion(t);
     return month === mes && year === anio;
   });
-  const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO);
+  const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO && t.descripcion !== "Liquidación");
+  const dataMesSinLiq = dataMes.filter(t => t.descripcion !== "Liquidación");
 
   const sueldo = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)
@@ -5909,22 +5912,22 @@ function actualizarKpisPres() {
                && (t.responsabilidad || "Mío") === "Mío"
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    const gastosComp = dataMes
+    const gastosComp = dataMesSinLiq
       .filter(t => t.tipo === "Gasto" && t.categoria === cat
                && t.responsabilidad === "Compartido"
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    const ingresosComp = dataMes
+    const ingresosComp = dataMesSinLiq
       .filter(t => t.tipo === "Ingreso" && t.categoria === cat
                && t.responsabilidad === "Compartido"
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    const deJGastoP = dataMes
+    const deJGastoP = dataMesSinLiq
       .filter(t => t.tipo === "Gasto" && t.categoria === cat
                && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    const deJIngresoP = dataMes
+    const deJIngresoP = dataMesSinLiq
       .filter(t => t.tipo === "Ingreso" && t.categoria === cat
                && t.responsabilidad === "De " + USUARIO
                && !esTransferencia(t) && (t.moneda || "ARS") === "ARS")
