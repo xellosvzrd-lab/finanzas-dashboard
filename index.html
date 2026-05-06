@@ -538,6 +538,21 @@
     transition: opacity .15s;
   }
   .comp-saldar-btn:hover { opacity: .88; }
+  .comp-saldado-badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    margin-top: .85rem; padding: .38rem .9rem;
+    background: rgba(52,211,153,.15); color: var(--green);
+    border: 1.5px solid rgba(52,211,153,.35);
+    border-radius: 99px; font-size: .82rem; font-weight: 700;
+  }
+  .comp-undo-btn {
+    margin-top: .5rem; padding: .35rem .9rem;
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: .78rem; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: color .15s, border-color .15s;
+  }
+  .comp-undo-btn:hover { color: var(--red); border-color: var(--red); }
 
   /* ─── TENDENCIA CHIPS ───────────────────────────────────────── */
   .tendencias-wrap { margin-bottom: 1.1rem; }
@@ -2060,6 +2075,8 @@
           <div class="comp-balance-value" id="comp-balance-valor">$0</div>
           <div class="comp-balance-sub" id="comp-balance-sub">—</div>
           <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
+          <div class="comp-saldado-badge" id="comp-saldado-badge" style="display:none">✓ Mes saldado</div>
+          <button class="comp-undo-btn" id="comp-undo-btn" onclick="deshacerLiquidacion()" style="display:none">↩ Deshacer liquidación</button>
           <div class="comp-fairness" id="comp-fairness" style="display:none">
             <div class="comp-fairness-label">Contribución compartidos (ARS)</div>
             <div class="comp-fairness-bar-wrap">
@@ -4790,8 +4807,21 @@ function cargarCompartidos() {
     const net = (reembA_USD[cat] || 0) - (reembB_USD[cat] || 0);
     if (Math.abs(net) > 0.01) _settlementItems.push({ cat, monto: Math.abs(net), tipo: net > 0 ? "Ingreso" : "Gasto", moneda: "USD" });
   });
-  const saldarBtn = document.getElementById("comp-saldar-btn");
-  if (saldarBtn) saldarBtn.style.display = _settlementItems.length > 0 ? "" : "none";
+  // Detect if month was already settled
+  const mesComp  = parseInt(document.getElementById("comp-mes").value);
+  const anioComp = parseInt(document.getElementById("comp-anio").value);
+  const yaLiquidado = allTransac.some(t =>
+    t.descripcion === "Liquidación" &&
+    (t.usuario || "Daniel") === USUARIO &&
+    (() => { const { year, month } = getMesLiquidacion(t); return month === mesComp && year === anioComp; })()
+  );
+
+  const saldarBtn  = document.getElementById("comp-saldar-btn");
+  const badgeEl    = document.getElementById("comp-saldado-badge");
+  const undoBtn    = document.getElementById("comp-undo-btn");
+  if (saldarBtn) saldarBtn.style.display = (!yaLiquidado && _settlementItems.length > 0) ? "" : "none";
+  if (badgeEl)   badgeEl.style.display   = yaLiquidado ? "" : "none";
+  if (undoBtn)   undoBtn.style.display   = yaLiquidado ? "" : "none";
 
   inicializarDisclosureCompartidos();
 }
@@ -4881,6 +4911,30 @@ async function confirmarSaldarTodo() {
   } else {
     showToast(`⚠️ ${ok} OK · ${fail} error(es)`, "error");
   }
+  cargarCompartidos();
+}
+
+async function deshacerLiquidacion() {
+  const mes  = parseInt(document.getElementById("comp-mes").value);
+  const anio = parseInt(document.getElementById("comp-anio").value);
+  const txsLiq = allTransac.filter(t =>
+    t.descripcion === "Liquidación" &&
+    (t.usuario || "Daniel") === USUARIO &&
+    (() => { const { year, month } = getMesLiquidacion(t); return month === mes && year === anio; })()
+  );
+  if (!txsLiq.length) return;
+  let ok = 0, fail = 0;
+  for (const t of txsLiq) {
+    try {
+      const { error } = await supabaseClient.from("transacciones").delete().eq("id", t.id);
+      if (error) throw error;
+      const idx = allTransac.findIndex(x => x.id === t.id);
+      if (idx !== -1) allTransac.splice(idx, 1);
+      ok++;
+    } catch(e) { fail++; }
+  }
+  if (fail === 0) showToast(`↩ ${ok} liquidación(es) eliminada(s)`, "ok");
+  else showToast(`⚠️ ${ok} OK · ${fail} error(es)`, "error");
   cargarCompartidos();
 }
 
