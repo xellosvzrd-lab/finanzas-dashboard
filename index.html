@@ -252,9 +252,34 @@
     justify-content: space-between;
     margin-bottom: 2.4rem;
     padding-bottom: 1.2rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
+    position: relative;
   }
-  .page-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -.045em; line-height: 1.05; }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(to right, var(--accent), transparent);
+    opacity: 0.35;
+  }
+  .page-header-left { display: flex; flex-direction: column; }
+  .page-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.75;
+    margin-bottom: 0.2rem;
+    font-family: 'Libre Franklin', system-ui, sans-serif;
+    font-weight: 600;
+  }
+  .page-header h1 {
+    font-size: 2rem; font-weight: 800; letter-spacing: -.045em; line-height: 1.05;
+    background: linear-gradient(135deg, var(--text) 20%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
   .mes-selector {
     display: flex; align-items: center; gap: .5rem;
   }
@@ -1921,7 +1946,10 @@
       <!-- ── PÁGINA TRANSACCIONES ──────────────────────── -->
       <div id="page-transacciones" class="page">
         <div class="page-header">
-          <h1>Historial de transacciones</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-transacciones">TRANSACCIONES</p>
+            <h1>Historial de transacciones</h1>
+          </div>
           <div style="display:flex;gap:.5rem;align-items:center">
             <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">CSV</button>
             <button class="btn btn-ghost" onclick="navegarA('importar')" title="Importar desde archivo o PDF">Importar</button>
@@ -2078,7 +2106,10 @@
       <!-- ── PÁGINA COMPARTIDOS ────────────────────────── -->
       <div id="page-compartidos" class="page">
         <div class="page-header">
-          <h1 id="comp-titulo">Compartidos con Ama</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-compartidos">COMPARTIDOS</p>
+            <h1 id="comp-titulo">Compartidos con Ama</h1>
+          </div>
         </div>
 
         <!-- Selector de mes -->
@@ -2200,7 +2231,10 @@
       <!-- ── PÁGINA PRESUPUESTO ────────────────────────────── -->
       <div id="page-presupuesto" class="page">
         <div class="page-header">
-          <h1>Mi mes</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-presupuesto">MI MES</p>
+            <h1>Mi mes</h1>
+          </div>
           <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
             <div class="mes-selector">
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
@@ -2358,7 +2392,10 @@
       <!-- ── PÁGINA CATEGORÍAS Y FUENTES ──────────────────── -->
       <div id="page-config" class="page">
         <div class="page-header">
-          <h1>Categorías y Fuentes</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-config">CATEGORÍAS</p>
+            <h1>Categorías y Fuentes</h1>
+          </div>
           <div style="font-size:.85rem;color:var(--text-muted)">Tus categorías y fuentes de pago</div>
         </div>
 
@@ -2415,7 +2452,10 @@
       <!-- ── PÁGINA INVERSIONES ────────────────────────────── -->
       <div id="page-inversiones" class="page">
         <div class="page-header">
-          <h1>Inversiones</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-inversiones">INVERSIONES</p>
+            <h1>Inversiones</h1>
+          </div>
         </div>
 
         <!-- Totalizador por categoría -->
@@ -3112,6 +3152,13 @@ function _actualizarStringsUsuario() {
   if (drawerName) drawerName.textContent = USUARIO;
   const topnavUser = document.getElementById("topnav-user");
   if (topnavUser) topnavUser.textContent = USUARIO;
+  const _eyebrowMeses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const _eyebrowNow = new Date();
+  const _eyebrowBase = `${_eyebrowMeses[_eyebrowNow.getMonth()]} ${_eyebrowNow.getFullYear()} · ${USUARIO.toUpperCase()}`;
+  ['presupuesto','transacciones','compartidos','config','inversiones'].forEach(id => {
+    const _eyebrowEl = document.getElementById(`eyebrow-${id}`);
+    if (_eyebrowEl) _eyebrowEl.textContent = _eyebrowBase;
+  });
 }
 
 async function guardarNombre() {
