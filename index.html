@@ -1616,6 +1616,11 @@
   .topnav .nav-item.active {
     color: var(--accent);
   }
+  @media (hover: hover) {
+    .nav-item i, .bn-item i { transition: transform 0.15s var(--ease-out), color 0.15s; }
+    .nav-item:hover i, .nav-item:hover svg { transform: scale(1.12); color: var(--accent); }
+    .nav-item.active i, .nav-item.active svg { color: var(--accent); }
+  }
   .topnav-logout {
     background: none;
     border: none;
@@ -1841,12 +1846,12 @@
     💰 <span id="topnav-user"></span>
   </div>
   <div class="topnav-tabs">
-    <button class="nav-item" onclick="navegarA('presupuesto')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mi mes</button>
-    <button class="nav-item" onclick="navegarA('transacciones')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transacciones</button>
-    <button class="nav-item" onclick="navegarA('compartidos')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Compartidos</button>
-    <button class="nav-item" onclick="navegarA('config')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorías</button>
-    <button class="nav-item" onclick="navegarA('inversiones')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Inversiones</button>
-    <button class="nav-item" onclick="navegarA('resumen')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Resumen</button>
+    <button class="nav-item" onclick="navegarA('presupuesto')"><i data-lucide="calendar-days" width="14" height="14"></i>Mi mes</button>
+    <button class="nav-item" onclick="navegarA('transacciones')"><i data-lucide="receipt" width="14" height="14"></i>Transacciones</button>
+    <button class="nav-item" onclick="navegarA('compartidos')"><i data-lucide="users" width="14" height="14"></i>Compartidos</button>
+    <button class="nav-item" onclick="navegarA('config')"><i data-lucide="tag" width="14" height="14"></i>Categorías</button>
+    <button class="nav-item" onclick="navegarA('inversiones')"><i data-lucide="trending-up" width="14" height="14"></i>Inversiones</button>
+    <button class="nav-item" onclick="navegarA('resumen')"><i data-lucide="bar-chart-2" width="14" height="14"></i>Resumen</button>
     <span class="topnav-indicator" id="topnav-indicator"></span>
   </div>
   <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
@@ -1857,22 +1862,22 @@
 <!-- Bottom nav mobile -->
 <nav class="bottom-nav" id="bottom-nav">
   <button class="bn-item" id="bn-presupuesto" onclick="navegarA('presupuesto')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span><span>Mi mes</span>
+    <span class="bn-icon"><i data-lucide="calendar-days" width="20" height="20"></i></span><span>Mi mes</span>
   </button>
   <button class="bn-item" id="bn-transacciones" onclick="navegarA('transacciones')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></span><span>Gastos</span>
+    <span class="bn-icon"><i data-lucide="receipt" width="20" height="20"></i></span><span>Gastos</span>
   </button>
   <button class="bn-item" id="bn-compartidos" onclick="navegarA('compartidos')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span>Compartidos</span>
+    <span class="bn-icon"><i data-lucide="users" width="20" height="20"></i></span><span>Compartidos</span>
   </button>
   <button class="bn-item" id="bn-config" onclick="navegarA('config')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span>Categorías</span>
+    <span class="bn-icon"><i data-lucide="tag" width="20" height="20"></i></span><span>Categorías</span>
   </button>
   <button class="bn-item" id="bn-inversiones" onclick="navegarA('inversiones')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></span><span>Inversiones</span>
+    <span class="bn-icon"><i data-lucide="trending-up" width="20" height="20"></i></span><span>Inversiones</span>
   </button>
   <button class="bn-item" id="bn-resumen" onclick="navegarA('resumen')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>Resumen</span>
+    <span class="bn-icon"><i data-lucide="bar-chart-2" width="20" height="20"></i></span><span>Resumen</span>
   </button>
 </nav>
 
@@ -2932,6 +2937,7 @@ function guardarCacheCateg(data) {
 
 // ─── INICIALIZACIÓN ───────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
+  if (window.lucide) lucide.createIcons();
   document.getElementById("f-fecha").valueAsDate = new Date();
   poblarSelectoresFecha();
 
