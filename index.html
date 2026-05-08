@@ -341,16 +341,6 @@
   .kpi-card:nth-child(3) { animation-delay: .14s; }
   .kpi-card:nth-child(4) { animation-delay: .19s; }
   .kpi-card:nth-child(5) { animation-delay: .24s; }
-  .kpi-card::before {
-    content: ''; position: absolute;
-    top: 0; left: 0; right: 0; height: 3px;
-    background: var(--border2); transition: background .25s, box-shadow .25s;
-  }
-  .kpi-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--border2);
-    box-shadow: var(--shadow), 0 0 48px rgba(200,132,90,0.18);
-  }
   /* Acento de color superior según tipo de KPI */
   .kpi-card:has(.income)::before      { background: linear-gradient(90deg, var(--green), transparent 65%); box-shadow: 0 0 12px rgba(52,211,153,0.5); }
   .kpi-card:has(.expense)::before     { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
