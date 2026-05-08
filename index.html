@@ -365,18 +365,21 @@
   .kpi-card:hover::after { left: 160%; }
   /* Icon badge en KPI cards */
   .kpi-icon {
-    width: 28px; height: 28px; border-radius: 8px;
+    width: 36px; height: 36px;
+    border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: .35rem; flex-shrink: 0;
+    margin-bottom: .55rem;
+    flex-shrink: 0;
   }
-  .kpi-icon.ico-green  { background: var(--green-dim);  color: var(--green); }
-  .kpi-icon.ico-red    { background: var(--red-dim);    color: var(--red); }
-  .kpi-icon.ico-accent { background: var(--accent-dim); color: var(--accent); }
-  .kpi-icon.ico-yellow { background: var(--yellow-dim); color: var(--yellow); }
-  .kpi-icon.ico-muted  { background: var(--bg3);        color: var(--text-muted); }
-  @media (max-width: 768px) {
-    .kpi-icon { width: 26px; height: 26px; border-radius: 7px; margin-bottom: .35rem; }
-    .kpi-icon svg { width: 13px; height: 13px; }
+  .kpi-icon svg, .kpi-icon i { width: 17px; height: 17px; display: block; }
+  .kpi-icon.ico-green  { background: rgba(var(--green-rgb), 0.13);      color: var(--green); }
+  .kpi-icon.ico-red    { background: rgba(var(--red-rgb), 0.13);         color: var(--red); }
+  .kpi-icon.ico-accent { background: rgba(var(--accent-rgb), 0.13);      color: var(--accent); }
+  .kpi-icon.ico-yellow { background: rgba(var(--yellow-rgb), 0.13);      color: var(--yellow); }
+  .kpi-icon.ico-muted  { background: rgba(var(--text-muted-rgb), 0.10);  color: var(--text-muted); }
+  @media (max-width: 480px) {
+    .kpi-icon { width: 28px; height: 28px; border-radius: 8px; margin-bottom: .35rem; }
+    .kpi-icon svg, .kpi-icon i { width: 14px; height: 14px; }
   }
 
   .kpi-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; font-weight: 600; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -1897,7 +1900,7 @@
         <!-- KPIs -->
         <div class="kpi-grid">
           <div class="kpi-card">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="trending-up" width="17" height="17"></i></div>
             <div class="kpi-label">Ingresos</div>
             <div class="kpi-value income" id="kpi-ingresos">$0</div>
             <div class="kpi-sub" id="kpi-ingresos-sub">—</div>
@@ -1905,7 +1908,7 @@
             <div class="kpi-spark" id="spark-ingresos"></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
+            <div class="kpi-icon ico-red"><i data-lucide="trending-down" width="17" height="17"></i></div>
             <div class="kpi-label">Gastos</div>
             <div class="kpi-value expense" id="kpi-gastos">$0</div>
             <div class="kpi-sub" id="kpi-gastos-sub">—</div>
@@ -1913,7 +1916,7 @@
             <div class="kpi-spark" id="spark-gastos"></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="kpi-icon ico-accent"><i data-lucide="scale" width="17" height="17"></i></div>
             <div class="kpi-label">Balance</div>
             <div class="kpi-value balance-pos" id="kpi-balance">$0</div>
             <div class="kpi-sub" id="kpi-balance-sub">—</div>
@@ -1921,7 +1924,7 @@
             <div class="kpi-spark" id="spark-balance"></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-yellow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></div>
+            <div class="kpi-icon ico-yellow"><i data-lucide="target" width="17" height="17"></i></div>
             <div class="kpi-label">Ahorro</div>
             <div class="kpi-value" id="kpi-ahorro" style="color:var(--yellow)">0%</div>
             <div class="kpi-sub">del ingreso mensual</div>
@@ -2266,58 +2269,58 @@
         <!-- KPI strip -->
         <div class="kpi-grid kpi-grid-4" id="pres-kpi-grid">
           <div class="kpi-card kpi-hero">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="wallet" width="17" height="17"></i></div>
             <div class="kpi-label">Lo que te queda</div>
             <div class="kpi-value" id="pres-kpi-saldo-real">$0</div>
             <div class="kpi-hero-bar-wrap"><div class="kpi-hero-bar-fill" id="pres-hero-bar"></div></div>
             <div class="kpi-sub" id="pres-kpi-saldo-real-sub">Sueldo − Gastado real</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="banknote" width="17" height="17"></i></div>
             <div class="kpi-label">Sueldo</div>
             <div class="kpi-value income" id="pres-kpi-sueldo">$0</div>
             <div class="kpi-sub" id="pres-kpi-sueldo-sub">ingresos del mes</div>
             <div class="kpi-sparkline-wrap"><canvas id="spark-sueldo"></canvas></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div>
+            <div class="kpi-icon ico-accent"><i data-lucide="pie-chart" width="17" height="17"></i></div>
             <div class="kpi-label">Presupuestado</div>
             <div class="kpi-value" id="pres-kpi-total" style="color:var(--accent)">$0</div>
             <div class="kpi-sub" id="pres-kpi-total-sub">de tu sueldo asignado</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+            <div class="kpi-icon ico-red"><i data-lucide="shopping-bag" width="17" height="17"></i></div>
             <div class="kpi-label">Gastado</div>
             <div class="kpi-value expense" id="pres-kpi-gastado">$0</div>
             <div class="kpi-sub" id="pres-kpi-gastado-sub">50% compartidos</div>
             <div class="kpi-sparkline-wrap"><canvas id="spark-gastado"></canvas></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
+            <div class="kpi-icon ico-muted"><i data-lucide="sliders-horizontal" width="17" height="17"></i></div>
             <div class="kpi-label">Margen planeado</div>
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
             <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Presupuestado</div>
           </div>
           <div class="kpi-card" id="pres-kpi-mep-card" style="display:none">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="dollar-sign" width="17" height="17"></i></div>
             <div class="kpi-label">Saldo en USD</div>
             <div class="kpi-value" id="pres-kpi-mep-val">U$S 0</div>
             <div class="kpi-sub" id="pres-kpi-mep-sub">Lo que te queda ÷ MEP</div>
           </div>
           <div class="kpi-card" id="kpi-ahorro-cat-card">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="piggy-bank" width="17" height="17"></i></div>
             <div class="kpi-label">Ahorro (categoría)</div>
             <div class="kpi-value" id="kpi-ahorro-cat" style="color:var(--green)">$0</div>
             <div class="kpi-sub" id="kpi-ahorro-cat-sub">total acumulado: —</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="kpi-icon ico-accent"><i data-lucide="calendar-days" width="17" height="17"></i></div>
             <div class="kpi-label">Podés gastar por día</div>
             <div class="kpi-value" id="pres-kpi-diario">—</div>
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
           <div class="kpi-card" id="pres-kpi-compartido-card" style="display:none">
-            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="kpi-icon ico-accent"><i data-lucide="users" width="17" height="17"></i></div>
             <div class="kpi-label" id="pres-kpi-compartido-label">Compartidos</div>
             <div class="kpi-value" id="pres-kpi-compartido-val">$0</div>
             <div class="kpi-sub" id="pres-kpi-compartido-sub">—</div>
@@ -3113,6 +3116,7 @@ function _renderApp() {
   inicializarSelectoresPresupuesto();
   inicializarRespButtons();
   navegarA("presupuesto");
+  if (window.lucide) lucide.createIcons();
 }
 
 // ─── FETCH CON TIMEOUT ────────────────────────────────────────
@@ -5395,6 +5399,7 @@ async function cargarPresupuesto() {
   } catch(e) { console.warn("Error cargando presupuesto:", e); }
   renderPresupuesto();
   inicializarDisclosureMimes();
+  if (window.lucide) lucide.createIcons();
 }
 
 async function guardarPresupuesto() {
