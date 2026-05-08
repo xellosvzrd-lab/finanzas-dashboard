@@ -136,6 +136,10 @@
     text-rendering: optimizeLegibility;
   }
 
+  .kpi-value, #sub-neto, .comp-balance-value, .donut-center-val {
+    font-variant-numeric: tabular-nums;
+  }
+
   /* ─── PANTALLA DE CONFIGURACIÓN ────────────────────────── */
   #setup-screen {
     display: flex;
@@ -590,6 +594,11 @@
     100% { transform: scale(1); }
   }
   .comp-balance-value.a-mano { animation: balancePop .4s var(--ease-out) both; }
+  @keyframes badgeEntrada {
+    from { transform: scale(0.75); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .saldado-badge { animation: badgeEntrada 0.3s var(--ease-out); }
   .comp-balance-sub  { font-size: .83rem; color: var(--text-muted); margin-top: .2rem; }
   .comp-saldar-btn {
     padding: .45rem 1.1rem;
