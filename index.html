@@ -69,6 +69,15 @@
     /* Easing curves */
     --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+    /* RGB splits for rgba() usage */
+    --card-rgb:        255, 252, 249;
+    --accent-rgb:      200, 132, 90;
+    --green-rgb:       90, 140, 107;
+    --red-rgb:         200, 90, 90;
+    --yellow-rgb:      200, 164, 90;
+    --text-rgb:        45, 41, 38;
+    --text-muted-rgb:  140, 123, 114;
   }
 
   /* ─── TEMA CLARO (Ama) ──────────────────────────────────── */
@@ -86,6 +95,13 @@
     --glass-border: rgba(45,41,38,0.08);
     --white:  #FFFFFF;
     --overlay: rgba(45,41,38,0.45);
+    --card-rgb:       255, 255, 255;
+    --text-rgb:       28, 20, 16;
+    --text-muted-rgb:  122, 104, 96;
+    --green-rgb:       90, 140, 107;
+    --red-rgb:         200, 90, 90;
+    --yellow-rgb:      200, 164, 90;
+    --accent-rgb:     200, 132, 90;
   }
 
   /* ─── FOCUS VISIBLE ─────────────────────────────────────── */
@@ -122,6 +138,10 @@
   .donut-center-val, .donut-center-sub {
     font-family: 'Bricolage Grotesque', system-ui, sans-serif;
     text-rendering: optimizeLegibility;
+  }
+
+  .kpi-value, #sub-neto, .comp-balance-value, .donut-center-val {
+    font-variant-numeric: tabular-nums;
   }
 
   /* ─── PANTALLA DE CONFIGURACIÓN ────────────────────────── */
@@ -241,9 +261,34 @@
     justify-content: space-between;
     margin-bottom: 2.4rem;
     padding-bottom: 1.2rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
+    position: relative;
   }
-  .page-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -.045em; line-height: 1.05; }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(to right, var(--accent), transparent);
+    opacity: 0.35;
+  }
+  .page-header-left { display: flex; flex-direction: column; }
+  .page-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.75;
+    margin-bottom: 0.2rem;
+    font-family: 'Libre Franklin', system-ui, sans-serif;
+    font-weight: 600;
+  }
+  .page-header h1 {
+    font-size: 2rem; font-weight: 800; letter-spacing: -.045em; line-height: 1.05;
+    background: linear-gradient(135deg, var(--text) 20%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
   .mes-selector {
     display: flex; align-items: center; gap: .5rem;
   }
@@ -255,6 +300,17 @@
   }
   .mes-selector select:focus { outline: none; border-color: var(--accent); }
 
+  /* Sub-section header bars */
+  .chart-title,
+  .comp-title,
+  .pres-title,
+  .section-title {
+    border-left: 3px solid var(--accent);
+    padding-left: 0.75rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
   /* ─── KPI CARDS ─────────────────────────────────────────── */
   .kpi-grid {
     display: grid;
@@ -262,48 +318,54 @@
     gap: 1rem; margin-bottom: 2.2rem;
   }
   .kpi-card {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: rgba(var(--card-rgb), 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--accent-rgb), 0.14);
     border-radius: var(--radius); padding: .8rem .95rem;
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 24px rgba(var(--text-rgb), 0.07), inset 0 1px 0 rgba(255,255,255,0.55);
     min-width: 0;
     container-type: inline-size;
     position: relative; overflow: hidden;
-    transition: border-color .25s var(--ease-out), transform .2s var(--ease-out), box-shadow .25s var(--ease-out);
+    transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
     animation: fadeUp .45s var(--ease-out) both;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(to right, var(--accent), transparent);
+    opacity: 0.45;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  @media (hover: hover) {
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(var(--text-rgb), 0.12), inset 0 1px 0 rgba(255,255,255,0.65);
+    }
   }
   .kpi-card:nth-child(1) { animation-delay: .04s; }
   .kpi-card:nth-child(2) { animation-delay: .09s; }
   .kpi-card:nth-child(3) { animation-delay: .14s; }
   .kpi-card:nth-child(4) { animation-delay: .19s; }
   .kpi-card:nth-child(5) { animation-delay: .24s; }
-  .kpi-card::before {
-    content: ''; position: absolute;
-    top: 0; left: 0; right: 0; height: 3px;
-    background: var(--border2); transition: background .25s, box-shadow .25s;
-  }
-  .kpi-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--border2);
-    box-shadow: var(--shadow), 0 0 48px rgba(200,132,90,0.18);
-  }
   /* Acento de color superior según tipo de KPI */
-  .kpi-card:has(.income)::before      { background: linear-gradient(90deg, var(--green), transparent 65%); box-shadow: 0 0 12px rgba(52,211,153,0.5); }
-  .kpi-card:has(.expense)::before     { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
-  .kpi-card:has(.balance-pos)::before { background: linear-gradient(90deg, var(--accent), transparent 65%); box-shadow: 0 0 12px rgba(200,132,90,0.5); }
-  .kpi-card:has(.balance-neg)::before { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(248,113,113,0.5); }
+  .kpi-card:has(.income)::before      { background: linear-gradient(90deg, var(--green), transparent 65%); box-shadow: 0 0 12px rgba(var(--green-rgb),0.4); }
+  .kpi-card:has(.expense)::before     { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(var(--red-rgb),0.4); }
+  .kpi-card:has(.balance-pos)::before { background: linear-gradient(90deg, var(--accent), transparent 65%); box-shadow: 0 0 12px rgba(var(--accent-rgb),0.4); }
+  .kpi-card:has(.balance-neg)::before { background: linear-gradient(90deg, var(--red), transparent 65%);   box-shadow: 0 0 12px rgba(var(--red-rgb),0.4); }
   /* Tinte semántico de fondo por tipo */
-  .kpi-card:has(.income)      { background: linear-gradient(145deg, var(--card) 50%, rgba(90,140,107,0.06) 100%); }
-  .kpi-card:has(.expense)     { background: linear-gradient(145deg, var(--card) 50%, rgba(200,90,90,0.06) 100%); }
-  .kpi-card:has(.balance-pos) { background: linear-gradient(145deg, var(--card) 50%, rgba(200,132,90,0.06) 100%); }
-  .kpi-card:has(.balance-neg) { background: linear-gradient(145deg, var(--card) 50%, rgba(200,90,90,0.06) 100%); }
+  .kpi-card:has(.income)      { background: linear-gradient(145deg, var(--card) 50%, rgba(var(--green-rgb),0.06) 100%); }
+  .kpi-card:has(.expense)     { background: linear-gradient(145deg, var(--card) 50%, rgba(var(--red-rgb),0.06) 100%); }
+  .kpi-card:has(.balance-pos) { background: linear-gradient(145deg, var(--card) 50%, rgba(var(--accent-rgb),0.06) 100%); }
+  .kpi-card:has(.balance-neg) { background: linear-gradient(145deg, var(--card) 50%, rgba(var(--red-rgb),0.06) 100%); }
   /* Shine sweep on hover */
   .kpi-card::after {
     content: '';
     position: absolute;
     top: 0; left: -80%;
     width: 50%; height: 100%;
-    background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.08) 50%, transparent 80%);
+    background: linear-gradient(105deg, transparent 20%, rgba(var(--card-rgb),0.25) 50%, transparent 80%);
     transform: skewX(-20deg);
     transition: left .6s var(--ease-out);
     pointer-events: none;
@@ -311,18 +373,31 @@
   .kpi-card:hover::after { left: 160%; }
   /* Icon badge en KPI cards */
   .kpi-icon {
-    width: 28px; height: 28px; border-radius: 8px;
+    width: 36px; height: 36px;
+    border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: .35rem; flex-shrink: 0;
+    margin-bottom: .55rem;
+    flex-shrink: 0;
   }
-  .kpi-icon.ico-green  { background: var(--green-dim);  color: var(--green); }
-  .kpi-icon.ico-red    { background: var(--red-dim);    color: var(--red); }
-  .kpi-icon.ico-accent { background: var(--accent-dim); color: var(--accent); }
-  .kpi-icon.ico-yellow { background: var(--yellow-dim); color: var(--yellow); }
-  .kpi-icon.ico-muted  { background: var(--bg3);        color: var(--text-muted); }
-  @media (max-width: 768px) {
-    .kpi-icon { width: 26px; height: 26px; border-radius: 7px; margin-bottom: .35rem; }
-    .kpi-icon svg { width: 13px; height: 13px; }
+  .kpi-icon svg, .kpi-icon i { width: 17px; height: 17px; display: block; }
+  .kpi-icon.ico-green  { background: rgba(var(--green-rgb), 0.13);      color: var(--green); }
+  .kpi-icon.ico-red    { background: rgba(var(--red-rgb), 0.13);         color: var(--red); }
+  .kpi-icon.ico-accent { background: rgba(var(--accent-rgb), 0.13);      color: var(--accent); }
+  .kpi-icon.ico-yellow { background: rgba(var(--yellow-rgb), 0.13);      color: var(--yellow); }
+  .kpi-icon.ico-muted  { background: rgba(var(--text-muted-rgb), 0.10);  color: var(--text-muted); }
+  @media (max-width: 480px) {
+    .kpi-icon { width: 28px; height: 28px; border-radius: 8px; margin-bottom: .35rem; }
+    .kpi-icon svg, .kpi-icon i { width: 14px; height: 14px; }
+  }
+
+  /* ─── KPI CARDS — LIGHT THEME OVERRIDES ───────────────────── */
+  [data-theme="light"] .kpi-card {
+    box-shadow: 0 2px 16px rgba(var(--text-rgb), 0.08), inset 0 1px 0 rgba(var(--accent-rgb), 0.10);
+  }
+  @media (hover: hover) {
+    [data-theme="light"] .kpi-card:hover {
+      box-shadow: 0 6px 24px rgba(var(--text-rgb), 0.12), inset 0 1px 0 rgba(var(--accent-rgb), 0.16);
+    }
   }
 
   .kpi-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; font-weight: 600; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -405,7 +480,7 @@
   .chart-card.full { grid-column: 1 / -1; }
   .chart-title {
     font-size: .68rem; font-weight: 700; margin-bottom: 1.1rem;
-    color: var(--text-muted); text-transform: uppercase; letter-spacing: .12em;
+    text-transform: uppercase; letter-spacing: .12em;
   }
   .chart-wrap { position: relative; height: 250px; }
 
@@ -533,6 +608,11 @@
     100% { transform: scale(1); }
   }
   .comp-balance-value.a-mano { animation: balancePop .4s var(--ease-out) both; }
+  @keyframes badgeEntrada {
+    from { transform: scale(0.75); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .saldado-badge { animation: badgeEntrada 0.3s var(--ease-out); }
   .comp-balance-sub  { font-size: .83rem; color: var(--text-muted); margin-top: .2rem; }
   .comp-saldar-btn {
     padding: .45rem 1.1rem;
@@ -545,8 +625,8 @@
   .comp-saldado-badge {
     display: inline-flex; align-items: center; gap: .35rem;
     padding: .35rem .85rem;
-    background: rgba(52,211,153,.15); color: var(--green);
-    border: 1.5px solid rgba(52,211,153,.35);
+    background: rgba(var(--green-rgb),.15); color: var(--green);
+    border: 1.5px solid rgba(var(--green-rgb),.35);
     border-radius: 99px; font-size: .8rem; font-weight: 700; white-space: nowrap;
   }
   .comp-undo-btn {
@@ -563,15 +643,15 @@
   .tendencias-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; margin-bottom: .5rem; }
   .tendencia-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
   .tendencia-chip { display: flex; align-items: center; gap: .3rem; padding: .28rem .65rem; border-radius: 99px; font-size: .78rem; font-weight: 600; }
-  .tendencia-chip.up   { background: rgba(248,113,113,.13); color: var(--red); }
-  .tendencia-chip.down { background: rgba(52,211,153,.12);  color: var(--green); }
+  .tendencia-chip.up   { background: rgba(var(--red-rgb),.13);   color: var(--red); }
+  .tendencia-chip.down { background: rgba(var(--green-rgb),.12); color: var(--green); }
   .tendencia-chip.flat { background: var(--bg3); color: var(--text-muted); font-weight: 400; font-size: .76rem; }
 
   /* ─── PACING POR CATEGORÍA ───────────────────────────────────── */
   .pres-pacing { font-size: .68rem; font-weight: 700; padding: .15rem .4rem; border-radius: 99px; margin-left: .4rem; vertical-align: middle; }
-  .pres-pacing.ok   { background: rgba(52,211,153,.12);  color: var(--green); }
-  .pres-pacing.warn { background: rgba(251,191,36,.12);  color: var(--yellow); }
-  .pres-pacing.over { background: rgba(248,113,113,.12); color: var(--red); }
+  .pres-pacing.ok   { background: rgba(var(--green-rgb),.12);  color: var(--green); }
+  .pres-pacing.warn { background: rgba(var(--yellow-rgb),.12); color: var(--yellow); }
+  .pres-pacing.over { background: rgba(var(--red-rgb),.12);    color: var(--red); }
 
   /* ─── FAIRNESS SCORE ─────────────────────────────────────────── */
   .comp-fairness { margin-top: .9rem; padding: .75rem 1rem; background: var(--bg2); border-radius: 10px; border: 1px solid var(--border); }
@@ -595,9 +675,9 @@
   .plazo-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; }
   .plazo-desc { font-weight: 700; font-size: .93rem; line-height: 1.25; }
   .plazo-badge { font-size: .68rem; font-weight: 700; padding: .15rem .5rem; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
-  .plazo-badge.vigente  { background: rgba(52,211,153,.12);  color: var(--green); }
-  .plazo-badge.vence    { background: rgba(251,191,36,.15);  color: var(--yellow); }
-  .plazo-badge.vencido  { background: rgba(248,113,113,.12); color: var(--red); }
+  .plazo-badge.vigente  { background: rgba(var(--green-rgb),.12);  color: var(--green); }
+  .plazo-badge.vence    { background: rgba(var(--yellow-rgb),.15); color: var(--yellow); }
+  .plazo-badge.vencido  { background: rgba(var(--red-rgb),.12);    color: var(--red); }
   .plazo-row { display: flex; justify-content: space-between; align-items: center; font-size: .8rem; color: var(--text-muted); margin-top: .25rem; }
   .plazo-row strong { color: var(--text); }
   /* Barra de progreso del plazo */
@@ -725,9 +805,9 @@
     width: 0; animation: barFill .65s var(--ease-out) .12s both;
     position: relative; overflow: hidden;
   }
-  .pres-bar-fill.bar-ok   { background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,.55); }
-  .pres-bar-fill.bar-warn { background: var(--yellow); box-shadow: 0 0 8px rgba(251,191,36,.55); }
-  .pres-bar-fill.bar-over { background: var(--red);   box-shadow: 0 0 8px rgba(248,113,113,.55); }
+  .pres-bar-fill.bar-ok   { background: var(--green);  box-shadow: 0 0 8px rgba(var(--green-rgb),.45); }
+  .pres-bar-fill.bar-warn { background: var(--yellow); box-shadow: 0 0 8px rgba(var(--yellow-rgb),.45); }
+  .pres-bar-fill.bar-over { background: var(--red);    box-shadow: 0 0 8px rgba(var(--red-rgb),.45); }
   .pres-bar-fill::after {
     content: '';
     position: absolute;
@@ -1559,6 +1639,11 @@
   .topnav .nav-item.active {
     color: var(--accent);
   }
+  @media (hover: hover) {
+    .nav-item i, .bn-item i { transition: transform 0.15s var(--ease-out), color 0.15s; }
+    .nav-item:hover i, .nav-item:hover svg { transform: scale(1.12); color: var(--accent); }
+    .nav-item.active i, .nav-item.active svg { color: var(--accent); }
+  }
   .topnav-logout {
     background: none;
     border: none;
@@ -1685,6 +1770,7 @@
   }
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 
@@ -1783,12 +1869,12 @@
     💰 <span id="topnav-user"></span>
   </div>
   <div class="topnav-tabs">
-    <button class="nav-item" onclick="navegarA('presupuesto')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mi mes</button>
-    <button class="nav-item" onclick="navegarA('transacciones')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transacciones</button>
-    <button class="nav-item" onclick="navegarA('compartidos')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Compartidos</button>
-    <button class="nav-item" onclick="navegarA('config')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorías</button>
-    <button class="nav-item" onclick="navegarA('inversiones')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Inversiones</button>
-    <button class="nav-item" onclick="navegarA('resumen')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Resumen</button>
+    <button class="nav-item" onclick="navegarA('presupuesto')"><i data-lucide="calendar-days" width="14" height="14"></i>Mi mes</button>
+    <button class="nav-item" onclick="navegarA('transacciones')"><i data-lucide="receipt" width="14" height="14"></i>Transacciones</button>
+    <button class="nav-item" onclick="navegarA('compartidos')"><i data-lucide="users" width="14" height="14"></i>Compartidos</button>
+    <button class="nav-item" onclick="navegarA('config')"><i data-lucide="tag" width="14" height="14"></i>Categorías</button>
+    <button class="nav-item" onclick="navegarA('inversiones')"><i data-lucide="trending-up" width="14" height="14"></i>Inversiones</button>
+    <button class="nav-item" onclick="navegarA('resumen')"><i data-lucide="bar-chart-2" width="14" height="14"></i>Resumen</button>
     <span class="topnav-indicator" id="topnav-indicator"></span>
   </div>
   <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
@@ -1799,22 +1885,22 @@
 <!-- Bottom nav mobile -->
 <nav class="bottom-nav" id="bottom-nav">
   <button class="bn-item" id="bn-presupuesto" onclick="navegarA('presupuesto')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span><span>Mi mes</span>
+    <span class="bn-icon"><i data-lucide="calendar-days" width="20" height="20"></i></span><span>Mi mes</span>
   </button>
   <button class="bn-item" id="bn-transacciones" onclick="navegarA('transacciones')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></span><span>Gastos</span>
+    <span class="bn-icon"><i data-lucide="receipt" width="20" height="20"></i></span><span>Gastos</span>
   </button>
   <button class="bn-item" id="bn-compartidos" onclick="navegarA('compartidos')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span>Compartidos</span>
+    <span class="bn-icon"><i data-lucide="users" width="20" height="20"></i></span><span>Compartidos</span>
   </button>
   <button class="bn-item" id="bn-config" onclick="navegarA('config')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span><span>Categorías</span>
+    <span class="bn-icon"><i data-lucide="tag" width="20" height="20"></i></span><span>Categorías</span>
   </button>
   <button class="bn-item" id="bn-inversiones" onclick="navegarA('inversiones')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></span><span>Inversiones</span>
+    <span class="bn-icon"><i data-lucide="trending-up" width="20" height="20"></i></span><span>Inversiones</span>
   </button>
   <button class="bn-item" id="bn-resumen" onclick="navegarA('resumen')">
-    <span class="bn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>Resumen</span>
+    <span class="bn-icon"><i data-lucide="bar-chart-2" width="20" height="20"></i></span><span>Resumen</span>
   </button>
 </nav>
 
@@ -1842,7 +1928,7 @@
         <!-- KPIs -->
         <div class="kpi-grid">
           <div class="kpi-card">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="trending-up" width="17" height="17"></i></div>
             <div class="kpi-label">Ingresos</div>
             <div class="kpi-value income" id="kpi-ingresos">$0</div>
             <div class="kpi-sub" id="kpi-ingresos-sub">—</div>
@@ -1850,7 +1936,7 @@
             <div class="kpi-spark" id="spark-ingresos"></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
+            <div class="kpi-icon ico-red"><i data-lucide="trending-down" width="17" height="17"></i></div>
             <div class="kpi-label">Gastos</div>
             <div class="kpi-value expense" id="kpi-gastos">$0</div>
             <div class="kpi-sub" id="kpi-gastos-sub">—</div>
@@ -1858,7 +1944,7 @@
             <div class="kpi-spark" id="spark-gastos"></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="kpi-icon ico-accent"><i data-lucide="scale" width="17" height="17"></i></div>
             <div class="kpi-label">Balance</div>
             <div class="kpi-value balance-pos" id="kpi-balance">$0</div>
             <div class="kpi-sub" id="kpi-balance-sub">—</div>
@@ -1866,7 +1952,7 @@
             <div class="kpi-spark" id="spark-balance"></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-yellow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></div>
+            <div class="kpi-icon ico-yellow"><i data-lucide="target" width="17" height="17"></i></div>
             <div class="kpi-label">Ahorro</div>
             <div class="kpi-value" id="kpi-ahorro" style="color:var(--yellow)">0%</div>
             <div class="kpi-sub">del ingreso mensual</div>
@@ -1909,7 +1995,10 @@
       <!-- ── PÁGINA TRANSACCIONES ──────────────────────── -->
       <div id="page-transacciones" class="page">
         <div class="page-header">
-          <h1>Historial de transacciones</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-transacciones">TRANSACCIONES</p>
+            <h1>Historial de transacciones</h1>
+          </div>
           <div style="display:flex;gap:.5rem;align-items:center">
             <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">CSV</button>
             <button class="btn btn-ghost" onclick="navegarA('importar')" title="Importar desde archivo o PDF">Importar</button>
@@ -2066,7 +2155,10 @@
       <!-- ── PÁGINA COMPARTIDOS ────────────────────────── -->
       <div id="page-compartidos" class="page">
         <div class="page-header">
-          <h1 id="comp-titulo">Compartidos con Ama</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-compartidos">COMPARTIDOS</p>
+            <h1 id="comp-titulo">Compartidos con Ama</h1>
+          </div>
         </div>
 
         <!-- Selector de mes -->
@@ -2188,13 +2280,16 @@
       <!-- ── PÁGINA PRESUPUESTO ────────────────────────────── -->
       <div id="page-presupuesto" class="page">
         <div class="page-header">
-          <h1>Mi mes</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-presupuesto">MI MES</p>
+            <h1>Mi mes</h1>
+          </div>
           <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
             <div class="mes-selector">
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
-            <button class="btn" onclick="sugerirPresupuestoDesdeHistorial()" title="Promedia los últimos 3 meses" style="font-size:.82rem">📊 Sugerir</button>
+            <button class="btn" onclick="sugerirPresupuestoDesdeHistorial()" title="Promedia los últimos 3 meses" style="font-size:.82rem;display:inline-flex;align-items:center;gap:.35rem"><i data-lucide="bar-chart-2" width="14" height="14"></i>Sugerir</button>
             <button class="btn btn-primary" onclick="guardarPresupuesto()">Guardar presupuesto</button>
           </div>
         </div>
@@ -2202,58 +2297,58 @@
         <!-- KPI strip -->
         <div class="kpi-grid kpi-grid-4" id="pres-kpi-grid">
           <div class="kpi-card kpi-hero">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="wallet" width="17" height="17"></i></div>
             <div class="kpi-label">Lo que te queda</div>
             <div class="kpi-value" id="pres-kpi-saldo-real">$0</div>
             <div class="kpi-hero-bar-wrap"><div class="kpi-hero-bar-fill" id="pres-hero-bar"></div></div>
             <div class="kpi-sub" id="pres-kpi-saldo-real-sub">Sueldo − Gastado real</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="banknote" width="17" height="17"></i></div>
             <div class="kpi-label">Sueldo</div>
             <div class="kpi-value income" id="pres-kpi-sueldo">$0</div>
             <div class="kpi-sub" id="pres-kpi-sueldo-sub">ingresos del mes</div>
             <div class="kpi-sparkline-wrap"><canvas id="spark-sueldo"></canvas></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div>
+            <div class="kpi-icon ico-accent"><i data-lucide="pie-chart" width="17" height="17"></i></div>
             <div class="kpi-label">Presupuestado</div>
             <div class="kpi-value" id="pres-kpi-total" style="color:var(--accent)">$0</div>
             <div class="kpi-sub" id="pres-kpi-total-sub">de tu sueldo asignado</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+            <div class="kpi-icon ico-red"><i data-lucide="shopping-bag" width="17" height="17"></i></div>
             <div class="kpi-label">Gastado</div>
             <div class="kpi-value expense" id="pres-kpi-gastado">$0</div>
             <div class="kpi-sub" id="pres-kpi-gastado-sub">50% compartidos</div>
             <div class="kpi-sparkline-wrap"><canvas id="spark-gastado"></canvas></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
+            <div class="kpi-icon ico-muted"><i data-lucide="sliders-horizontal" width="17" height="17"></i></div>
             <div class="kpi-label">Margen planeado</div>
             <div class="kpi-value" id="pres-kpi-disponible">$0</div>
             <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Presupuestado</div>
           </div>
           <div class="kpi-card" id="pres-kpi-mep-card" style="display:none">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="dollar-sign" width="17" height="17"></i></div>
             <div class="kpi-label">Saldo en USD</div>
             <div class="kpi-value" id="pres-kpi-mep-val">U$S 0</div>
             <div class="kpi-sub" id="pres-kpi-mep-sub">Lo que te queda ÷ MEP</div>
           </div>
           <div class="kpi-card" id="kpi-ahorro-cat-card">
-            <div class="kpi-icon ico-green"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="kpi-icon ico-green"><i data-lucide="piggy-bank" width="17" height="17"></i></div>
             <div class="kpi-label">Ahorro (categoría)</div>
             <div class="kpi-value" id="kpi-ahorro-cat" style="color:var(--green)">$0</div>
             <div class="kpi-sub" id="kpi-ahorro-cat-sub">total acumulado: —</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="kpi-icon ico-accent"><i data-lucide="calendar-days" width="17" height="17"></i></div>
             <div class="kpi-label">Podés gastar por día</div>
             <div class="kpi-value" id="pres-kpi-diario">—</div>
             <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
           </div>
           <div class="kpi-card" id="pres-kpi-compartido-card" style="display:none">
-            <div class="kpi-icon ico-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="kpi-icon ico-accent"><i data-lucide="users" width="17" height="17"></i></div>
             <div class="kpi-label" id="pres-kpi-compartido-label">Compartidos</div>
             <div class="kpi-value" id="pres-kpi-compartido-val">$0</div>
             <div class="kpi-sub" id="pres-kpi-compartido-sub">—</div>
@@ -2346,7 +2441,10 @@
       <!-- ── PÁGINA CATEGORÍAS Y FUENTES ──────────────────── -->
       <div id="page-config" class="page">
         <div class="page-header">
-          <h1>Categorías y Fuentes</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-config">CATEGORÍAS</p>
+            <h1>Categorías y Fuentes</h1>
+          </div>
           <div style="font-size:.85rem;color:var(--text-muted)">Tus categorías y fuentes de pago</div>
         </div>
 
@@ -2403,7 +2501,10 @@
       <!-- ── PÁGINA INVERSIONES ────────────────────────────── -->
       <div id="page-inversiones" class="page">
         <div class="page-header">
-          <h1>Inversiones</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-inversiones">INVERSIONES</p>
+            <h1>Inversiones</h1>
+          </div>
         </div>
 
         <!-- Totalizador por categoría -->
@@ -2751,9 +2852,9 @@ const SUPABASE_URL = "https://eutarjfnlkcehhigqqxr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1dGFyamZubGtjZWhoaWdxcXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTA0MTQsImV4cCI6MjA5MTA4NjQxNH0._7-AO_9_12PumXjDfcAWkgKyS4s_kXZTxb8EKSdxlAg";
 
 // ─── SVG ICONS ────────────────────────────────────────────────
-const IC_COPY  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-const IC_EDIT  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
-const IC_TRASH = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
+const IC_COPY  = `<i data-lucide="copy"    width="14" height="14" style="vertical-align:middle;pointer-events:none"></i>`;
+const IC_EDIT  = `<i data-lucide="pencil"  width="14" height="14" style="vertical-align:middle;pointer-events:none"></i>`;
+const IC_TRASH = `<i data-lucide="trash-2" width="14" height="14" style="vertical-align:middle;pointer-events:none"></i>`;
 
 function _confettiBrief(opts = {}) {
   if (typeof confetti !== "function") return;
@@ -2859,6 +2960,7 @@ function guardarCacheCateg(data) {
 
 // ─── INICIALIZACIÓN ───────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
+  if (window.lucide) lucide.createIcons();
   document.getElementById("f-fecha").valueAsDate = new Date();
   poblarSelectoresFecha();
 
@@ -3043,6 +3145,7 @@ function _renderApp() {
   inicializarSelectoresPresupuesto();
   inicializarRespButtons();
   navegarA("presupuesto");
+  if (window.lucide) lucide.createIcons();
 }
 
 // ─── FETCH CON TIMEOUT ────────────────────────────────────────
@@ -3100,6 +3203,13 @@ function _actualizarStringsUsuario() {
   if (drawerName) drawerName.textContent = USUARIO;
   const topnavUser = document.getElementById("topnav-user");
   if (topnavUser) topnavUser.textContent = USUARIO;
+  const _eyebrowMeses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const _eyebrowNow = new Date();
+  const _eyebrowBase = `${_eyebrowMeses[_eyebrowNow.getMonth()]} ${_eyebrowNow.getFullYear()} · ${USUARIO.toUpperCase()}`;
+  ['presupuesto','transacciones','compartidos','config','inversiones'].forEach(id => {
+    const _eyebrowEl = document.getElementById(`eyebrow-${id}`);
+    if (_eyebrowEl) _eyebrowEl.textContent = _eyebrowBase;
+  });
 }
 
 async function guardarNombre() {
@@ -3976,6 +4086,7 @@ function filtrarTabla() {
   requestAnimationFrame(() => {
     if (gen !== _filtroGen) return;
     tbody.innerHTML = html;
+    if (window.lucide) lucide.createIcons();
   });
 }
 
@@ -5318,6 +5429,7 @@ async function cargarPresupuesto() {
   } catch(e) { console.warn("Error cargando presupuesto:", e); }
   renderPresupuesto();
   inicializarDisclosureMimes();
+  if (window.lucide) lucide.createIcons();
 }
 
 async function guardarPresupuesto() {
