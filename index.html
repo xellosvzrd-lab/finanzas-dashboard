@@ -90,6 +90,7 @@
   .bn-item:focus-visible,
   .tipo-btn:focus-visible,
   .moneda-btn:focus-visible,
+  .forma-pago-btn:focus-visible,
   .delete-btn:focus-visible,
   .hamburger-btn:focus-visible {
     outline: 2px solid var(--accent);
@@ -1762,14 +1763,7 @@
     border-color: var(--accent); background: var(--accent-dim); color: var(--accent); font-weight: 600;
   }
   #f-cuotas-fields { display: none; }
-  .cuotas-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .35rem; }
-  .cuota-chip {
-    padding: .25rem .6rem; border: 1px solid var(--border); border-radius: 6px;
-    background: transparent; color: var(--text-muted); cursor: pointer;
-    font-size: .8rem; font-family: inherit; transition: border-color .12s, color .12s, background .12s;
-  }
-  .cuota-chip.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); font-weight: 700; }
-  .cuota-monto-cuota-calc { font-size: .82rem; color: var(--text-muted); margin-top: .3rem; }
+.cuota-monto-cuota-calc { font-size: .82rem; color: var(--text-muted); margin-top: .3rem; }
   .cuota-monto-cuota-calc strong { color: var(--accent); font-weight: 700; }
   .badge-cuota {
     font-size: .7rem; color: var(--accent); background: rgba(var(--accent-rgb), 0.12);
@@ -2184,9 +2178,6 @@
             <!-- Campos adicionales en modo cuotas -->
             <div id="f-cuotas-fields">
               <div class="form-row">
-                <div class="form-group" style="flex:2">
-                  <!-- f-monto reutilizado como monto total; label cambia via JS -->
-                </div>
                 <div class="form-group" style="flex:1">
                   <label for="f-cuotas-n">Cuotas</label>
                   <select id="f-cuotas-n" onchange="_recalcularMontoCuota(); _actualizarBtnGuardar()">
@@ -2448,7 +2439,9 @@
 
         <!-- Tarjeta cuotas activas -->
         <div class="cuotas-card" id="cuotas-card" style="display:none">
-          <div class="cuotas-header" onclick="toggleCuotasCard()">
+          <div class="cuotas-header" onclick="toggleCuotasCard()"
+               role="button" tabindex="0" aria-expanded="true" aria-controls="cuotas-body-wrap"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCuotasCard()}">
             <div class="cuotas-header-left">
               <i data-lucide="credit-card" width="16" height="16" style="color:var(--yellow)"></i>
               Cuotas activas
@@ -6875,7 +6868,11 @@ function _recalcularMontoCuota() {
   const n = parseInt(document.getElementById("f-cuotas-n")?.value) || 12;
   const inp  = document.getElementById("f-monto-cuota");
   const calc = document.getElementById("f-monto-cuota-calc");
-  if (!inp || !montoTotal) return;
+  if (!inp || !montoTotal) {
+    if (inp) inp.value = "";
+    if (calc) calc.innerHTML = "";
+    return;
+  }
   const cuota = montoTotal / n;
   inp.value = cuota.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (calc) calc.innerHTML = `Calculado: <strong>${fmt(cuota)}</strong> × ${n}`;
