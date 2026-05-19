@@ -4417,6 +4417,7 @@ function setTipo(tipo) {
 }
 
 async function guardarTransaccion() {
+  if (_modoCuotas) { await guardarCompraEnCuotas(); return; }
   const fecha   = document.getElementById("f-fecha").value;
   const monto   = parsearDecimal(document.getElementById("f-monto").value);
   const cat     = document.getElementById("f-categoria").value;
@@ -4481,6 +4482,135 @@ async function guardarTransaccion() {
 
   btn.disabled = false;
   btn.textContent = "Guardar";
+}
+
+async function guardarCompraEnCuotas() {
+  const btn = document.getElementById("btn-guardar");
+  const msg = document.getElementById("form-msg");
+  btn.disabled = true;
+  if (msg) { msg.textContent = ""; msg.style.display = "none"; }
+
+  const fecha           = document.getElementById("f-fecha")?.value || "";
+  const categoria       = document.getElementById("f-categoria")?.value || "";
+  const fuente          = document.getElementById("f-fuente")?.value || "";
+  const responsabilidad = document.querySelector("#f-responsabilidad")?.value || "Mío";
+  const moneda          = document.querySelector(".moneda-btn.active")?.dataset.val || "ARS";
+  const descripcion     = document.getElementById("f-descripcion")?.value.trim() || "";
+  const montoTotal      = parsearDecimal(document.getElementById("f-monto")?.value);
+  const cuotasTotal     = parseInt(document.getElementById("f-cuotas-n")?.value) || 0;
+  const montoCuota      = parsearDecimal(document.getElementById("f-monto-cuota")?.value);
+  const primerMesLiq    = document.getElementById("f-primer-mes-liq")?.value || "";
+  const cftPct          = document.getElementById("f-cft-check")?.checked
+    ? parsearDecimal(document.getElementById("f-cft-pct")?.value) || null
+    : null;
+
+  // Validation
+  const errs = [];
+  if (!fecha)                                          errs.push("fecha");
+  if (!categoria)                                      errs.push("categoría");
+  if (!fuente)                                         errs.push("fuente");
+  if (!descripcion)                                    errs.push("descripción");
+  if (montoTotal <= 0)                                 errs.push("monto total");
+  if (cuotasTotal < 2 || cuotasTotal > 60)             errs.push("cuotas (2–60)");
+  if (montoCuota <= 0)                                 errs.push("monto por cuota");
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(primerMesLiq)) errs.push("mes de primera cuota");
+
+  if (errs.length) {
+    if (msg) { msg.textContent = `Completá: ${errs.join(", ")}`; msg.style.display = "block"; }
+    btn.disabled = false;
+    _actualizarBtnGuardar();
+    return;
+  }
+
+  btn.textContent = "Guardando...";
+
+  try {
+    // 1. Insert compra metadata
+    const compraId = crypto.randomUUID();
+    const { error: errCompra } = await supabaseClient.from("compras_cuotas").insert({
+      id: compraId,
+      usuario: USUARIO,
+      descripcion,
+      categoria,
+      responsabilidad,
+      fuente,
+      moneda,
+      monto_total: montoTotal,
+      cuotas_total: cuotasTotal,
+      monto_cuota: montoCuota,
+      primer_mes_liq: primerMesLiq,
+      cft_anual_pct: cftPct,
+      user_id: supabaseSession.user.id
+    });
+    if (errCompra) throw errCompra;
+
+    // 2. Generate N transaction rows (all upfront)
+    const [anio0, mes0] = primerMesLiq.split("-").map(Number);
+    const rows = Array.from({ length: cuotasTotal }, (_, i) => {
+      const d = new Date(anio0, mes0 - 1 + i, 1);
+      const mesLiq = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const nroStr = String(i + 1).padStart(2, "0");
+      const totStr = String(cuotasTotal).padStart(2, "0");
+      return {
+        id: crypto.randomUUID(),
+        fecha,
+        tipo: "Gasto",
+        categoria,
+        monto: montoCuota,
+        descripcion: `${descripcion} ${nroStr}/${totStr}`,
+        usuario: USUARIO,
+        responsabilidad,
+        fuente,
+        moneda,
+        mes_liquidacion: mesLiq,
+        compra_id: compraId,
+        cuota_nro: i + 1,
+        cuota_total: cuotasTotal,
+        user_id: supabaseSession.user.id
+      };
+    });
+
+    const { error: errTrans } = await supabaseClient.from("transacciones").insert(rows);
+    if (errTrans) {
+      // Rollback: delete compra so we don't have orphaned metadata
+      await supabaseClient.from("compras_cuotas").delete().eq("id", compraId);
+      throw errTrans;
+    }
+
+    // 3. Refresh local state
+    await cargarTodasTransacciones();
+    _renderApp();
+
+    // 4. Toast with first settlement month name
+    const [sigAnio, sigMes] = primerMesLiq.split("-").map(Number);
+    const mesNombre = new Date(sigAnio, sigMes - 1, 1)
+      .toLocaleDateString("es-AR", { month: "long", year: "numeric" });
+    showToast(`${cuotasTotal} cuotas registradas — próxima: ${mesNombre}`, "ok");
+
+    // 5. Reset form to single-payment mode
+    _montoCuotaEditado = false;
+    _setModoCuotas("unico");
+    document.getElementById("f-monto").value        = "";
+    document.getElementById("f-descripcion").value  = "";
+    document.getElementById("f-monto-cuota").value  = "";
+    const calcEl = document.getElementById("f-monto-cuota-calc");
+    if (calcEl) calcEl.innerHTML = "";
+    const cftCheck = document.getElementById("f-cft-check");
+    if (cftCheck) cftCheck.checked = false;
+    const cftRow = document.getElementById("f-cft-row");
+    if (cftRow) cftRow.style.display = "none";
+    const cftPctInp = document.getElementById("f-cft-pct");
+    if (cftPctInp) cftPctInp.value = "";
+    const primerMesInp = document.getElementById("f-primer-mes-liq");
+    if (primerMesInp) primerMesInp.value = "";
+    if (msg) msg.style.display = "none";
+
+  } catch(e) {
+    if (msg) { msg.textContent = `Error: ${e.message}`; msg.style.display = "block"; }
+  } finally {
+    btn.disabled = false;
+    _actualizarBtnGuardar();
+  }
 }
 
 // ─── MODO RÁFAGA ──────────────────────────────────────────────
