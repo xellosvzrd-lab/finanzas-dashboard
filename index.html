@@ -5508,6 +5508,12 @@ function _actualizarNavIndicator() {
 }
 
 function navegarA(pagina) {
+  // Reset cuotas mode when leaving Nueva page
+  if (pagina !== "nueva" && typeof _modoCuotas !== "undefined" && _modoCuotas) {
+    _setModoCuotas("unico");
+    _montoCuotaEditado = false;
+  }
+
   // Aliases para compatibilidad con código interno
   const alias = { mimes: "presupuesto", categorias: "config" };
   pagina = alias[pagina] || pagina;
