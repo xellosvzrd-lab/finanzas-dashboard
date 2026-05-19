@@ -4154,7 +4154,11 @@ function filtrarTabla() {
       <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${escapeHtml(t.fuente) || "—"}</td>
       <td class="col-hide-sm"><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${escapeHtml(r)}</span></td>
       <td class="col-hide-sm" style="color:var(--text-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(t.descripcion) || "—"}${t.cuota_nro && t.cuota_total
-          ? ` <span class="badge-cuota" onclick="_abrirModalCuotas('${t.compra_id}')" title="Ver cuotas">[${t.cuota_nro}/${t.cuota_total}]</span>`
+          ? ` <span class="badge-cuota" role="button" tabindex="0"
+                    data-compra-id="${t.compra_id}"
+                    onclick="_abrirModalCuotas(this.dataset.compraId)"
+                    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_abrirModalCuotas(this.dataset.compraId)}"
+                    title="Ver cuotas">[${t.cuota_nro}/${t.cuota_total}]</span>`
           : ""}</td>
       <td style="text-align:right;font-weight:600;white-space:nowrap;color:${t.tipo==="Ingreso"?"var(--green)":"var(--red)"}">${fmtMoneda(t.monto, mon)}</td>
       <td class="col-hide-xs">${monBadge}</td>
