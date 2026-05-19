@@ -7212,6 +7212,157 @@ function _inicializarDisclosureCuotas() {
   }
 }
 
+// ─── MODAL GESTIÓN DE CUOTAS ──────────────────────────────────
+
+let _cuotaModalCompraId = null;
+
+function _abrirModalCuotas(compraId) {
+  const id = compraId || comprasEnCuotas[0]?.id;
+  if (!id) return;
+  _cuotaModalCompraId = id;
+  _renderModalCuotas(id);
+  document.getElementById("cuotas-modal-overlay").classList.add("open");
+}
+
+function _cerrarModalCuotas() {
+  document.getElementById("cuotas-modal-overlay").classList.remove("open");
+  _cuotaModalCompraId = null;
+}
+
+function _renderModalCuotas(compraId) {
+  const c = comprasEnCuotas.find(x => x.id === compraId);
+  if (!c) return;
+
+  const hoy = new Date();
+  const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+  const MESES_CORTOS = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+  const cuotasTrans = allTransac
+    .filter(t => t.compra_id === compraId)
+    .sort((a, b) => (Number(a.cuota_nro) || 0) - (Number(b.cuota_nro) || 0));
+
+  const pagadas  = cuotasTrans.filter(t => (t.mes_liquidacion || "") <= mesActualStr).length;
+  const restante = cuotasTrans
+    .filter(t => (t.mes_liquidacion || "") > mesActualStr)
+    .reduce((s, t) => s + Number(t.monto), 0);
+  const pct = c.cuotas_total > 0 ? Math.round((pagadas / c.cuotas_total) * 100) : 0;
+
+  document.getElementById("cuotas-modal-title").textContent = c.descripcion;
+  document.getElementById("cuotas-modal-meta").textContent =
+    `${c.fuente} · ${c.responsabilidad} · ${c.moneda}`;
+  document.getElementById("cuotas-modal-progress-label").textContent =
+    `${pagadas} de ${c.cuotas_total} pagadas`;
+  document.getElementById("cuotas-modal-restante").textContent =
+    restante > 0 ? `${fmt(restante)} restantes` : "Completada";
+  document.getElementById("cuotas-modal-progress-fill").style.width = `${pct}%`;
+
+  const listHTML = cuotasTrans.map(t => {
+    const [ly, lm] = (t.mes_liquidacion || "").split("-").map(Number);
+    const mesStr = (lm && ly) ? `${MESES_CORTOS[lm - 1]} ${ly}` : (t.mes_liquidacion || "—");
+    const pagada = (t.mes_liquidacion || "") <= mesActualStr;
+    return `<div class="cuota-list-row">
+      <span class="cuota-list-mes">${mesStr}</span>
+      <span>${fmtMoneda(Number(t.monto), t.moneda || "ARS")}</span>
+      <span class="cuota-list-estado ${pagada ? "pagada" : "pendiente"}">${pagada ? "✅" : "⏳"}</span>
+    </div>`;
+  }).join("");
+
+  document.getElementById("cuotas-modal-list").innerHTML = listHTML;
+  document.getElementById("cuotas-modal-msg").textContent = "";
+
+  const hasFuture = cuotasTrans.some(t => (t.mes_liquidacion || "") > mesActualStr);
+  const btnCancelar = document.getElementById("cuotas-modal-btn-cancelar");
+  if (btnCancelar) btnCancelar.style.display = hasFuture ? "" : "none";
+}
+
+async function _cancelarCuotasAnticipadamente() {
+  const id = _cuotaModalCompraId;
+  if (!id) return;
+
+  const hoy = new Date();
+  const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+  const cuotasFuturas = allTransac.filter(t =>
+    t.compra_id === id && (t.mes_liquidacion || "") > mesActualStr
+  );
+
+  if (!cuotasFuturas.length) {
+    document.getElementById("cuotas-modal-msg").textContent = "No hay cuotas futuras para cancelar.";
+    return;
+  }
+
+  const ok = confirm(`Se eliminarán ${cuotasFuturas.length} cuotas pendientes. ¿Continuar?`);
+  if (!ok) return;
+
+  const btnCancelar = document.getElementById("cuotas-modal-btn-cancelar");
+  if (btnCancelar) { btnCancelar.disabled = true; btnCancelar.textContent = "Cancelando..."; }
+
+  try {
+    const { error: errDel } = await supabaseClient
+      .from("transacciones")
+      .delete()
+      .eq("compra_id", id)
+      .gt("mes_liquidacion", mesActualStr);
+    if (errDel) throw errDel;
+
+    const { error: errUpd } = await supabaseClient
+      .from("compras_cuotas")
+      .update({ estado: "cancelada" })
+      .eq("id", id);
+    if (errUpd) throw errUpd;
+
+    await Promise.all([cargarTodasTransacciones(), cargarCuotasActivas()]);
+    _renderApp();
+    _cerrarModalCuotas();
+    showToast("Cuotas restantes canceladas", "ok");
+
+  } catch(e) {
+    document.getElementById("cuotas-modal-msg").textContent = `Error: ${e.message}`;
+    if (btnCancelar) { btnCancelar.disabled = false; btnCancelar.textContent = "Cancelar anticipadamente"; }
+  }
+}
+
+function _abrirEditarCompra() {
+  const id = _cuotaModalCompraId;
+  const c  = comprasEnCuotas.find(x => x.id === id);
+  if (!c) return;
+  const desc = prompt("Nueva descripción:", c.descripcion);
+  if (desc === null) return;
+  if (!desc.trim()) { alert("La descripción no puede estar vacía."); return; }
+  _guardarEdicionCompra(id, desc.trim());
+}
+
+async function _guardarEdicionCompra(compraId, nuevaDesc) {
+  const msg = document.getElementById("cuotas-modal-msg");
+  try {
+    const { error: errComp } = await supabaseClient
+      .from("compras_cuotas")
+      .update({ descripcion: nuevaDesc })
+      .eq("id", compraId);
+    if (errComp) throw errComp;
+
+    const cuotasTrans = allTransac.filter(t => t.compra_id === compraId);
+    const updates = cuotasTrans.map(t => {
+      const nroStr = String(Number(t.cuota_nro) || 1).padStart(2, "0");
+      const totStr = String(Number(t.cuota_total) || 1).padStart(2, "0");
+      return supabaseClient
+        .from("transacciones")
+        .update({ descripcion: `${nuevaDesc} ${nroStr}/${totStr}` })
+        .eq("id", t.id);
+    });
+    const results = await Promise.all(updates);
+    const firstErr = results.find(r => r.error)?.error;
+    if (firstErr) throw firstErr;
+
+    await Promise.all([cargarTodasTransacciones(), cargarCuotasActivas()]);
+    _renderApp();
+    _renderModalCuotas(compraId);
+    if (msg) msg.textContent = "✅ Guardado";
+
+  } catch(e) {
+    if (msg) msg.textContent = `Error: ${e.message}`;
+  }
+}
+
 function inicializarDisclosureMimes() {
   const el  = document.getElementById("pres-desglose");
   const btn = document.getElementById("btn-toggle-desglose");
