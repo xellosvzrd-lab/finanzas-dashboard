@@ -2956,6 +2956,7 @@ let supabaseClient  = null;
 let supabaseSession = null;
 let USUARIO         = "Daniel";
 let PARTNER         = "Ama";
+let comprasEnCuotas = [];  // loaded by cargarCuotasActivas()
 let CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
 let tipoCambioMEP   = null;
 let allTransac  = [];
@@ -5640,6 +5641,9 @@ async function cargarPresupuesto() {
   } catch(e) { console.warn("Error cargando presupuesto:", e); }
   renderPresupuesto();
   inicializarDisclosureMimes();
+  await cargarCuotasActivas();
+  _renderCuotasCard();
+  _inicializarDisclosureCuotas();
   if (window.lucide) lucide.createIcons();
 }
 
@@ -7087,6 +7091,125 @@ function toggleDesglose() {
   el.style.display = visible ? "none" : "";
   btn.textContent  = visible ? "Ver desglose ▾" : "Ocultar desglose ▴";
   try { localStorage.setItem(USUARIO + "_disclosure_mimes", visible ? "0" : "1"); } catch(e) {}
+}
+
+// ─── CUOTAS ACTIVAS ───────────────────────────────────────────
+
+async function cargarCuotasActivas() {
+  const { data, error } = await supabaseClient
+    .from("compras_cuotas")
+    .select("*")
+    .eq("usuario", USUARIO)
+    .eq("estado", "activa")
+    .order("created_at");
+  comprasEnCuotas = error ? [] : (data || []);
+}
+
+function _renderCuotasCard() {
+  const card = document.getElementById("cuotas-card");
+  if (!card) return;
+  if (!comprasEnCuotas.length) { card.style.display = "none"; return; }
+
+  const hoy = new Date();
+  const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+  const MESES_CORTOS = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+  let estesMes = 0, futuro = 0;
+  const toComplete = [];
+
+  const rows = comprasEnCuotas.map(c => {
+    const cuotasTrans = allTransac.filter(t => t.compra_id === c.id);
+    const pagadas = cuotasTrans.filter(t => (t.mes_liquidacion || "") <= mesActualStr).length;
+    const factor  = c.responsabilidad === "Compartido" ? 0.5 : 1;
+
+    // Auto-complete check (lazy)
+    if (pagadas >= c.cuotas_total) {
+      toComplete.push(c.id);
+      return null;
+    }
+
+    // Accumulate summary totals
+    cuotasTrans.filter(t => t.mes_liquidacion === mesActualStr)
+      .forEach(t => { estesMes += Number(t.monto) * factor; });
+    cuotasTrans.filter(t => (t.mes_liquidacion || "") > mesActualStr)
+      .forEach(t => { futuro += Number(t.monto) * factor; });
+
+    // Last installment month label
+    const ultima = cuotasTrans.find(t => Number(t.cuota_nro) === c.cuotas_total);
+    let cierreStr = "";
+    if (ultima?.mes_liquidacion) {
+      const [cy, cm] = ultima.mes_liquidacion.split("-").map(Number);
+      cierreStr = `${MESES_CORTOS[cm - 1]} ${String(cy).slice(2)}`;
+    }
+
+    const pct = Math.round((pagadas / c.cuotas_total) * 100);
+    const esComp = c.responsabilidad === "Compartido";
+
+    return `<div class="cuota-row">
+      <div class="cuota-row-header">
+        <span class="cuota-desc">${escapeHtml(c.descripcion)}</span>
+        ${esComp ? '<span class="cuota-badge-comp">compartido</span>' : ""}
+      </div>
+      <div class="cuota-progress-wrap">
+        <div class="cuota-progress-bar">
+          <div class="cuota-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <span class="cuota-progress-label">${pagadas}/${c.cuotas_total}</span>
+        <span class="cuota-progress-meta">${fmt(c.monto_cuota)}/mes${cierreStr ? ` · ${cierreStr}` : ""}</span>
+      </div>
+    </div>`;
+  }).filter(Boolean);
+
+  // Lazy auto-complete: mark finished purchases in Supabase
+  toComplete.forEach(id => {
+    supabaseClient.from("compras_cuotas")
+      .update({ estado: "completada" })
+      .eq("id", id)
+      .then(() => {});
+    comprasEnCuotas = comprasEnCuotas.filter(c => c.id !== id);
+  });
+
+  if (!rows.length) { card.style.display = "none"; return; }
+
+  card.style.display = "";
+  document.getElementById("cuotas-count").textContent =
+    `${rows.length} compra${rows.length !== 1 ? "s" : ""}`;
+  document.getElementById("cuotas-este-mes").textContent = fmt(estesMes);
+  document.getElementById("cuotas-futuro").textContent   = fmt(futuro);
+  document.getElementById("cuotas-rows").innerHTML       = rows.join("");
+  if (window.lucide) lucide.createIcons();
+}
+
+function toggleCuotasCard() {
+  const bodyWrap = document.getElementById("cuotas-body-wrap");
+  const icon     = document.getElementById("cuotas-toggle-icon");
+  if (!bodyWrap || !icon) return;
+  const visible = bodyWrap.style.display !== "none";
+  bodyWrap.style.display = visible ? "none" : "";
+  icon.classList.toggle("open", !visible);
+  // Update aria-expanded on the header div
+  const header = document.querySelector(".cuotas-header");
+  if (header) header.setAttribute("aria-expanded", String(!visible));
+  try { localStorage.setItem(USUARIO + "_disclosure_cuotas", visible ? "0" : "1"); } catch(e) {}
+}
+
+function _inicializarDisclosureCuotas() {
+  const saved = (() => {
+    try { return localStorage.getItem(USUARIO + "_disclosure_cuotas"); } catch(e) { return null; }
+  })();
+  const bodyWrap = document.getElementById("cuotas-body-wrap");
+  const icon     = document.getElementById("cuotas-toggle-icon");
+  const header   = document.querySelector(".cuotas-header");
+  if (!bodyWrap || !icon) return;
+  if (saved === "0") {
+    bodyWrap.style.display = "none";
+    icon.classList.remove("open");
+    if (header) header.setAttribute("aria-expanded", "false");
+  } else {
+    bodyWrap.style.display = "";
+    icon.classList.add("open");
+    if (header) header.setAttribute("aria-expanded", "true");
+  }
 }
 
 function inicializarDisclosureMimes() {
