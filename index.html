@@ -13,7 +13,6 @@
 <meta name="apple-mobile-web-app-title" content="Finanzas">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
@@ -80,29 +79,6 @@
     --text-muted-rgb:  140, 123, 114;
   }
 
-  /* ─── TEMA CLARO (Ama) ──────────────────────────────────── */
-  [data-theme="light"] {
-    --bg:      #FFFAF6;
-    --bg2:     #F5EDE4;
-    --bg3:     #EDE2D8;
-    --card:    #FFFFFF;
-    --border:  #E5D9CF;
-    --border2: #C9B9AE;
-    --text:       #1C1410;
-    --text-muted: #7A6860;
-    --shadow: 0 1px 3px rgba(45,41,38,0.12);
-    --glass:  rgba(255,255,255,0.85);
-    --glass-border: rgba(45,41,38,0.08);
-    --white:  #FFFFFF;
-    --overlay: rgba(45,41,38,0.45);
-    --card-rgb:       255, 255, 255;
-    --text-rgb:       28, 20, 16;
-    --text-muted-rgb:  122, 104, 96;
-    --green-rgb:       90, 140, 107;
-    --red-rgb:         200, 90, 90;
-    --yellow-rgb:      200, 164, 90;
-    --accent-rgb:     200, 132, 90;
-  }
 
   /* ─── FOCUS VISIBLE ─────────────────────────────────────── */
   :focus-visible {
@@ -114,6 +90,7 @@
   .bn-item:focus-visible,
   .tipo-btn:focus-visible,
   .moneda-btn:focus-visible,
+  .forma-pago-btn:focus-visible,
   .delete-btn:focus-visible,
   .hamburger-btn:focus-visible {
     outline: 2px solid var(--accent);
@@ -390,15 +367,6 @@
     .kpi-icon svg, .kpi-icon i { width: 14px; height: 14px; }
   }
 
-  /* ─── KPI CARDS — LIGHT THEME OVERRIDES ───────────────────── */
-  [data-theme="light"] .kpi-card {
-    box-shadow: 0 2px 16px rgba(var(--text-rgb), 0.08), inset 0 1px 0 rgba(var(--accent-rgb), 0.10);
-  }
-  @media (hover: hover) {
-    [data-theme="light"] .kpi-card:hover {
-      box-shadow: 0 6px 24px rgba(var(--text-rgb), 0.12), inset 0 1px 0 rgba(var(--accent-rgb), 0.16);
-    }
-  }
 
   .kpi-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; font-weight: 600; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   @container (max-width: 160px) { .kpi-label { font-size: .58rem; letter-spacing: .02em; } }
@@ -881,46 +849,6 @@
   .imp-tab-panel { display: none; }
   .imp-tab-panel.active { display: block; }
 
-  /* ─── PDF DROP ZONE ───────────────────────────────────── */
-  .pdf-drop-zone {
-    border: 2px dashed var(--border); border-radius: var(--radius);
-    padding: 2.5rem 1.5rem; text-align: center; cursor: pointer;
-    transition: border-color .2s, background .2s; margin-bottom: 1.2rem;
-  }
-  .pdf-drop-zone:hover, .pdf-drop-zone.drag-over {
-    border-color: var(--accent); background: var(--accent-dim);
-  }
-  .pdf-drop-zone .pdf-drop-icon { font-size: 2.5rem; margin-bottom: .5rem; }
-  .pdf-drop-zone p { color: var(--text-muted); font-size: .86rem; margin: .25rem 0; }
-  .pdf-drop-zone strong { color: var(--text); }
-  .pdf-file-list { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1.2rem; }
-  .pdf-file-item {
-    display: flex; align-items: center; gap: .75rem;
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 8px; padding: .55rem .9rem; font-size: .84rem;
-  }
-  .pdf-file-icon { font-size: 1.1rem; }
-  .pdf-file-name { flex: 1; font-weight: 600; }
-  .pdf-file-fuente {
-    background: var(--accent-dim); color: var(--accent);
-    border-radius: 5px; padding: .15rem .55rem; font-size: .75rem; font-weight: 700;
-  }
-  .pdf-file-remove {
-    background: none; border: none; color: var(--text-muted);
-    cursor: pointer; font-size: 1rem; padding: .1rem .3rem;
-    border-radius: 4px; transition: color .15s;
-  }
-  .pdf-file-remove:hover { color: var(--red); }
-  .pdf-parse-progress {
-    background: var(--bg3); border-radius: 8px; padding: 1rem;
-    font-size: .83rem; color: var(--text-muted); display: none;
-  }
-  .pdf-cat-select {
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 5px; color: var(--text); font-size: .78rem;
-    padding: .2rem .35rem; max-width: 130px;
-  }
-  .pdf-cat-select.sin-cat { border-color: var(--yellow); color: var(--yellow); }
 
   .imp-instrucciones {
     background: var(--accent-dim); border: 1px solid var(--border);
@@ -1769,6 +1697,107 @@
     }
   }
 
+  /* ─── CUOTAS ─────────────────────────────────────────────── */
+  .cuotas-card {
+    background: rgba(var(--card-rgb), 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--accent-rgb), 0.14);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .cuotas-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(to right, var(--yellow), transparent);
+    opacity: 0.6;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .cuotas-header {
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; user-select: none;
+    margin-bottom: .6rem;
+  }
+  .cuotas-header-left { display: flex; align-items: center; gap: .55rem; font-weight: 700; font-size: .9rem; }
+  .cuotas-count { font-size: .75rem; color: var(--text-muted); font-weight: 500; }
+  .cuotas-toggle-icon { color: var(--text-muted); font-size: .8rem; transition: transform .2s; }
+  .cuotas-toggle-icon.open { transform: rotate(180deg); }
+  .cuotas-summary {
+    display: flex; gap: 1.5rem; margin-bottom: .85rem;
+    font-size: .83rem; color: var(--text-muted);
+  }
+  .cuotas-summary strong { color: var(--text); font-weight: 700; }
+  .cuotas-body { display: flex; flex-direction: column; gap: .7rem; }
+  .cuota-row { padding: .45rem 0; border-bottom: 1px solid var(--border); }
+  .cuota-row:last-child { border-bottom: none; }
+  .cuota-row-header { display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; }
+  .cuota-desc { font-weight: 600; font-size: .875rem; flex: 1; }
+  .cuota-badge-comp {
+    font-size: .68rem; color: var(--yellow); background: rgba(var(--yellow-rgb), 0.13);
+    border-radius: 4px; padding: .1rem .45rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  }
+  .cuota-progress-wrap { display: flex; align-items: center; gap: .6rem; font-size: .78rem; color: var(--text-muted); }
+  .cuota-progress-bar {
+    flex: 1; height: 5px; background: var(--bg3);
+    border-radius: 3px; overflow: hidden; min-width: 60px;
+  }
+  .cuota-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
+  .cuota-progress-label { font-weight: 700; color: var(--text); white-space: nowrap; }
+  .cuota-progress-meta { white-space: nowrap; }
+  .cuotas-actions {
+    display: flex; gap: .6rem; margin-top: .85rem; padding-top: .6rem;
+    border-top: 1px solid var(--border);
+  }
+  .forma-pago-toggle { display: flex; gap: .4rem; }
+  .forma-pago-btn {
+    flex: 1; padding: .45rem .6rem; border: 1px solid var(--border);
+    border-radius: 8px; background: transparent; color: var(--text-muted);
+    cursor: pointer; font-size: .83rem; font-family: inherit;
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  .forma-pago-btn.active {
+    border-color: var(--accent); background: var(--accent-dim); color: var(--accent); font-weight: 600;
+  }
+  #f-cuotas-fields { display: none; }
+.cuota-monto-cuota-calc { font-size: .82rem; color: var(--text-muted); margin-top: .3rem; }
+  .cuota-monto-cuota-calc strong { color: var(--accent); font-weight: 700; }
+  .badge-cuota {
+    font-size: .7rem; color: var(--accent); background: rgba(var(--accent-rgb), 0.12);
+    border-radius: 4px; padding: .08rem .35rem; cursor: pointer;
+    font-weight: 700; margin-left: .3rem; white-space: nowrap;
+    transition: background .15s;
+  }
+  .badge-cuota:hover { background: rgba(var(--accent-rgb), 0.22); }
+  #cuotas-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: var(--overlay); align-items: center; justify-content: center; padding: 1rem;
+  }
+  #cuotas-modal-overlay.open { display: flex; }
+  .cuotas-modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem; width: 100%;
+    max-width: 500px; max-height: 85vh; overflow-y: auto;
+  }
+  .cuotas-modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+  .cuotas-modal-title { font-size: 1.05rem; font-weight: 800; margin: 0; }
+  .cuotas-modal-meta { font-size: .78rem; color: var(--text-muted); margin-top: .2rem; }
+  .cuotas-modal-progress { margin-bottom: 1rem; }
+  .cuotas-modal-progress-bar { height: 7px; background: var(--bg3); border-radius: 4px; overflow: hidden; margin: .4rem 0; }
+  .cuotas-modal-progress-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+  .cuotas-modal-list { font-size: .83rem; max-height: 260px; overflow-y: auto; }
+  .cuota-list-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .4rem .2rem; border-bottom: 1px solid var(--border);
+  }
+  .cuota-list-row:last-child { border-bottom: none; }
+  .cuota-list-mes { color: var(--text-muted); }
+  .cuota-list-estado.pagada { color: var(--green); }
+  .cuota-list-estado.pendiente { color: var(--text-muted); }
+  .cuotas-modal-actions { display: flex; gap: .6rem; margin-top: 1rem; flex-wrap: wrap; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -2107,7 +2136,8 @@
             </div>
             <div class="form-group">
               <label for="f-monto" id="f-monto-label">Monto (ARS $)</label>
-              <input type="text" inputmode="decimal" id="f-monto" placeholder="0,00">
+              <input type="text" inputmode="decimal" id="f-monto" placeholder="0,00"
+                     oninput="formatearMiles(this); if(typeof _modoCuotas !== 'undefined' && _modoCuotas && !_montoCuotaEditado) _recalcularMontoCuota()">
             </div>
           </div>
           <!-- Fila 3: Categoría + Responsabilidad -->
@@ -2135,6 +2165,52 @@
               <div id="f-mes-liq-err" style="font-size:.8rem;color:var(--red);min-height:1em;margin-top:.25rem"></div>
             </div>
           </div>
+            <!-- Forma de pago: toggle cuotas (solo visible para FUENTE_TC) -->
+            <div class="form-group" id="f-cuotas-toggle-row" style="display:none">
+              <label>Forma de pago</label>
+              <div class="forma-pago-toggle" role="group" aria-label="Forma de pago">
+                <button type="button" class="forma-pago-btn active" id="f-pago-unico"
+                        onclick="_setModoCuotas('unico')">Pago único</button>
+                <button type="button" class="forma-pago-btn" id="f-pago-cuotas"
+                        onclick="_setModoCuotas('cuotas')">En cuotas</button>
+              </div>
+            </div>
+            <!-- Campos adicionales en modo cuotas -->
+            <div id="f-cuotas-fields">
+              <div class="form-row">
+                <div class="form-group" style="flex:1">
+                  <label for="f-cuotas-n">Cuotas</label>
+                  <select id="f-cuotas-n" onchange="_recalcularMontoCuota(); _actualizarBtnGuardar()">
+                    <option value="3">3</option>
+                    <option value="6">6</option>
+                    <option value="9">9</option>
+                    <option value="12" selected>12</option>
+                    <option value="18">18</option>
+                    <option value="24">24</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="f-monto-cuota">Monto por cuota <span style="font-size:.78rem;color:var(--text-muted)">(editable si tiene interés)</span></label>
+                <input type="text" inputmode="decimal" id="f-monto-cuota" placeholder="0,00"
+                       oninput="formatearMiles(this); _montoCuotaEditado=true">
+                <div class="cuota-monto-cuota-calc" id="f-monto-cuota-calc"></div>
+              </div>
+              <div class="form-group">
+                <label for="f-primer-mes-liq">1ra cuota se liquida en</label>
+                <input type="month" id="f-primer-mes-liq">
+              </div>
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer">
+                  <input type="checkbox" id="f-cft-check" onchange="_toggleCFT()">
+                  Tiene interés (CFT)
+                </label>
+                <div id="f-cft-row" style="display:none;margin-top:.4rem">
+                  <input type="text" inputmode="decimal" id="f-cft-pct" placeholder="Ej: 86.5" style="max-width:120px">
+                  <span style="margin-left:.4rem;font-size:.83rem;color:var(--text-muted)">% anual</span>
+                </div>
+              </div>
+            </div>
           <!-- Fila 5: Descripción -->
           <div class="form-row">
             <div class="form-group full">
@@ -2361,6 +2437,33 @@
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
 
+        <!-- Tarjeta cuotas activas -->
+        <div class="cuotas-card" id="cuotas-card" style="display:none">
+          <div class="cuotas-header" onclick="toggleCuotasCard()"
+               role="button" tabindex="0" aria-expanded="true" aria-controls="cuotas-body-wrap"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCuotasCard()}">
+            <div class="cuotas-header-left">
+              <i data-lucide="credit-card" width="16" height="16" style="color:var(--yellow)"></i>
+              Cuotas activas
+              <span class="cuota-badge-comp" id="cuotas-count">0 compras</span>
+            </div>
+            <span class="cuotas-toggle-icon open" id="cuotas-toggle-icon">▾</span>
+          </div>
+          <div id="cuotas-body-wrap">
+            <div class="cuotas-summary">
+              <span>Este mes: <strong id="cuotas-este-mes">$0</strong></span>
+              <span>Comprometido futuro: <strong id="cuotas-futuro">$0</strong></span>
+            </div>
+            <div class="cuotas-body" id="cuotas-rows"></div>
+            <div class="cuotas-actions">
+              <button class="btn btn-outline" style="font-size:.83rem"
+                      onclick="_setModoCuotasYNavegar()">+ Nueva compra en cuotas</button>
+              <button class="btn btn-ghost" style="font-size:.83rem"
+                      onclick="_abrirModalCuotas(null)">Ver todas</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Toggle desglose -->
         <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
           <button id="btn-toggle-desglose"
@@ -2563,14 +2666,6 @@
           <h1>Importar datos</h1>
         </div>
 
-        <!-- Tabs -->
-        <div class="imp-tabs">
-          <button class="imp-tab active" id="imp-tab-btn-paste" onclick="impSwitchTab('paste')">Copiar / Pegar</button>
-          <button class="imp-tab" id="imp-tab-btn-pdf" onclick="impSwitchTab('pdf')">Resumen de tarjeta (PDF)</button>
-        </div>
-
-        <!-- ── TAB: COPIAR/PEGAR ── -->
-        <div id="imp-tab-paste" class="imp-tab-panel active">
 
         <!-- Instrucciones -->
         <div class="imp-instrucciones">
@@ -2593,13 +2688,14 @@
               <tr><td>6</td><td>Responsabilidad</td><td><code>Mío</code> / <code>Compartido</code> / <code>De Ama</code></td><td>— (default: Mío)</td></tr>
               <tr><td>7</td><td>Fuente</td><td>Galicia, HSBC, etc.</td><td>—</td></tr>
               <tr><td>8</td><td>Moneda</td><td><code>ARS</code> (pesos) o <code>USD</code> (dólares)</td><td>— (default: ARS)</td></tr>
+              <tr><td>9</td><td>Mes liquidación</td><td><code>YYYY-MM</code> — solo para TC cuando la compra y el resumen son de distinto mes (ej: <code>2026-02</code>)</td><td>— (solo TC)</td></tr>
             </tbody>
           </table>
           <br>
           <strong>Ejemplo de fila (ARS):</strong><br>
-          <code>15/01/2025	Gasto	Mercado	4500	Supermercado	Compartido	Galicia	ARS</code><br><br>
-          <strong>Ejemplo de fila (USD):</strong><br>
-          <code>10/02/2025	Ingreso	Freelance	500	Pago cliente	Mío	Galicia	USD</code>
+          <code>15/01/2026	Gasto	Mercado	4500	Supermercado	Compartido	Galicia	ARS;</code><br><br>
+          <strong>Ejemplo con mes de liquidación (TC):</strong><br>
+          <code>15/01/2026	Gasto	Mercado	8000	Compra enero	Mío	Galicia VISA	ARS	2026-02</code>
         </div>
 
         <!-- Área de pegado -->
@@ -2648,62 +2744,7 @@
           <div id="imp-result-msg" style="display:none;" class="imp-result-msg"></div>
         </div>
 
-        </div><!-- /imp-tab-paste -->
 
-        <!-- ── TAB: PDF ── -->
-        <div id="imp-tab-pdf" class="imp-tab-panel">
-
-          <div class="pdf-drop-zone" id="pdf-drop-zone"
-               onclick="document.getElementById('pdf-file-input').click()"
-               ondragover="event.preventDefault();this.classList.add('drag-over')"
-               ondragleave="this.classList.remove('drag-over')"
-               ondrop="event.preventDefault();this.classList.remove('drag-over');pdfAgregarArchivos(event.dataTransfer.files)">
-            <div class="pdf-drop-icon">📄</div>
-            <p><strong>Arrastrá los PDFs acá</strong> o hacé clic para seleccionar</p>
-            <p>Cada nombre de archivo será la fuente — ej: <code>Galicia VISA.pdf</code> → fuente «Galicia VISA»</p>
-            <p style="margin-top:.5rem; font-size:.78rem">Podés subir varios PDFs a la vez (distintas tarjetas)</p>
-            <input type="file" id="pdf-file-input" accept=".pdf" multiple style="display:none"
-                   onchange="pdfAgregarArchivos(this.files)">
-          </div>
-
-          <div class="pdf-file-list" id="pdf-file-list"></div>
-
-          <div id="pdf-parse-progress" class="pdf-parse-progress">⏳ Leyendo PDFs...</div>
-
-          <div class="imp-actions" id="pdf-actions" style="display:none">
-            <button class="btn btn-primary" onclick="parsearPDFs()">Leer y previsualizar</button>
-            <button class="btn btn-outline" onclick="pdfLimpiarTodo()">Limpiar</button>
-          </div>
-
-          <!-- Preview PDF (reutiliza la misma estructura) -->
-          <div id="pdf-preview-wrap" class="imp-preview-wrap" style="display:none; margin-top:1.5rem">
-            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-              <h3>Previsualización</h3>
-              <span id="pdf-badge" class="imp-badge-count">0 transacciones</span>
-              <span style="color:var(--yellow);font-size:.78rem" id="pdf-sin-cat-aviso"></span>
-            </div>
-            <div id="pdf-stats" class="imp-stats"></div>
-            <div class="table-wrap">
-              <table class="imp-preview-table">
-                <thead>
-                  <tr>
-                    <th>#</th><th>Fecha</th><th>Descripción</th>
-                    <th>Monto</th><th>Moneda</th>
-                    <th>Categoría</th><th>Resp.</th><th>Fuente</th><th>Estado</th>
-                  </tr>
-                </thead>
-                <tbody id="pdf-preview-tbody"></tbody>
-              </table>
-            </div>
-            <div class="imp-actions" style="margin-top:1.5rem">
-              <button id="pdf-confirm-btn" class="btn btn-primary" onclick="confirmarImportPDF()">
-                ✅ Importar transacciones
-              </button>
-            </div>
-            <div id="pdf-result-msg" style="display:none;" class="imp-result-msg"></div>
-          </div>
-
-        </div><!-- /imp-tab-pdf -->
 
       </div><!-- /page-importar -->
 
@@ -2772,6 +2813,38 @@
   </div>
 </div>
 
+<!-- Modal gestión de cuotas -->
+<div id="cuotas-modal-overlay" onclick="if(event.target===this)_cerrarModalCuotas()">
+  <div class="cuotas-modal" role="dialog" aria-modal="true" aria-labelledby="cuotas-modal-title">
+    <div class="cuotas-modal-header">
+      <div>
+        <p class="cuotas-modal-title" id="cuotas-modal-title">Cuotas</p>
+        <p class="cuotas-modal-meta" id="cuotas-modal-meta"></p>
+      </div>
+      <button class="delete-btn" onclick="_cerrarModalCuotas()" aria-label="Cerrar" style="font-size:1.1rem">✕</button>
+    </div>
+    <div class="cuotas-modal-progress">
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.25rem">
+        <span id="cuotas-modal-progress-label"></span>
+        <span id="cuotas-modal-restante" style="color:var(--text-muted)"></span>
+      </div>
+      <div class="cuotas-modal-progress-bar">
+        <div class="cuotas-modal-progress-fill" id="cuotas-modal-progress-fill"></div>
+      </div>
+    </div>
+    <div class="cuotas-modal-list" id="cuotas-modal-list"></div>
+    <div class="cuotas-modal-actions">
+      <button class="btn btn-outline" style="color:var(--red);border-color:var(--red)"
+              id="cuotas-modal-btn-cancelar" onclick="_cancelarCuotasAnticipadamente()">
+        Cancelar anticipadamente
+      </button>
+      <button class="btn btn-ghost" id="cuotas-modal-btn-editar"
+              onclick="_abrirEditarCompra()">Editar</button>
+    </div>
+    <div id="cuotas-modal-msg" style="font-size:.83rem;min-height:1em;margin-top:.5rem"></div>
+  </div>
+</div>
+
 <!-- MODAL EDITAR TRANSACCIÓN -->
 <div class="edit-overlay" id="edit-overlay" onclick="if(event.target===this)cerrarEditorTransaccion()">
   <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
@@ -2803,7 +2876,7 @@
         </div>
         <div class="edit-field">
           <label for="edit-monto">Monto</label>
-          <input type="text" inputmode="decimal" id="edit-monto" placeholder="0,00">
+          <input type="text" inputmode="decimal" id="edit-monto" placeholder="0,00" oninput="formatearMiles(this)">
         </div>
       </div>
       <div class="edit-field">
@@ -2883,6 +2956,7 @@ let supabaseClient  = null;
 let supabaseSession = null;
 let USUARIO         = "Daniel";
 let PARTNER         = "Ama";
+let comprasEnCuotas = [];  // loaded by cargarCuotasActivas()
 let CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
 let tipoCambioMEP   = null;
 let allTransac  = [];
@@ -3998,6 +4072,12 @@ function filtrarTabla() {
 
   let datos = allTransac.filter(t => {
     if (_pendingDelete && t.id === _pendingDelete.id) return false;
+    // Hide future installments (mes_liquidacion > current month)
+    if (t.compra_id && t.mes_liquidacion) {
+      const hoy = new Date();
+      const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+      if (t.mes_liquidacion > mesActualStr) return false;
+    }
     const { year: tYear, month: tMonth } = getMesLiquidacion(t);
     const okUsuario = (t.usuario || "Daniel") === USUARIO;
     const okMes    = !mes    || tMonth === parseInt(mes);
@@ -4073,7 +4153,13 @@ function filtrarTabla() {
       <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="width:7px;height:7px;border-radius:50%;background:${_catColor(t.categoria)};flex-shrink:0;opacity:.85"></span>${escapeHtml(t.categoria)}</span></td>
       <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${escapeHtml(t.fuente) || "—"}</td>
       <td class="col-hide-sm"><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${escapeHtml(r)}</span></td>
-      <td class="col-hide-sm" style="color:var(--text-muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(t.descripcion) || "—"}</td>
+      <td class="col-hide-sm" style="color:var(--text-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(t.descripcion) || "—"}${t.cuota_nro && t.cuota_total
+          ? ` <span class="badge-cuota" role="button" tabindex="0"
+                    data-compra-id="${t.compra_id}"
+                    onclick="_abrirModalCuotas(this.dataset.compraId)"
+                    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_abrirModalCuotas(this.dataset.compraId)}"
+                    title="Ver cuotas">[${t.cuota_nro}/${t.cuota_total}]</span>`
+          : ""}</td>
       <td style="text-align:right;font-weight:600;white-space:nowrap;color:${t.tipo==="Ingreso"?"var(--green)":"var(--red)"}">${fmtMoneda(t.monto, mon)}</td>
       <td class="col-hide-xs">${monBadge}</td>
       <td style="white-space:nowrap">
@@ -4344,6 +4430,7 @@ function setTipo(tipo) {
 }
 
 async function guardarTransaccion() {
+  if (_modoCuotas) { await guardarCompraEnCuotas(); return; }
   const fecha   = document.getElementById("f-fecha").value;
   const monto   = parsearDecimal(document.getElementById("f-monto").value);
   const cat     = document.getElementById("f-categoria").value;
@@ -4410,6 +4497,135 @@ async function guardarTransaccion() {
   btn.textContent = "Guardar";
 }
 
+async function guardarCompraEnCuotas() {
+  const btn = document.getElementById("btn-guardar");
+  const msg = document.getElementById("form-msg");
+  btn.disabled = true;
+  if (msg) { msg.textContent = ""; msg.style.display = "none"; }
+
+  const fecha           = document.getElementById("f-fecha")?.value || "";
+  const categoria       = document.getElementById("f-categoria")?.value || "";
+  const fuente          = document.getElementById("f-fuente")?.value || "";
+  const responsabilidad = document.querySelector("#f-responsabilidad")?.value || "Mío";
+  const moneda          = document.querySelector(".moneda-btn.active")?.dataset.val || "ARS";
+  const descripcion     = document.getElementById("f-descripcion")?.value.trim() || "";
+  const montoTotal      = parsearDecimal(document.getElementById("f-monto")?.value);
+  const cuotasTotal     = parseInt(document.getElementById("f-cuotas-n")?.value) || 0;
+  const montoCuota      = parsearDecimal(document.getElementById("f-monto-cuota")?.value);
+  const primerMesLiq    = document.getElementById("f-primer-mes-liq")?.value || "";
+  const cftPct          = document.getElementById("f-cft-check")?.checked
+    ? parsearDecimal(document.getElementById("f-cft-pct")?.value) || null
+    : null;
+
+  // Validation
+  const errs = [];
+  if (!fecha)                                          errs.push("fecha");
+  if (!categoria)                                      errs.push("categoría");
+  if (!fuente)                                         errs.push("fuente");
+  if (!descripcion)                                    errs.push("descripción");
+  if (montoTotal <= 0)                                 errs.push("monto total");
+  if (cuotasTotal < 2 || cuotasTotal > 60)             errs.push("cuotas (2–60)");
+  if (montoCuota <= 0)                                 errs.push("monto por cuota");
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(primerMesLiq)) errs.push("mes de primera cuota");
+
+  if (errs.length) {
+    if (msg) { msg.textContent = `Completá: ${errs.join(", ")}`; msg.style.display = "block"; }
+    btn.disabled = false;
+    _actualizarBtnGuardar();
+    return;
+  }
+
+  btn.textContent = "Guardando...";
+
+  try {
+    // 1. Insert compra metadata
+    const compraId = crypto.randomUUID();
+    const { error: errCompra } = await supabaseClient.from("compras_cuotas").insert({
+      id: compraId,
+      usuario: USUARIO,
+      descripcion,
+      categoria,
+      responsabilidad,
+      fuente,
+      moneda,
+      monto_total: montoTotal,
+      cuotas_total: cuotasTotal,
+      monto_cuota: montoCuota,
+      primer_mes_liq: primerMesLiq,
+      cft_anual_pct: cftPct,
+      user_id: supabaseSession.user.id
+    });
+    if (errCompra) throw errCompra;
+
+    // 2. Generate N transaction rows (all upfront)
+    const [anio0, mes0] = primerMesLiq.split("-").map(Number);
+    const rows = Array.from({ length: cuotasTotal }, (_, i) => {
+      const d = new Date(anio0, mes0 - 1 + i, 1);
+      const mesLiq = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const nroStr = String(i + 1).padStart(2, "0");
+      const totStr = String(cuotasTotal).padStart(2, "0");
+      return {
+        id: crypto.randomUUID(),
+        fecha,
+        tipo: "Gasto",
+        categoria,
+        monto: montoCuota,
+        descripcion: `${descripcion} ${nroStr}/${totStr}`,
+        usuario: USUARIO,
+        responsabilidad,
+        fuente,
+        moneda,
+        mes_liquidacion: mesLiq,
+        compra_id: compraId,
+        cuota_nro: i + 1,
+        cuota_total: cuotasTotal,
+        user_id: supabaseSession.user.id
+      };
+    });
+
+    const { error: errTrans } = await supabaseClient.from("transacciones").insert(rows);
+    if (errTrans) {
+      // Rollback: delete compra so we don't have orphaned metadata
+      await supabaseClient.from("compras_cuotas").delete().eq("id", compraId);
+      throw errTrans;
+    }
+
+    // 3. Refresh local state
+    await cargarTodasTransacciones();
+    _renderApp();
+
+    // 4. Toast with first settlement month name
+    const [sigAnio, sigMes] = primerMesLiq.split("-").map(Number);
+    const mesNombre = new Date(sigAnio, sigMes - 1, 1)
+      .toLocaleDateString("es-AR", { month: "long", year: "numeric" });
+    showToast(`${cuotasTotal} cuotas registradas — próxima: ${mesNombre}`, "ok");
+
+    // 5. Reset form to single-payment mode
+    _montoCuotaEditado = false;
+    _setModoCuotas("unico");
+    document.getElementById("f-monto").value        = "";
+    document.getElementById("f-descripcion").value  = "";
+    document.getElementById("f-monto-cuota").value  = "";
+    const calcEl = document.getElementById("f-monto-cuota-calc");
+    if (calcEl) calcEl.innerHTML = "";
+    const cftCheck = document.getElementById("f-cft-check");
+    if (cftCheck) cftCheck.checked = false;
+    const cftRow = document.getElementById("f-cft-row");
+    if (cftRow) cftRow.style.display = "none";
+    const cftPctInp = document.getElementById("f-cft-pct");
+    if (cftPctInp) cftPctInp.value = "";
+    const primerMesInp = document.getElementById("f-primer-mes-liq");
+    if (primerMesInp) primerMesInp.value = "";
+    if (msg) msg.style.display = "none";
+
+  } catch(e) {
+    if (msg) { msg.textContent = `Error: ${e.message}`; msg.style.display = "block"; }
+  } finally {
+    btn.disabled = false;
+    _actualizarBtnGuardar();
+  }
+}
+
 // ─── MODO RÁFAGA ──────────────────────────────────────────────
 function abrirRafaga() {
   document.getElementById("rafaga-overlay").classList.add("open");
@@ -4468,7 +4684,7 @@ function agregarFilaRafaga() {
       </select>
     </td>
     <td><select class="rf-cat">${_optsCategRafaga("Gasto")}</select></td>
-    <td><input type="text" inputmode="decimal" class="rf-monto" placeholder="0,00"></td>
+    <td><input type="text" inputmode="decimal" class="rf-monto" placeholder="0,00" oninput="formatearMiles(this)"></td>
     <td>
       <select class="rf-moneda">
         <option value="ARS">🇦🇷 ARS</option>
@@ -5296,6 +5512,12 @@ function _actualizarNavIndicator() {
 }
 
 function navegarA(pagina) {
+  // Reset cuotas mode when leaving Nueva page
+  if (pagina !== "nueva" && typeof _modoCuotas !== "undefined" && _modoCuotas) {
+    _setModoCuotas("unico");
+    _montoCuotaEditado = false;
+  }
+
   // Aliases para compatibilidad con código interno
   const alias = { mimes: "presupuesto", categorias: "config" };
   pagina = alias[pagina] || pagina;
@@ -5429,6 +5651,9 @@ async function cargarPresupuesto() {
   } catch(e) { console.warn("Error cargando presupuesto:", e); }
   renderPresupuesto();
   inicializarDisclosureMimes();
+  await cargarCuotasActivas();
+  _renderCuotasCard();
+  _inicializarDisclosureCuotas();
   if (window.lucide) lucide.createIcons();
 }
 
@@ -6737,6 +6962,104 @@ function _actualizarMesLiqField(fuente) {
   }
 }
 
+// ─── MODO CUOTAS ─────────────────────────────────────────────
+
+let _modoCuotas = false;
+let _montoCuotaEditado = false;
+const _actualizarMesLiqFieldOrig = _actualizarMesLiqField;
+
+function _actualizarMesLiqField(fuente) {
+  _actualizarMesLiqFieldOrig(fuente);
+  const toggleRow = document.getElementById("f-cuotas-toggle-row");
+  if (!toggleRow) return;
+  if (_esFuenteTC(fuente)) {
+    toggleRow.style.display = "";
+  } else {
+    toggleRow.style.display = "none";
+    _setModoCuotas("unico");
+  }
+}
+
+function _setModoCuotas(modo) {
+  _modoCuotas = modo === "cuotas";
+  const btnUnico   = document.getElementById("f-pago-unico");
+  const btnCuotas  = document.getElementById("f-pago-cuotas");
+  const fields     = document.getElementById("f-cuotas-fields");
+  const mesLiqRow  = document.getElementById("f-mes-liq-row");
+  const montoLabel = document.getElementById("f-monto-label");
+
+  if (_modoCuotas) {
+    btnUnico?.classList.remove("active");
+    btnCuotas?.classList.add("active");
+    if (fields) fields.style.display = "";
+    if (mesLiqRow) mesLiqRow.style.display = "none";
+    if (montoLabel) montoLabel.textContent = "Monto total";
+    const inp = document.getElementById("f-primer-mes-liq");
+    if (inp && !inp.value) {
+      const hoy = new Date();
+      const sig = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 1);
+      inp.value = `${sig.getFullYear()}-${String(sig.getMonth() + 1).padStart(2, "0")}`;
+    }
+    _montoCuotaEditado = false;
+    _recalcularMontoCuota();
+    _actualizarBtnGuardar();
+  } else {
+    btnUnico?.classList.add("active");
+    btnCuotas?.classList.remove("active");
+    if (fields) fields.style.display = "none";
+    const fuente = document.getElementById("f-fuente")?.value || "";
+    if (mesLiqRow) mesLiqRow.style.display = _esFuenteTC(fuente) ? "" : "none";
+    if (montoLabel) montoLabel.textContent = "Monto (ARS $)";
+    _actualizarBtnGuardar();
+  }
+}
+
+function _recalcularMontoCuota() {
+  if (_montoCuotaEditado) return;
+  const montoTotal = parsearDecimal(document.getElementById("f-monto")?.value);
+  const n = parseInt(document.getElementById("f-cuotas-n")?.value) || 12;
+  const inp  = document.getElementById("f-monto-cuota");
+  const calc = document.getElementById("f-monto-cuota-calc");
+  if (!inp || !montoTotal) {
+    if (inp) inp.value = "";
+    if (calc) calc.innerHTML = "";
+    return;
+  }
+  const cuota = montoTotal / n;
+  inp.value = cuota.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (calc) calc.innerHTML = `Calculado: <strong>${fmt(cuota)}</strong> × ${n}`;
+  _actualizarBtnGuardar();
+}
+
+function _actualizarBtnGuardar() {
+  const btn = document.getElementById("btn-guardar");
+  if (!btn) return;
+  if (_modoCuotas) {
+    const n = parseInt(document.getElementById("f-cuotas-n")?.value) || 12;
+    btn.textContent = `Guardar ${n} cuotas`;
+  } else {
+    btn.textContent = "Guardar";
+  }
+}
+
+function _toggleCFT() {
+  const checked = document.getElementById("f-cft-check")?.checked;
+  const row = document.getElementById("f-cft-row");
+  if (row) row.style.display = checked ? "" : "none";
+}
+
+function _setModoCuotasYNavegar() {
+  navegarA("nueva");
+  setTimeout(() => {
+    const sel = document.getElementById("f-fuente");
+    if (sel && !_esFuenteTC(sel.value)) {
+      const tcOpt = [...sel.options].find(o => _esFuenteTC(o.value));
+      if (tcOpt) { sel.value = tcOpt.value; _actualizarMesLiqField(sel.value); }
+    }
+    _setModoCuotas("cuotas");
+  }, 80);
+}
+
 // Muestra/oculta el campo mes_liquidacion en el modal de edición
 function _actualizarEditMesLiqField(fuente) {
   const row = document.getElementById("edit-mes-liq-row");
@@ -6754,367 +7077,20 @@ function _actualizarEditMesLiqField(fuente) {
 
 // Acepta tanto punto como coma como separador decimal (convención argentina: 1.234,56)
 function parsearDecimal(val) {
-  return parseFloat(String(val || 0).replace(',', '.')) || 0;
+  // Strip thousand-separator dots, then convert decimal comma to dot
+  return parseFloat(String(val || 0).replace(/\./g, '').replace(',', '.')) || 0;
 }
 
-// ─── IMPORTAR PDF ─────────────────────────────────────────────
-
-// Configurar PDF.js worker
-if (typeof pdfjsLib !== "undefined") {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-}
-
-// ─ Estado
-let pdfArchivos = []; // Array de File objects seleccionados
-
-// ─ Tab switching
-function impSwitchTab(tab) {
-  ["paste","pdf"].forEach(t => {
-    document.getElementById(`imp-tab-${t}`).classList.toggle("active", t === tab);
-    document.getElementById(`imp-tab-btn-${t}`).classList.toggle("active", t === tab);
-  });
-}
-
-// ─ Drag & drop / file input
-function pdfAgregarArchivos(files) {
-  for (const f of files) {
-    if (!f.name.toLowerCase().endsWith(".pdf")) continue;
-    if (pdfArchivos.find(x => x.name === f.name)) continue; // evitar duplicados
-    pdfArchivos.push(f);
-  }
-  pdfRenderFileList();
-}
-
-function pdfRenderFileList() {
-  const list = document.getElementById("pdf-file-list");
-  const actions = document.getElementById("pdf-actions");
-  list.innerHTML = pdfArchivos.map((f, i) => {
-    const fuente = f.name.replace(/\.pdf$/i, "").trim();
-    const matchFuente = categFuentes.find(cf => cf.toLowerCase() === fuente.toLowerCase()) || fuente;
-    return `
-      <div class="pdf-file-item">
-        <span class="pdf-file-icon">📄</span>
-        <span class="pdf-file-name">${f.name}</span>
-        <span class="pdf-file-fuente">fuente: ${matchFuente}</span>
-        <button class="pdf-file-remove" onclick="pdfQuitarArchivo(${i})" title="Quitar">✕</button>
-      </div>`;
-  }).join("");
-  actions.style.display = pdfArchivos.length ? "flex" : "none";
-  // Limpiar preview si cambian los archivos
-  document.getElementById("pdf-preview-wrap").style.display = "none";
-  document.getElementById("pdf-result-msg").style.display = "none";
-}
-
-function pdfQuitarArchivo(idx) {
-  pdfArchivos.splice(idx, 1);
-  pdfRenderFileList();
-}
-
-function pdfLimpiarTodo() {
-  pdfArchivos = [];
-  document.getElementById("pdf-file-input").value = "";
-  pdfRenderFileList();
-  document.getElementById("pdf-preview-wrap").style.display = "none";
-}
-
-// ─ Extraer texto del PDF agrupando por línea (posición Y)
-async function _pdfExtraerTexto(file) {
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-  let texto = "";
-  for (let p = 1; p <= pdf.numPages; p++) {
-    const page   = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    // Agrupar items por Y redondeado (misma línea)
-    const lineas = {};
-    for (const item of content.items) {
-      const y = Math.round(item.transform[5]);
-      if (!lineas[y]) lineas[y] = [];
-      lineas[y].push({ x: item.transform[4], str: item.str });
-    }
-    const ysOrdenados = Object.keys(lineas).map(Number).sort((a, b) => b - a);
-    for (const y of ysOrdenados) {
-      const lineaStr = lineas[y].sort((a, b) => a.x - b.x).map(i => i.str).join(" ");
-      texto += lineaStr + "\n";
-    }
-    texto += "\n";
-  }
-  return texto;
-}
-
-// ─ Auto-categorización por palabras clave del comercio
-const PDF_KEYWORD_CAT = [
-  { re: /carrefour|jumbo|disco|walmart|coto|\bdia\b|maxi\s?kiosco|supermercado|super\s?vea|toledo|changomas/i, cat: "Mercado" },
-  { re: /netflix|spotify|disney|hbo|amazon\s?prime|apple\s*tv|paramount|deezer|mubi/i,                         cat: "Servicios" },
-  { re: /movistar|personal\s+celular|claro|telecom|directv|cablevision|fibertel|telecentro/i,                  cat: "Servicios" },
-  { re: /metrogas|aysa|edesur|edenor|aguas\s+argen|gas\s+natural/i,                                           cat: "Servicios" },
-  { re: /uber\*|cabify|didi|remis|taxi/i,                                                                      cat: "Transporte" },
-  { re: /ypf|shell|axion|petrobras|nafta|petro|infinia/i,                                                      cat: "Transporte" },
-  { re: /subte|metrovias|sube\b/i,                                                                             cat: "Transporte" },
-  { re: /rappi|pedidos\s*ya|glovo|mostaza\s*delivery/i,                                                        cat: "Delivery" },
-  { re: /farmacity|drogueria|farmacia|ahorro\s*farma/i,                                                        cat: "Farmacia" },
-  { re: /sancor\s+salud|osde|swiss\s*medical|medicus|galeno|omint|dosep/i,                                     cat: "Salud" },
-  { re: /megatlon|smart\s*fit|bodytech|gimnasio|gym\b/i,                                                       cat: "Gym" },
-  { re: /google\b|microsoft|adobe|github|openai|chatgpt|dropbox|icloud/i,                                      cat: "Servicios" },
-  { re: /mercadolibre|meli\b|amazon(?!\s*prime)|ebay/i,                                                        cat: "Electro" },
-  { re: /starbucks|mcdonald|burger\s*king|kentucky|kfc|mostaza|mc\s*donalds|subway|papas\s*fritas|la\s*rural/i, cat: "Salida Comida" },
-  { re: /expensas|administraci[oó]n\s+consorcio/i,                                                             cat: "Expensas" },
-  { re: /hotel|airbnb|booking|despegar|almundo/i,                                                              cat: "Viajes" },
-  { re: /aerol[ií]neas|latam|flybondi|jetsmart|gol\s+airlines/i,                                              cat: "Viajes" },
-  { re: /zara|h&m|uniqlo|adidas|nike|lacoste|polo\s*club|legacy/i,                                            cat: "Vestimenta" },
-  { re: /libreria|el\s*ateneo|yenny|cuspide|libro/i,                                                          cat: "Libros" },
-  { re: /cine|hoyts|cinemark|showcase/i,                                                                       cat: "Entradas" },
-  { re: /teatro|luna\s*park|movistar\s*arena|stadium/i,                                                        cat: "Entradas" },
-];
-
-function _autoCategoria(desc) {
-  const allCats = [...categGasto, ...categIngreso];
-  for (const { re, cat } of PDF_KEYWORD_CAT) {
-    if (re.test(desc)) {
-      // Verificar que esa categoría exista en el dashboard
-      const match = allCats.find(c => c.toLowerCase() === cat.toLowerCase());
-      if (match) return match;
-    }
-  }
-  return ""; // Sin match → el usuario la elige en la preview
-}
-
-// ─ Parser de una línea de resumen bancario argentino
-function _parsearLinea(linea) {
-  const l = linea.replace(/\s{2,}/g, " ").trim();
-
-  // ── Formato Galicia VISA: DD-MM-YY TYPE DESC [CUOTA] COMPROBANTE PESOS [DÓLARES]
-  // Ejemplos reales:
-  //   30-09-25 * 419032*MOVISTAR ARENA 06/06 000719 50.000,00
-  //   06-03-26 K SUBE Viajes 389653 724,09
-  //   06-03-26 K Microsoft*Xbox G MicrosoftUSD 17,95 488809 17,95
-  // Anchor estructural: número de 6 dígitos (comprobante) antes del/los importes
-  const galiciaRe = /^(\d{2})-(\d{2})-(\d{2})\s+\S\s+(.+?)\s+(\d{6})\s+([\d.]+,\d{1,2})(?:\s+([\d.]+,\d{1,2}))?$/;
-  const gm = l.match(galiciaRe);
-  if (gm) {
-    const [, dd, mm, yy, rawDesc, , monto1, monto2] = gm;
-    // Limpiar descripción: quitar prefijo de referencia "NNNNNN*" y cuota "NN/NN"
-    let desc = rawDesc
-      .replace(/^\d+\*/, "")               // quitar prefijo ref tipo "419032*"
-      .replace(/\s+\d{2}\/\d{2}\s*$/, "")  // quitar cuota tipo " 06/06"
-      .trim();
-    // Detectar USD: columna dólares presente (monto2) O "USD"/"U$S" en descripción
-    let gMoneda = "ARS", gMontoStr = monto1;
-    if (monto2 || /USD|U\$S/i.test(desc)) {
-      gMoneda = "USD";
-      gMontoStr = monto2 || monto1; // tomar importe en dólares cuando existe
-    }
-    // Limpiar "MicrosoftUSD", "USD" suelto, etc. de la descripción
-    desc = desc.replace(/U\$S\b/g, "").replace(/\bUSD\b/g, "").replace(/\s{2,}/g, " ").trim();
-    const gMonto = parseFloat(gMontoStr.replace(/\./g, "").replace(",", "."));
-    if (isNaN(gMonto) || gMonto <= 0) return null;
-    return { dia: dd, mes: mm, añoRaw: yy, desc, moneda: gMoneda, monto: gMonto };
-  }
-
-  // ── Formato genérico: DD/MM[/YY|/YYYY]  DESCRIPCION  [U$S|USD]  MONTO
-  // (Otros bancos: Santander, BBVA, HSBC, Macro, etc.)
-  const fechaRe = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/;
-  const fm = l.match(fechaRe);
-  if (!fm) return null;
-
-  const resto = l.slice(fm[0].length).trim();
-  let moneda = "ARS", monto = null, desc = resto;
-
-  const usdM = resto.match(/\bU\$S\s*([\d.,]+)\s*$/i) || resto.match(/\bUSD\s*([\d.,]+)\s*$/i);
-  if (usdM) {
-    moneda = "USD";
-    monto  = usdM[1];
-    desc   = resto.slice(0, resto.lastIndexOf(usdM[0])).trim();
-  } else {
-    const arsM = resto.match(/\$\s*([\d.,]+)\s*$/) || resto.match(/\s([\d.,]+)\s*$/);
-    if (arsM) {
-      monto = arsM[1];
-      desc  = resto.slice(0, resto.lastIndexOf(arsM[0])).trim();
-    }
-  }
-
-  if (!monto) return null;
-
-  // Parsear monto argentino: punto = miles, coma = decimal
-  const montoNum = parseFloat(monto.replace(/\./g, "").replace(",", "."));
-  if (isNaN(montoNum) || montoNum <= 0) return null;
-
-  return { dia: fm[1], mes: fm[2], añoRaw: fm[3], desc: desc.trim(), moneda, monto: montoNum };
-}
-
-// ─ Parsear texto completo de un resumen, devuelve array de transacciones
-function _parsearTextoResumen(texto, fuente) {
-  // Detectar año del período
-  let añoPeriodo = new Date().getFullYear();
-  const añoMatch = texto.match(/(?:per[ií]odo|cierre|vencimiento)[^0-9]*(\d{2})\/(\d{2})\/(\d{2,4})/i);
-  if (añoMatch) {
-    let a = parseInt(añoMatch[3]);
-    if (a < 100) a += 2000;
-    añoPeriodo = a;
-  } else {
-    const anyYear = texto.match(/\b(20\d{2})\b/);
-    if (anyYear) añoPeriodo = parseInt(anyYear[1]);
-  }
-
-  const lineas = texto.split("\n");
-  const resultado = [];
-
-  for (const linea of lineas) {
-    const parsed = _parsearLinea(linea);
-    if (!parsed) continue;
-
-    let año = añoPeriodo;
-    if (parsed.añoRaw) {
-      año = parseInt(parsed.añoRaw);
-      if (año < 100) año += 2000;
-    }
-
-    const fecha    = `${año}-${parsed.mes.padStart(2,"0")}-${parsed.dia.padStart(2,"0")}`;
-    const categoria = _autoCategoria(parsed.desc);
-
-    resultado.push({
-      fecha, tipo: "Gasto",
-      categoria,
-      monto: parsed.monto,
-      moneda: parsed.moneda,
-      descripcion: parsed.desc,
-      fuente,
-      usuario: USUARIO,
-      responsabilidad: "Mío",
-      mes_liquidacion: _esFuenteTC(fuente) ? fecha.substring(0, 7) : null,
-    });
-  }
-  return resultado;
-}
-
-// ─ Parsear todos los PDFs cargados
-let pdfFilasParsed = [];
-
-async function parsearPDFs() {
-  if (!pdfArchivos.length) return;
-  const progress = document.getElementById("pdf-parse-progress");
-  const actions  = document.getElementById("pdf-actions");
-  progress.style.display = "block";
-  actions.style.display  = "none";
-
-  pdfFilasParsed = [];
-
-  for (const file of pdfArchivos) {
-    const fuente = file.name.replace(/\.pdf$/i, "").trim();
-    progress.textContent = `⏳ Leyendo ${file.name}...`;
-    try {
-      const texto = await _pdfExtraerTexto(file);
-      const filas = _parsearTextoResumen(texto, fuente);
-      pdfFilasParsed.push(...filas);
-    } catch (e) {
-      console.error("Error leyendo PDF:", file.name, e);
-    }
-  }
-
-  progress.style.display = "none";
-  actions.style.display  = "flex";
-  _renderPDFPreview();
-}
-
-// ─ Renderizar preview PDF con selects de categoría editables
-function _renderPDFPreview() {
-  const wrap   = document.getElementById("pdf-preview-wrap");
-  const tbody  = document.getElementById("pdf-preview-tbody");
-  const badge  = document.getElementById("pdf-badge");
-  const aviso  = document.getElementById("pdf-sin-cat-aviso");
-  const n      = pdfFilasParsed.length;
-
-  if (!n) {
-    wrap.style.display = "none";
-    showToast("No se encontraron transacciones en los PDFs", "error");
-    return;
-  }
-
-  const allCats = [...new Set([...categGasto, ...categIngreso])].sort();
-  const sinCat  = pdfFilasParsed.filter(f => !f.categoria).length;
-
-  badge.textContent = `${n} transacción${n !== 1 ? "es" : ""}`;
-  aviso.textContent = sinCat > 0
-    ? `⚠ ${sinCat} sin categoría auto-detectada — asignala manualmente`
-    : "";
-
-  const respOpts = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De " + PARTNER])
-    .map(r => `<option value="${r}">${r}</option>`)
-    .join("");
-
-  tbody.innerHTML = pdfFilasParsed.map((f, i) => {
-    const catOpts = allCats.map(c =>
-      `<option value="${c}" ${c === f.categoria ? "selected" : ""}>${c}</option>`
-    ).join("");
-    const sinCatCls = f.categoria ? "" : " sin-cat";
-    const monBadge = f.moneda === "USD"
-      ? `<span class="badge-moneda usd">USD</span>`
-      : `<span class="badge-moneda ars">ARS</span>`;
-    const respOptsRow = (categResponsabilidad.length ? categResponsabilidad : ["Mío","Compartido","De " + PARTNER])
-      .map(r => `<option value="${r}" ${r === (f.responsabilidad||"Mío") ? "selected" : ""}>${r}</option>`)
-      .join("");
-    return `<tr>
-      <td>${i+1}</td>
-      <td>${f.fecha}</td>
-      <td style="max-width:200px;font-size:.78rem">${f.descripcion}</td>
-      <td style="text-align:right">${f.moneda === "USD" ? "U$S "+f.monto.toFixed(2) : fmtMoneda(f.monto,"ARS")}</td>
-      <td>${monBadge}</td>
-      <td><select class="pdf-cat-select${sinCatCls}"
-            onchange="pdfFilasParsed[${i}].categoria=this.value;this.classList.remove('sin-cat')"
-          ><option value="">— elegir —</option>${catOpts}</select></td>
-      <td><select class="pdf-cat-select" style="min-width:7rem"
-            onchange="pdfFilasParsed[${i}].responsabilidad=this.value"
-          >${respOptsRow}</select></td>
-      <td style="font-size:.75rem">${f.fuente}</td>
-      <td>${f.categoria ? "✅" : `<span style="color:var(--yellow)">⚠ asignar</span>`}</td>
-    </tr>`;
-  }).join("");
-
-  // Stats
-  const totalARS = pdfFilasParsed.filter(f=>f.moneda==="ARS").reduce((s,f)=>s+f.monto,0);
-  const totalUSD = pdfFilasParsed.filter(f=>f.moneda==="USD").reduce((s,f)=>s+f.monto,0);
-  document.getElementById("pdf-stats").innerHTML =
-    `Total ARS: <strong>${fmtMoneda(totalARS,"ARS")}</strong>&nbsp;&nbsp;` +
-    (totalUSD > 0 ? `Total USD: <strong>U$S ${totalUSD.toFixed(2)}</strong>` : "");
-
-  wrap.style.display = "block";
-}
-
-// ─ Confirmar importación PDF
-async function confirmarImportPDF() {
-  const sinCat = pdfFilasParsed.filter(f => !f.categoria);
-  if (sinCat.length) {
-    showToast(`Asigná categoría a las ${sinCat.length} filas marcadas en amarillo`, "error");
-    return;
-  }
-
-  const btn    = document.getElementById("pdf-confirm-btn");
-  const msgEl  = document.getElementById("pdf-result-msg");
-  btn.disabled = true;
-  btn.textContent = "⏳ Importando...";
-  msgEl.style.display = "none";
-
-  try {
-    const rows = pdfFilasParsed.map(f => ({ id: crypto.randomUUID(), ...f, user_id: supabaseSession.user.id }));
-    const { error } = await supabaseClient.from('transacciones').insert(rows);
-    if (error) throw error;
-    msgEl.style.display = "block";
-    msgEl.className = "imp-result-msg ok";
-    msgEl.textContent = `✅ ${pdfFilasParsed.length} transacciones importadas`;
-    showToast(msgEl.textContent, "ok");
-    await cargarTodasTransacciones();
-    _renderApp();
-    pdfFilasParsed = [];
-    pdfLimpiarTodo();
-    document.getElementById("pdf-preview-wrap").style.display = "none";
-  } catch (e) {
-    msgEl.style.display = "block";
-    msgEl.className = "imp-result-msg fail";
-    msgEl.textContent = `❌ Error de conexión: ${e.message}`;
-    btn.disabled = false;
-    btn.textContent = "✅ Importar transacciones";
-  }
+// Formatea el input de monto con separador de miles (punto) mientras se escribe
+function formatearMiles(input) {
+  const offsetFromEnd = input.value.length - (input.selectionStart || 0);
+  const parts = input.value.replace(/\./g, '').split(',');
+  parts[0] = (parts[0] || '').replace(/\D/g, '');
+  if (parts[0]) parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  if (parts.length > 1) parts[1] = parts[1].replace(/\D/g, '').substring(0, 2);
+  input.value = parts.join(',');
+  const newPos = Math.max(0, input.value.length - offsetFromEnd);
+  try { input.setSelectionRange(newPos, newPos); } catch(e) {}
 }
 
 function toggleDesglose() {
@@ -7125,6 +7101,276 @@ function toggleDesglose() {
   el.style.display = visible ? "none" : "";
   btn.textContent  = visible ? "Ver desglose ▾" : "Ocultar desglose ▴";
   try { localStorage.setItem(USUARIO + "_disclosure_mimes", visible ? "0" : "1"); } catch(e) {}
+}
+
+// ─── CUOTAS ACTIVAS ───────────────────────────────────────────
+
+async function cargarCuotasActivas() {
+  const { data, error } = await supabaseClient
+    .from("compras_cuotas")
+    .select("*")
+    .eq("usuario", USUARIO)
+    .eq("estado", "activa")
+    .order("created_at");
+  comprasEnCuotas = error ? [] : (data || []);
+}
+
+function _renderCuotasCard() {
+  const card = document.getElementById("cuotas-card");
+  if (!card) return;
+  if (!comprasEnCuotas.length) { card.style.display = "none"; return; }
+
+  const hoy = new Date();
+  const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+  const MESES_CORTOS = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+  let estesMes = 0, futuro = 0;
+  const toComplete = [];
+
+  const rows = comprasEnCuotas.map(c => {
+    const cuotasTrans = allTransac.filter(t => t.compra_id === c.id);
+    const pagadas = cuotasTrans.filter(t => (t.mes_liquidacion || "") <= mesActualStr).length;
+    const factor  = c.responsabilidad === "Compartido" ? 0.5 : 1;
+
+    // Auto-complete check (lazy)
+    if (pagadas >= c.cuotas_total) {
+      toComplete.push(c.id);
+      return null;
+    }
+
+    // Accumulate summary totals
+    cuotasTrans.filter(t => t.mes_liquidacion === mesActualStr)
+      .forEach(t => { estesMes += Number(t.monto) * factor; });
+    cuotasTrans.filter(t => (t.mes_liquidacion || "") > mesActualStr)
+      .forEach(t => { futuro += Number(t.monto) * factor; });
+
+    // Last installment month label
+    const ultima = cuotasTrans.find(t => Number(t.cuota_nro) === c.cuotas_total);
+    let cierreStr = "";
+    if (ultima?.mes_liquidacion) {
+      const [cy, cm] = ultima.mes_liquidacion.split("-").map(Number);
+      cierreStr = `${MESES_CORTOS[cm - 1]} ${String(cy).slice(2)}`;
+    }
+
+    const pct = Math.round((pagadas / c.cuotas_total) * 100);
+    const esComp = c.responsabilidad === "Compartido";
+
+    return `<div class="cuota-row">
+      <div class="cuota-row-header">
+        <span class="cuota-desc">${escapeHtml(c.descripcion)}</span>
+        ${esComp ? '<span class="cuota-badge-comp">compartido</span>' : ""}
+      </div>
+      <div class="cuota-progress-wrap">
+        <div class="cuota-progress-bar">
+          <div class="cuota-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <span class="cuota-progress-label">${pagadas}/${c.cuotas_total}</span>
+        <span class="cuota-progress-meta">${fmt(c.monto_cuota)}/mes${cierreStr ? ` · ${cierreStr}` : ""}</span>
+      </div>
+    </div>`;
+  }).filter(Boolean);
+
+  // Lazy auto-complete: mark finished purchases in Supabase
+  toComplete.forEach(id => {
+    supabaseClient.from("compras_cuotas")
+      .update({ estado: "completada" })
+      .eq("id", id)
+      .then(() => {});
+    comprasEnCuotas = comprasEnCuotas.filter(c => c.id !== id);
+  });
+
+  if (!rows.length) { card.style.display = "none"; return; }
+
+  card.style.display = "";
+  document.getElementById("cuotas-count").textContent =
+    `${rows.length} compra${rows.length !== 1 ? "s" : ""}`;
+  document.getElementById("cuotas-este-mes").textContent = fmt(estesMes);
+  document.getElementById("cuotas-futuro").textContent   = fmt(futuro);
+  document.getElementById("cuotas-rows").innerHTML       = rows.join("");
+  if (window.lucide) lucide.createIcons();
+}
+
+function toggleCuotasCard() {
+  const bodyWrap = document.getElementById("cuotas-body-wrap");
+  const icon     = document.getElementById("cuotas-toggle-icon");
+  if (!bodyWrap || !icon) return;
+  const visible = bodyWrap.style.display !== "none";
+  bodyWrap.style.display = visible ? "none" : "";
+  icon.classList.toggle("open", !visible);
+  // Update aria-expanded on the header div
+  const header = document.querySelector(".cuotas-header");
+  if (header) header.setAttribute("aria-expanded", String(!visible));
+  try { localStorage.setItem(USUARIO + "_disclosure_cuotas", visible ? "0" : "1"); } catch(e) {}
+}
+
+function _inicializarDisclosureCuotas() {
+  const saved = (() => {
+    try { return localStorage.getItem(USUARIO + "_disclosure_cuotas"); } catch(e) { return null; }
+  })();
+  const bodyWrap = document.getElementById("cuotas-body-wrap");
+  const icon     = document.getElementById("cuotas-toggle-icon");
+  const header   = document.querySelector(".cuotas-header");
+  if (!bodyWrap || !icon) return;
+  if (saved === "0") {
+    bodyWrap.style.display = "none";
+    icon.classList.remove("open");
+    if (header) header.setAttribute("aria-expanded", "false");
+  } else {
+    bodyWrap.style.display = "";
+    icon.classList.add("open");
+    if (header) header.setAttribute("aria-expanded", "true");
+  }
+}
+
+// ─── MODAL GESTIÓN DE CUOTAS ──────────────────────────────────
+
+let _cuotaModalCompraId = null;
+
+function _abrirModalCuotas(compraId) {
+  const id = compraId || comprasEnCuotas[0]?.id;
+  if (!id) return;
+  _cuotaModalCompraId = id;
+  _renderModalCuotas(id);
+  document.getElementById("cuotas-modal-overlay").classList.add("open");
+}
+
+function _cerrarModalCuotas() {
+  document.getElementById("cuotas-modal-overlay").classList.remove("open");
+  _cuotaModalCompraId = null;
+}
+
+function _renderModalCuotas(compraId) {
+  const c = comprasEnCuotas.find(x => x.id === compraId);
+  if (!c) return;
+
+  const hoy = new Date();
+  const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+  const MESES_CORTOS = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+  const cuotasTrans = allTransac
+    .filter(t => t.compra_id === compraId)
+    .sort((a, b) => (Number(a.cuota_nro) || 0) - (Number(b.cuota_nro) || 0));
+
+  const pagadas  = cuotasTrans.filter(t => (t.mes_liquidacion || "") <= mesActualStr).length;
+  const restante = cuotasTrans
+    .filter(t => (t.mes_liquidacion || "") > mesActualStr)
+    .reduce((s, t) => s + Number(t.monto), 0);
+  const pct = c.cuotas_total > 0 ? Math.round((pagadas / c.cuotas_total) * 100) : 0;
+
+  document.getElementById("cuotas-modal-title").textContent = c.descripcion;
+  document.getElementById("cuotas-modal-meta").textContent =
+    `${c.fuente} · ${c.responsabilidad} · ${c.moneda}`;
+  document.getElementById("cuotas-modal-progress-label").textContent =
+    `${pagadas} de ${c.cuotas_total} pagadas`;
+  document.getElementById("cuotas-modal-restante").textContent =
+    restante > 0 ? `${fmt(restante)} restantes` : "Completada";
+  document.getElementById("cuotas-modal-progress-fill").style.width = `${pct}%`;
+
+  const listHTML = cuotasTrans.map(t => {
+    const [ly, lm] = (t.mes_liquidacion || "").split("-").map(Number);
+    const mesStr = (lm && ly) ? `${MESES_CORTOS[lm - 1]} ${ly}` : (t.mes_liquidacion || "—");
+    const pagada = (t.mes_liquidacion || "") <= mesActualStr;
+    return `<div class="cuota-list-row">
+      <span class="cuota-list-mes">${mesStr}</span>
+      <span>${fmtMoneda(Number(t.monto), t.moneda || "ARS")}</span>
+      <span class="cuota-list-estado ${pagada ? "pagada" : "pendiente"}">${pagada ? "✅" : "⏳"}</span>
+    </div>`;
+  }).join("");
+
+  document.getElementById("cuotas-modal-list").innerHTML = listHTML;
+  document.getElementById("cuotas-modal-msg").textContent = "";
+
+  const hasFuture = cuotasTrans.some(t => (t.mes_liquidacion || "") > mesActualStr);
+  const btnCancelar = document.getElementById("cuotas-modal-btn-cancelar");
+  if (btnCancelar) btnCancelar.style.display = hasFuture ? "" : "none";
+}
+
+async function _cancelarCuotasAnticipadamente() {
+  const id = _cuotaModalCompraId;
+  if (!id) return;
+
+  const hoy = new Date();
+  const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+  const cuotasFuturas = allTransac.filter(t =>
+    t.compra_id === id && (t.mes_liquidacion || "") > mesActualStr
+  );
+
+  if (!cuotasFuturas.length) {
+    document.getElementById("cuotas-modal-msg").textContent = "No hay cuotas futuras para cancelar.";
+    return;
+  }
+
+  const ok = confirm(`Se eliminarán ${cuotasFuturas.length} cuotas pendientes. ¿Continuar?`);
+  if (!ok) return;
+
+  const btnCancelar = document.getElementById("cuotas-modal-btn-cancelar");
+  if (btnCancelar) { btnCancelar.disabled = true; btnCancelar.textContent = "Cancelando..."; }
+
+  try {
+    const { error: errDel } = await supabaseClient
+      .from("transacciones")
+      .delete()
+      .eq("compra_id", id)
+      .gt("mes_liquidacion", mesActualStr);
+    if (errDel) throw errDel;
+
+    const { error: errUpd } = await supabaseClient
+      .from("compras_cuotas")
+      .update({ estado: "cancelada" })
+      .eq("id", id);
+    if (errUpd) throw errUpd;
+
+    await Promise.all([cargarTodasTransacciones(), cargarCuotasActivas()]);
+    _renderApp();
+    _cerrarModalCuotas();
+    showToast("Cuotas restantes canceladas", "ok");
+
+  } catch(e) {
+    document.getElementById("cuotas-modal-msg").textContent = `Error: ${e.message}`;
+    if (btnCancelar) { btnCancelar.disabled = false; btnCancelar.textContent = "Cancelar anticipadamente"; }
+  }
+}
+
+function _abrirEditarCompra() {
+  const id = _cuotaModalCompraId;
+  const c  = comprasEnCuotas.find(x => x.id === id);
+  if (!c) return;
+  const desc = prompt("Nueva descripción:", c.descripcion);
+  if (desc === null) return;
+  if (!desc.trim()) { alert("La descripción no puede estar vacía."); return; }
+  _guardarEdicionCompra(id, desc.trim());
+}
+
+async function _guardarEdicionCompra(compraId, nuevaDesc) {
+  const msg = document.getElementById("cuotas-modal-msg");
+  try {
+    const { error: errComp } = await supabaseClient
+      .from("compras_cuotas")
+      .update({ descripcion: nuevaDesc })
+      .eq("id", compraId);
+    if (errComp) throw errComp;
+
+    const cuotasTrans = allTransac.filter(t => t.compra_id === compraId);
+    const updates = cuotasTrans.map(t => {
+      const nroStr = String(Number(t.cuota_nro) || 1).padStart(2, "0");
+      const totStr = String(Number(t.cuota_total) || 1).padStart(2, "0");
+      return supabaseClient
+        .from("transacciones")
+        .update({ descripcion: `${nuevaDesc} ${nroStr}/${totStr}` })
+        .eq("id", t.id);
+    });
+    const results = await Promise.all(updates);
+    const firstErr = results.find(r => r.error)?.error;
+    if (firstErr) throw firstErr;
+
+    await Promise.all([cargarTodasTransacciones(), cargarCuotasActivas()]);
+    _renderApp();
+    _renderModalCuotas(compraId);
+    if (msg) msg.textContent = "✅ Guardado";
+
+  } catch(e) {
+    if (msg) msg.textContent = `Error: ${e.message}`;
+  }
 }
 
 function inicializarDisclosureMimes() {
