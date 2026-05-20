@@ -6983,7 +6983,7 @@ function _setModoCuotas(modo) {
   if (_modoCuotas) {
     btnUnico?.classList.remove("active");
     btnCuotas?.classList.add("active");
-    if (fields) fields.style.display = "";
+    if (fields) fields.style.display = "block";
     if (mesLiqRow) mesLiqRow.style.display = "none";
     if (montoLabel) montoLabel.textContent = "Monto total";
     const inp = document.getElementById("f-primer-mes-liq");
