@@ -6948,34 +6948,26 @@ function _esFuenteTC(fuente) {
 }
 
 // Muestra/oculta el campo mes_liquidacion en el formulario de nueva transacción
-function _actualizarMesLiqField(fuente) {
-  const row = document.getElementById("f-mes-liq-row");
-  const inp = document.getElementById("f-mes-liq");
-  const err = document.getElementById("f-mes-liq-err");
-  if (!row || !inp) return;
-  if (_esFuenteTC(fuente)) {
-    row.style.display = "";
-  } else {
-    row.style.display = "none";
-    inp.value = "";
-    if (err) err.textContent = "";
-  }
-}
-
 // ─── MODO CUOTAS ─────────────────────────────────────────────
 
 let _modoCuotas = false;
 let _montoCuotaEditado = false;
-const _actualizarMesLiqFieldOrig = _actualizarMesLiqField;
 
 function _actualizarMesLiqField(fuente) {
-  _actualizarMesLiqFieldOrig(fuente);
+  const row       = document.getElementById("f-mes-liq-row");
+  const inp       = document.getElementById("f-mes-liq");
+  const err       = document.getElementById("f-mes-liq-err");
   const toggleRow = document.getElementById("f-cuotas-toggle-row");
-  if (!toggleRow) return;
+  if (!row || !inp) return;
   if (_esFuenteTC(fuente)) {
-    toggleRow.style.display = "";
+    // En modo pago único: mostrar mes_liq. En modo cuotas: ocultarlo (el toggle lo maneja)
+    if (!_modoCuotas) row.style.display = "";
+    if (toggleRow) toggleRow.style.display = "";
   } else {
-    toggleRow.style.display = "none";
+    row.style.display = "none";
+    inp.value = "";
+    if (err) err.textContent = "";
+    if (toggleRow) toggleRow.style.display = "none";
     _setModoCuotas("unico");
   }
 }
