@@ -261,10 +261,7 @@
   }
   .page-header h1 {
     font-size: 2rem; font-weight: 800; letter-spacing: -.045em; line-height: 1.05;
-    background: linear-gradient(135deg, var(--text) 20%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text);
   }
   .mes-selector {
     display: flex; align-items: center; gap: .5rem;
@@ -282,8 +279,6 @@
   .comp-title,
   .pres-title,
   .section-title {
-    border-left: 3px solid var(--accent);
-    padding-left: 0.75rem;
     font-weight: 700;
     color: var(--text);
   }
@@ -415,7 +410,7 @@
   .kpi-hero { grid-column: span 2; padding: 1.5rem 1.8rem; }
   .kpi-hero .kpi-value { font-size: clamp(1.5rem, 8cqw, 2.4rem); letter-spacing: -.04em; }
   .kpi-hero-bar-wrap { width: 100%; height: 7px; background: var(--bg3); border-radius: 99px; overflow: hidden; margin-top: .75rem; }
-  .kpi-hero-bar-fill { height: 100%; border-radius: 99px; width: 0%; transition: width .6s var(--ease-out, ease); }
+  .kpi-hero-bar-fill { height: 100%; border-radius: 99px; width: 100%; transform: scaleX(0); transform-origin: left; transition: transform .6s var(--ease-out, ease); }
   .kpi-hero-bar-fill.bar-ok   { background: var(--green); }
   .kpi-hero-bar-fill.bar-warn { background: var(--yellow); }
   .kpi-hero-bar-fill.bar-over { background: var(--red); }
@@ -650,7 +645,7 @@
   .plazo-row strong { color: var(--text); }
   /* Barra de progreso del plazo */
   .plazo-progress { height: 4px; background: var(--bg3); border-radius: 99px; overflow: hidden; margin: .55rem 0 .35rem; }
-  .plazo-progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width .4s var(--ease-out); }
+  .plazo-progress-fill { height: 100%; border-radius: 99px; background: var(--accent); width: 100%; transform: scaleX(0); transform-origin: left; transition: transform .4s var(--ease-out); }
   /* Acciones: valor + P&L en el header */
   .accion-header-valor { text-align: right; }
   .accion-valor-num { font-size: .95rem; font-weight: 800; letter-spacing: -.02em; }
@@ -749,8 +744,8 @@
   }
   .fecha-liq-pendiente {
     display: inline-block; font-size: .69rem; font-weight: 600;
-    color: #f59e0b; background: rgba(245,158,11,.12);
-    border: 1px solid rgba(245,158,11,.3);
+    color: var(--yellow); background: var(--yellow-dim);
+    border: 1px solid rgba(200,164,90,.3);
     border-radius: .25rem; padding: .05rem .3rem;
     margin-top: .15rem; white-space: normal;
   }
@@ -1471,8 +1466,7 @@
   .rafaga-count { color: var(--text-muted); font-size: .78rem; }
   .rafaga-row-err td { background: rgba(220,50,50,0.07); }
   .btn-rafaga {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: #000; border: none; border-radius: 9px;
+    background: var(--yellow); color: var(--text); border: none; border-radius: 9px;
     padding: .42rem .95rem; font-size: .82rem; font-weight: 700;
     cursor: pointer; transition: opacity .15s; white-space: nowrap;
   }
@@ -1699,10 +1693,8 @@
 
   /* ─── CUOTAS ─────────────────────────────────────────────── */
   .cuotas-card {
-    background: rgba(var(--card-rgb), 0.72);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(var(--accent-rgb), 0.14);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1rem 1.1rem;
     margin-bottom: 1.2rem;
@@ -1745,7 +1737,7 @@
     flex: 1; height: 5px; background: var(--bg3);
     border-radius: 3px; overflow: hidden; min-width: 60px;
   }
-  .cuota-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
+  .cuota-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; width: 100%; transform: scaleX(0); transform-origin: left; transition: transform .3s; }
   .cuota-progress-label { font-weight: 700; color: var(--text); white-space: nowrap; }
   .cuota-progress-meta { white-space: nowrap; }
   .cuotas-actions {
@@ -1787,7 +1779,7 @@
   .cuotas-modal-meta { font-size: .78rem; color: var(--text-muted); margin-top: .2rem; }
   .cuotas-modal-progress { margin-bottom: 1rem; }
   .cuotas-modal-progress-bar { height: 7px; background: var(--bg3); border-radius: 4px; overflow: hidden; margin: .4rem 0; }
-  .cuotas-modal-progress-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+  .cuotas-modal-progress-fill { height: 100%; background: var(--accent); border-radius: 4px; width: 100%; transform: scaleX(0); transform-origin: left; transition: transform .4s var(--ease-out); }
   .cuotas-modal-list { font-size: .83rem; max-height: 260px; overflow-y: auto; }
   .cuota-list-row {
     display: flex; justify-content: space-between; align-items: center;
@@ -3864,7 +3856,7 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
           <span style="color:var(--text-muted)">${fmtVal(val)} <span style="color:var(--red)">(${pct}%)</span></span>
         </div>
         <div style="background:var(--bg2);border-radius:4px;height:6px;overflow:hidden;margin-bottom:.3rem;">
-          <div style="width:${pct}%;height:100%;background:${PALETTE[i%PALETTE.length]};border-radius:4px;transition:width .5s;"></div>
+          <div style="width:100%;height:100%;background:${PALETTE[i%PALETTE.length]};border-radius:4px;transform:scaleX(${(pct/100).toFixed(3)});transform-origin:left;transition:transform .5s;"></div>
         </div>
         <div id="${drillId}" style="display:none;background:var(--bg2);border-radius:6px;padding:.3rem;margin-top:.3rem;">
           <table style="width:100%;border-collapse:collapse;">
@@ -4693,26 +4685,26 @@ function agregarFilaRafaga() {
   const tr    = document.createElement("tr");
   tr.innerHTML = `
     <td style="color:var(--text-muted);text-align:center;font-size:.73rem;padding:.3rem .2rem">${idx}</td>
-    <td><input type="date" class="rf-fecha" value="${hoy}"></td>
+    <td><input type="date" class="rf-fecha" value="${hoy}" aria-label="Fecha fila ${idx}"></td>
     <td>
-      <select class="rf-tipo" onchange="this.closest('tr').querySelector('.rf-cat').innerHTML=_optsCategRafaga(this.value)">
+      <select class="rf-tipo" aria-label="Tipo fila ${idx}" onchange="this.closest('tr').querySelector('.rf-cat').innerHTML=_optsCategRafaga(this.value)">
         <option value="Gasto">Gasto</option>
         <option value="Ingreso">Ingreso</option>
       </select>
     </td>
-    <td><select class="rf-cat">${_optsCategRafaga("Gasto")}</select></td>
-    <td><input type="text" inputmode="decimal" class="rf-monto" placeholder="0,00" oninput="formatearMiles(this)"></td>
+    <td><select class="rf-cat" aria-label="Categoría fila ${idx}">${_optsCategRafaga("Gasto")}</select></td>
+    <td><input type="text" inputmode="decimal" class="rf-monto" placeholder="0,00" aria-label="Monto fila ${idx}" oninput="formatearMiles(this)"></td>
     <td>
-      <select class="rf-moneda">
+      <select class="rf-moneda" aria-label="Moneda fila ${idx}">
         <option value="ARS">🇦🇷 ARS</option>
         <option value="USD">🇺🇸 USD</option>
       </select>
     </td>
-    <td><input type="text" class="rf-desc rafaga-desc" placeholder="Descripción opcional"></td>
-    <td><select class="rf-resp">${_optsRespRafaga()}</select></td>
+    <td><input type="text" class="rf-desc rafaga-desc" placeholder="Descripción opcional" aria-label="Descripción fila ${idx}"></td>
+    <td><select class="rf-resp" aria-label="Responsabilidad fila ${idx}">${_optsRespRafaga()}</select></td>
     <td>
-      <select class="rf-fuente" onchange="_rafagaActualizarMesLiq(this)">${_optsFuenteRafaga()}</select>
-      <input type="month" class="rf-mes-liq" style="display:none;margin-top:.3rem;width:100%" title="Mes de liquidación">
+      <select class="rf-fuente" aria-label="Fuente fila ${idx}" onchange="_rafagaActualizarMesLiq(this)">${_optsFuenteRafaga()}</select>
+      <input type="month" class="rf-mes-liq" style="display:none;margin-top:.3rem;width:100%" aria-label="Mes de liquidación fila ${idx}">
     </td>
     <td class="td-del"><button class="rafaga-del-btn" onclick="eliminarFilaRafaga(this)" title="Eliminar fila">✕</button></td>
   `;
@@ -5157,7 +5149,7 @@ function cargarCompartidos() {
     if (totalAmbos > 0.01) {
       const pctUsuario = Math.max(0, Math.min(1, totalCompDanielARS / totalAmbos));
       const pctPartner = Math.max(0, Math.min(1, totalCompAmaARS / totalAmbos));
-      document.getElementById("comp-fairness-bar-a").style.width = (pctUsuario * 100).toFixed(1) + "%";
+      document.getElementById("comp-fairness-bar-a").style.width = (pctUsuario * 100).toFixed(1) + "%"; // flex layout — width required here
       document.getElementById("comp-fairness-a").textContent = `${USUARIO} ${Math.round(pctUsuario * 100)}%`;
       document.getElementById("comp-fairness-b").textContent = `${PARTNER} ${Math.round(pctPartner * 100)}%`;
       fairnessEl.style.display = "";
@@ -6138,7 +6130,7 @@ function renderPresupuesto() {
   const heroBar = document.getElementById("pres-hero-bar");
   if (heroBar && sueldoEfectivo > 0) {
     const pctUsado = Math.min(totalGasto / sueldoEfectivo, 1);
-    heroBar.style.width = (pctUsado * 100).toFixed(1) + "%";
+    heroBar.style.transform = `scaleX(${Math.min(pctUsado, 1).toFixed(3)})`;
     heroBar.className = "kpi-hero-bar-fill " + (pctUsado < 0.8 ? "bar-ok" : pctUsado < 1 ? "bar-warn" : "bar-over");
     const heroSub = document.getElementById("pres-kpi-saldo-real-sub");
     if (heroSub) heroSub.textContent = `Sueldo − Gastado real · ${Math.round(pctUsado * 100)}% usado`;
@@ -6423,7 +6415,7 @@ function actualizarKpisPres() {
   const heroBar2 = document.getElementById("pres-hero-bar");
   if (heroBar2 && sueldoEfectivo > 0) {
     const pctUsado2 = Math.min(totalGasto / sueldoEfectivo, 1);
-    heroBar2.style.width = (pctUsado2 * 100).toFixed(1) + "%";
+    heroBar2.style.transform = `scaleX(${Math.min(pctUsado2, 1).toFixed(3)})`;
     heroBar2.className = "kpi-hero-bar-fill " + (pctUsado2 < 0.8 ? "bar-ok" : pctUsado2 < 1 ? "bar-warn" : "bar-over");
     const heroSub2 = document.getElementById("pres-kpi-saldo-real-sub");
     if (heroSub2) heroSub2.textContent = `Sueldo − Gastado real · ${Math.round(pctUsado2 * 100)}% usado`;
@@ -7244,7 +7236,7 @@ function _renderCuotasCard() {
       </div>
       <div class="cuota-progress-wrap">
         <div class="cuota-progress-bar">
-          <div class="cuota-progress-fill" style="width:${pct}%"></div>
+          <div class="cuota-progress-fill" style="transform:scaleX(${(pct/100).toFixed(3)})"></div>
         </div>
         <span class="cuota-progress-label">${pagadas}/${c.cuotas_total}</span>
         <span class="cuota-progress-meta">${fmt(c.monto_cuota)}/mes${cierreStr ? ` · ${cierreStr}` : ""}</span>
@@ -7346,7 +7338,7 @@ function _renderModalCuotas(compraId) {
     `${pagadas} de ${c.cuotas_total} pagadas`;
   document.getElementById("cuotas-modal-restante").textContent =
     restante > 0 ? `${fmt(restante)} restantes` : "Completada";
-  document.getElementById("cuotas-modal-progress-fill").style.width = `${pct}%`;
+  document.getElementById("cuotas-modal-progress-fill").style.transform = `scaleX(${(pct / 100).toFixed(3)})`;
 
   const listHTML = cuotasTrans.map(t => {
     const [ly, lm] = (t.mes_liquidacion || "").split("-").map(Number);
@@ -7641,7 +7633,7 @@ async function renderPlazos() {
         </div>
         <span class="plazo-badge ${badge}">${badgeTxt}</span>
       </div>
-      <div class="plazo-progress"><div class="plazo-progress-fill" style="width:${progreso}%;background:${barColor}"></div></div>
+      <div class="plazo-progress"><div class="plazo-progress-fill" style="transform:scaleX(${(progreso/100).toFixed(3)});background:${barColor}"></div></div>
       <div class="plazo-row"><span>Capital · TNA</span><strong>${fmtP(p.monto)} <span style="font-weight:400;color:var(--text-muted);font-size:.75rem">${moneda} · ${p.tna}%</span></strong></div>
       <div class="plazo-row"><span>Rendimiento estimado</span><strong style="color:var(--green)">+${fmtP(rend)}</strong></div>
       <div class="plazo-row"><span>Total al vencimiento</span><strong style="font-size:.88rem">${fmtP(p.monto + rend)}</strong></div>
