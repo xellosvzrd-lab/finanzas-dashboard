@@ -2969,6 +2969,7 @@ let categIngreso         = [];
 let categFuentes         = [];
 let categFuentesTC       = [];
 let categResponsabilidad = ["Mío","Compartido","De Ama"];
+let _todasCategorias     = [];
 
 let chartCat       = null;
 let chartDonut     = null;
@@ -3173,6 +3174,7 @@ function _aplicarCacheCateg(catData) {
   categFuentes         = catData.fuentes          || [];
   categFuentesTC       = catData.fuentesTC        || [];
   categResponsabilidad = catData.responsabilidad  || categResponsabilidad;
+  if (catData.todas) _todasCategorias = catData.todas;
   // Poblar selectores con los datos cacheados
   // (f-responsabilidad ahora es hidden input + radio buttons — se inicializa en inicializarRespButtons)
   const filResp = document.getElementById("fil-resp");
@@ -3377,11 +3379,12 @@ async function cargarCategorias() {
     const { data, error } = await supabaseClient.from('categorias').select('*');
     if (error) throw error;
     const catData = {
-      gasto:           data.filter(r => r.tipo === 'GASTO').map(r => r.valor).sort(),
-      ingreso:         data.filter(r => r.tipo === 'INGRESO').map(r => r.valor).sort(),
-      fuentes:         data.filter(r => r.tipo === 'FUENTE').map(r => r.valor),
-      fuentesTC:       data.filter(r => r.tipo === 'FUENTE_TC').map(r => r.valor),
-      responsabilidad: categResponsabilidad
+      gasto:           data.filter(r => r.tipo === 'GASTO'     && r.activa !== false).map(r => r.valor).sort(),
+      ingreso:         data.filter(r => r.tipo === 'INGRESO'   && r.activa !== false).map(r => r.valor).sort(),
+      fuentes:         data.filter(r => r.tipo === 'FUENTE'    && r.activa !== false).map(r => r.valor),
+      fuentesTC:       data.filter(r => r.tipo === 'FUENTE_TC' && r.activa !== false).map(r => r.valor),
+      responsabilidad: categResponsabilidad,
+      todas:           data
     };
     _aplicarCacheCateg(catData);
     guardarCacheCateg(catData);
@@ -6436,15 +6439,31 @@ function renderizarConfig() {
 function _renderLista(tipo, items, tipoAPI) {
   const el = document.getElementById("cfg-lista-" + tipo);
   if (!el) return;
-  if (!items.length) {
-    el.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin ítems</div>';
-    return;
+
+  const inactivas = _todasCategorias.filter(r => r.tipo === tipoAPI && r.activa === false).map(r => r.valor).sort();
+
+  let html = "";
+  if (!items.length && !inactivas.length) {
+    html = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin ítems</div>';
+  } else {
+    html = items.map(item => `
+      <div class="cfg-item">
+        <span class="cfg-item-name">${escapeHtml(item)}</span>
+        <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${JSON.stringify(item)},false,this)" title="Ocultar" style="opacity:.6">Ocultar</button>
+        <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}',${JSON.stringify(item)},this)" title="Eliminar">✕</button>
+      </div>`).join("");
+
+    if (inactivas.length) {
+      html += `<div style="font-size:.75rem;color:var(--text-muted);margin:.6rem 0 .3rem;letter-spacing:.04em;text-transform:uppercase">Disponibles (inactivas)</div>`;
+      html += inactivas.map(item => `
+        <div class="cfg-item" style="opacity:.55">
+          <span class="cfg-item-name">${escapeHtml(item)}</span>
+          <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${JSON.stringify(item)},true,this)" title="Activar">Activar</button>
+        </div>`).join("");
+    }
   }
-  el.innerHTML = items.map(item => `
-    <div class="cfg-item">
-      <span class="cfg-item-name">${escapeHtml(item)}</span>
-      <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}',${JSON.stringify(item)},this)" title="Eliminar">✕</button>
-    </div>`).join("");
+
+  el.innerHTML = html;
 }
 
 function _renderListaFuentes(tipo, items, tipoAPI) {
@@ -6514,6 +6533,45 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
     renderizarConfig();
     _refrescarSelectores();
     if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" eliminado.</span>`; }
+  } catch(e) {
+    if (msgEl) { msgEl.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>'; }
+    btn.disabled = false;
+  }
+  setTimeout(() => { if (msgEl) msgEl.innerHTML = ""; }, 3000);
+}
+
+async function toggleCategoria(tipoAPI, valor, activar, btn) {
+  btn.disabled = true;
+  const tipoKey = tipoAPI === 'FUENTE_TC' ? 'fuentetc' : tipoAPI.toLowerCase();
+  const msgEl = document.getElementById("cfg-msg-" + tipoKey);
+  try {
+    const { error } = await supabaseClient
+      .from('categorias')
+      .update({ activa: activar })
+      .eq('tipo', tipoAPI)
+      .eq('valor', valor)
+      .eq('usuario', USUARIO);
+    if (error) throw error;
+
+    const cat = _todasCategorias.find(r => r.tipo === tipoAPI && r.valor === valor && r.usuario === USUARIO);
+    if (cat) cat.activa = activar;
+
+    if (activar) {
+      if      (tipoAPI === "GASTO")    { categGasto.push(valor);    categGasto.sort(); }
+      else if (tipoAPI === "INGRESO")  { categIngreso.push(valor);  categIngreso.sort(); }
+      else if (tipoAPI === "FUENTE")   { categFuentes.push(valor); }
+      else if (tipoAPI === "FUENTE_TC"){ categFuentesTC.push(valor); }
+    } else {
+      if      (tipoAPI === "GASTO")    categGasto     = categGasto.filter(x => x !== valor);
+      else if (tipoAPI === "INGRESO")  categIngreso   = categIngreso.filter(x => x !== valor);
+      else if (tipoAPI === "FUENTE")   categFuentes   = categFuentes.filter(x => x !== valor);
+      else if (tipoAPI === "FUENTE_TC")categFuentesTC = categFuentesTC.filter(x => x !== valor);
+    }
+
+    guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, fuentesTC: categFuentesTC, responsabilidad: categResponsabilidad });
+    renderizarConfig();
+    _refrescarSelectores();
+    if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" ${activar ? "activada" : "desactivada"}.</span>`; }
   } catch(e) {
     if (msgEl) { msgEl.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>'; }
     btn.disabled = false;
