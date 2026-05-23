@@ -6557,7 +6557,11 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
     _refrescarSelectores();
     if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" eliminado.</span>`; }
   } catch(e) {
-    if (msgEl) { msgEl.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>'; }
+    const esFKViolation = e.code === '23503' || e.message?.includes('violates foreign key');
+    const msg = esFKViolation
+      ? `❌ "${valor}" tiene transacciones asociadas y no se puede eliminar. Podés ocultarla con "Ocultar".`
+      : '❌ Error de conexión.';
+    if (msgEl) { msgEl.innerHTML = `<span style="color:var(--red)">${msg}</span>`; }
     btn.disabled = false;
   }
   setTimeout(() => { if (msgEl) msgEl.innerHTML = ""; }, 3000);
