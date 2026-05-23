@@ -2971,6 +2971,14 @@ let categFuentesTC       = [];
 let categResponsabilidad = ["Mío","Compartido","De Ama"];
 let _todasCategorias     = [];
 
+function _getCategoriaId(valor, tipoTx) {
+  const tipoCat = tipoTx === 'Gasto' ? 'GASTO' : 'INGRESO';
+  return _todasCategorias.find(c => c.valor === valor && c.tipo === tipoCat && c.usuario === USUARIO)?.id ?? null;
+}
+function _getCuentaId(fuente) {
+  return _todasCategorias.find(c => c.valor === fuente && (c.tipo === 'FUENTE' || c.tipo === 'FUENTE_TC') && c.usuario === USUARIO)?.id ?? null;
+}
+
 let chartCat       = null;
 let chartDonut     = null;
 let chartEvolCombo = null;
@@ -4380,7 +4388,9 @@ async function guardarEdicionTransaccion() {
     const { error } = await supabaseClient
       .from('transacciones')
       .update({ fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda,
-                mes_liquidacion: mesLiq || null })
+                mes_liquidacion: mesLiq || null,
+                categoria_id: _getCategoriaId(cat, tipo),
+                cuenta_id:    _getCuentaId(fuente) })
       .eq('id', editandoId);
     if (error) {
       if (error.code === '42703' || error.message?.includes('mes_liquidacion')) {
@@ -4464,6 +4474,8 @@ async function guardarTransaccion() {
       .insert({ id: crypto.randomUUID(), fecha, tipo: tipoActual, categoria: cat, monto, descripcion: desc,
                 usuario: USUARIO, responsabilidad: resp, fuente, moneda: monedaActual,
                 mes_liquidacion: mesLiq || null,
+                categoria_id: _getCategoriaId(cat, tipoActual),
+                cuenta_id:    _getCuentaId(fuente),
                 user_id: supabaseSession.user.id })
       .select().single();
     if (error) {
@@ -4582,6 +4594,8 @@ async function guardarCompraEnCuotas() {
         compra_id: compraId,
         cuota_nro: i + 1,
         cuota_total: cuotasTotal,
+        categoria_id: _getCategoriaId(categoria, "Gasto"),
+        cuenta_id:    _getCuentaId(fuente),
         user_id: supabaseSession.user.id
       };
     });
@@ -4771,7 +4785,12 @@ async function guardarRafaga() {
   btn.textContent = "⏳ Guardando...";
 
   try {
-    const rows = validas.map(v => ({ id: crypto.randomUUID(), ...v, user_id: supabaseSession.user.id }));
+    const rows = validas.map(v => ({
+      id: crypto.randomUUID(), ...v,
+      categoria_id: _getCategoriaId(v.categoria, v.tipo),
+      cuenta_id:    _getCuentaId(v.fuente),
+      user_id: supabaseSession.user.id
+    }));
     const { error } = await supabaseClient.from('transacciones').insert(rows);
     if (error) throw error;
     showToast(`✅ ${validas.length} transacciones guardadas`, "ok");
@@ -5254,6 +5273,8 @@ async function confirmarSaldarTodo() {
           responsabilidad: "Mío",
           fuente, moneda: item.moneda,
           usuario: USUARIO,
+          categoria_id: _getCategoriaId(item.cat, item.tipo),
+          cuenta_id:    _getCuentaId(fuente),
           user_id: supabaseSession.user.id
         })
         .select().single();
@@ -5316,6 +5337,8 @@ async function confirmarLiquidar() {
         responsabilidad: "Mío",
         fuente, moneda: "ARS",
         usuario: USUARIO,
+        categoria_id: _getCategoriaId(cat, tipo),
+        cuenta_id:    _getCuentaId(fuente),
         user_id: supabaseSession.user.id
       })
       .select().single();
@@ -6813,7 +6836,12 @@ async function confirmarImport() {
 
   const msgEl = document.getElementById("imp-result-msg");
   try {
-    const rows = importFilas.map(({ errores: _, ...f }) => ({ id: crypto.randomUUID(), ...f, user_id: supabaseSession.user.id }));
+    const rows = importFilas.map(({ errores: _, ...f }) => ({
+      id: crypto.randomUUID(), ...f,
+      categoria_id: _getCategoriaId(f.categoria, f.tipo),
+      cuenta_id:    _getCuentaId(f.fuente),
+      user_id: supabaseSession.user.id
+    }));
     const { error } = await supabaseClient.from('transacciones').insert(rows);
     if (error) throw error;
     msgEl.style.display = "block";
