@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://eutarjfnlkcehhigqqxr.supabase.co wss://eutarjfnlkcehhigqqxr.supabase.co https://dolarapi.com https://api.coinbase.com; img-src 'self' data:; worker-src blob: https://cdnjs.cloudflare.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://eutarjfnlkcehhigqqxr.supabase.co wss://eutarjfnlkcehhigqqxr.supabase.co https://dolarapi.com https://api.coinbase.com https://accounts.google.com; img-src 'self' data:; worker-src blob: https://cdnjs.cloudflare.com;">
 <title>💰 Finanzas Personales — Daniel</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#201A16">
@@ -1024,6 +1024,27 @@
     background: transparent; color: var(--text-muted);
     border: 1px solid var(--border);
   }
+  .btn-google {
+    background: var(--card); color: var(--text);
+    border: 1px solid var(--border);
+    width: 100%; justify-content: center; margin-top: .25rem;
+  }
+  .btn-google:hover { border-color: var(--border2); background: var(--bg2); }
+  .login-divider {
+    display: flex; align-items: center; gap: .75rem;
+    color: var(--text-muted); font-size: .8rem; margin: .75rem 0 .25rem;
+  }
+  .login-divider::before, .login-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .cuenta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .7rem 0; border-bottom: 1px solid var(--border);
+  }
+  .cuenta-row:last-child { border-bottom: none; padding-bottom: .25rem; }
+  .cuenta-provider { display: flex; align-items: center; gap: .6rem; font-size: .88rem; }
+  .cuenta-badge-ok  { color: var(--green); font-size: .78rem; font-weight: 600; }
+  .cuenta-badge-no  { color: var(--text-muted); font-size: .78rem; }
   .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
   /* ─── TOAST ─────────────────────────────────────────────── */
@@ -1820,6 +1841,17 @@
               onclick="mostrarRecuperarPassword()">¿Olvidaste tu contraseña?</button>
     </div>
     <div id="test-result"></div>
+    <div class="login-divider">o</div>
+    <button class="btn btn-google" id="btn-google-login" onclick="guardarConfigGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+        <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 6.294C4.672 4.169 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      Continuar con Google
+    </button>
+    <div id="google-login-result" style="margin-top:.4rem;font-size:.82rem"></div>
   </div>
 
   <!-- ── Pantalla: recuperar contraseña ───────────────── -->
@@ -2591,6 +2623,14 @@
 
         </div><!-- /cfg-grid -->
 
+        <!-- Cuenta y Seguridad -->
+        <div class="chart-card" style="margin-top:1.5rem">
+          <div class="chart-title">Cuenta y Seguridad</div>
+          <div id="cuenta-identities">
+            <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
+          </div>
+        </div>
+
       </div><!-- /page-config -->
 
       <!-- ── PÁGINA INVERSIONES ────────────────────────────── -->
@@ -3094,6 +3134,69 @@ async function guardarConfig() {
   }
 }
 
+async function guardarConfigGoogle() {
+  const btn = document.getElementById('btn-google-login');
+  const res = document.getElementById('google-login-result');
+  btn.disabled = true;
+  btn.querySelector('svg').nextSibling.textContent = ' Redirigiendo…';
+  res.innerHTML = '';
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+  if (error) {
+    res.innerHTML = `<span class="fail">❌ ${escapeHtml(error.message)}</span>`;
+    btn.disabled = false;
+    btn.querySelector('svg').nextSibling.textContent = ' Continuar con Google';
+  }
+}
+
+async function vincularGoogle() {
+  const btn = document.getElementById('btn-vincular-google');
+  const res = document.getElementById('cuenta-msg');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Redirigiendo…'; }
+  const { error } = await supabaseClient.auth.linkIdentity({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+  if (error) {
+    if (res) res.innerHTML = `<span class="fail">❌ ${escapeHtml(error.message)}</span>`;
+    if (btn) { btn.disabled = false; btn.textContent = 'Vincular →'; }
+  }
+}
+
+async function renderizarSeccionCuenta() {
+  const container = document.getElementById('cuenta-identities');
+  if (!container) return;
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  const identities = user?.identities || [];
+  const hasGoogle = identities.some(i => i.provider === 'google');
+  const hasEmail  = identities.some(i => i.provider === 'email');
+  const googleSVG = `<svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true" style="flex-shrink:0">
+    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+    <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+    <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 6.294C4.672 4.169 6.656 3.58 9 3.58z" fill="#EA4335"/>
+  </svg>`;
+  container.innerHTML = `
+    <div class="cuenta-row">
+      <div class="cuenta-provider">
+        <span style="font-size:1rem">📧</span>
+        <span>Email / Contraseña</span>
+        <span class="cuenta-badge-${hasEmail ? 'ok' : 'no'}">${hasEmail ? '✓ Activo' : '— No configurado'}</span>
+      </div>
+    </div>
+    <div class="cuenta-row">
+      <div class="cuenta-provider">
+        ${googleSVG}
+        <span>Google</span>
+        <span class="cuenta-badge-${hasGoogle ? 'ok' : 'no'}">${hasGoogle ? '✓ Vinculado' : '— No vinculado'}</span>
+      </div>
+      ${!hasGoogle ? `<button class="btn btn-ghost" id="btn-vincular-google" onclick="vincularGoogle()" style="font-size:.8rem;padding:.4rem .85rem">Vincular →</button>` : ''}
+    </div>
+    <div id="cuenta-msg" style="margin-top:.5rem;font-size:.82rem"></div>`;
+}
+
 async function volverConfig() {
   if (supabaseClient) await supabaseClient.auth.signOut();
   supabaseSession = null;
@@ -3255,7 +3358,15 @@ function _setVariablesUsuario(nombre) {
 }
 
 function _configurarUsuario(session) {
-  const metaNombre = session.user.user_metadata?.nombre;
+  const metaNombre   = session.user.user_metadata?.nombre;
+  const isGoogleOnly = session.user.app_metadata?.provider === 'google'
+                    && !session.user.app_metadata?.providers?.includes('email');
+  if (isGoogleOnly && !metaNombre) {
+    supabaseClient.auth.signOut();
+    const res = document.getElementById('google-login-result') || document.getElementById('test-result');
+    if (res) res.innerHTML = '<span class="fail">❌ Esta cuenta de Google no está vinculada a ningún usuario. Iniciá sesión con email y vinculá tu cuenta desde Categorías → Cuenta y Seguridad.</span>';
+    return;
+  }
   _setVariablesUsuario(metaNombre || "");
   if (USUARIO) _actualizarStringsUsuario();
 }
@@ -6449,6 +6560,7 @@ function renderizarConfig() {
   _renderLista("ingreso",    categIngreso, "INGRESO");
   _renderListaFuentes("fuente",   categFuentes,   "FUENTE");
   _renderListaFuentes("fuentetc", categFuentesTC, "FUENTE_TC");
+  renderizarSeccionCuenta();
 }
 
 function _renderLista(tipo, items, tipoAPI) {
