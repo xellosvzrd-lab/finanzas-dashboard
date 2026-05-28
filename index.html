@@ -2828,9 +2828,14 @@
 <div id="cuotas-modal-overlay" onclick="if(event.target===this)_cerrarModalCuotas()">
   <div class="cuotas-modal" role="dialog" aria-modal="true" aria-labelledby="cuotas-modal-title">
     <div class="cuotas-modal-header">
-      <div>
+      <div style="flex:1;min-width:0">
         <p class="cuotas-modal-title" id="cuotas-modal-title">Cuotas</p>
         <p class="cuotas-modal-meta" id="cuotas-modal-meta"></p>
+      </div>
+      <div id="cuotas-modal-nav" style="display:none;align-items:center;gap:.3rem;margin-right:.5rem">
+        <button class="delete-btn" onclick="_navModalCuotas(-1)" aria-label="Anterior" style="font-size:.9rem;padding:.2rem .45rem">‹</button>
+        <span id="cuotas-modal-nav-label" style="font-size:.75rem;color:var(--text-muted);white-space:nowrap"></span>
+        <button class="delete-btn" onclick="_navModalCuotas(1)" aria-label="Siguiente" style="font-size:.9rem;padding:.2rem .45rem">›</button>
       </div>
       <button class="delete-btn" onclick="_cerrarModalCuotas()" aria-label="Cerrar" style="font-size:1.1rem">✕</button>
     </div>
@@ -7390,13 +7395,25 @@ function _inicializarDisclosureCuotas() {
 // ─── MODAL GESTIÓN DE CUOTAS ──────────────────────────────────
 
 let _cuotaModalCompraId = null;
+let _cuotaModalIndex = 0;
 
 function _abrirModalCuotas(compraId) {
-  const id = compraId || comprasEnCuotas[0]?.id;
-  if (!id) return;
-  _cuotaModalCompraId = id;
-  _renderModalCuotas(id);
+  if (!comprasEnCuotas.length) return;
+  if (compraId) {
+    _cuotaModalIndex = comprasEnCuotas.findIndex(c => c.id === compraId);
+    if (_cuotaModalIndex < 0) _cuotaModalIndex = 0;
+  } else {
+    _cuotaModalIndex = 0;
+  }
+  _cuotaModalCompraId = comprasEnCuotas[_cuotaModalIndex].id;
+  _renderModalCuotas(_cuotaModalCompraId);
   document.getElementById("cuotas-modal-overlay").classList.add("open");
+}
+
+function _navModalCuotas(dir) {
+  _cuotaModalIndex = (_cuotaModalIndex + dir + comprasEnCuotas.length) % comprasEnCuotas.length;
+  _cuotaModalCompraId = comprasEnCuotas[_cuotaModalIndex].id;
+  _renderModalCuotas(_cuotaModalCompraId);
 }
 
 function _cerrarModalCuotas() {
@@ -7421,6 +7438,17 @@ function _renderModalCuotas(compraId) {
     .filter(t => (t.mes_liquidacion || "") > mesActualStr)
     .reduce((s, t) => s + Number(t.monto), 0);
   const pct = c.cuotas_total > 0 ? Math.round((pagadas / c.cuotas_total) * 100) : 0;
+
+  const navEl = document.getElementById("cuotas-modal-nav");
+  if (navEl) {
+    if (comprasEnCuotas.length > 1) {
+      navEl.style.display = "flex";
+      document.getElementById("cuotas-modal-nav-label").textContent =
+        `${_cuotaModalIndex + 1} / ${comprasEnCuotas.length}`;
+    } else {
+      navEl.style.display = "none";
+    }
+  }
 
   document.getElementById("cuotas-modal-title").textContent = c.descripcion;
   document.getElementById("cuotas-modal-meta").textContent =
