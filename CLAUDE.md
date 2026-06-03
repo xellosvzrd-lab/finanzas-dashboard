@@ -158,11 +158,6 @@ Labels visuales: "Solo mío" / "Lo pagamos juntos" / "Lo pagó [PARTNER]".
 Valores canónicos que van a la BD: `"Mío"` / `"Compartido"` / `"De " + PARTNER`.
 Resetear con `resetRespField()` tras guardar. Llamar `seleccionarResp(valor)` al duplicar.
 
-### Editar transacción (workaround)
-El backend **no tiene** `updateTransaccion`. Se usa delete + add:
-1. `POST { action: "deleteTransaccion", id }`
-2. `POST { action: "addTransaccion", fecha, tipo, categoria, monto, descripcion, usuario, responsabilidad, fuente, moneda }`
-
 ---
 
 ## 6. Backend API (Apps Script)
@@ -182,8 +177,6 @@ El backend **no tiene** `updateTransaccion`. Se usa delete + add:
 { action: "deleteCategoria",   tipo, valor }
 { action: "savePresupuesto",   mes, anio, items, usuario }   ← usuario REQUERIDO
 ```
-
-> ⚠️ `updateTransaccion` **NO existe** en el backend. Siempre usar delete + add.
 
 ---
 
@@ -255,7 +248,6 @@ Usa **variables CSS** (`var(--card)`, `var(--border)`, `var(--bg2)`) para respet
 
 | Problema | Solución aplicada |
 |---|---|
-| `updateTransaccion is not defined` | delete + add en `guardarEdicionTransaccion()` |
 | PDF Galicia no parsea | regex `DD-MM-YY` con comprobante como ancla |
 | Categorías case-sensitive | `_normalizarCategorias()` normaliza al cargar |
 | `fuente`/`responsabilidad` case-sensitive | incluidos en `_normalizarCategorias()` |

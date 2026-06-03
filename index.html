@@ -4356,10 +4356,7 @@ function duplicarTransaccion(id) {
   showToast("📋 Duplicado — revisá los datos antes de guardar", "ok");
 }
 
-// ─── EDITAR TRANSACCIÓN (approach: delete + re-add) ──────────
-// En vez de llamar updateTransaccion en el backend, eliminamos la
-// transacción original y creamos una nueva con los datos actualizados.
-// Esto usa únicamente deleteTransaccion y addTransaccion, que funcionan.
+// ─── EDITAR TRANSACCIÓN ───────────────────────────────────────
 let editandoId   = null;
 let editandoOrig = null; // copia original por si hay que hacer rollback
 
