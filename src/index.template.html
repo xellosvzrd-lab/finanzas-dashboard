@@ -1,6 +1,6 @@
 <!-- ARCHIVO GENERADO — editar en src/js/*.js y ejecutar ./build.sh -->
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
   /* ─── FONTS ──────────────────────────────────────────────── */
-  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Libre+Franklin:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
 
   /* ─── SKIP NAVIGATION ──────────────────────────────────── */
   .skip-link {
@@ -33,51 +33,139 @@
   /* ─── RESET & BASE ─────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ─── SHARED TOKENS ─────────────────────────────────────── */
   :root {
-    /* Backgrounds — tema cálido */
-    --bg:      #FAF8F5;
-    --bg2:     #F2EEE9;
-    --bg3:     #EDE8E3;
-    --card:    #FFFCF9;
-    --border:  #EDE8E3;
-    --border2: #D4CFC9;
+    --font-display: 'Schibsted Grotesk', system-ui, sans-serif;
+    --font-text:    'Hanken Grotesk',    system-ui, sans-serif;
 
-    /* Accent: terracota */
-    --accent:      #C8845A;
-    --accent-dim:  rgba(200,132,90,0.13);
-    --accent-glow: rgba(200,132,90,0.28);
-    --white: #FFFCF9;
-    --overlay: rgba(45,41,38,0.6);
+    /* radii */
+    --r-xs: 8px;  --r-sm: 12px; --r-md: 18px;
+    --r-lg: 26px; --r-xl: 34px; --r-pill: 999px;
 
-    /* Semantic colors */
-    --green:      #5A8C6B;
-    --green-dim:  rgba(90,140,107,0.11);
-    --red:        #C85A5A;
-    --red-dim:    rgba(200,90,90,0.11);
-    --yellow:     #C8A45A;
-    --yellow-dim: rgba(200,164,90,0.11);
+    /* semantic accents — shared (overridden in light) */
+    --pos:  oklch(0.74 0.15 152);
+    --neg:  oklch(0.70 0.16 25);
+    --info: oklch(0.70 0.15 252);
+    --save: oklch(0.74 0.13 195);
+    --warn: oklch(0.78 0.14 75);
 
-    /* Text */
-    --text:       #2D2926;
-    --text-muted: #8C7B72;
-
-    --radius: 14px;
-    --shadow: 0 1px 3px rgba(45,41,38,0.08);
-    --glass:  rgba(255,255,255,0.6);
-    --glass-border: rgba(45,41,38,0.06);
-
-    /* Easing curves */
+    /* easing */
     --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  }
 
-    /* RGB splits for rgba() usage */
-    --card-rgb:        255, 252, 249;
-    --accent-rgb:      200, 132, 90;
-    --green-rgb:       90, 140, 107;
-    --red-rgb:         200, 90, 90;
-    --yellow-rgb:      200, 164, 90;
-    --text-rgb:        45, 41, 38;
-    --text-muted-rgb:  140, 123, 114;
+  /* ─── DARK THEME (default / Daniel) ─────────────────────── */
+  :root[data-theme='dark'] {
+    --bg:          #141019;
+    --bg-grad:     radial-gradient(120% 80% at 80% -10%, #251c39 0%, #141019 55%);
+    --elev:        #1b1626;
+    --surface:     #221c30;
+    --surface-2:   #2b2440;
+    --surface-3:   #352c4d;
+    --line:        rgba(255,255,255,0.08);
+    --line-strong: rgba(255,255,255,0.15);
+    --text:        #f4f1fa;
+    --text-dim:    #b3aac6;
+    --text-faint:  #7e7595;
+    --brand:       oklch(0.74 0.15 300);
+    --brand-2:     oklch(0.78 0.16 330);
+    --brand-ink:   #fff;
+    --brand-soft:  color-mix(in oklab, var(--brand) 16%, var(--surface));
+    --pos-soft:    color-mix(in oklab, var(--pos)   16%, var(--surface));
+    --neg-soft:    color-mix(in oklab, var(--neg)   16%, var(--surface));
+    --shadow-card: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 30px rgba(0,0,0,.45);
+    --shadow-pop:  0 18px 50px rgba(0,0,0,.55);
+
+    /* legacy aliases — components existentes sin cambios */
+    --bg2:         var(--surface-2);
+    --bg3:         var(--surface-3);
+    --card:        var(--surface);
+    --border:      var(--line);
+    --border2:     var(--line-strong);
+    --accent:      var(--brand);
+    --accent-dim:  var(--brand-soft);
+    --accent-glow: color-mix(in oklab, var(--brand) 28%, transparent);
+    --white:       var(--brand-ink);
+    --overlay:     rgba(0,0,0,0.55);
+    --green:       var(--pos);
+    --green-dim:   var(--pos-soft);
+    --red:         var(--neg);
+    --red-dim:     var(--neg-soft);
+    --yellow:      var(--warn);
+    --yellow-dim:  color-mix(in oklab, var(--warn) 16%, var(--surface));
+    --text-muted:  var(--text-dim);
+    --radius:      var(--r-md);
+    --shadow:      var(--shadow-card);
+    --glass:       rgba(255,255,255,0.07);
+    --glass-border:rgba(255,255,255,0.12);
+
+    /* RGB splits para rgba() */
+    --accent-rgb:     176, 102, 232;
+    --green-rgb:       78, 196, 118;
+    --red-rgb:        229, 110,  74;
+    --yellow-rgb:     210, 188,  58;
+    --text-rgb:       244, 241, 250;
+    --text-muted-rgb: 179, 170, 198;
+    --card-rgb:        34,  28,  48;
+  }
+
+  /* ─── LIGHT THEME (Ama) ──────────────────────────────────── */
+  :root[data-theme='light'] {
+    --bg:          #f4f1fb;
+    --bg-grad:     radial-gradient(120% 80% at 80% -10%, #efe7ff 0%, #f4f1fb 55%);
+    --elev:        #ffffff;
+    --surface:     #ffffff;
+    --surface-2:   #f3eefb;
+    --surface-3:   #ece4f8;
+    --line:        rgba(28,18,48,0.09);
+    --line-strong: rgba(28,18,48,0.16);
+    --text:        #1a1426;
+    --text-dim:    #5b5370;
+    --text-faint:  #8c84a0;
+    --brand:       oklch(0.58 0.18 300);
+    --brand-2:     oklch(0.60 0.19 330);
+    --brand-ink:   #fff;
+    --brand-soft:  color-mix(in oklab, var(--brand) 12%, #fff);
+    --pos:         oklch(0.58 0.15 152);
+    --neg:         oklch(0.56 0.18 25);
+    --info:        oklch(0.55 0.16 252);
+    --save:        oklch(0.56 0.12 195);
+    --pos-soft:    color-mix(in oklab, var(--pos) 12%, #fff);
+    --neg-soft:    color-mix(in oklab, var(--neg) 12%, #fff);
+    --shadow-card: 0 1px 2px rgba(28,18,48,.05), 0 10px 30px rgba(60,40,110,.08);
+    --shadow-pop:  0 18px 50px rgba(60,40,110,.18);
+
+    /* legacy aliases */
+    --bg2:         var(--surface-2);
+    --bg3:         var(--surface-3);
+    --card:        var(--surface);
+    --border:      var(--line);
+    --border2:     var(--line-strong);
+    --accent:      var(--brand);
+    --accent-dim:  var(--brand-soft);
+    --accent-glow: color-mix(in oklab, var(--brand) 28%, transparent);
+    --white:       var(--brand-ink);
+    --overlay:     rgba(28,18,48,0.5);
+    --green:       var(--pos);
+    --green-dim:   var(--pos-soft);
+    --red:         var(--neg);
+    --red-dim:     var(--neg-soft);
+    --yellow:      var(--warn);
+    --yellow-dim:  color-mix(in oklab, var(--warn) 12%, #fff);
+    --text-muted:  var(--text-dim);
+    --radius:      var(--r-md);
+    --shadow:      var(--shadow-card);
+    --glass:       rgba(28,18,48,0.04);
+    --glass-border:rgba(28,18,48,0.10);
+
+    /* RGB splits para rgba() */
+    --accent-rgb:     128,  55, 198;
+    --green-rgb:       40, 153,  80;
+    --red-rgb:        192,  68,  36;
+    --yellow-rgb:     185, 160,  28;
+    --text-rgb:        26,  20,  38;
+    --text-muted-rgb:  91,  83, 112;
+    --card-rgb:       255, 255, 255;
   }
 
 
@@ -100,11 +188,13 @@
   }
 
   body {
-    font-family: 'Libre Franklin', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-text);
     background: var(--bg);
+    background-image: var(--bg-grad);
     color: var(--text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    letter-spacing: -.01em;
   }
 
   h1, h2, h3,
@@ -114,10 +204,11 @@
   .chart-title, .comp-title, .pres-title,
   #sub-neto, .comp-balance-value,
   .donut-center-val, .donut-center-sub {
-    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+    font-family: var(--font-display);
     text-rendering: optimizeLegibility;
   }
 
+  .num,
   .kpi-value, #sub-neto, .comp-balance-value, .donut-center-val {
     font-variant-numeric: tabular-nums;
   }
@@ -229,7 +320,7 @@
     color: var(--accent);
     opacity: 0.75;
     margin-bottom: 0.2rem;
-    font-family: 'Libre Franklin', system-ui, sans-serif;
+    font-family: var(--font-display);
     font-weight: 600;
   }
   .page-header h1 {
@@ -1150,56 +1241,133 @@
     .comp-grid { grid-template-columns: 1fr; }
   }
 
-  /* ─── BOTTOM NAV (solo mobile) ────────────────────────────── */
+  /* ─── BOTTOM NAV (NavCalida pill) ─────────────────────────── */
   .bottom-nav {
     display: none;
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-    background: var(--card); border-top: 1px solid var(--border);
-    height: 62px; align-items: stretch;
-    box-shadow: 0 -1px 0 var(--border), 0 -8px 24px rgba(45,41,38,0.18);
+    padding: 10px 18px 30px;
+    background: linear-gradient(0deg, var(--bg) 60%, transparent);
+    pointer-events: none;
+  }
+  .bn-pill {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 24px; padding: 10px 16px;
+    box-shadow: var(--shadow-card);
+    pointer-events: all;
   }
   .bn-item {
     flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 3px;
+    align-items: center; gap: 4px;
     background: none; border: none; cursor: pointer;
-    color: var(--text-muted); font-size: .65rem; font-weight: 600;
-    letter-spacing: .03em; text-transform: uppercase;
-    transition: color .15s, background .15s;
-    padding: 0; font-family: inherit;
-    position: relative; border-radius: 0;
+    color: var(--text-faint); font-size: .62rem; font-weight: 600;
+    font-family: inherit; padding: 0;
+    transition: color .15s; position: relative;
   }
-  .bn-item:hover, .bn-item.active { color: var(--accent); }
-  .bn-item.active { background: var(--accent-dim); }
-  .bn-item.active::before {
-    content: ''; position: absolute; top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 28px; height: 2px;
-    background: var(--accent); border-radius: 0 0 3px 3px;
-  }
+  .bn-item:hover { color: var(--brand); }
+  .bn-item.active { color: var(--brand); }
   .bn-item:active { transform: scale(0.93); }
   @keyframes bnIconPop {
-    0%   { transform: translateY(0)   scale(1); }
+    0%   { transform: translateY(0)    scale(1); }
     40%  { transform: translateY(-4px) scale(1.22); }
     72%  { transform: translateY(1px)  scale(0.9); }
-    100% { transform: translateY(0)   scale(1); }
+    100% { transform: translateY(0)    scale(1); }
   }
-  .bn-item.active .bn-icon { animation: bnIconPop .34s var(--ease-out); }
-  .bn-item .bn-icon { font-size: 1.3rem; line-height: 1; }
-  .bn-nueva {
-    flex: 1.2; position: relative; overflow: visible;
-  }
-  .bn-nueva-circle {
-    width: 52px; height: 52px; border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 4px 16px var(--accent-glow);
+  .bn-item.active i { animation: bnIconPop .34s var(--ease-out); }
+  .bn-cta {
+    width: 50px; height: 50px; border-radius: 16px; flex-shrink: 0;
+    background: var(--brand); color: #fff; border: none;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem; margin-bottom: 2px;
+    box-shadow: 0 8px 20px color-mix(in oklab, var(--brand) 45%, transparent);
+    cursor: pointer;
     transition: transform .15s var(--ease-out), box-shadow .15s var(--ease-out);
-    margin-top: -14px;
+    margin-top: -2px;
   }
-  .bn-nueva:hover .bn-nueva-circle { transform: scale(1.08); box-shadow: 0 6px 22px var(--accent-glow); }
-  .bn-nueva:active .bn-nueva-circle { transform: scale(0.94); box-shadow: 0 2px 8px var(--accent-glow); }
-  .bn-nueva span.bn-label { font-size: .65rem; font-weight: 600; color: var(--text-muted); letter-spacing: .03em; text-transform: uppercase; }
+  .bn-cta:hover  { transform: scale(1.06); box-shadow: 0 10px 28px color-mix(in oklab, var(--brand) 50%, transparent); }
+  .bn-cta:active { transform: scale(0.94); }
+
+  /* ─── MI MES CÁLIDA ───────────────────────────────────────── */
+  .page-mimes { padding-bottom: 1rem; }
+
+  .mm-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 1rem 0 1.1rem;
+  }
+  .mm-greeting { font-size: .82rem; color: var(--text-faint); font-weight: 600; margin-bottom: .4rem; }
+  .mm-month-selects { display: flex; gap: .4rem; align-items: center; }
+  .mm-month-selects select {
+    background: var(--surface-2); border: 1px solid var(--line);
+    color: var(--text); border-radius: var(--r-pill);
+    padding: .3rem .7rem; font-size: .82rem; font-weight: 700;
+    font-family: inherit; cursor: pointer; appearance: none;
+  }
+  .mm-bell {
+    width: 40px; height: 40px; border-radius: var(--r-pill);
+    background: var(--surface-2); border: 1px solid var(--line);
+    color: var(--text-dim); display: flex; align-items: center;
+    justify-content: center; cursor: pointer; flex-shrink: 0;
+    transition: background .15s;
+  }
+  .mm-bell:hover { background: var(--surface-3); }
+
+  .mm-hero {
+    border-radius: 28px; padding: 24px 22px;
+    position: relative; overflow: hidden; color: #fff;
+    background: linear-gradient(150deg, var(--brand) 0%, var(--brand-2) 100%);
+    box-shadow: 0 18px 40px color-mix(in oklab, var(--brand) 40%, transparent);
+    margin-bottom: 12px;
+  }
+  .mm-hero-orb {
+    position: absolute; width: 180px; height: 180px; border-radius: 999px;
+    right: -50px; top: -60px; background: rgba(255,255,255,.16);
+    pointer-events: none;
+  }
+  .mm-hero-eyebrow { font-size: .875rem; font-weight: 600; opacity: .9; position: relative; }
+  .mm-hero-amount {
+    font-size: clamp(2.4rem, 10vw, 3.2rem); font-weight: 700;
+    line-height: 1.05; margin-top: .35rem; position: relative;
+    font-family: var(--font-display);
+  }
+  .mm-hero-sub { font-size: .84rem; opacity: .9; margin-top: .25rem; position: relative; }
+  .mm-hero-stats { display: flex; gap: 10px; margin-top: 18px; position: relative; }
+  .mm-hero-stat {
+    flex: 1; background: rgba(255,255,255,.16); border-radius: 16px;
+    padding: 11px 14px; backdrop-filter: blur(4px);
+  }
+  .mm-hero-stat-label { font-size: .72rem; opacity: .85; font-weight: 600; }
+  .mm-hero-stat-val   { font-size: 1.2rem; font-weight: 700; margin-top: .15rem; font-family: var(--font-display); }
+
+  .mm-quick-stats { display: flex; gap: 10px; margin-bottom: 14px; }
+  .mm-qs-card { flex: 1; padding: 12px 13px; }
+  .mm-qs-label { font-size: .72rem; color: var(--text-faint); font-weight: 600; }
+  .mm-qs-val { font-size: 1.05rem; font-weight: 700; margin-top: .2rem; font-family: var(--font-display); }
+
+  .mm-section-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: .75rem 0 .5rem;
+    font-size: 1rem; font-weight: 700; font-family: var(--font-display);
+  }
+  .mm-ver-todas {
+    font-size: .82rem; color: var(--brand); font-weight: 600;
+    background: none; border: none; cursor: pointer; font-family: inherit;
+  }
+  .mm-cats-card { border-radius: 22px; padding: 4px 0; margin-bottom: 16px; }
+  .mm-cat-row { padding: 12px 16px; border-top: 1px solid var(--line); }
+  .mm-cat-row:first-child { border-top: none; }
+  .mm-cat-top { display: flex; align-items: center; gap: 11px; }
+  .mm-cat-icon {
+    width: 36px; height: 36px; border-radius: 11px;
+    background: var(--surface-2); display: flex; align-items: center;
+    justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+  }
+  .mm-cat-name    { font-size: .875rem; font-weight: 600; }
+  .mm-cat-rest    { font-size: .75rem; color: var(--text-faint); }
+  .mm-cat-pct     { font-size: .82rem; font-weight: 700; color: var(--text-dim); font-family: var(--font-display); }
+  .mm-cat-bar-wrap { margin-top: 9px; margin-left: 47px; }
+  .mm-cat-bar-track {
+    height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden;
+  }
+  .mm-cat-bar-fill { height: 100%; border-radius: 999px; transition: width .4s var(--ease-out); }
 
   /* ─── MOBILE (≤ 768px) ─────────────────────────────────────── */
   @media (max-width: 768px) {
@@ -1207,10 +1375,10 @@
     .mobile-header { display: flex; }
 
     /* Contenido ocupa todo el ancho */
-    .main { margin-left: 0; padding: 4.8rem 1.1rem 5.5rem; }
+    .main { margin-left: 0; padding: 4.8rem 1.1rem 7.5rem; }
 
     /* Bottom nav */
-    .bottom-nav { display: flex; }
+    .bottom-nav { display: block; }
 
     /* KPIs: 2 columnas + forzar 4-columnas a 2 */
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1902,26 +2070,31 @@
   </button>
 </nav>
 
-<!-- Bottom nav mobile -->
+<!-- Bottom nav mobile (NavCalida pill) -->
 <nav class="bottom-nav" id="bottom-nav">
-  <button class="bn-item" id="bn-presupuesto" onclick="navegarA('presupuesto')">
-    <span class="bn-icon"><i data-lucide="calendar-days" width="20" height="20"></i></span><span>Mi mes</span>
-  </button>
-  <button class="bn-item" id="bn-transacciones" onclick="navegarA('transacciones')">
-    <span class="bn-icon"><i data-lucide="receipt" width="20" height="20"></i></span><span>Gastos</span>
-  </button>
-  <button class="bn-item" id="bn-compartidos" onclick="navegarA('compartidos')">
-    <span class="bn-icon"><i data-lucide="users" width="20" height="20"></i></span><span>Compartidos</span>
-  </button>
-  <button class="bn-item" id="bn-config" onclick="navegarA('config')">
-    <span class="bn-icon"><i data-lucide="tag" width="20" height="20"></i></span><span>Categorías</span>
-  </button>
-  <button class="bn-item" id="bn-inversiones" onclick="navegarA('inversiones')">
-    <span class="bn-icon"><i data-lucide="trending-up" width="20" height="20"></i></span><span>Inversiones</span>
-  </button>
-  <button class="bn-item" id="bn-resumen" onclick="navegarA('resumen')">
-    <span class="bn-icon"><i data-lucide="bar-chart-2" width="20" height="20"></i></span><span>Resumen</span>
-  </button>
+  <div class="bn-pill">
+    <button class="bn-item" id="bn-presupuesto" onclick="navegarA('presupuesto')">
+      <i data-lucide="home" width="21" height="21"></i>
+      <span>Mi mes</span>
+    </button>
+    <button class="bn-item" id="bn-transacciones" onclick="navegarA('transacciones')">
+      <i data-lucide="receipt" width="21" height="21"></i>
+      <span>Gastos</span>
+    </button>
+    <button class="bn-cta" onclick="navegarA('nueva')" aria-label="Nueva transacción">
+      <i data-lucide="plus" width="24" height="24"></i>
+    </button>
+    <button class="bn-item" id="bn-compartidos" onclick="navegarA('compartidos')">
+      <i data-lucide="users" width="21" height="21"></i>
+      <span>Compartidos</span>
+    </button>
+    <button class="bn-item" id="bn-config" onclick="navegarA('config')">
+      <i data-lucide="grid-2x2" width="21" height="21"></i>
+      <span>Más</span>
+    </button>
+    <span id="bn-inversiones" style="display:none"></span>
+    <span id="bn-resumen" style="display:none"></span>
+  </div>
 </nav>
 
 <div id="app">
@@ -2344,86 +2517,57 @@
 
       </div><!-- /page-compartidos -->
 
-      <!-- ── PÁGINA PRESUPUESTO ────────────────────────────── -->
-      <div id="page-presupuesto" class="page">
-        <div class="page-header">
-          <div class="page-header-left">
-            <p class="page-eyebrow" id="eyebrow-presupuesto">MI MES</p>
-            <h1>Mi mes</h1>
-          </div>
-          <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
-            <div class="mes-selector">
+      <!-- ── PÁGINA PRESUPUESTO (Mi mes Cálida) ───────────── -->
+      <div id="page-presupuesto" class="page page-mimes">
+
+        <!-- Header: saludo + selectores de mes -->
+        <div class="mm-header">
+          <div>
+            <div class="mm-greeting" id="mm-greeting">Hola 👋</div>
+            <div class="mm-month-selects">
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
-            <button class="btn" onclick="sugerirPresupuestoDesdeHistorial()" title="Promedia los últimos 3 meses" style="font-size:.82rem;display:inline-flex;align-items:center;gap:.35rem"><i data-lucide="bar-chart-2" width="14" height="14"></i>Sugerir</button>
-            <button class="btn btn-primary" onclick="guardarPresupuesto()">Guardar presupuesto</button>
+          </div>
+          <button class="mm-bell" onclick="sugerirPresupuestoDesdeHistorial()"
+                  title="Sugerir presupuesto desde historial" aria-label="Sugerir presupuesto">
+            <i data-lucide="bar-chart-2" width="18" height="18"></i>
+          </button>
+        </div>
+
+        <!-- Hero: Lo que te queda -->
+        <div class="mm-hero">
+          <div class="mm-hero-orb"></div>
+          <div class="mm-hero-eyebrow">💸 Te queda para gastar</div>
+          <div class="mm-hero-amount num" id="mm-hero-amount">$0</div>
+          <div class="mm-hero-sub">de tu sueldo, hasta fin de mes</div>
+          <div class="mm-hero-stats">
+            <div class="mm-hero-stat">
+              <div class="mm-hero-stat-label">Por día</div>
+              <div class="mm-hero-stat-val num" id="mm-stat-diario">—</div>
+            </div>
+            <div class="mm-hero-stat">
+              <div class="mm-hero-stat-label">En USD</div>
+              <div class="mm-hero-stat-val num" id="mm-stat-usd">—</div>
+            </div>
           </div>
         </div>
 
-        <!-- KPI strip -->
-        <div class="kpi-grid kpi-grid-4" id="pres-kpi-grid">
-          <div class="kpi-card kpi-hero">
-            <div class="kpi-icon ico-green"><i data-lucide="wallet" width="17" height="17"></i></div>
-            <div class="kpi-label">Lo que te queda</div>
-            <div class="kpi-value" id="pres-kpi-saldo-real">$0</div>
-            <div class="kpi-hero-bar-wrap"><div class="kpi-hero-bar-fill" id="pres-hero-bar"></div></div>
-            <div class="kpi-sub" id="pres-kpi-saldo-real-sub">Sueldo − Gastado real</div>
+        <!-- Quick stats: Ingresos · Gastos · Ahorro -->
+        <div class="mm-quick-stats">
+          <div class="card mm-qs-card">
+            <div class="mm-qs-label">Ingresos</div>
+            <div class="mm-qs-val num" style="color:var(--pos)" id="mm-qs-ingresos">$0</div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-icon ico-green"><i data-lucide="banknote" width="17" height="17"></i></div>
-            <div class="kpi-label">Sueldo</div>
-            <div class="kpi-value income" id="pres-kpi-sueldo">$0</div>
-            <div class="kpi-sub" id="pres-kpi-sueldo-sub">ingresos del mes</div>
-            <div class="kpi-sparkline-wrap"><canvas id="spark-sueldo"></canvas></div>
+          <div class="card mm-qs-card">
+            <div class="mm-qs-label">Gastos</div>
+            <div class="mm-qs-val num" style="color:var(--neg)" id="mm-qs-gastos">$0</div>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-icon ico-accent"><i data-lucide="pie-chart" width="17" height="17"></i></div>
-            <div class="kpi-label">Presupuestado</div>
-            <div class="kpi-value" id="pres-kpi-total" style="color:var(--accent)">$0</div>
-            <div class="kpi-sub" id="pres-kpi-total-sub">de tu sueldo asignado</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon ico-red"><i data-lucide="shopping-bag" width="17" height="17"></i></div>
-            <div class="kpi-label">Gastado</div>
-            <div class="kpi-value expense" id="pres-kpi-gastado">$0</div>
-            <div class="kpi-sub" id="pres-kpi-gastado-sub">50% compartidos</div>
-            <div class="kpi-sparkline-wrap"><canvas id="spark-gastado"></canvas></div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon ico-muted"><i data-lucide="sliders-horizontal" width="17" height="17"></i></div>
-            <div class="kpi-label">Margen planeado</div>
-            <div class="kpi-value" id="pres-kpi-disponible">$0</div>
-            <div class="kpi-sub" id="pres-kpi-disponible-sub">Sueldo − Presupuestado</div>
-          </div>
-          <div class="kpi-card" id="pres-kpi-mep-card" style="display:none">
-            <div class="kpi-icon ico-green"><i data-lucide="dollar-sign" width="17" height="17"></i></div>
-            <div class="kpi-label">Saldo en USD</div>
-            <div class="kpi-value" id="pres-kpi-mep-val">U$S 0</div>
-            <div class="kpi-sub" id="pres-kpi-mep-sub">Lo que te queda ÷ MEP</div>
-          </div>
-          <div class="kpi-card" id="kpi-ahorro-cat-card">
-            <div class="kpi-icon ico-green"><i data-lucide="piggy-bank" width="17" height="17"></i></div>
-            <div class="kpi-label">Ahorro (categoría)</div>
-            <div class="kpi-value" id="kpi-ahorro-cat" style="color:var(--green)">$0</div>
-            <div class="kpi-sub" id="kpi-ahorro-cat-sub">total acumulado: —</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon ico-accent"><i data-lucide="calendar-days" width="17" height="17"></i></div>
-            <div class="kpi-label">Podés gastar por día</div>
-            <div class="kpi-value" id="pres-kpi-diario">—</div>
-            <div class="kpi-sub" id="pres-kpi-diario-sub">Lo que te queda ÷ días</div>
-          </div>
-          <div class="kpi-card" id="pres-kpi-compartido-card" style="display:none">
-            <div class="kpi-icon ico-accent"><i data-lucide="users" width="17" height="17"></i></div>
-            <div class="kpi-label" id="pres-kpi-compartido-label">Compartidos</div>
-            <div class="kpi-value" id="pres-kpi-compartido-val">$0</div>
-            <div class="kpi-sub" id="pres-kpi-compartido-sub">—</div>
+          <div class="card mm-qs-card">
+            <div class="mm-qs-label">Ahorro</div>
+            <div class="mm-qs-val num" style="color:var(--save)" id="mm-qs-ahorro">—%</div>
           </div>
         </div>
-
-        <!-- Heatmap calendario -->
-        <div class="chart-card heatmap-full-card" id="heatmap-mes"></div>
 
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
@@ -2456,13 +2600,20 @@
           </div>
         </div>
 
-        <!-- Toggle desglose -->
-        <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
-          <button id="btn-toggle-desglose"
-                  class="config-btn"
-                  onclick="toggleDesglose()"
-                  style="font-size:.83rem;">
-            Ver desglose ▾
+        <!-- Tus categorías -->
+        <div class="mm-section-header">
+          <span>Tus categorías</span>
+          <button class="mm-ver-todas" onclick="toggleDesglose()">Ver todas</button>
+        </div>
+        <div class="card mm-cats-card" id="mm-cats-card"></div>
+
+        <!-- Heatmap calendario -->
+        <div class="chart-card heatmap-full-card" id="heatmap-mes"></div>
+
+        <!-- Editar presupuesto -->
+        <div style="display:flex;justify-content:flex-end;margin:.75rem 0 .5rem">
+          <button id="btn-toggle-desglose" class="config-btn" onclick="toggleDesglose()" style="font-size:.83rem;">
+            Editar presupuesto ▾
           </button>
         </div>
 
@@ -2487,12 +2638,41 @@
             </tbody>
             <tfoot id="pres-tfoot"></tfoot>
           </table>
+          <div style="display:flex;gap:.5rem;padding:.75rem 1rem;flex-wrap:wrap">
+            <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPresupuesto()">Guardar presupuesto</button>
+          </div>
         </div>
 
         <p class="pres-note">
           💡 Los valores se ingresan como <strong>% del sueldo</strong> del mes. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → 50% · <strong id="pres-note-partner">De Ama</strong> → 0%.
         </p>
         <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
+
+        <!-- IDs legacy usados por JS — ocultos -->
+        <div style="display:none" aria-hidden="true">
+          <div id="pres-kpi-saldo-real"></div>
+          <div id="pres-hero-bar"></div>
+          <div id="pres-kpi-saldo-real-sub"></div>
+          <div id="pres-kpi-sueldo"></div>
+          <div id="pres-kpi-sueldo-sub"></div>
+          <div id="pres-kpi-total"></div>
+          <div id="pres-kpi-total-sub"></div>
+          <div id="pres-kpi-gastado"></div>
+          <div id="pres-kpi-gastado-sub"></div>
+          <div id="pres-kpi-disponible"></div>
+          <div id="pres-kpi-disponible-sub"></div>
+          <div id="pres-kpi-mep-card"><div id="pres-kpi-mep-val"></div><div id="pres-kpi-mep-sub"></div></div>
+          <div id="kpi-ahorro-cat-card"><div id="kpi-ahorro-cat"></div><div id="kpi-ahorro-cat-sub"></div></div>
+          <div id="pres-kpi-diario"></div>
+          <div id="pres-kpi-diario-sub"></div>
+          <div id="pres-kpi-compartido-card">
+            <div id="pres-kpi-compartido-label"></div>
+            <div id="pres-kpi-compartido-val"></div>
+            <div id="pres-kpi-compartido-sub"></div>
+          </div>
+          <canvas id="spark-sueldo"></canvas>
+          <canvas id="spark-gastado"></canvas>
+        </div>
 
       </div><!-- /page-presupuesto -->
 

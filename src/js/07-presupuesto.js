@@ -686,10 +686,108 @@ function renderPresupuesto() {
     if (subEl) subEl.textContent = "Ver detalle en Compartidos";
   })();
 
+  // Hero Cálida + categorías
+  _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio);
+  _renderMMCats(gastoPorCat, sueldoEfectivo);
+
   // Sprint 2 — heatmap + sparklines (después de HTML escrito)
   renderHeatmapMes();
   const monthly = buildMonthlyData(6);
   renderKpiSparklines(monthly);
+}
+
+function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
+  const $ = id => document.getElementById(id);
+  const heroAmt = $("mm-hero-amount");
+  if (heroAmt) heroAmt.textContent = fmt(Math.max(0, saldoReal));
+
+  const hoy = new Date();
+  const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
+
+  const statDiario = $("mm-stat-diario");
+  if (statDiario) {
+    if (esEsteMes && saldoReal > 0) {
+      const dias = new Date(anio, mes, 0).getDate() - hoy.getDate() + 1;
+      statDiario.textContent = fmt(Math.round(saldoReal / Math.max(1, dias)));
+    } else {
+      statDiario.textContent = "—";
+    }
+  }
+
+  const statUSD = $("mm-stat-usd");
+  if (statUSD) {
+    if (tipoCambioMEP > 0 && saldoReal > 0) {
+      statUSD.textContent = "U$S " + Math.round(saldoReal / tipoCambioMEP).toLocaleString("es-AR");
+    } else {
+      statUSD.textContent = "—";
+    }
+  }
+
+  const qsIng = $("mm-qs-ingresos");
+  if (qsIng) qsIng.textContent = fmt(sueldoEfectivo);
+
+  const qsGas = $("mm-qs-gastos");
+  if (qsGas) qsGas.textContent = fmt(totalGasto);
+
+  const qsAho = $("mm-qs-ahorro");
+  if (qsAho && sueldoEfectivo > 0) {
+    const pct = Math.round(Math.max(0, (sueldoEfectivo - totalGasto) / sueldoEfectivo) * 100);
+    qsAho.textContent = pct + "%";
+  }
+}
+
+const _CAT_EMOJI = {
+  'Alquiler':'🏠','Mercado':'🛒','Supermercado':'🛒',
+  'Comida':'🍽️','Salidas':'🍽️','Comida y salidas':'🍽️','Restaurantes':'🍽️',
+  'Transporte':'🚗','Nafta':'⛽','Auto':'🚗',
+  'Servicios':'💡','Suscripciones':'📺',
+  'Salud':'💊','Médico':'💊','Farmacia':'💊',
+  'Ahorro':'🐷','Inversiones':'📈',
+  'Ropa':'👔','Tecnología':'💻','Electrónica':'💻',
+  'Entretenimiento':'🎮','Viajes':'✈️',
+  'Educación':'📚','Mascotas':'🐾',
+  'Gym':'🏋️','Deporte':'🏋️',
+  'Limpieza':'🧹','Hogar':'🏠',
+};
+
+function _renderMMCats(gastoPorCat, sueldoEfectivo) {
+  const cont = document.getElementById("mm-cats-card");
+  if (!cont) return;
+
+  const rows = categGasto
+    .map(cat => {
+      const gasto = gastoPorCat[cat] || 0;
+      const presARS = ((presupuestoActual[cat] || 0) / 100) * sueldoEfectivo;
+      return { cat, gasto, presARS };
+    })
+    .filter(r => r.gasto > 0 || r.presARS > 0)
+    .sort((a, b) => b.gasto - a.gasto)
+    .slice(0, 5);
+
+  if (!rows.length) { cont.innerHTML = '<div style="padding:1rem;color:var(--text-faint);font-size:.88rem">Sin gastos registrados</div>'; return; }
+
+  cont.innerHTML = rows.map(({ cat, gasto, presARS }) => {
+    const emoji = _CAT_EMOJI[cat] || '📌';
+    const used = presARS > 0 ? Math.min(gasto / presARS, 1) : 0;
+    const pctNum = Math.round(used * 100);
+    const restante = presARS > 0 ? presARS - gasto : 0;
+    const barColor = used >= 1 ? 'var(--neg)' : used >= 0.8 ? 'var(--warn)' : 'var(--brand)';
+    const pctColor = used >= 1 ? 'var(--neg)' : used >= 0.8 ? 'var(--warn)' : 'var(--text-dim)';
+    const restText = presARS > 0
+      ? (restante >= 0 ? `Quedan ${fmt(restante)}` : `Excedido ${fmt(Math.abs(restante))}`)
+      : fmt(gasto);
+    return `<div class="mm-cat-row">
+      <div class="mm-cat-top">
+        <div class="mm-cat-icon">${emoji}</div>
+        <div style="flex:1">
+          <div class="mm-cat-name">${cat}</div>
+          <div class="mm-cat-rest">${restText}</div>
+        </div>
+        ${presARS > 0 ? `<div class="mm-cat-pct" style="color:${pctColor}">${pctNum}%</div>` : ''}
+      </div>
+      ${presARS > 0 ? `<div class="mm-cat-bar-wrap"><div class="mm-cat-bar-track"><div class="mm-cat-bar-fill" style="width:${Math.min(pctNum,100)}%;background:${barColor}"></div></div></div>` : ''}
+    </div>`;
+  }).join('');
 }
 
 // Actualiza solo los KPIs al cambiar un input (sin re-renderizar la tabla)

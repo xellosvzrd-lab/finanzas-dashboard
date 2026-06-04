@@ -25,7 +25,7 @@ function _setVariablesUsuario(nombre) {
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
   categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
-  document.body.dataset.theme = USUARIO.toLowerCase() === "ama" ? "light" : "";
+  document.documentElement.dataset.theme = USUARIO.toLowerCase() === "ama" ? "light" : "dark";
 }
 
 function _configurarUsuario(session) {
@@ -57,6 +57,8 @@ function _actualizarStringsUsuario() {
   if (noteP) noteP.textContent = "De " + PARTNER;
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) sidebarUser.textContent = USUARIO;
+  const greeting = document.getElementById("mm-greeting");
+  if (greeting) greeting.textContent = `Hola, ${USUARIO} 👋`;
   const drawerName = document.getElementById("mobile-drawer-name");
   if (drawerName) drawerName.textContent = USUARIO;
   const topnavUser = document.getElementById("topnav-user");
