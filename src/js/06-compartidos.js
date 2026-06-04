@@ -759,6 +759,9 @@ function navegarA(pagina) {
   document.querySelectorAll(".topnav .nav-item").forEach((n, i) => {
     n.classList.toggle("active", i === navMap[pagina]);
   });
+  document.querySelectorAll(".sidebar .nav-item").forEach((n, i) => {
+    n.classList.toggle("active", i === navMap[pagina]);
+  });
   requestAnimationFrame(_actualizarNavIndicator);
 
   // Bottom nav (mobile)

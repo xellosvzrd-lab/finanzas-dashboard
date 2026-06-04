@@ -59,6 +59,8 @@ function _actualizarStringsUsuario() {
   if (sidebarUser) sidebarUser.textContent = USUARIO;
   const greeting = document.getElementById("mm-greeting");
   if (greeting) greeting.textContent = `Hola, ${USUARIO} 👋`;
+  const sidebarAvatar = document.getElementById("sidebar-avatar");
+  if (sidebarAvatar) sidebarAvatar.textContent = USUARIO.charAt(0).toUpperCase();
   const drawerName = document.getElementById("mobile-drawer-name");
   if (drawerName) drawerName.textContent = USUARIO;
   const topnavUser = document.getElementById("topnav-user");

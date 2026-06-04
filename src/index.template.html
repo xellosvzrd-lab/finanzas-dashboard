@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://eutarjfnlkcehhigqqxr.supabase.co wss://eutarjfnlkcehhigqqxr.supabase.co https://dolarapi.com https://api.coinbase.com https://accounts.google.com; img-src 'self' data:; worker-src blob: https://cdnjs.cloudflare.com;">
 <title>💰 Finanzas Personales — Daniel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#201A16">
 <meta name="mobile-web-app-capable" content="yes">
@@ -17,9 +20,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
-  /* ─── FONTS ──────────────────────────────────────────────── */
-  @import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
-
   /* ─── SKIP NAVIGATION ──────────────────────────────────── */
   .skip-link {
     position: absolute; top: -100%; left: 1rem;
@@ -169,6 +169,14 @@
   }
 
 
+  /* ─── CARD PRIMITIVE ────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-card);
+  }
+
   /* ─── FOCUS VISIBLE ─────────────────────────────────────── */
   :focus-visible {
     outline: 2px solid var(--accent);
@@ -208,7 +216,11 @@
     text-rendering: optimizeLegibility;
   }
 
-  .num,
+  .num {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
   .kpi-value, #sub-neto, .comp-balance-value, .donut-center-val {
     font-variant-numeric: tabular-nums;
   }
@@ -1369,6 +1381,32 @@
   }
   .mm-cat-bar-fill { height: 100%; border-radius: 999px; transition: width .4s var(--ease-out); }
 
+  /* desktop-only Mi mes elements */
+  .mm-page-title { display: none; font-size: 1.7rem; font-weight: 600; font-family: var(--font-display); letter-spacing: -.025em; color: var(--text); }
+  .mm-anotar-btn { display: none; }
+  .mm-hero-stat-3 { display: none; }
+
+  @media (min-width: 860px) {
+    .page-mimes { padding-top: 0; }
+    .mm-page-title { display: block; margin-bottom: .2rem; }
+    .mm-anotar-btn { display: inline-flex; }
+    .mm-header { padding: 0 0 18px; border-bottom: 1px solid var(--line); margin-bottom: 22px; align-items: flex-end; }
+    .mm-greeting { font-size: .88rem; color: var(--text-dim); margin-bottom: 0; }
+    .mm-bell { display: none; }
+    .mm-row1 { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: start; }
+    .mm-hero { margin-bottom: 0; }
+    .mm-hero-stat-3 { display: flex; flex-direction: column; }
+    .mm-quick-stats { flex-direction: column; gap: 12px; margin-bottom: 0; }
+    .mm-qs-card { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; }
+    .mm-qs-val { font-size: 1.5rem; }
+    .mm-cats-card {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      background: none; border: none; box-shadow: none; padding: 0; border-radius: 0;
+    }
+    .mm-cat-row { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow-card); }
+    .mm-cat-row:first-child { border-top: 1px solid var(--line); }
+  }
+
   /* ─── MOBILE (≤ 768px) ─────────────────────────────────────── */
   @media (max-width: 768px) {
     /* Mostrar header mobile, ocultar sidebar por default */
@@ -1712,12 +1750,64 @@
   }
   .topnav-logout:hover { color: var(--text); }
   @media (max-width: 768px) { .topnav { display: none; } }
-  @media (min-width: 769px) { .bottom-nav { display: none; } }
 
-  /* Layout sin sidebar */
+  /* ─── SIDEBAR (desktop ≥ 860px) ─────────────────────────── */
+  .sidebar { display: none; }
+  @media (min-width: 860px) {
+    .topnav    { display: none !important; }
+    .bottom-nav{ display: none !important; }
+    .layout    { display: flex; }
+    .sidebar {
+      display: flex; flex-direction: column;
+      width: 232px; flex-shrink: 0;
+      background: var(--elev); border-right: 1px solid var(--line);
+      padding: 22px 14px;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .main { padding: 22px 30px 3rem; }
+  }
+  @media (min-width: 769px) and (max-width: 859px) { .bottom-nav { display: none; } }
+
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 10px 22px;
+  }
+  .sidebar-logo-icon {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(150deg, var(--brand), var(--brand-2));
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .sidebar-logo-text { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--text); }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 3px; }
+  .sidebar .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 12px;
+    background: none; border: none; cursor: pointer;
+    color: var(--text-dim); font-weight: 600; font-size: 14.5px;
+    font-family: inherit; text-align: left; width: 100%;
+    transition: background .15s, color .15s;
+  }
+  .sidebar .nav-item:hover { background: var(--surface-2); color: var(--text); }
+  .sidebar .nav-item.active { background: var(--brand-soft); color: var(--brand); font-weight: 700; }
+  .sidebar-spacer { flex: 1; }
+  .sidebar-footer {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 8px; border-top: 1px solid var(--line);
+  }
+  .sidebar-avatar {
+    width: 34px; height: 34px; border-radius: 999px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--info), var(--save));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 14px;
+  }
+  .sidebar-username { font-size: 13.5px; font-weight: 700; }
+  .sidebar-usersub  { font-size: 11.5px; color: var(--text-faint); }
+
+  /* Layout principal */
   .main {
     margin-left: 0;
     padding: 2rem 2.5rem 5rem;
+    flex: 1; min-width: 0; overflow-x: hidden;
   }
   @media (max-width: 768px) { .main { padding: 1rem 1rem 5rem; } }
 
@@ -2099,6 +2189,33 @@
 
 <div id="app">
   <div class="layout">
+
+    <!-- Sidebar (desktop) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">💰</div>
+        <span class="sidebar-logo-text">Finanzas</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item" onclick="navegarA('presupuesto')"><i data-lucide="home" width="19" height="19"></i><span>Mi mes</span></button>
+        <button class="nav-item" onclick="navegarA('transacciones')"><i data-lucide="receipt" width="19" height="19"></i><span>Transacciones</span></button>
+        <button class="nav-item" onclick="navegarA('compartidos')"><i data-lucide="users" width="19" height="19"></i><span>Compartidos</span></button>
+        <button class="nav-item" onclick="navegarA('config')"><i data-lucide="tag" width="19" height="19"></i><span>Categorías</span></button>
+        <button class="nav-item" onclick="navegarA('inversiones')"><i data-lucide="trending-up" width="19" height="19"></i><span>Inversiones</span></button>
+        <button class="nav-item" onclick="navegarA('resumen')"><i data-lucide="bar-chart-2" width="19" height="19"></i><span>Resumen</span></button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-footer">
+        <div class="sidebar-avatar" id="sidebar-avatar">D</div>
+        <div style="flex:1;min-width:0">
+          <div class="sidebar-username" id="sidebar-user">Daniel</div>
+          <div class="sidebar-usersub">Plan compartido · Ama</div>
+        </div>
+        <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </aside>
 
     <!-- MAIN -->
     <main class="main">
@@ -2523,51 +2640,64 @@
         <!-- Header: saludo + selectores de mes -->
         <div class="mm-header">
           <div>
+            <div class="mm-page-title">Mi mes</div>
             <div class="mm-greeting" id="mm-greeting">Hola 👋</div>
             <div class="mm-month-selects">
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
           </div>
-          <button class="mm-bell" onclick="sugerirPresupuestoDesdeHistorial()"
-                  title="Sugerir presupuesto desde historial" aria-label="Sugerir presupuesto">
-            <i data-lucide="bar-chart-2" width="18" height="18"></i>
-          </button>
-        </div>
-
-        <!-- Hero: Lo que te queda -->
-        <div class="mm-hero">
-          <div class="mm-hero-orb"></div>
-          <div class="mm-hero-eyebrow">💸 Te queda para gastar</div>
-          <div class="mm-hero-amount num" id="mm-hero-amount">$0</div>
-          <div class="mm-hero-sub">de tu sueldo, hasta fin de mes</div>
-          <div class="mm-hero-stats">
-            <div class="mm-hero-stat">
-              <div class="mm-hero-stat-label">Por día</div>
-              <div class="mm-hero-stat-val num" id="mm-stat-diario">—</div>
-            </div>
-            <div class="mm-hero-stat">
-              <div class="mm-hero-stat-label">En USD</div>
-              <div class="mm-hero-stat-val num" id="mm-stat-usd">—</div>
-            </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn btn-primary mm-anotar-btn" onclick="navegarA('nueva')">+ Anotar</button>
+            <button class="mm-bell" onclick="sugerirPresupuestoDesdeHistorial()"
+                    title="Sugerir presupuesto" aria-label="Sugerir presupuesto">
+              <i data-lucide="bar-chart-2" width="18" height="18"></i>
+            </button>
           </div>
         </div>
 
-        <!-- Quick stats: Ingresos · Gastos · Ahorro -->
-        <div class="mm-quick-stats">
-          <div class="card mm-qs-card">
-            <div class="mm-qs-label">Ingresos</div>
-            <div class="mm-qs-val num" style="color:var(--pos)" id="mm-qs-ingresos">$0</div>
+        <!-- Row 1: hero + quick stats (grid on desktop) -->
+        <div class="mm-row1">
+
+          <!-- Hero: Lo que te queda -->
+          <div class="mm-hero">
+            <div class="mm-hero-orb"></div>
+            <div class="mm-hero-eyebrow">💸 Te queda para gastar</div>
+            <div class="mm-hero-amount num" id="mm-hero-amount">$0</div>
+            <div class="mm-hero-sub">de tu sueldo, hasta fin de mes</div>
+            <div class="mm-hero-stats">
+              <div class="mm-hero-stat">
+                <div class="mm-hero-stat-label">Por día</div>
+                <div class="mm-hero-stat-val num" id="mm-stat-diario">—</div>
+              </div>
+              <div class="mm-hero-stat">
+                <div class="mm-hero-stat-label">En USD</div>
+                <div class="mm-hero-stat-val num" id="mm-stat-usd">—</div>
+              </div>
+              <div class="mm-hero-stat mm-hero-stat-3">
+                <div class="mm-hero-stat-label">Días restantes</div>
+                <div class="mm-hero-stat-val num" id="mm-stat-dias">—</div>
+              </div>
+            </div>
           </div>
-          <div class="card mm-qs-card">
-            <div class="mm-qs-label">Gastos</div>
-            <div class="mm-qs-val num" style="color:var(--neg)" id="mm-qs-gastos">$0</div>
+
+          <!-- Quick stats: Ingresos · Gastos · Ahorro -->
+          <div class="mm-quick-stats">
+            <div class="card mm-qs-card">
+              <div class="mm-qs-label">Ingresos</div>
+              <div class="mm-qs-val num" style="color:var(--pos)" id="mm-qs-ingresos">$0</div>
+            </div>
+            <div class="card mm-qs-card">
+              <div class="mm-qs-label">Gastos</div>
+              <div class="mm-qs-val num" style="color:var(--neg)" id="mm-qs-gastos">$0</div>
+            </div>
+            <div class="card mm-qs-card">
+              <div class="mm-qs-label">Ahorro</div>
+              <div class="mm-qs-val num" style="color:var(--save)" id="mm-qs-ahorro">—%</div>
+            </div>
           </div>
-          <div class="card mm-qs-card">
-            <div class="mm-qs-label">Ahorro</div>
-            <div class="mm-qs-val num" style="color:var(--save)" id="mm-qs-ahorro">—%</div>
-          </div>
-        </div>
+
+        </div><!-- /mm-row1 -->
 
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>

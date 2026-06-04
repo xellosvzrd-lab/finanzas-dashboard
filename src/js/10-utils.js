@@ -108,11 +108,12 @@ function animatePct(el, toValue, duration = 680) {
 
 // ─── FORMATEO ─────────────────────────────────────────────────
 function fmt(n) {
-  return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+  const s = new Intl.NumberFormat("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.abs(n));
+  return (n < 0 ? "−" : "") + "$" + s;
 }
 function fmtMoneda(n, moneda) {
   if (moneda === "USD") {
-    return "U$S " + new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+    return "U$S " + new Intl.NumberFormat("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(Math.abs(n)));
   }
   return fmt(n);
 }

@@ -704,14 +704,22 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   const hoy = new Date();
   const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
 
+  const diasRestantes = esEsteMes
+    ? Math.max(1, new Date(anio, mes, 0).getDate() - hoy.getDate() + 1)
+    : 0;
+
   const statDiario = $("mm-stat-diario");
   if (statDiario) {
     if (esEsteMes && saldoReal > 0) {
-      const dias = new Date(anio, mes, 0).getDate() - hoy.getDate() + 1;
-      statDiario.textContent = fmt(Math.round(saldoReal / Math.max(1, dias)));
+      statDiario.textContent = fmt(Math.round(saldoReal / diasRestantes));
     } else {
       statDiario.textContent = "—";
     }
+  }
+
+  const statDias = $("mm-stat-dias");
+  if (statDias) {
+    statDias.textContent = esEsteMes ? diasRestantes + " días" : "—";
   }
 
   const statUSD = $("mm-stat-usd");
