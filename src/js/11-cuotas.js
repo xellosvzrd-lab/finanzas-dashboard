@@ -166,6 +166,14 @@ function _renderCuotasCard() {
   const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
   const MESES_CORTOS = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
 
+  // Floor timeline: próximos 6 meses comenzando desde el mes actual
+  const floorMeses = [];
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1);
+    floorMeses.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  }
+  const floorByMes = Object.fromEntries(floorMeses.map(m => [m, 0]));
+
   let estesMes = 0, futuro = 0;
   const toComplete = [];
 
@@ -174,19 +182,20 @@ function _renderCuotasCard() {
     const pagadas = cuotasTrans.filter(t => (t.mes_liquidacion || "") <= mesActualStr).length;
     const factor  = c.responsabilidad === "Compartido" ? 0.5 : 1;
 
-    // Auto-complete check (lazy)
     if (pagadas >= c.cuotas_total) {
       toComplete.push(c.id);
       return null;
     }
 
-    // Accumulate summary totals
-    cuotasTrans.filter(t => t.mes_liquidacion === mesActualStr)
-      .forEach(t => { estesMes += Number(t.monto) * factor; });
-    cuotasTrans.filter(t => (t.mes_liquidacion || "") > mesActualStr)
-      .forEach(t => { futuro += Number(t.monto) * factor; });
+    cuotasTrans.forEach(t => {
+      const m = t.mes_liquidacion;
+      if (!m) return;
+      const monto = Number(t.monto) * factor;
+      if (m === mesActualStr) estesMes += monto;
+      else if (m > mesActualStr) futuro += monto;
+      if (Object.prototype.hasOwnProperty.call(floorByMes, m)) floorByMes[m] += monto;
+    });
 
-    // Last installment month label
     const ultima = cuotasTrans.find(t => Number(t.cuota_nro) === c.cuotas_total);
     let cierreStr = "";
     if (ultima?.mes_liquidacion) {
@@ -212,7 +221,6 @@ function _renderCuotasCard() {
     </div>`;
   }).filter(Boolean);
 
-  // Lazy auto-complete: mark finished purchases in Supabase
   toComplete.forEach(id => {
     supabaseClient.from("compras_cuotas")
       .update({ estado: "completada" })
@@ -229,6 +237,26 @@ function _renderCuotasCard() {
   document.getElementById("cuotas-este-mes").textContent = fmt(estesMes);
   document.getElementById("cuotas-futuro").textContent   = fmt(futuro);
   document.getElementById("cuotas-rows").innerHTML       = rows.join("");
+
+  // Render floor timeline
+  const floorEl = document.getElementById("cuotas-floor");
+  if (floorEl) {
+    const maxFloor = Math.max(...Object.values(floorByMes), 1);
+    floorEl.innerHTML = floorMeses.map(m => {
+      const mo = parseInt(m.split("-")[1]);
+      const monto = floorByMes[m];
+      const barH = monto > 0 ? Math.max(0.08, monto / maxFloor) : 0;
+      const isCurrent = m === mesActualStr;
+      return `<div class="cuotas-floor-col${isCurrent ? " current" : ""}">
+        <span class="cuotas-floor-amount">${monto > 0 ? fmtShort(monto) : "—"}</span>
+        <div class="cuotas-floor-bar-wrap">
+          <div class="cuotas-floor-bar-fill" style="transform:scaleY(${barH.toFixed(3)})"></div>
+        </div>
+        <span class="cuotas-floor-label">${MESES_CORTOS[mo - 1]}</span>
+      </div>`;
+    }).join("");
+  }
+
   if (window.lucide) lucide.createIcons();
 }
 
