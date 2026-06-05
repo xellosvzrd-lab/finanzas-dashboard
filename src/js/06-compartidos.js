@@ -801,6 +801,9 @@ function navegarA(pagina) {
   const fab = document.getElementById("btn-fab-nueva");
   if (fab) fab.style.display = pagina === "nueva" ? "none" : "";
 
+  // Re-renderizar íconos Lucide tras navegación (contenido dinámico puede contener data-lucide)
+  if (window.lucide) lucide.createIcons();
+
   closeSidebar();
   window.scrollTo(0, 0);
 }

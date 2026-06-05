@@ -643,8 +643,9 @@ function renderPresupuesto() {
         ? `<span style="color:var(--text-muted);font-size:.78rem">Sin presupuesto</span>`
         : "";
 
+    const catEmoji = _CAT_EMOJI[cat] || '';
     return `<tr class="${rowCls}">
-      <td><span class="pres-status-dot" style="background:${dotColor}"></span>${cat}${pacingHtml}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:7px">${catEmoji ? `<span style="font-size:1.05rem;width:24px;text-align:center">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}<span>${cat}</span></span>${pacingHtml}</td>
       <td style="text-align:right">
         <div style="display:flex;align-items:center;justify-content:flex-end;gap:.3rem">
           <input type="text" inputmode="decimal" class="pres-input" data-cat="${cat}"
