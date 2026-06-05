@@ -706,6 +706,12 @@ function renderPresupuesto() {
     const scLbl = document.getElementById('mm-sc-comp-label');
     if (scVal) { scVal.textContent = parts.join(' + '); scVal.style.color = teDeben ? 'var(--pos)' : 'var(--neg)'; }
     if (scLbl) scLbl.textContent = teDeben ? `${PARTNER} te debe` : `Le debés a ${PARTNER}`;
+    // Sync cuotas count to stat card sub
+    const cuotasCount = document.getElementById('mm-sc-cuotas-count');
+    if (cuotasCount) {
+      const c = document.getElementById('cuotas-count');
+      if (c) cuotasCount.textContent = c.textContent;
+    }
   })();
 
   // Hero Cálida + categorías
@@ -722,6 +728,8 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   const $ = id => document.getElementById(id);
   const heroAmt = $("mm-hero-amount");
   if (heroAmt) heroAmt.textContent = fmt(Math.max(0, saldoReal));
+  const heroSub = $("mm-hero-sub");
+  if (heroSub) heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
 
   const hoy = new Date();
   const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
