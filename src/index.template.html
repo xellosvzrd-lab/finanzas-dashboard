@@ -672,12 +672,33 @@
   .pres-pacing.over { background: rgba(var(--red-rgb),.12);    color: var(--red); }
 
   /* ─── FAIRNESS SCORE ─────────────────────────────────────────── */
-  .comp-fairness { margin-top: .9rem; padding: .75rem 1rem; background: var(--bg2); border-radius: 10px; border: 1px solid var(--border); }
-  .comp-fairness-label { font-size: .68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; margin-bottom: .5rem; }
-  .comp-fairness-bar-wrap { height: 8px; border-radius: 99px; overflow: hidden; display: flex; margin-bottom: .45rem; }
-  .comp-fairness-bar-a { background: var(--accent); transition: width .5s var(--ease-out, ease); }
-  .comp-fairness-bar-b { background: var(--accent);  flex: 1; }
-  .comp-fairness-names { display: flex; justify-content: space-between; font-size: .78rem; font-weight: 600; }
+  /* ─── COMPARTIDOS HERO ROW ──────────────────────────────── */
+  .comp-hero-row { display: flex; flex-direction: column; gap: 14px; margin-bottom: 1.25rem; }
+  @media (min-width: 860px) {
+    .comp-hero-row { flex-direction: row; align-items: stretch; }
+    .comp-hero-row > * { flex: 1; }
+  }
+  /* Contribución del mes card */
+  .comp-contrib          { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .comp-contrib-title    { font-size: 14.5px; font-weight: 700; font-family: var(--font-display); }
+  .comp-contrib-subtitle { font-size: 12px; color: var(--text-faint); margin-top: -8px; }
+  .comp-contrib-rows     { display: flex; flex-direction: column; gap: 12px; }
+  .comp-contrib-row      { display: flex; flex-direction: column; gap: 5px; }
+  .comp-contrib-top      { display: flex; justify-content: space-between; align-items: baseline; }
+  .comp-contrib-name     { font-size: 13.5px; font-weight: 600; }
+  .comp-contrib-meta     { display: flex; gap: 6px; align-items: baseline; }
+  .comp-contrib-amt      { font-family: var(--font-display); font-size: 14px; font-weight: 700;
+                            font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .comp-contrib-pct      { font-size: 12px; color: var(--text-faint); font-weight: 600; }
+  .comp-contrib-bar-wrap { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+  .comp-contrib-bar      { height: 100%; border-radius: 99px; transition: width .5s var(--ease-out, ease); min-width: 4px; }
+  .comp-contrib-bar-a    { background: var(--info); }
+  .comp-contrib-bar-b    { background: var(--brand-2); }
+  .comp-contrib-total    { font-size: 12.5px; color: var(--text-dim); border-top: 1px solid var(--line);
+                            padding-top: 10px; display: flex; justify-content: space-between; }
+  .comp-contrib-total .num { font-weight: 700; }
+  /* legacy compat */
+  .comp-fairness { display: none !important; }
 
   .comp-tfoot-row td {
     padding: .7rem 1rem !important;
@@ -2588,32 +2609,65 @@
           <select id="comp-anio"></select>
         </div>
 
-        <!-- Balance final destacado -->
-        <div id="comp-balance-card" class="comp-balance-card">
-          <div class="comp-balance-row">
-            <div class="comp-balance-info">
-              <div class="comp-balance-label">Balance del mes</div>
-              <div class="comp-balance-value" id="comp-balance-valor">$0</div>
-              <div class="comp-balance-sub" id="comp-balance-sub">—</div>
-            </div>
-            <div class="comp-balance-actions">
-              <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
-              <div class="comp-saldado-badge" id="comp-saldado-badge" style="display:none">✓ Mes saldado</div>
-              <button class="comp-undo-btn" id="comp-undo-btn" onclick="deshacerLiquidacion()" style="display:none">↩ Deshacer liquidación</button>
-            </div>
-          </div>
-          <div class="comp-fairness" id="comp-fairness" style="display:none">
-            <div class="comp-fairness-label">Contribución compartidos (ARS)</div>
-            <div class="comp-fairness-bar-wrap">
-              <div class="comp-fairness-bar-a" id="comp-fairness-bar-a"></div>
-              <div class="comp-fairness-bar-b"></div>
-            </div>
-            <div class="comp-fairness-names">
-              <span id="comp-fairness-a">—</span>
-              <span id="comp-fairness-b">—</span>
+        <!-- Hero row: balance + contribución -->
+        <div class="comp-hero-row">
+
+          <!-- Balance final destacado -->
+          <div id="comp-balance-card" class="comp-balance-card" style="margin-bottom:0">
+            <div class="comp-balance-row">
+              <div class="comp-balance-info">
+                <div class="comp-balance-label">Balance del mes</div>
+                <div class="comp-balance-value" id="comp-balance-valor">$0</div>
+                <div class="comp-balance-sub" id="comp-balance-sub">—</div>
+              </div>
+              <div class="comp-balance-actions">
+                <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
+                <div class="comp-saldado-badge" id="comp-saldado-badge" style="display:none">✓ Mes saldado</div>
+                <button class="comp-undo-btn" id="comp-undo-btn" onclick="deshacerLiquidacion()" style="display:none">↩ Deshacer liquidación</button>
+              </div>
             </div>
           </div>
-        </div>
+
+          <!-- Contribución del mes -->
+          <div class="card comp-contrib" id="comp-contrib" style="display:none">
+            <div class="comp-contrib-title">Contribución del mes</div>
+            <div class="comp-contrib-subtitle">gastos divididos al 50%</div>
+            <div class="comp-contrib-rows">
+              <div class="comp-contrib-row">
+                <div class="comp-contrib-top">
+                  <span class="comp-contrib-name" id="comp-contrib-name-a">Daniel</span>
+                  <div class="comp-contrib-meta">
+                    <span class="comp-contrib-amt num" id="comp-fairness-a-amt">—</span>
+                    <span class="comp-contrib-pct" id="comp-fairness-a">—</span>
+                  </div>
+                </div>
+                <div class="comp-contrib-bar-wrap">
+                  <div class="comp-contrib-bar comp-contrib-bar-a" id="comp-fairness-bar-a" style="width:50%"></div>
+                </div>
+              </div>
+              <div class="comp-contrib-row">
+                <div class="comp-contrib-top">
+                  <span class="comp-contrib-name" id="comp-contrib-name-b">Ama</span>
+                  <div class="comp-contrib-meta">
+                    <span class="comp-contrib-amt num" id="comp-fairness-b-amt">—</span>
+                    <span class="comp-contrib-pct" id="comp-fairness-b">—</span>
+                  </div>
+                </div>
+                <div class="comp-contrib-bar-wrap">
+                  <div class="comp-contrib-bar comp-contrib-bar-b" id="comp-fairness-bar-b" style="width:50%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="comp-contrib-total">
+              <span>Total compartido</span>
+              <span class="num" id="comp-contrib-total">—</span>
+            </div>
+          </div>
+
+          <!-- legacy compat: fairness hidden -->
+          <div id="comp-fairness" style="display:none"></div>
+
+        </div><!-- /comp-hero-row -->
 
         <!-- Toggle detalle compartidos -->
         <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">

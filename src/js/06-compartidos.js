@@ -343,19 +343,27 @@ function cargarCompartidos() {
   } else {
     balSub.textContent = "✅ Están a mano — sin deuda pendiente";
   }
-  // ── FAIRNESS SCORE ───────────────────────────────────────────
-  const fairnessEl = document.getElementById("comp-fairness");
-  if (fairnessEl) {
+  // ── CONTRIBUCIÓN DEL MES ─────────────────────────────────────
+  const contribCard = document.getElementById("comp-contrib");
+  if (contribCard) {
     const totalAmbos = totalCompDanielARS + totalCompAmaARS;
     if (totalAmbos > 0.01) {
-      const pctUsuario = Math.max(0, Math.min(1, totalCompDanielARS / totalAmbos));
-      const pctPartner = Math.max(0, Math.min(1, totalCompAmaARS / totalAmbos));
-      document.getElementById("comp-fairness-bar-a").style.width = (pctUsuario * 100).toFixed(1) + "%"; // flex layout — width required here
-      document.getElementById("comp-fairness-a").textContent = `${USUARIO} ${Math.round(pctUsuario * 100)}%`;
-      document.getElementById("comp-fairness-b").textContent = `${PARTNER} ${Math.round(pctPartner * 100)}%`;
-      fairnessEl.style.display = "";
+      const pctU = Math.max(0, Math.min(1, totalCompDanielARS / totalAmbos));
+      const pctP = Math.max(0, Math.min(1, totalCompAmaARS   / totalAmbos));
+      const _s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      const _w = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = (pct * 100).toFixed(1) + "%"; };
+      _w("comp-fairness-bar-a", pctU);
+      _w("comp-fairness-bar-b", pctP);
+      _s("comp-fairness-a",     Math.round(pctU * 100) + "%");
+      _s("comp-fairness-b",     Math.round(pctP * 100) + "%");
+      _s("comp-fairness-a-amt", fmt(totalCompDanielARS));
+      _s("comp-fairness-b-amt", fmt(totalCompAmaARS));
+      _s("comp-contrib-total",  fmt(totalAmbos));
+      _s("comp-contrib-name-a", USUARIO);
+      _s("comp-contrib-name-b", PARTNER);
+      contribCard.style.display = "";
     } else {
-      fairnessEl.style.display = "none";
+      contribCard.style.display = "none";
     }
   }
 
