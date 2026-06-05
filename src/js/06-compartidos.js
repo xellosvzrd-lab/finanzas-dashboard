@@ -173,7 +173,7 @@ function cargarCompartidos() {
         ? `<button onclick="event.stopPropagation();abrirLiquidar('${r.cat.replace(/'/g,"\\'")}',${Math.abs(net)},'${net>0?"Ingreso":"Gasto"}')"
              style="margin-left:.5rem;padding:.15rem .5rem;font-size:.7rem;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text-muted);cursor:pointer;vertical-align:middle">Liquidar</button>`
         : "";
-      const _catEmo = (typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[r.cat]||'💳';
+      const _catEmo = getCatEmoji(r.cat);
       return `<tr style="cursor:pointer;" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'table-row':'none'">
         <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_catEmo}</span>${r.cat}</span> <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
         <td style="text-align:right;color:${r.daniel !== 0 ? 'var(--text)' : 'var(--text-muted)'}">${r.daniel !== 0 ? fmtMoneda(r.daniel, monedaFilter) : "—"}</td>
@@ -259,7 +259,7 @@ function cargarCompartidos() {
       const ama    = mapB[cat] || 0;
       const net    = daniel - ama;
       const netColor = net > 0 ? "var(--yellow)" : net < 0 ? "var(--green)" : "var(--text-muted)";
-      const _re = (typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[cat]||'💳';
+      const _re = getCatEmoji(cat);
       return `<tr>
         <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_re}</span>${cat}</span></td>
         <td style="text-align:right;color:${daniel>0?"var(--accent)":"var(--text-muted)"}">${daniel>0?fmtR(daniel,mon):"—"}</td>

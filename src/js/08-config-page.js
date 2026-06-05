@@ -17,12 +17,16 @@ function _renderLista(tipo, items, tipoAPI) {
   if (!items.length && !inactivas.length) {
     html = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin ítems</div>';
   } else {
-    html = items.map(item => `
+    html = items.map(item => {
+      const emo = getCatEmoji(item);
+      return `
       <div class="cfg-item">
+        <button class="cfg-emoji-btn" onclick="editarEmojiCategoria(${JSON.stringify(item)},this)" title="Cambiar emoji">${emo}</button>
         <span class="cfg-item-name">${escapeHtml(item)}</span>
         <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${JSON.stringify(item)},false,this)" title="Ocultar" style="opacity:.6">Ocultar</button>
         <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}',${JSON.stringify(item)},this)" title="Eliminar">✕</button>
-      </div>`).join("");
+      </div>`;
+    }).join("");
 
     if (inactivas.length) {
       html += `<div style="font-size:.75rem;color:var(--text-muted);margin:.6rem 0 .3rem;letter-spacing:.04em;text-transform:uppercase">Disponibles (inactivas)</div>`;
@@ -249,5 +253,27 @@ function _refrescarSelectores() {
   }
   // Formulario categoría (según tipo actual)
   setTipo(tipoActual);
+}
+
+function editarEmojiCategoria(cat, btnEl) {
+  const inp = document.createElement("input");
+  inp.type = "text";
+  inp.value = getCatEmoji(cat);
+  inp.style.cssText = "width:2.4rem;font-size:1.1rem;text-align:center;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:.1rem .2rem;cursor:text;outline:none";
+  inp.title = "Pegá o escribí un emoji y presioná Enter";
+
+  const save = () => {
+    const raw = inp.value.trim();
+    const glyph = raw ? [...raw][0] : null;
+    if (glyph) setCatEmoji(cat, glyph);
+    renderizarConfig();
+  };
+
+  inp.addEventListener("blur", save);
+  inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } if (e.key === "Escape") { inp.removeEventListener("blur", save); renderizarConfig(); } });
+
+  btnEl.replaceWith(inp);
+  inp.focus();
+  inp.select();
 }
 

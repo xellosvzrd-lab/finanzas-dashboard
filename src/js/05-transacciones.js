@@ -175,7 +175,7 @@ function filtrarTabla() {
     <tr style="--row-i:${Math.min(i, 16)}">
       <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}${fechaExtra}</td>
       <td class="col-hide-xs"><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
-      <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="font-size:1rem;width:22px;text-align:center;flex-shrink:0">${(typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[t.categoria]||'💳'}</span>${escapeHtml(t.categoria)}</span></td>
+      <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="font-size:1rem;width:22px;text-align:center;flex-shrink:0">${getCatEmoji(t.categoria)}</span>${escapeHtml(t.categoria)}</span></td>
       <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${escapeHtml(t.fuente) || "—"}</td>
       <td class="col-hide-sm"><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${escapeHtml(r)}</span></td>
       <td class="col-hide-sm" style="color:var(--text-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(t.descripcion) || "—"}${t.cuota_nro && t.cuota_total
@@ -209,7 +209,6 @@ function _renderMobileList(datos) {
     el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem">Sin movimientos para este filtro</div>';
     return;
   }
-  const CAT_EMO = typeof _CAT_EMOJI !== "undefined" ? _CAT_EMOJI : {};
   const byDate = {};
   datos.forEach(t => { (byDate[t.fecha] = byDate[t.fecha] || []).push(t); });
   el.innerHTML = Object.entries(byDate)
@@ -219,7 +218,7 @@ function _renderMobileList(datos) {
         const mon  = t.moneda || "ARS";
         const isPos = t.tipo === "Ingreso";
         const resp  = t.responsabilidad || "Mío";
-        const emoji = CAT_EMO[t.categoria] || "💳";
+        const emoji = getCatEmoji(t.categoria);
         const iconBg = `color-mix(in oklab, ${_catColor(t.categoria)} 18%, var(--surface-2))`;
         const respBadge = (resp === "Compartido")
           ? `<span class="trans-mobile-badge comp">÷ ${escapeHtml(PARTNER)}</span>` : "";

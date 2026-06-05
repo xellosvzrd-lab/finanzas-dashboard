@@ -312,7 +312,7 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
       <div style="margin-bottom:.9rem;">
         <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;font-size:.88rem;cursor:pointer;"
              onclick="document.getElementById('${drillId}').style.display=document.getElementById('${drillId}').style.display==='none'?'block':'none'">
-          <span><span style="font-size:1rem;margin-right:.4rem;">${(typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[cat]||'📌'}</span>${cat}${presTag}
+          <span><span style="font-size:1rem;margin-right:.4rem;">${getCatEmoji(cat,'📌')}</span>${cat}${presTag}
             <span style="color:var(--text-muted);font-size:.72rem;margin-left:.3rem;">(${txsCat.length} tx) ▾</span>
           </span>
           <span style="color:var(--text-muted)">${fmtVal(val)} <span style="color:var(--red)">(${pct}%)</span></span>

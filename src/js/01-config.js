@@ -81,18 +81,18 @@ const _C = {
 
 // ─── PALETA DE COLORES ────────────────────────────────────────
 const PALETTE = [
-  "#C8845A",  // terracotta
-  "#8B9E6E",  // sage
-  "#C4A05A",  // ámbar
-  "#B87A7A",  // rosa polvoso
-  "#7A9888",  // eucalyptus
-  "#C49478",  // albaricoque
-  "#A87A9A",  // malva cálida
-  "#708E6A",  // oliva
-  "#C8887A",  // salmón
-  "#7A8898",  // pizarra cálida
-  "#A87A5A",  // sienna
-  "#9A8870",  // champiñón
+  "#A070D5",  // brand   — violeta
+  "#6680DC",  // info    — azul índigo
+  "#D97060",  // neg     — coral
+  "#58C0B0",  // save    — teal
+  "#C8BC45",  // warn    — ámbar
+  "#DE7EC5",  // brand-2 — rosa
+  "#5ABB78",  // pos     — verde
+  "#E09060",  // naranja cálido
+  "#7BA8D4",  // celeste
+  "#B87AD4",  // lavanda
+  "#80C878",  // lima
+  "#D4A060",  // sienna
 ];
 
 function _catColor(cat) {

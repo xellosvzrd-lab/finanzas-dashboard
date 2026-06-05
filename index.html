@@ -823,6 +823,12 @@
   }
   .cfg-item:hover { border-color: var(--border2); }
   .cfg-item-name { flex: 1; }
+  .cfg-emoji-btn {
+    background: none; border: 1px solid transparent; cursor: pointer;
+    font-size: 1.1rem; padding: .1rem .25rem; border-radius: 6px;
+    line-height: 1; transition: border-color .15s, background .15s; flex-shrink: 0;
+  }
+  .cfg-emoji-btn:hover { border-color: var(--border); background: var(--bg2); }
   .cfg-del-btn {
     background: none; border: none; cursor: pointer;
     color: var(--text-muted); font-size: .85rem; padding: .15rem .35rem;
@@ -3610,18 +3616,18 @@ const _C = {
 
 // ─── PALETA DE COLORES ────────────────────────────────────────
 const PALETTE = [
-  "#C8845A",  // terracotta
-  "#8B9E6E",  // sage
-  "#C4A05A",  // ámbar
-  "#B87A7A",  // rosa polvoso
-  "#7A9888",  // eucalyptus
-  "#C49478",  // albaricoque
-  "#A87A9A",  // malva cálida
-  "#708E6A",  // oliva
-  "#C8887A",  // salmón
-  "#7A8898",  // pizarra cálida
-  "#A87A5A",  // sienna
-  "#9A8870",  // champiñón
+  "#A070D5",  // brand   — violeta
+  "#6680DC",  // info    — azul índigo
+  "#D97060",  // neg     — coral
+  "#58C0B0",  // save    — teal
+  "#C8BC45",  // warn    — ámbar
+  "#DE7EC5",  // brand-2 — rosa
+  "#5ABB78",  // pos     — verde
+  "#E09060",  // naranja cálido
+  "#7BA8D4",  // celeste
+  "#B87AD4",  // lavanda
+  "#80C878",  // lima
+  "#D4A060",  // sienna
 ];
 
 function _catColor(cat) {
@@ -4540,7 +4546,7 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
       <div style="margin-bottom:.9rem;">
         <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;font-size:.88rem;cursor:pointer;"
              onclick="document.getElementById('${drillId}').style.display=document.getElementById('${drillId}').style.display==='none'?'block':'none'">
-          <span><span style="font-size:1rem;margin-right:.4rem;">${(typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[cat]||'📌'}</span>${cat}${presTag}
+          <span><span style="font-size:1rem;margin-right:.4rem;">${getCatEmoji(cat,'📌')}</span>${cat}${presTag}
             <span style="color:var(--text-muted);font-size:.72rem;margin-left:.3rem;">(${txsCat.length} tx) ▾</span>
           </span>
           <span style="color:var(--text-muted)">${fmtVal(val)} <span style="color:var(--red)">(${pct}%)</span></span>
@@ -4843,7 +4849,7 @@ function filtrarTabla() {
     <tr style="--row-i:${Math.min(i, 16)}">
       <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}${fechaExtra}</td>
       <td class="col-hide-xs"><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
-      <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="font-size:1rem;width:22px;text-align:center;flex-shrink:0">${(typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[t.categoria]||'💳'}</span>${escapeHtml(t.categoria)}</span></td>
+      <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="font-size:1rem;width:22px;text-align:center;flex-shrink:0">${getCatEmoji(t.categoria)}</span>${escapeHtml(t.categoria)}</span></td>
       <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${escapeHtml(t.fuente) || "—"}</td>
       <td class="col-hide-sm"><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${escapeHtml(r)}</span></td>
       <td class="col-hide-sm" style="color:var(--text-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(t.descripcion) || "—"}${t.cuota_nro && t.cuota_total
@@ -4877,7 +4883,6 @@ function _renderMobileList(datos) {
     el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem">Sin movimientos para este filtro</div>';
     return;
   }
-  const CAT_EMO = typeof _CAT_EMOJI !== "undefined" ? _CAT_EMOJI : {};
   const byDate = {};
   datos.forEach(t => { (byDate[t.fecha] = byDate[t.fecha] || []).push(t); });
   el.innerHTML = Object.entries(byDate)
@@ -4887,7 +4892,7 @@ function _renderMobileList(datos) {
         const mon  = t.moneda || "ARS";
         const isPos = t.tipo === "Ingreso";
         const resp  = t.responsabilidad || "Mío";
-        const emoji = CAT_EMO[t.categoria] || "💳";
+        const emoji = getCatEmoji(t.categoria);
         const iconBg = `color-mix(in oklab, ${_catColor(t.categoria)} 18%, var(--surface-2))`;
         const respBadge = (resp === "Compartido")
           ? `<span class="trans-mobile-badge comp">÷ ${escapeHtml(PARTNER)}</span>` : "";
@@ -5722,7 +5727,7 @@ function cargarCompartidos() {
         ? `<button onclick="event.stopPropagation();abrirLiquidar('${r.cat.replace(/'/g,"\\'")}',${Math.abs(net)},'${net>0?"Ingreso":"Gasto"}')"
              style="margin-left:.5rem;padding:.15rem .5rem;font-size:.7rem;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text-muted);cursor:pointer;vertical-align:middle">Liquidar</button>`
         : "";
-      const _catEmo = (typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[r.cat]||'💳';
+      const _catEmo = getCatEmoji(r.cat);
       return `<tr style="cursor:pointer;" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'table-row':'none'">
         <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_catEmo}</span>${r.cat}</span> <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
         <td style="text-align:right;color:${r.daniel !== 0 ? 'var(--text)' : 'var(--text-muted)'}">${r.daniel !== 0 ? fmtMoneda(r.daniel, monedaFilter) : "—"}</td>
@@ -5808,7 +5813,7 @@ function cargarCompartidos() {
       const ama    = mapB[cat] || 0;
       const net    = daniel - ama;
       const netColor = net > 0 ? "var(--yellow)" : net < 0 ? "var(--green)" : "var(--text-muted)";
-      const _re = (typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[cat]||'💳';
+      const _re = getCatEmoji(cat);
       return `<tr>
         <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_re}</span>${cat}</span></td>
         <td style="text-align:right;color:${daniel>0?"var(--accent)":"var(--text-muted)"}">${daniel>0?fmtR(daniel,mon):"—"}</td>
@@ -7037,7 +7042,7 @@ function renderPresupuesto() {
         ? `<span style="color:var(--text-muted);font-size:.78rem">Sin presupuesto</span>`
         : "";
 
-    const catEmoji = _CAT_EMOJI[cat] || '';
+    const catEmoji = getCatEmoji(cat, '');
     return `<tr class="${rowCls}">
       <td><span style="display:inline-flex;align-items:center;gap:7px">${catEmoji ? `<span style="font-size:1.05rem;width:24px;text-align:center">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}<span>${cat}</span></span>${pacingHtml}</td>
       <td style="text-align:right">
@@ -7183,6 +7188,26 @@ const _CAT_EMOJI = {
   'Limpieza':'🧹','Hogar':'🏠',
 };
 
+let _userCatEmojis = null;
+
+function _loadUserCatEmojis() {
+  try {
+    _userCatEmojis = JSON.parse(localStorage.getItem(USUARIO + "_cat_emojis") || "{}");
+  } catch { _userCatEmojis = {}; }
+}
+
+function getCatEmoji(cat, fallback) {
+  if (_userCatEmojis === null) _loadUserCatEmojis();
+  return _userCatEmojis[cat] || _CAT_EMOJI[cat] || fallback || '💳';
+}
+
+function setCatEmoji(cat, emoji) {
+  if (_userCatEmojis === null) _loadUserCatEmojis();
+  if (emoji) _userCatEmojis[cat] = emoji;
+  else delete _userCatEmojis[cat];
+  localStorage.setItem(USUARIO + "_cat_emojis", JSON.stringify(_userCatEmojis));
+}
+
 function _renderMMCats(gastoPorCat, sueldoEfectivo) {
   const cont = document.getElementById("mm-cats-card");
   if (!cont) return;
@@ -7200,7 +7225,7 @@ function _renderMMCats(gastoPorCat, sueldoEfectivo) {
   if (!rows.length) { cont.innerHTML = '<div style="padding:1rem;color:var(--text-faint);font-size:.88rem">Sin gastos registrados</div>'; return; }
 
   cont.innerHTML = rows.map(({ cat, gasto, presARS }) => {
-    const emoji = _CAT_EMOJI[cat] || '📌';
+    const emoji = getCatEmoji(cat, '📌');
     const used = presARS > 0 ? Math.min(gasto / presARS, 1) : 0;
     const pctNum = Math.round(used * 100);
     const restante = presARS > 0 ? presARS - gasto : 0;
@@ -7368,12 +7393,16 @@ function _renderLista(tipo, items, tipoAPI) {
   if (!items.length && !inactivas.length) {
     html = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin ítems</div>';
   } else {
-    html = items.map(item => `
+    html = items.map(item => {
+      const emo = getCatEmoji(item);
+      return `
       <div class="cfg-item">
+        <button class="cfg-emoji-btn" onclick="editarEmojiCategoria(${JSON.stringify(item)},this)" title="Cambiar emoji">${emo}</button>
         <span class="cfg-item-name">${escapeHtml(item)}</span>
         <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${JSON.stringify(item)},false,this)" title="Ocultar" style="opacity:.6">Ocultar</button>
         <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}',${JSON.stringify(item)},this)" title="Eliminar">✕</button>
-      </div>`).join("");
+      </div>`;
+    }).join("");
 
     if (inactivas.length) {
       html += `<div style="font-size:.75rem;color:var(--text-muted);margin:.6rem 0 .3rem;letter-spacing:.04em;text-transform:uppercase">Disponibles (inactivas)</div>`;
@@ -7600,6 +7629,28 @@ function _refrescarSelectores() {
   }
   // Formulario categoría (según tipo actual)
   setTipo(tipoActual);
+}
+
+function editarEmojiCategoria(cat, btnEl) {
+  const inp = document.createElement("input");
+  inp.type = "text";
+  inp.value = getCatEmoji(cat);
+  inp.style.cssText = "width:2.4rem;font-size:1.1rem;text-align:center;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:.1rem .2rem;cursor:text;outline:none";
+  inp.title = "Pegá o escribí un emoji y presioná Enter";
+
+  const save = () => {
+    const raw = inp.value.trim();
+    const glyph = raw ? [...raw][0] : null;
+    if (glyph) setCatEmoji(cat, glyph);
+    renderizarConfig();
+  };
+
+  inp.addEventListener("blur", save);
+  inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } if (e.key === "Escape") { inp.removeEventListener("blur", save); renderizarConfig(); } });
+
+  btnEl.replaceWith(inp);
+  inp.focus();
+  inp.select();
 }
 
 // ─── IMPORTAR DATOS ───────────────────────────────────────────

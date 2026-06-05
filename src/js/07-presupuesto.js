@@ -643,7 +643,7 @@ function renderPresupuesto() {
         ? `<span style="color:var(--text-muted);font-size:.78rem">Sin presupuesto</span>`
         : "";
 
-    const catEmoji = _CAT_EMOJI[cat] || '';
+    const catEmoji = getCatEmoji(cat, '');
     return `<tr class="${rowCls}">
       <td><span style="display:inline-flex;align-items:center;gap:7px">${catEmoji ? `<span style="font-size:1.05rem;width:24px;text-align:center">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}<span>${cat}</span></span>${pacingHtml}</td>
       <td style="text-align:right">
@@ -789,6 +789,26 @@ const _CAT_EMOJI = {
   'Limpieza':'🧹','Hogar':'🏠',
 };
 
+let _userCatEmojis = null;
+
+function _loadUserCatEmojis() {
+  try {
+    _userCatEmojis = JSON.parse(localStorage.getItem(USUARIO + "_cat_emojis") || "{}");
+  } catch { _userCatEmojis = {}; }
+}
+
+function getCatEmoji(cat, fallback) {
+  if (_userCatEmojis === null) _loadUserCatEmojis();
+  return _userCatEmojis[cat] || _CAT_EMOJI[cat] || fallback || '💳';
+}
+
+function setCatEmoji(cat, emoji) {
+  if (_userCatEmojis === null) _loadUserCatEmojis();
+  if (emoji) _userCatEmojis[cat] = emoji;
+  else delete _userCatEmojis[cat];
+  localStorage.setItem(USUARIO + "_cat_emojis", JSON.stringify(_userCatEmojis));
+}
+
 function _renderMMCats(gastoPorCat, sueldoEfectivo) {
   const cont = document.getElementById("mm-cats-card");
   if (!cont) return;
@@ -806,7 +826,7 @@ function _renderMMCats(gastoPorCat, sueldoEfectivo) {
   if (!rows.length) { cont.innerHTML = '<div style="padding:1rem;color:var(--text-faint);font-size:.88rem">Sin gastos registrados</div>'; return; }
 
   cont.innerHTML = rows.map(({ cat, gasto, presARS }) => {
-    const emoji = _CAT_EMOJI[cat] || '📌';
+    const emoji = getCatEmoji(cat, '📌');
     const used = presARS > 0 ? Math.min(gasto / presARS, 1) : 0;
     const pctNum = Math.round(used * 100);
     const restante = presARS > 0 ? presARS - gasto : 0;
