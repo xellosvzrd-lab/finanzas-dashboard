@@ -640,6 +640,16 @@
     transition: opacity .15s; white-space: nowrap;
   }
   .comp-saldar-btn:hover { opacity: .88; }
+  .comp-registrar-btn {
+    display: inline-block; margin-top: 1rem;
+    padding: .6rem 1.3rem;
+    background: rgba(255,255,255,.15); color: #fff; border: 1.5px solid rgba(255,255,255,.35);
+    border-radius: 10px; font-size: .88rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    backdrop-filter: blur(4px);
+    transition: background .15s; white-space: nowrap;
+  }
+  .comp-registrar-btn:hover { background: rgba(255,255,255,.25); }
   .comp-saldado-badge {
     display: inline-flex; align-items: center; gap: .35rem;
     padding: .35rem .85rem;
@@ -1883,6 +1893,7 @@
   /* ─── MI MES — ROW 2: 4 STAT CARDS (desktop) ───────────────── */
   .mm-row2       { margin-top: 14px; }
   .mm-sc       { padding: 16px 18px; }
+  .mm-sc-icon  { font-size: 1.35rem; margin-bottom: 6px; }
   .mm-sc-label { font-size: 12.5px; font-weight: 600; color: var(--text-dim); margin-bottom: 4px; }
   .mm-sc-val   { font-family: var(--font-display); font-size: 22px; font-weight: 700;
                   font-variant-numeric: tabular-nums; letter-spacing: -0.02em; margin-top: 2px; }
@@ -2431,8 +2442,8 @@
           </div>
         </div>
 
-        <!-- Gráfico categorías -->
-        <div class="charts-grid">
+        <!-- Gráficos + Top gastos (3 columnas desktop) -->
+        <div class="charts-grid" style="grid-template-columns:1fr 1fr 1fr">
           <div class="chart-card">
             <div class="chart-title">Gastos por categoría</div>
             <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
@@ -2447,12 +2458,10 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Top categorías -->
-        <div class="chart-card">
-          <div class="chart-title">Top gastos del mes</div>
-          <div id="top-gastos-list"></div>
+          <div class="chart-card">
+            <div class="chart-title">Top gastos del mes</div>
+            <div id="top-gastos-list"></div>
+          </div>
         </div>
 
         <!-- Evolución mensual fusionada — últimos 12 meses -->
@@ -2690,6 +2699,11 @@
             <p class="page-eyebrow" id="eyebrow-compartidos">COMPARTIDOS</p>
             <h1 id="comp-titulo">Compartidos con Ama</h1>
           </div>
+          <div style="display:flex;align-items:center;gap:.75rem">
+            <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
+            <div class="comp-saldado-badge" id="comp-saldado-badge" style="display:none">✓ Mes saldado</div>
+            <button class="comp-undo-btn" id="comp-undo-btn" onclick="deshacerLiquidacion()" style="display:none">↩ Deshacer</button>
+          </div>
         </div>
 
         <!-- Selector de mes -->
@@ -2710,9 +2724,7 @@
                 <div class="comp-balance-sub" id="comp-balance-sub">—</div>
               </div>
               <div class="comp-balance-actions">
-                <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
-                <div class="comp-saldado-badge" id="comp-saldado-badge" style="display:none">✓ Mes saldado</div>
-                <button class="comp-undo-btn" id="comp-undo-btn" onclick="deshacerLiquidacion()" style="display:none">↩ Deshacer liquidación</button>
+                <button class="comp-registrar-btn" id="comp-registrar-btn" onclick="abrirSaldarTodo()" style="display:none">Registrar pago →</button>
               </div>
             </div>
           </div>
@@ -2758,23 +2770,14 @@
 
         </div><!-- /comp-hero-row -->
 
-        <!-- Toggle detalle compartidos -->
-        <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
-          <button id="btn-toggle-compartidos"
-                  class="config-btn"
-                  onclick="toggleDetalleCompartidos()"
-                  style="font-size:.83rem;">
-            Ver detalle ▾
-          </button>
-        </div>
-
-        <!-- Dos tablas side-by-side -->
+        <!-- Desglose por categoría (siempre visible) -->
         <div id="comp-detalle" class="comp-grid">
 
           <!-- Tabla izquierda: Compartidos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
-            <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 style="font-size:1rem;font-weight:700;color:var(--yellow)">Compartidos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(cada uno paga la mitad)</span></h3>
+            <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;gap:.5rem">
+              <h3 style="font-size:1rem;font-weight:700">Desglose por categoría</h3>
+              <span style="font-size:.74rem;color:var(--text-muted)">cada valor ya dividido ÷2</span>
             </div>
             <div class="table-wrap">
               <table>
@@ -2944,21 +2947,25 @@
         <!-- Row 2: 4 stat-cards (desktop) -->
         <div class="mm-row2">
           <div class="card mm-sc">
+            <div class="mm-sc-icon">🐷</div>
             <div class="mm-sc-label">Ahorro acumulado</div>
             <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
             <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
           </div>
           <div class="card mm-sc" id="mm-sc-comp-card">
+            <div class="mm-sc-icon">🤝</div>
             <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">Ama</span></div>
             <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
             <div class="mm-sc-sub" id="mm-sc-comp-label">balance del mes</div>
           </div>
           <div class="card mm-sc">
+            <div class="mm-sc-icon">📅</div>
             <div class="mm-sc-label">Cuotas este mes</div>
             <div class="mm-sc-val" id="mm-sc-cuotas-mes">—</div>
             <div class="mm-sc-sub" id="mm-sc-cuotas-count">compras activas</div>
           </div>
           <div class="card mm-sc">
+            <div class="mm-sc-icon">📅</div>
             <div class="mm-sc-label">Comprometido futuro</div>
             <div class="mm-sc-val" id="mm-sc-cuotas-fut">—</div>
             <div class="mm-sc-sub">en próximos meses</div>

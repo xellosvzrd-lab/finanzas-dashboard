@@ -519,13 +519,7 @@ function inicializarDisclosureInversiones() {
 }
 
 function inicializarDisclosureCompartidos() {
-  const el  = document.getElementById("comp-detalle");
-  const btn = document.getElementById("btn-toggle-compartidos");
-  if (!el || !btn) return;
-  const saved = localStorage.getItem(USUARIO + "_disclosure_compartidos");
-  const defaultExpanded = USUARIO.toLowerCase() !== "ama";
-  const expanded = saved !== null ? saved === "1" : defaultExpanded;
-  el.style.display  = expanded ? "" : "none";
-  btn.textContent   = expanded ? "Ocultar detalle ▴" : "Ver detalle ▾";
+  const el = document.getElementById("comp-detalle");
+  if (el) el.style.display = "";
 }
 

@@ -173,8 +173,9 @@ function cargarCompartidos() {
         ? `<button onclick="event.stopPropagation();abrirLiquidar('${r.cat.replace(/'/g,"\\'")}',${Math.abs(net)},'${net>0?"Ingreso":"Gasto"}')"
              style="margin-left:.5rem;padding:.15rem .5rem;font-size:.7rem;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text-muted);cursor:pointer;vertical-align:middle">Liquidar</button>`
         : "";
+      const _catEmo = (typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[r.cat]||'💳';
       return `<tr style="cursor:pointer;" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'table-row':'none'">
-        <td>${r.cat} <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
+        <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_catEmo}</span>${r.cat}</span> <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
         <td style="text-align:right;color:${r.daniel !== 0 ? 'var(--text)' : 'var(--text-muted)'}">${r.daniel !== 0 ? fmtMoneda(r.daniel, monedaFilter) : "—"}</td>
         <td style="text-align:right;color:${r.ama !== 0 ? 'var(--text-muted)' : 'var(--text-muted)'}">${r.ama !== 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}</td>
         <td style="text-align:right;font-weight:700;color:${net>0?"var(--yellow)":"var(--green)"}">${fmtMoneda(Math.abs(net), monedaFilter)}${liqBtn}</td>
@@ -258,8 +259,9 @@ function cargarCompartidos() {
       const ama    = mapB[cat] || 0;
       const net    = daniel - ama;
       const netColor = net > 0 ? "var(--yellow)" : net < 0 ? "var(--green)" : "var(--text-muted)";
+      const _re = (typeof _CAT_EMOJI!=="undefined"?_CAT_EMOJI:{})[cat]||'💳';
       return `<tr>
-        <td>${cat}</td>
+        <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_re}</span>${cat}</span></td>
         <td style="text-align:right;color:${daniel>0?"var(--accent)":"var(--text-muted)"}">${daniel>0?fmtR(daniel,mon):"—"}</td>
         <td style="text-align:right;color:${ama>0?"var(--yellow)":"var(--text-muted)"}">${ama>0?fmtR(ama,mon):"—"}</td>
         <td style="text-align:right;font-weight:700;color:${netColor}">${net!==0?fmtR(Math.abs(net),mon):"—"}</td>
@@ -394,12 +396,15 @@ function cargarCompartidos() {
     (() => { const { year, month } = getMesLiquidacion(t); return month === mesComp && year === anioComp; })()
   );
 
-  const saldarBtn  = document.getElementById("comp-saldar-btn");
-  const badgeEl    = document.getElementById("comp-saldado-badge");
-  const undoBtn    = document.getElementById("comp-undo-btn");
-  if (saldarBtn) saldarBtn.style.display = (!yaLiquidado && _settlementItems.length > 0) ? "" : "none";
-  if (badgeEl)   badgeEl.style.display   = yaLiquidado ? "" : "none";
-  if (undoBtn)   undoBtn.style.display   = yaLiquidado ? "" : "none";
+  const saldarBtn    = document.getElementById("comp-saldar-btn");
+  const badgeEl      = document.getElementById("comp-saldado-badge");
+  const undoBtn      = document.getElementById("comp-undo-btn");
+  const registrarBtn = document.getElementById("comp-registrar-btn");
+  const hayDeuda = !yaLiquidado && _settlementItems.length > 0;
+  if (saldarBtn)    saldarBtn.style.display    = hayDeuda ? "" : "none";
+  if (registrarBtn) registrarBtn.style.display = hayDeuda ? "" : "none";
+  if (badgeEl)      badgeEl.style.display      = yaLiquidado ? "" : "none";
+  if (undoBtn)      undoBtn.style.display      = yaLiquidado ? "" : "none";
 
   inicializarDisclosureCompartidos();
 }
