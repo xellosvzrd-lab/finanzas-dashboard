@@ -16,6 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Finanzas">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script>(function(){var t=localStorage.getItem('fin-theme');if(t)document.documentElement.dataset.theme=t;})()</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -1396,9 +1397,9 @@
     .mm-row1 { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: start; }
     .mm-hero { margin-bottom: 0; }
     .mm-hero-stat-3 { display: flex; flex-direction: column; }
-    .mm-quick-stats { flex-direction: column; gap: 12px; margin-bottom: 0; }
-    .mm-qs-card { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; }
-    .mm-qs-val { font-size: 1.5rem; }
+    .mm-quick-stats { display: none; }
+    .mm-desglose { display: flex; flex-direction: column; }
+    .mm-row2     { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
     .mm-cats-card {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
       background: none; border: none; box-shadow: none; padding: 0; border-radius: 0;
@@ -1767,6 +1768,35 @@
     .main { padding: 22px 30px 3rem; }
   }
   @media (min-width: 769px) and (max-width: 859px) { .bottom-nav { display: none; } }
+
+  /* ─── MI MES — DESGLOSE DEL SUELDO (desktop) ───────────────── */
+  .mm-desglose   { display: none; padding: 18px 20px; }
+  .mm-dl-title   { font-size: 14.5px; font-weight: 700; margin-bottom: 14px; font-family: var(--font-display); }
+  .mm-dl-rows    { display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+  .mm-dl-row     { display: flex; align-items: flex-start; justify-content: space-between;
+                    gap: 8px; padding: 11px 0; border-top: 1px solid var(--line); }
+  .mm-dl-row:first-child { border-top: none; padding-top: 0; }
+  .mm-dl-label   { font-size: 14px; font-weight: 600; }
+  .mm-dl-sub     { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; }
+  .mm-dl-val     { font-family: var(--font-display); font-size: 17px; font-weight: 700;
+                    font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+                    white-space: nowrap; }
+
+  /* ─── MI MES — ROW 2: 4 STAT CARDS (desktop) ───────────────── */
+  .mm-row2       { display: none; margin-top: 14px; }
+  .mm-sc         { padding: 16px 18px; }
+  .mm-sc-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .12em; color: var(--brand); margin-bottom: 4px; }
+  .mm-sc-val     { font-family: var(--font-display); font-size: 22px; font-weight: 700;
+                    font-variant-numeric: tabular-nums; letter-spacing: -0.02em; margin-top: 2px; }
+  .mm-sc-sub     { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+
+  /* ─── THEME TOGGLE ──────────────────────────────────────────── */
+  .btn-theme     { background: none; border: 1px solid var(--line); border-radius: var(--r-pill);
+                    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+                    cursor: pointer; color: var(--text-dim); flex-shrink: 0;
+                    transition: background .15s, color .15s; }
+  .btn-theme:hover { background: var(--brand-soft); color: var(--brand); }
 
   .sidebar-logo {
     display: flex; align-items: center; gap: 10px;
@@ -2211,6 +2241,10 @@
           <div class="sidebar-username" id="sidebar-user">Daniel</div>
           <div class="sidebar-usersub">Plan compartido · Ama</div>
         </div>
+        <button class="btn-theme" id="btn-theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+          <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
         <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
@@ -2697,7 +2731,66 @@
             </div>
           </div>
 
+          <!-- Desglose del sueldo: columna derecha en desktop -->
+          <div class="card mm-desglose">
+            <div class="mm-dl-title">Desglose del sueldo</div>
+            <div class="mm-dl-rows">
+              <div class="mm-dl-row">
+                <div>
+                  <div class="mm-dl-label">Sueldo</div>
+                  <div class="mm-dl-sub" id="mm-dl-sueldo-sub">ingresos del mes</div>
+                </div>
+                <div class="mm-dl-val" id="mm-dl-sueldo">—</div>
+              </div>
+              <div class="mm-dl-row">
+                <div>
+                  <div class="mm-dl-label">Presupuestado</div>
+                  <div class="mm-dl-sub" id="mm-dl-presup-sub">% del sueldo asignado</div>
+                </div>
+                <div class="mm-dl-val" id="mm-dl-presup" style="color:var(--brand)">—</div>
+              </div>
+              <div class="mm-dl-row">
+                <div>
+                  <div class="mm-dl-label">Gastado</div>
+                  <div class="mm-dl-sub">incluye compartidos ÷2</div>
+                </div>
+                <div class="mm-dl-val" id="mm-dl-gastado" style="color:var(--neg)">—</div>
+              </div>
+              <div class="mm-dl-row">
+                <div>
+                  <div class="mm-dl-label">Margen planeado</div>
+                  <div class="mm-dl-sub">sueldo − presupuestado</div>
+                </div>
+                <div class="mm-dl-val" id="mm-dl-margen">—</div>
+              </div>
+            </div>
+          </div>
+
         </div><!-- /mm-row1 -->
+
+        <!-- Row 2: 4 stat-cards (desktop) -->
+        <div class="mm-row2">
+          <div class="card mm-sc">
+            <div class="mm-sc-eyebrow">💰 Ahorro</div>
+            <div class="mm-sc-val" id="mm-sc-ahorro">—</div>
+            <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
+          </div>
+          <div class="card mm-sc" id="mm-sc-comp-card">
+            <div class="mm-sc-eyebrow">🤝 Compartidos</div>
+            <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
+            <div class="mm-sc-sub" id="mm-sc-comp-label">con <span id="mm-sc-comp-partner">Ama</span></div>
+          </div>
+          <div class="card mm-sc">
+            <div class="mm-sc-eyebrow">💳 Cuotas</div>
+            <div class="mm-sc-val" id="mm-sc-cuotas-mes">—</div>
+            <div class="mm-sc-sub">este mes</div>
+          </div>
+          <div class="card mm-sc">
+            <div class="mm-sc-eyebrow">📅 Comprometido</div>
+            <div class="mm-sc-val" id="mm-sc-cuotas-fut">—</div>
+            <div class="mm-sc-sub">cuotas futuras</div>
+          </div>
+        </div>
 
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>

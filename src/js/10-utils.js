@@ -1,3 +1,15 @@
+// ─── THEME TOGGLE ─────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  html.dataset.theme = next;
+  localStorage.setItem('fin-theme', next);
+  const sun  = document.getElementById('theme-icon-sun');
+  const moon = document.getElementById('theme-icon-moon');
+  if (sun)  sun.style.display  = next === 'dark' ? '' : 'none';
+  if (moon) moon.style.display = next === 'dark' ? 'none' : '';
+}
+
 // ─── TOAST ────────────────────────────────────────────────────
 function showToast(msg, tipo) {
   const t = document.getElementById("toast");

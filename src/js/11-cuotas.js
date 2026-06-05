@@ -236,6 +236,10 @@ function _renderCuotasCard() {
     `${rows.length} compra${rows.length !== 1 ? "s" : ""}`;
   document.getElementById("cuotas-este-mes").textContent = fmt(estesMes);
   document.getElementById("cuotas-futuro").textContent   = fmt(futuro);
+  const _scMes = document.getElementById("mm-sc-cuotas-mes");
+  const _scFut = document.getElementById("mm-sc-cuotas-fut");
+  if (_scMes) _scMes.textContent = fmt(estesMes);
+  if (_scFut) _scFut.textContent = fmt(futuro);
   document.getElementById("cuotas-rows").innerHTML       = rows.join("");
 
   // Render floor timeline

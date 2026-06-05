@@ -564,6 +564,23 @@ function renderPresupuesto() {
     document.getElementById("kpi-ahorro-cat-sub").textContent = `total acumulado: ${fmt(ahorroAcumCat)}`;
   }
 
+  // Desktop Mi mes — Desglose del sueldo + stat cards
+  (function() {
+    const _s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    _s('mm-dl-sueldo',  fmt(sueldoEfectivo));
+    _s('mm-dl-gastado', fmt(totalGasto));
+    _s('mm-dl-presup',  fmt(totalPresARS));
+    const totalPct = categGasto.reduce((s, c) => s + (presupuestoActual[c] || 0), 0);
+    _s('mm-dl-presup-sub', totalPct.toFixed(0) + '% del sueldo');
+    const margen = sueldoEfectivo - totalPresARS;
+    const mEl = document.getElementById('mm-dl-margen');
+    if (mEl) { mEl.textContent = fmt(Math.abs(margen)); mEl.style.color = margen >= 0 ? 'var(--save)' : 'var(--neg)'; }
+    _s('mm-sc-ahorro',     fmt(ahorroMesCat));
+    _s('mm-sc-ahorro-sub', 'acumulado: ' + fmt(ahorroAcumCat));
+    const partnerEl = document.getElementById('mm-sc-comp-partner');
+    if (partnerEl) partnerEl.textContent = PARTNER;
+  })();
+
   const subTotal = document.getElementById("pres-kpi-total-sub");
   if (subTotal) {
     const totalPct = categGasto.reduce((s, c) => s + (presupuestoActual[c] || 0), 0);
@@ -684,6 +701,11 @@ function renderPresupuesto() {
       if (labelEl) labelEl.textContent = "Compartidos";
     }
     if (subEl) subEl.textContent = "Ver detalle en Compartidos";
+    // Stat card desktop
+    const scVal = document.getElementById('mm-sc-comp-val');
+    const scLbl = document.getElementById('mm-sc-comp-label');
+    if (scVal) { scVal.textContent = parts.join(' + '); scVal.style.color = teDeben ? 'var(--pos)' : 'var(--neg)'; }
+    if (scLbl) scLbl.textContent = teDeben ? `${PARTNER} te debe` : `Le debés a ${PARTNER}`;
   })();
 
   // Hero Cálida + categorías
