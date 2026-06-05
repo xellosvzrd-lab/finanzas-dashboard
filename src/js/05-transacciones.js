@@ -197,8 +197,71 @@ function filtrarTabla() {
   requestAnimationFrame(() => {
     if (gen !== _filtroGen) return;
     tbody.innerHTML = html;
+    _renderMobileList(datos);
     if (window.lucide) lucide.createIcons();
   });
+}
+
+function _renderMobileList(datos) {
+  const el = document.getElementById("trans-mobile-list");
+  if (!el) return;
+  if (!datos.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem">Sin movimientos para este filtro</div>';
+    return;
+  }
+  const CAT_EMO = typeof _CAT_EMOJI !== "undefined" ? _CAT_EMOJI : {};
+  const byDate = {};
+  datos.forEach(t => { (byDate[t.fecha] = byDate[t.fecha] || []).push(t); });
+  el.innerHTML = Object.entries(byDate)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([fecha, ts]) => {
+      const rows = ts.map(t => {
+        const mon  = t.moneda || "ARS";
+        const isPos = t.tipo === "Ingreso";
+        const resp  = t.responsabilidad || "Mío";
+        const emoji = CAT_EMO[t.categoria] || "💳";
+        const iconBg = `color-mix(in oklab, ${_catColor(t.categoria)} 18%, var(--surface-2))`;
+        const respBadge = (resp === "Compartido")
+          ? `<span class="trans-mobile-badge comp">÷ ${escapeHtml(PARTNER)}</span>` : "";
+        const usdBadge = mon === "USD"
+          ? `<span class="trans-mobile-badge usd">USD</span>` : "";
+        const subline = [t.descripcion, t.fuente].filter(Boolean).map(escapeHtml).join(" · ");
+        const monto   = fmtMoneda(Math.abs(Number(t.monto)), mon);
+        return `<div class="trans-mobile-item">
+          <div class="trans-mobile-icon" style="background:${iconBg}">${emoji}</div>
+          <div class="trans-mobile-body">
+            <div class="trans-mobile-cat">${escapeHtml(t.categoria)}${respBadge}</div>
+            ${subline ? `<div class="trans-mobile-desc">${subline}</div>` : ""}
+          </div>
+          <div class="trans-mobile-right">
+            <div class="trans-mobile-amount ${isPos ? "pos" : "neg"}">${isPos ? "+" : "−"}${monto}</div>
+            ${usdBadge}
+          </div>
+        </div>`;
+      }).join("");
+      return `<div class="trans-mobile-day">
+        <div class="trans-mobile-day-label">${fmtFecha(fecha)}</div>
+        <div class="card trans-mobile-day-card">${rows}</div>
+      </div>`;
+    }).join("");
+  if (window.lucide) lucide.createIcons();
+}
+
+function _setChipFiltro(tipo) {
+  const sel  = document.getElementById("fil-tipo");
+  const resp = document.getElementById("fil-resp");
+  if (tipo === "Compartido") {
+    if (sel)  sel.value  = "";
+    if (resp) resp.value = "Compartido";
+  } else {
+    if (sel)  sel.value  = tipo;
+    if (resp) resp.value = "";
+  }
+  filtrarTabla();
+  document.querySelectorAll(".trans-chip").forEach(c => c.classList.remove("on"));
+  const ids = { "": "chip-todos", "Ingreso": "chip-ing", "Gasto": "chip-gas", "Compartido": "chip-comp" };
+  const chip = document.getElementById(ids[tipo] || "chip-todos");
+  if (chip) chip.classList.add("on");
 }
 
 // ─── EXPORTAR CSV ────────────────────────────────────────────

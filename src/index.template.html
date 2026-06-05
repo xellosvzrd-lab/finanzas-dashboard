@@ -1457,6 +1457,10 @@
     .mm-cat-row:first-child { border-top: 1px solid var(--line); }
   }
 
+  /* elementos mobile-only: ocultos por defecto, activados en media query */
+  .trans-mobile-list    { display: none; }
+  .trans-mobile-filters { display: none; }
+
   /* ─── MOBILE (≤ 768px) ─────────────────────────────────────── */
   @media (max-width: 768px) {
     /* Mostrar header mobile, ocultar sidebar por default */
@@ -1512,6 +1516,15 @@
 
     /* Presupuesto: ocultar barra de progreso visual en móvil */
     .pres-bar-bg { display: none; }
+
+    /* Transacciones: ocultar tabla y filtros complejos; mostrar list-view */
+    .table-wrap { display: none; }
+    .trans-mobile-list { display: flex; }
+    .trans-mobile-filters { display: flex; }
+    .table-filters select:not(#fil-mes):not(#fil-anio),
+    .table-filters .multi-select-wrap { display: none; }
+    .table-filters { flex-wrap: wrap; gap: .4rem; }
+    #fil-buscar { width: 100% !important; }
     .pres-bar-wrap { min-width: auto; }
     .pres-input { width: 88px; }
     .pres-note { font-size: .73rem; }
@@ -1838,6 +1851,35 @@
   .mm-sc-val   { font-family: var(--font-display); font-size: 22px; font-weight: 700;
                   font-variant-numeric: tabular-nums; letter-spacing: -0.02em; margin-top: 2px; }
   .mm-sc-sub   { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+
+  /* ─── TRANSACCIONES MOBILE LIST ────────────────────────────── */
+  .trans-mobile-filters { gap: 7px; flex-wrap: wrap; padding: .5rem 0; }
+  .trans-chip { font-size: 12.5px; font-weight: 600; padding: 5px 13px; border-radius: var(--r-pill);
+                background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--line);
+                cursor: pointer; font-family: inherit; transition: background .12s, color .12s; }
+  .trans-chip.on { background: var(--brand-soft); color: var(--brand); border-color: color-mix(in oklab, var(--brand) 30%, transparent); }
+
+  .trans-mobile-list { flex-direction: column; gap: 8px; }
+  .trans-mobile-day-label { font-size: .72rem; font-weight: 700; text-transform: uppercase;
+                             letter-spacing: .07em; color: var(--text-faint); padding: .2rem 0 .3rem; }
+  .trans-mobile-day-card { overflow: hidden; }
+  .trans-mobile-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+                        border-top: 1px solid var(--line); }
+  .trans-mobile-item:first-child { border-top: none; }
+  .trans-mobile-icon { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+                        display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .trans-mobile-body { flex: 1; min-width: 0; }
+  .trans-mobile-cat { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+  .trans-mobile-desc { font-size: 12px; color: var(--text-faint); margin-top: 2px;
+                        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .trans-mobile-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .trans-mobile-amount { font-family: var(--font-display); font-size: 14.5px; font-weight: 700;
+                          font-variant-numeric: normal; white-space: nowrap; }
+  .trans-mobile-amount.pos { color: var(--pos); }
+  .trans-mobile-amount.neg { color: var(--neg); }
+  .trans-mobile-badge { font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 99px; }
+  .trans-mobile-badge.comp { background: var(--brand-soft); color: var(--brand); }
+  .trans-mobile-badge.usd  { background: var(--surface-3); color: var(--text-dim); }
 
   /* ─── THEME TOGGLE ──────────────────────────────────────────── */
   .btn-theme     { background: none; border: 1px solid var(--line); border-radius: var(--r-pill);
@@ -2430,6 +2472,17 @@
           </select>
           <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="clearTimeout(_filtroDebounce);_filtroDebounce=setTimeout(filtrarTabla,120)" aria-label="Buscar transacciones">
         </div>
+        <!-- Chips filtro rápido (solo mobile) -->
+        <div class="trans-mobile-filters" id="trans-mobile-filters">
+          <button class="trans-chip on" id="chip-todos"   onclick="_setChipFiltro('')">Todos</button>
+          <button class="trans-chip"    id="chip-ing"     onclick="_setChipFiltro('Ingreso')">Ingresos</button>
+          <button class="trans-chip"    id="chip-gas"     onclick="_setChipFiltro('Gasto')">Gastos</button>
+          <button class="trans-chip"    id="chip-comp"    onclick="_setChipFiltro('Compartido')">Compartido</button>
+        </div>
+
+        <!-- List-view mobile (oculto en desktop) -->
+        <div class="trans-mobile-list" id="trans-mobile-list"></div>
+
         <div class="chart-card" style="padding:0; overflow:hidden">
           <div class="tabla-subtotal" id="tabla-subtotal">
             <div class="sub-neto-main">
