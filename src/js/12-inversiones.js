@@ -277,39 +277,58 @@ async function _fetchPrecio(simbolo) {
 }
 
 function _renderTotalesInversiones(accionesUSD, accionesARS) {
-  const el = document.getElementById("inv-totales");
-  if (!el) return;
-  const plazos = _plazosCache;
+  const plazos    = _plazosCache;
   const plazosARS = plazos.filter(p => (p.moneda || "ARS") === "ARS").reduce((s,p) => s + p.monto, 0);
   const plazosUSD = plazos.filter(p => p.moneda === "USD").reduce((s,p) => s + p.monto, 0);
-  const totalARS = plazosARS + accionesARS;
-  const totalUSD = plazosUSD + accionesUSD;
-  const nInstr = plazos.length;
+  const totalARS  = plazosARS + accionesARS;
+  const totalUSD  = plazosUSD + accionesUSD;
 
-  const svgWallet = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="17" cy="14" r="1" fill="currentColor"/></svg>`;
-  const svgDolar  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`;
-  const svgPack   = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>`;
+  // Hero card
+  const heroTotal = document.getElementById("inv-hero-total-ars");
+  if (heroTotal) heroTotal.textContent = totalARS > 0 ? fmt(totalARS) : "—";
+  const heroUSDWrap = document.getElementById("inv-hero-total-usd");
+  const heroUSDVal  = document.getElementById("inv-hero-usd-val");
+  if (heroUSDWrap && heroUSDVal) {
+    if (totalUSD > 0) { heroUSDVal.textContent = fmtMoneda(totalUSD,"USD").replace("U$S ",""); heroUSDWrap.style.display = ""; }
+    else               { heroUSDWrap.style.display = "none"; }
+  }
+  const heroSub = document.getElementById("inv-hero-sub");
+  if (heroSub) heroSub.textContent = plazos.length > 0
+    ? `${plazos.length} plazo${plazos.length !== 1 ? "s" : ""} fijo${plazos.length !== 1 ? "s" : ""} · cartera activos`
+    : "Sumá tus inversiones para ver el total";
 
-  el.innerHTML = `<div class="inv-kpi-grid">
-    <div class="kpi-card" style="background:linear-gradient(145deg,var(--card) 50%,rgba(200,132,90,.04) 100%)">
-      <div class="kpi-icon ico-accent">${svgWallet}</div>
-      <div class="kpi-label">Total ARS</div>
-      <div class="kpi-value balance-pos">${totalARS > 0 ? fmt(totalARS) : "—"}</div>
-      <div class="kpi-sub">Plazos ${fmt(plazosARS)} · Cartera ${fmt(accionesARS)}</div>
-    </div>
-    <div class="kpi-card" style="background:linear-gradient(145deg,var(--card) 50%,rgba(90,140,107,.04) 100%)">
-      <div class="kpi-icon ico-green">${svgDolar}</div>
-      <div class="kpi-label">Total USD</div>
-      <div class="kpi-value ${totalUSD > 0 ? 'income' : ''}">${totalUSD > 0 ? fmtMoneda(totalUSD,"USD") : "—"}</div>
-      <div class="kpi-sub">Plazos ${fmtMoneda(plazosUSD,"USD")} · Cartera ${fmtMoneda(accionesUSD,"USD")}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon ico-muted">${svgPack}</div>
-      <div class="kpi-label">Instrumentos</div>
-      <div class="kpi-value" style="color:var(--text)">${nInstr}</div>
-      <div class="kpi-sub">plazos fijos activos</div>
-    </div>
-  </div>`;
+  // Allocation bars
+  const grandTotal = totalARS + (totalUSD * (tipoCambioMEP || 1));
+  const _pct = n => grandTotal > 0 ? Math.round(n / grandTotal * 100) : 0;
+  const plazosTotal   = plazosARS + plazosUSD * (tipoCambioMEP || 1);
+  const activosTotal  = accionesARS + accionesUSD * (tipoCambioMEP || 1);
+  const pctPlazos  = _pct(plazosTotal);
+  const pctActivos = _pct(activosTotal);
+  const _s = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+  const _w = (id,p) => { const e=document.getElementById(id); if(e) e.style.width=p+"%"; };
+  _s("inv-alloc-plazos-val", plazosARS > 0 ? fmt(plazosARS) : "—");
+  _s("inv-alloc-plazos-pct", pctPlazos + "%");
+  _w("inv-alloc-bar-plazos", pctPlazos);
+  _s("inv-alloc-act-val",    accionesARS > 0 ? fmt(accionesARS) : "—");
+  _s("inv-alloc-act-pct",    pctActivos + "%");
+  _w("inv-alloc-bar-activos", pctActivos);
+  _s("inv-alloc-total",      grandTotal > 0 ? fmt(Math.round(grandTotal)) : "—");
+
+  // Interest total
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const interesTotal = plazos.reduce((s,p) => {
+    if ((p.moneda || "ARS") !== "ARS") return s;
+    const venc = new Date(p.fechaVencimiento + "T00:00:00");
+    const inicio = new Date(p.fechaInicio + "T00:00:00");
+    const dias = Math.round((venc - inicio) / 86400000);
+    return s + p.monto * (p.tna / 100) * (dias / 365);
+  }, 0);
+  const interesEl = document.getElementById("inv-interes-total");
+  if (interesEl && interesTotal > 0) interesEl.textContent = `Interés estimado al vencer: +${fmt(Math.round(interesTotal))}`;
+
+  // legacy div (vacío, JS lo usaba antes)
+  const el = document.getElementById("inv-totales");
+  if (el) el.innerHTML = "";
 }
 
 function _tiempoTranscurrido(ts) {

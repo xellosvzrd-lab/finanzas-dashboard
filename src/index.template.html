@@ -730,6 +730,42 @@
   .accion-pnl.neg { background: var(--red-dim);   color: var(--red); }
   /* Inv totales — KPI grid */
   .inv-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .85rem; margin-bottom: 2rem; }
+
+  /* ─── INVERSIONES REDESIGN ──────────────────────────────── */
+  .inv-hero-row    { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
+  .inv-hero-card   { position: relative; overflow: hidden; border-radius: var(--r-lg);
+                      padding: 24px 28px; color: #fff;
+                      background: linear-gradient(140deg, var(--brand) 0%, var(--brand-2) 100%);
+                      box-shadow: 0 18px 44px color-mix(in oklab, var(--brand) 38%, transparent); }
+  .inv-hero-eyebrow { font-size: 14px; font-weight: 600; opacity: .9; position: relative; }
+  .inv-hero-total   { font-size: 38px; font-weight: 700; line-height: 1.05; margin-top: 6px; position: relative; }
+  .inv-hero-usd     { font-size: 14px; opacity: .8; margin-top: 3px; position: relative; }
+  .inv-hero-sub     { font-size: 12.5px; opacity: .75; margin-top: 6px; position: relative; }
+  .inv-alloc-card   { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .inv-alloc-title  { font-size: 14.5px; font-weight: 700; font-family: var(--font-display); }
+  .inv-alloc-row    { display: flex; flex-direction: column; gap: 5px; }
+  .inv-alloc-top    { display: flex; justify-content: space-between; align-items: baseline; }
+  .inv-alloc-name   { font-size: 13.5px; font-weight: 600; }
+  .inv-alloc-val    { font-family: var(--font-display); font-size: 14px; font-weight: 700; font-variant-numeric: normal; }
+  .inv-alloc-pct    { font-size: 12px; color: var(--text-faint); }
+  .inv-alloc-bar-wrap    { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+  .inv-alloc-bar         { height: 100%; border-radius: 99px; transition: width .5s var(--ease-out, ease); min-width: 4px; }
+  .inv-alloc-bar-plazos  { background: var(--save); }
+  .inv-alloc-bar-activos { background: var(--info); }
+  .inv-alloc-total  { font-size: 12.5px; color: var(--text-dim); border-top: 1px solid var(--line);
+                       padding-top: 10px; display: flex; justify-content: space-between; }
+  .inv-alloc-total .num { font-weight: 700; }
+  .inv-content-row  { display: flex; flex-direction: column; gap: 18px; }
+  .inv-section-hdr  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .inv-section-title{ font-size: 15px; font-weight: 700; margin: 0; font-family: var(--font-display); }
+  .inv-interes-total{ font-size: 13px; color: var(--pos); margin-top: 8px; padding: 8px 12px;
+                       border-top: 1px solid var(--line); font-weight: 600; }
+  @media (min-width: 860px) {
+    .inv-hero-row   { flex-direction: row; align-items: stretch; }
+    .inv-hero-card  { flex: 1.1; }
+    .inv-alloc-card { flex: 0.9; }
+    .inv-content-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  }
   .plazo-form { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: .75rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
   .plazo-form input { padding: .45rem .6rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .85rem; font-family: inherit; width: 100%; box-sizing: border-box; }
   .plazo-form input:focus { outline: none; border-color: var(--accent); }
@@ -3143,52 +3179,67 @@
 
       <!-- ── PÁGINA INVERSIONES ────────────────────────────── -->
       <div id="page-inversiones" class="page">
-        <div class="page-header">
+        <div class="page-header" style="margin-bottom:18px">
           <div class="page-header-left">
             <p class="page-eyebrow" id="eyebrow-inversiones">INVERSIONES</p>
             <h1>Inversiones</h1>
+            <p style="font-size:.84rem;color:var(--text-dim);margin:.2rem 0 0">Plazos fijos · activos · dólar</p>
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center">
+            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Nueva inversión</button>
           </div>
         </div>
 
-        <!-- Totalizador por categoría -->
-        <div id="inv-totales"></div>
-
-        <!-- Plazos Fijos -->
-        <div style="margin-bottom:1.5rem">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-            <h2 style="font-size:1rem;font-weight:700;margin:0">
-              <button style="background:none;border:none;cursor:pointer;font:inherit;color:inherit;display:flex;align-items:center;gap:.4rem;padding:0"
-                      onclick="toggleInvSection('plazos')"
-                      aria-expanded="true" aria-controls="inv-body-plazos"
-                      id="inv-hdr-plazos">
-                Plazos Fijos <span id="inv-toggle-plazos" aria-hidden="true" style="font-size:.75rem;color:var(--text-muted)">▴</span>
-              </button>
-            </h2>
-            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()" aria-label="Agregar plazo fijo">+ Agregar</button>
+        <!-- Hero row: patrimonio + asignación -->
+        <div class="inv-hero-row">
+          <!-- Patrimonio hero -->
+          <div class="inv-hero-card" id="inv-hero-card">
+            <div style="position:absolute;width:200px;height:200px;border-radius:999px;right:-60px;top:-80px;background:rgba(255,255,255,.14);pointer-events:none"></div>
+            <div class="inv-hero-eyebrow">🌱 Patrimonio invertido</div>
+            <div class="num inv-hero-total" id="inv-hero-total-ars">—</div>
+            <div class="inv-hero-usd" id="inv-hero-total-usd" style="display:none">≈ <span id="inv-hero-usd-val">—</span> USD</div>
+            <div class="inv-hero-sub" id="inv-hero-sub">—</div>
           </div>
-          <div id="inv-body-plazos">
+          <!-- Asignación -->
+          <div class="card inv-alloc-card">
+            <div class="inv-alloc-title">Asignación</div>
+            <div id="inv-alloc-rows" style="display:flex;flex-direction:column;gap:12px">
+              <div class="inv-alloc-row">
+                <div class="inv-alloc-top"><span class="inv-alloc-name">Plazos fijos</span><div style="display:flex;gap:6px;align-items:baseline"><span class="num inv-alloc-val" id="inv-alloc-plazos-val">—</span><span class="inv-alloc-pct" id="inv-alloc-plazos-pct">—</span></div></div>
+                <div class="inv-alloc-bar-wrap"><div class="inv-alloc-bar inv-alloc-bar-plazos" id="inv-alloc-bar-plazos" style="width:0%"></div></div>
+              </div>
+              <div class="inv-alloc-row">
+                <div class="inv-alloc-top"><span class="inv-alloc-name">Activos & cripto</span><div style="display:flex;gap:6px;align-items:baseline"><span class="num inv-alloc-val" id="inv-alloc-act-val">—</span><span class="inv-alloc-pct" id="inv-alloc-act-pct">—</span></div></div>
+                <div class="inv-alloc-bar-wrap"><div class="inv-alloc-bar inv-alloc-bar-activos" id="inv-alloc-bar-activos" style="width:0%"></div></div>
+              </div>
+            </div>
+            <div class="inv-alloc-total">Total invertido: <span class="num" id="inv-alloc-total">—</span></div>
+          </div>
+        </div><!-- /inv-hero-row -->
+
+        <!-- Content row: plazos + acciones en 2 cols (desktop) -->
+        <div class="inv-content-row">
+
+          <!-- Plazos Fijos -->
+          <div class="inv-section">
+            <div class="inv-section-hdr">
+              <h2 class="inv-section-title">🔒 Plazos fijos activos</h2>
+              <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormPlazo()" aria-label="Agregar plazo fijo">+ Agregar</button>
+            </div>
             <div id="plazo-form-wrap" style="display:none"></div>
             <div id="plazo-lista">
               <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:30%"></div><div class="skeleton skeleton-line" style="width:70%"></div></div>
               <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:50%"></div><div class="skeleton skeleton-line" style="width:35%"></div><div class="skeleton skeleton-line" style="width:65%"></div></div>
             </div>
+            <div id="inv-interes-total" class="inv-interes-total"></div>
           </div>
-        </div>
 
-        <!-- Acciones & Cripto -->
-        <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-            <h2 style="font-size:1rem;font-weight:700;margin:0">
-              <button style="background:none;border:none;cursor:pointer;font:inherit;color:inherit;display:flex;align-items:center;gap:.4rem;padding:0"
-                      onclick="toggleInvSection('acciones')"
-                      aria-expanded="true" aria-controls="inv-body-acciones"
-                      id="inv-hdr-acciones">
-                Acciones & Cripto <span id="inv-toggle-acciones" aria-hidden="true" style="font-size:.75rem;color:var(--text-muted)">▴</span>
-              </button>
-            </h2>
-            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia (acción o cripto)">+ Agregar</button>
-          </div>
-          <div id="inv-body-acciones">
+          <!-- Activos & Cripto -->
+          <div class="inv-section">
+            <div class="inv-section-hdr">
+              <h2 class="inv-section-title">📈 Activos & cripto</h2>
+              <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia">+ Agregar</button>
+            </div>
             <div id="accion-form-wrap" style="display:none"></div>
             <div id="accion-lista">
               <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-line" style="width:60%"></div><div class="skeleton skeleton-line" style="width:50%"></div></div>
@@ -3196,7 +3247,11 @@
             </div>
             <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
           </div>
-        </div>
+
+        </div><!-- /inv-content-row -->
+
+        <!-- legacy: vacío pero JS lo usa -->
+        <div id="inv-totales" style="display:none"></div>
 
       </div><!-- /page-inversiones -->
 
