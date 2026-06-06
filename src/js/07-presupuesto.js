@@ -806,7 +806,9 @@ function setCatEmoji(cat, emoji) {
   if (_userCatEmojis === null) _loadUserCatEmojis();
   if (emoji) _userCatEmojis[cat] = emoji;
   else delete _userCatEmojis[cat];
-  localStorage.setItem(USUARIO + "_cat_emojis", JSON.stringify(_userCatEmojis));
+  const snapshot = { ..._userCatEmojis };
+  localStorage.setItem(USUARIO + "_cat_emojis", JSON.stringify(snapshot));
+  supabaseClient.auth.updateUser({ data: { cat_emojis: snapshot } }).catch(() => {});
 }
 
 function _renderMMCats(gastoPorCat, sueldoEfectivo) {

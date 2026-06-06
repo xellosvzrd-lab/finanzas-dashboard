@@ -30,6 +30,7 @@ function _setVariablesUsuario(nombre) {
 
 function _configurarUsuario(session) {
   const metaNombre   = session.user.user_metadata?.nombre;
+  const metaEmojis   = session.user.user_metadata?.cat_emojis;
   const isGoogleOnly = session.user.app_metadata?.provider === 'google'
                     && !session.user.app_metadata?.providers?.includes('email');
   if (isGoogleOnly && !metaNombre) {
@@ -39,6 +40,10 @@ function _configurarUsuario(session) {
     return;
   }
   _setVariablesUsuario(metaNombre || "");
+  if (USUARIO && metaEmojis && typeof metaEmojis === "object") {
+    localStorage.setItem(USUARIO + "_cat_emojis", JSON.stringify(metaEmojis));
+    _userCatEmojis = metaEmojis;
+  }
   if (USUARIO) _actualizarStringsUsuario();
 }
 
