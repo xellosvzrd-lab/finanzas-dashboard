@@ -3955,6 +3955,17 @@ function _configurarUsuario(session) {
     _userCatEmojis = metaEmojis;
   }
   if (USUARIO) _actualizarStringsUsuario();
+  // getSession() devuelve JWT cacheado — user_metadata puede estar desactualizado.
+  // getUser() hace fetch real y trae los emojis frescos de otros dispositivos.
+  if (USUARIO) {
+    supabaseClient.auth.getUser().then(({ data: { user } }) => {
+      const fresh = user?.user_metadata?.cat_emojis;
+      if (fresh && typeof fresh === "object") {
+        localStorage.setItem(USUARIO + "_cat_emojis", JSON.stringify(fresh));
+        _userCatEmojis = fresh;
+      }
+    }).catch(() => {});
+  }
 }
 
 function _actualizarStringsUsuario() {
