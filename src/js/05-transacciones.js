@@ -858,6 +858,10 @@ async function guardarRafaga() {
   btn.textContent = "⏳ Guardando...";
 
   try {
+    const { data: { session: freshSession } } = await supabaseClient.auth.getSession();
+    if (!freshSession) throw new Error("Sesión expirada — volvé a iniciar sesión.");
+    supabaseSession = freshSession;
+
     const rows = validas.map(v => ({
       id: crypto.randomUUID(), ...v,
       categoria_id: _getCategoriaId(v.categoria, v.tipo),

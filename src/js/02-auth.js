@@ -8,14 +8,15 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Detectar retorno desde email de recuperación de contraseña
   supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session) supabaseSession = session;
     if (event === "PASSWORD_RECOVERY") {
-      supabaseSession = session;
       document.getElementById("setup-screen").style.display = "flex";
       document.getElementById("card-login").style.display         = "none";
       document.getElementById("card-reset").style.display         = "none";
       document.getElementById("card-nueva-password").style.display = "";
       document.getElementById("nueva-password").focus();
     }
+    if (event === "SIGNED_OUT") supabaseSession = null;
   });
 
   // Pre-llenar email guardado
