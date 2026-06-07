@@ -1874,6 +1874,9 @@
   /* ─── MI MES — ROW 2: 4 STAT CARDS (desktop) ───────────────── */
   .mm-row2       { margin-top: 14px; }
   .mm-sc       { padding: 16px 18px; }
+  .mm-sc-clickable { cursor: pointer; transition: border-color .15s, transform .12s; }
+  .mm-sc-clickable:hover { border-color: rgba(var(--accent-rgb),.45); transform: translateY(-1px); }
+  .mm-sc-clickable:active { transform: translateY(0); }
   .mm-sc-icon  { font-size: 1.35rem; margin-bottom: 6px; }
   .mm-sc-label { font-size: 12.5px; font-weight: 600; color: var(--text-dim); margin-bottom: 4px; }
   .mm-sc-val   { font-family: var(--font-display); font-size: 22px; font-weight: 700;
@@ -2127,6 +2130,19 @@
     border-color: var(--accent); background: var(--accent-dim); color: var(--accent); font-weight: 600;
   }
   #f-cuotas-fields { display: none; }
+  .cuotas-mes-sheet {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px 18px 0 0; width: 100%; max-width: 520px;
+    max-height: 80vh; overflow-y: auto; overscroll-behavior: contain;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    animation: slideUp .22s cubic-bezier(.4,0,.2,1);
+  }
+  .cuotas-mes-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem .75rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--card); z-index: 1;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .cuota-monto-cuota-calc { font-size: .82rem; color: var(--text-muted); margin-top: .3rem; }
   .cuota-monto-cuota-calc strong { color: var(--accent); font-weight: 700; }
   .badge-cuota {
@@ -2939,7 +2955,7 @@
             <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
             <div class="mm-sc-sub" id="mm-sc-comp-label">balance del mes</div>
           </div>
-          <div class="card mm-sc">
+          <div class="card mm-sc mm-sc-clickable" onclick="verDetalleCuotasMes()" role="button" tabindex="0" aria-haspopup="dialog" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();verDetalleCuotasMes()}">
             <div class="mm-sc-icon">📅</div>
             <div class="mm-sc-label">Cuotas este mes</div>
             <div class="mm-sc-val" id="mm-sc-cuotas-mes">—</div>
@@ -3058,6 +3074,19 @@
         </div>
 
       </div><!-- /page-presupuesto -->
+
+      <!-- ── MODAL DETALLE CUOTAS MES ─────────────────────── -->
+      <div id="cuotas-mes-overlay" role="dialog" aria-modal="true" aria-labelledby="cuotas-mes-title"
+           style="display:none;position:fixed;inset:0;background:var(--overlay);z-index:999;align-items:flex-end;justify-content:center"
+           onclick="if(event.target===this)cerrarCuotasMesModal()">
+        <div class="cuotas-mes-sheet">
+          <div class="cuotas-mes-header">
+            <span id="cuotas-mes-title" style="font-weight:700;font-size:1rem">Cuotas este mes</span>
+            <button class="btn btn-ghost" onclick="cerrarCuotasMesModal()" aria-label="Cerrar" style="padding:.3rem .6rem;font-size:.85rem">✕</button>
+          </div>
+          <div id="cuotas-mes-body" class="cuotas-body" style="padding:0 1.25rem 1rem"></div>
+        </div>
+      </div>
 
       <!-- ── PÁGINA AÑO COMPLETO ────────────────────────── -->
       <div id="page-anual" class="page">

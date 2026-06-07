@@ -1,5 +1,7 @@
 // ─── MODO CUOTAS ─────────────────────────────────────────────
 
+let _cuotasMesRows = "";   // HTML cache para el modal de detalle
+
 let _modoCuotas = false;
 let _montoCuotaEditado = false;
 
@@ -232,15 +234,18 @@ function _renderCuotasCard() {
   if (!rows.length) { card.style.display = "none"; return; }
 
   card.style.display = "";
-  document.getElementById("cuotas-count").textContent =
-    `${rows.length} compra${rows.length !== 1 ? "s" : ""}`;
+  const countLabel = `${rows.length} compra${rows.length !== 1 ? "s" : ""}`;
+  document.getElementById("cuotas-count").textContent = countLabel;
   document.getElementById("cuotas-este-mes").textContent = fmt(estesMes);
   document.getElementById("cuotas-futuro").textContent   = fmt(futuro);
-  const _scMes = document.getElementById("mm-sc-cuotas-mes");
-  const _scFut = document.getElementById("mm-sc-cuotas-fut");
-  if (_scMes) _scMes.textContent = fmt(estesMes);
-  if (_scFut) _scFut.textContent = fmt(futuro);
-  document.getElementById("cuotas-rows").innerHTML       = rows.join("");
+  const _scMes   = document.getElementById("mm-sc-cuotas-mes");
+  const _scFut   = document.getElementById("mm-sc-cuotas-fut");
+  const _scCount = document.getElementById("mm-sc-cuotas-count");
+  if (_scMes)   _scMes.textContent   = fmt(estesMes);
+  if (_scFut)   _scFut.textContent   = fmt(futuro);
+  if (_scCount) _scCount.textContent = countLabel;
+  _cuotasMesRows = rows.join("");
+  document.getElementById("cuotas-rows").innerHTML = _cuotasMesRows;
 
   // Render floor timeline
   const floorEl = document.getElementById("cuotas-floor");
@@ -521,5 +526,23 @@ function inicializarDisclosureInversiones() {
 function inicializarDisclosureCompartidos() {
   const el = document.getElementById("comp-detalle");
   if (el) el.style.display = "";
+}
+
+// ─── MODAL DETALLE CUOTAS MES ─────────────────────────────────
+
+function verDetalleCuotasMes() {
+  const overlay = document.getElementById("cuotas-mes-overlay");
+  const body    = document.getElementById("cuotas-mes-body");
+  if (!overlay || !body) return;
+  body.innerHTML = _cuotasMesRows ||
+    '<p style="padding:1rem;color:var(--text-muted);font-size:.88rem">Sin cuotas activas este mes.</p>';
+  overlay.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarCuotasMesModal() {
+  const overlay = document.getElementById("cuotas-mes-overlay");
+  if (overlay) overlay.style.display = "none";
+  document.body.style.overflow = "";
 }
 
