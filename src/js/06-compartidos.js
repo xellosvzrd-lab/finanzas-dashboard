@@ -413,7 +413,6 @@ function cargarCompartidos() {
 let _liqPendiente = null; // { cat, monto, tipo }
 let _settlementItems = []; // { cat, monto, tipo, moneda } — para saldar todo
 let chartSparklines = {};
-let _lastHeatmapMes = null;
 let _filFechaExacta = null;
 let _accionesRefreshTimer = null;
 let _accionesLabelTimer  = null;
@@ -421,7 +420,7 @@ let _filtroDebounce      = null;
 const _$ = {};  // element cache — populated lazily
 function _el(id) { return _$[id] || (_$[id] = document.getElementById(id)); }
 let _filtroGen = 0;  // generation counter — increments on every filtrarTabla() call
-let _accionesUltimaActualizacion = null; // "YYYY-MM-DD" — set by heatmap click, cleared on manual filter change
+let _accionesUltimaActualizacion = null;
 
 function abrirLiquidar(cat, monto, tipo) {
   _liqPendiente = { cat, monto, tipo };

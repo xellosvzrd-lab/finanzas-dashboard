@@ -223,7 +223,6 @@ function montoEfectivoGasto(t) {
 function destroyPresupuestoCharts() {
   Object.values(chartSparklines).forEach(c => c && c.destroy());
   chartSparklines = {};
-  _lastHeatmapMes = null;
 }
 
 function buildMonthlyData(nMeses) {
@@ -270,77 +269,6 @@ function renderKpiSparklines(monthly) {
   });
 }
 
-function irATransaccionesDia(anio, mes, dia) {
-  const pad = n => String(n).padStart(2, "0");
-  _filFechaExacta = `${anio}-${pad(mes)}-${pad(dia)}`;
-  const selMes = document.getElementById("fil-mes");
-  const selAnio = document.getElementById("fil-anio");
-  if (selMes) selMes.value = mes;
-  if (selAnio) selAnio.value = anio;
-  navegarA("transacciones");
-  filtrarTabla();
-}
-
-function renderHeatmapMes() {
-  const filMes  = parseInt(document.getElementById("pres-mes")?.value || 0);
-  const filAnio = parseInt(document.getElementById("pres-anio")?.value || 0);
-  if (!filMes || !filAnio) return;
-  _lastHeatmapMes = `${filMes}-${filAnio}`;
-  const el = document.getElementById("heatmap-mes");
-  if (!el) return;
-  const byDay = {};
-  allTransac.forEach(t => {
-    const { year, month } = getMesLiquidacion(t);
-    if (month !== filMes || year !== filAnio) return;
-    if (t.tipo !== "Gasto") return;
-    if ((t.usuario || "Daniel") !== USUARIO) return;
-    if ((t.moneda || "ARS") !== "ARS") return;
-    if (esTransferencia(t)) return;
-    const d = parseInt((t.fecha || "").split("-")[2] || 0);
-    if (d) byDay[d] = (byDay[d] || 0) + Math.abs(Number(t.monto));
-  });
-  const maxG = Math.max(...Object.values(byDay), 1);
-  const daysInMonth = new Date(filAnio, filMes, 0).getDate();
-  const offset = (new Date(filAnio, filMes - 1, 1).getDay() + 6) % 7;
-  const hoy = new Date();
-  const isCurrentMonth = filMes === hoy.getMonth() + 1 && filAnio === hoy.getFullYear();
-  const MESES = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-
-  // Stats para el header
-  const topDay = Object.entries(byDay).sort((a,b) => b[1]-a[1])[0];
-  const daysWithSpend = Object.keys(byDay).length;
-  const statHtml = topDay
-    ? `${daysWithSpend} días activos · pico <strong>${fmt(topDay[1])}</strong> el día ${topDay[0]}`
-    : "Sin gastos este mes";
-
-  let html = `<div class="heatmap-top">
-    <span class="heatmap-top-title">Actividad diaria · ${MESES[filMes]} ${filAnio}</span>
-    <span class="heatmap-top-stat">${statHtml}</span>
-  </div>`;
-  html += `<div class="heatmap-cal">`;
-  html += ["L","M","M","J","V","S","D"].map(d => `<div class="heatmap-header">${d}</div>`).join("");
-  for (let i = 0; i < offset; i++) html += `<div class="heatmap-day heatmap-empty"></div>`;
-  for (let d = 1; d <= daysInMonth; d++) {
-    const g = byDay[d] || 0;
-    const heat = g > 0 ? Math.max(0.12, (g / maxG)).toFixed(2) : 0;
-    const isToday = isCurrentMonth && d === hoy.getDate();
-    const clickable = g > 0 ? ` heatmap-clickable` : "";
-    const onclick = g > 0 ? ` onclick="irATransaccionesDia(${filAnio},${filMes},${d})"` : "";
-    const cls = `heatmap-day${isToday ? " heatmap-today" : ""}${g === 0 ? " heatmap-zero" : ""}${clickable}`;
-    const label = g > 0
-      ? `Día ${d}: ${fmt(g)} en gastos`
-      : `Día ${d}: sin gastos`;
-    const a11y = g > 0
-      ? ` role="button" tabindex="0" aria-label="${label}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irATransaccionesDia(${filAnio},${filMes},${d})}"`
-      : ` aria-label="${label}" aria-disabled="true"`;
-    const heatNum = parseFloat(heat);
-    const heatText = heatNum > 0.45 ? 'rgba(255,252,249,.92)' : 'rgba(50,32,20,.75)';
-    const heatStyle = heat > 0 ? `--heat:${heat};--heat-text:${heatText}` : `--heat:0`;
-    html += `<div class="${cls}" style="${heatStyle}"${onclick}${a11y}>${d}</div>`;
-  }
-  html += `</div>`;
-  el.innerHTML = html;
-}
 
 function renderPresupuesto() {
   destroyPresupuestoCharts();
@@ -719,8 +647,6 @@ function renderPresupuesto() {
   _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio);
   _renderMMCats(gastoPorCat, sueldoEfectivo);
 
-  // Sprint 2 — heatmap + sparklines (después de HTML escrito)
-  renderHeatmapMes();
   const monthly = buildMonthlyData(6);
   renderKpiSparklines(monthly);
 }

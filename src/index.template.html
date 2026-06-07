@@ -425,30 +425,6 @@
   .kpi-sparkline-wrap { margin-top: .5rem; height: 36px; }
   .kpi-sparkline-wrap canvas { width: 100% !important; height: 36px !important; }
 
-  /* ─── HEATMAP CALENDAR ───────────────────────────────────── */
-  .heatmap-full-card { margin-bottom: 1rem; padding: .85rem 1rem .7rem !important; }
-  .heatmap-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; gap: .5rem; }
-  .heatmap-top-title { font-size: .75rem; font-weight: 700; color: var(--text); }
-  .heatmap-top-stat { font-size: .68rem; color: var(--text-muted); }
-  .heatmap-top-stat strong { color: var(--accent); }
-  .heatmap-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; width: 100%; }
-  .heatmap-header { text-align: center; font-size: .58rem; color: var(--text-muted); font-weight: 600; padding-bottom: 2px; }
-  .heatmap-day {
-    height: 26px; border-radius: 3px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: .55rem; font-weight: 600;
-    background: rgba(200,132,90,var(--heat,0));
-    color: var(--heat-text, var(--text-muted));
-    border: 1px solid transparent; cursor: default;
-    transition: border-color .12s, transform .1s;
-  }
-  .heatmap-day:hover { border-color: var(--accent); transform: scale(1.12); z-index: 1; }
-  .heatmap-day.heatmap-clickable { cursor: pointer; }
-  .heatmap-day.heatmap-clickable:hover { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,132,90,.25); }
-  .heatmap-day.heatmap-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .heatmap-day.heatmap-empty { background: none; border: none; }
-  .heatmap-day.heatmap-today { border: 1.5px solid var(--accent); color: var(--accent); font-weight: 800; }
-  .heatmap-day.heatmap-zero  { background: var(--bg3); color: var(--text-muted); }
 
   /* ─── HERO KPI CARD ─────────────────────────────────────── */
   .kpi-hero { grid-column: span 2; padding: 1.5rem 1.8rem; }
@@ -1496,7 +1472,6 @@
     .cuotas-card         { display: none !important; }
     .mm-section-header   { display: none; }
     .mm-cats-card        { display: none; }
-    .heatmap-full-card   { display: none; }
     #btn-toggle-desglose { display: none; }
     .pres-note           { display: none; }
     /* Budget table: siempre visible en desktop, sin toggle */
@@ -3017,7 +2992,6 @@
         <div class="card mm-cats-card" id="mm-cats-card"></div>
 
         <!-- Heatmap calendario -->
-        <div class="chart-card heatmap-full-card" id="heatmap-mes"></div>
 
         <!-- Editar presupuesto -->
         <div style="display:flex;justify-content:flex-end;margin:.75rem 0 .5rem">
