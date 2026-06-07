@@ -3938,7 +3938,14 @@ function _setVariablesUsuario(nombre) {
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
   categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
-  document.documentElement.dataset.theme = USUARIO.toLowerCase() === "ama" ? "light" : "dark";
+  const _savedTheme = localStorage.getItem('fin-theme');
+  const _defaultTheme = USUARIO.toLowerCase() === "ama" ? "light" : "dark";
+  document.documentElement.dataset.theme = _savedTheme || _defaultTheme;
+  const _sun  = document.getElementById('theme-icon-sun');
+  const _moon = document.getElementById('theme-icon-moon');
+  const _activeTheme = _savedTheme || _defaultTheme;
+  if (_sun)  _sun.style.display  = _activeTheme === 'dark' ? '' : 'none';
+  if (_moon) _moon.style.display = _activeTheme === 'dark' ? 'none' : '';
 }
 
 function _configurarUsuario(session) {
