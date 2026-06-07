@@ -181,7 +181,7 @@ function _renderCuotasCard() {
 
   const rows = comprasEnCuotas.map(c => {
     const cuotasTrans = allTransac.filter(t => t.compra_id === c.id);
-    const pagadas = cuotasTrans.filter(t => (t.mes_liquidacion || "") <= mesActualStr).length;
+    const pagadas = cuotasTrans.filter(t => (t.mes_liquidacion || "") < mesActualStr).length;
     const factor  = c.responsabilidad === "Compartido" ? 0.5 : 1;
 
     if (pagadas >= c.cuotas_total) {
