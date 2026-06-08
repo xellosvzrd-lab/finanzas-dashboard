@@ -209,10 +209,11 @@ function _renderCuotasCard() {
     const pct = Math.round((pagadasDisplay / c.cuotas_total) * 100);
     const esComp = c.responsabilidad === "Compartido";
 
-    return `<div class="cuota-row">
+    return `<div class="cuota-row" data-compra-id="${c.id}">
       <div class="cuota-row-header">
         <span class="cuota-desc">${escapeHtml(c.descripcion)}</span>
         ${esComp ? '<span class="cuota-badge-comp">compartido</span>' : ""}
+        <button class="cuota-row-del-btn" onclick="_eliminarCompraCompleta('${c.id}')" title="Eliminar compra">✕</button>
       </div>
       <div class="cuota-progress-wrap">
         <div class="cuota-progress-bar">
@@ -434,8 +435,8 @@ async function _cancelarCuotasAnticipadamente() {
   }
 }
 
-async function _eliminarCompraCompleta() {
-  const id = _cuotaModalCompraId;
+async function _eliminarCompraCompleta(compraId) {
+  const id = compraId || _cuotaModalCompraId;
   const c  = comprasEnCuotas.find(x => x.id === id);
   if (!id || !c) return;
 

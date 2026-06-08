@@ -2102,6 +2102,8 @@
   .cuota-row { padding: .45rem 0; border-bottom: 1px solid var(--border); }
   .cuota-row:last-child { border-bottom: none; }
   .cuota-row-header { display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; }
+  .cuota-row-del-btn { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: .85rem; padding: .1rem .3rem; border-radius: 4px; line-height: 1; }
+  .cuota-row-del-btn:hover { color: var(--red); background: rgba(var(--red-rgb, 220,53,69), .1); }
   .cuota-desc { font-weight: 600; font-size: .875rem; flex: 1; }
   .cuota-badge-comp {
     font-size: .68rem; color: var(--yellow); background: rgba(var(--yellow-rgb), 0.13);
@@ -8179,10 +8181,11 @@ function _renderCuotasCard() {
     const pct = Math.round((pagadasDisplay / c.cuotas_total) * 100);
     const esComp = c.responsabilidad === "Compartido";
 
-    return `<div class="cuota-row">
+    return `<div class="cuota-row" data-compra-id="${c.id}">
       <div class="cuota-row-header">
         <span class="cuota-desc">${escapeHtml(c.descripcion)}</span>
         ${esComp ? '<span class="cuota-badge-comp">compartido</span>' : ""}
+        <button class="cuota-row-del-btn" onclick="_eliminarCompraCompleta('${c.id}')" title="Eliminar compra">✕</button>
       </div>
       <div class="cuota-progress-wrap">
         <div class="cuota-progress-bar">
@@ -8404,8 +8407,8 @@ async function _cancelarCuotasAnticipadamente() {
   }
 }
 
-async function _eliminarCompraCompleta() {
-  const id = _cuotaModalCompraId;
+async function _eliminarCompraCompleta(compraId) {
+  const id = compraId || _cuotaModalCompraId;
   const c  = comprasEnCuotas.find(x => x.id === id);
   if (!id || !c) return;
 
