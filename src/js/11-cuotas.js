@@ -434,6 +434,49 @@ async function _cancelarCuotasAnticipadamente() {
   }
 }
 
+async function _eliminarCompraCompleta() {
+  const id = _cuotaModalCompraId;
+  const c  = comprasEnCuotas.find(x => x.id === id);
+  if (!id || !c) return;
+
+  const hoy = new Date();
+  const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+  const cuotasTrans  = allTransac.filter(t => t.compra_id === id);
+  const pasadas      = cuotasTrans.filter(t => (t.mes_liquidacion || "") < mesActualStr).length;
+  const futuras      = cuotasTrans.filter(t => (t.mes_liquidacion || "") > mesActualStr).length;
+  const estesMesN    = cuotasTrans.filter(t => (t.mes_liquidacion || "") === mesActualStr).length;
+
+  let aviso = `Eliminar "${c.descripcion}" borrará ${cuotasTrans.length} transacciones en total`;
+  if (pasadas)   aviso += `\n• ${pasadas} cuota${pasadas !== 1 ? "s" : ""} ya liquidada${pasadas !== 1 ? "s" : ""} (afecta historial)`;
+  if (estesMesN) aviso += `\n• ${estesMesN} cuota del mes actual`;
+  if (futuras)   aviso += `\n• ${futuras} cuota${futuras !== 1 ? "s" : ""} futura${futuras !== 1 ? "s" : ""}`;
+  aviso += "\n\n¿Confirmar eliminación completa?";
+
+  if (!confirm(aviso)) return;
+
+  const btn = document.getElementById("cuotas-modal-btn-eliminar");
+  if (btn) { btn.disabled = true; btn.textContent = "Eliminando..."; }
+
+  try {
+    const { error: errDel } = await supabaseClient
+      .from("transacciones").delete().eq("compra_id", id);
+    if (errDel) throw errDel;
+
+    const { error: errComp } = await supabaseClient
+      .from("compras_cuotas").delete().eq("id", id);
+    if (errComp) throw errComp;
+
+    await Promise.all([cargarTodasTransacciones(), cargarCuotasActivas()]);
+    _renderApp();
+    _cerrarModalCuotas();
+    showToast(`"${c.descripcion}" eliminada`, "ok");
+
+  } catch(e) {
+    document.getElementById("cuotas-modal-msg").textContent = `Error: ${e.message}`;
+    if (btn) { btn.disabled = false; btn.textContent = "Eliminar"; }
+  }
+}
+
 function _abrirEditarCompra() {
   const id = _cuotaModalCompraId;
   const c  = comprasEnCuotas.find(x => x.id === id);
