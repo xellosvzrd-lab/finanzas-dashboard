@@ -204,7 +204,7 @@ async function cargarCategorias() {
 async function cargarTodasTransacciones() {
   try {
     const { data, error } = await supabaseClient
-      .from('transacciones').select('*').order('fecha', { ascending: false });
+      .from('transacciones').select('*').order('fecha', { ascending: false }).limit(5000);
     if (error) throw error;
     allTransac = data.map(t => ({
       ...t,
