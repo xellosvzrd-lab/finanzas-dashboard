@@ -181,7 +181,8 @@ function _renderCuotasCard() {
 
   const rows = comprasEnCuotas.map(c => {
     const cuotasTrans = allTransac.filter(t => t.compra_id === c.id);
-    const pagadas = cuotasTrans.filter(t => (t.mes_liquidacion || "") < mesActualStr).length;
+    const pagadas        = cuotasTrans.filter(t => (t.mes_liquidacion || "") < mesActualStr).length;
+    const pagadasDisplay = cuotasTrans.filter(t => (t.mes_liquidacion || "") <= mesActualStr).length;
     const factor  = c.responsabilidad === "Compartido" ? 0.5 : 1;
 
     if (pagadas >= c.cuotas_total) {
@@ -205,7 +206,7 @@ function _renderCuotasCard() {
       cierreStr = `${MESES_CORTOS[cm - 1]} ${String(cy).slice(2)}`;
     }
 
-    const pct = Math.round((pagadas / c.cuotas_total) * 100);
+    const pct = Math.round((pagadasDisplay / c.cuotas_total) * 100);
     const esComp = c.responsabilidad === "Compartido";
 
     return `<div class="cuota-row">
@@ -217,7 +218,7 @@ function _renderCuotasCard() {
         <div class="cuota-progress-bar">
           <div class="cuota-progress-fill" style="transform:scaleX(${(pct/100).toFixed(3)})"></div>
         </div>
-        <span class="cuota-progress-label">${pagadas}/${c.cuotas_total}</span>
+        <span class="cuota-progress-label">${pagadasDisplay}/${c.cuotas_total}</span>
         <span class="cuota-progress-meta">${fmt(c.monto_cuota)}/mes${cierreStr ? ` · ${cierreStr}` : ""}</span>
       </div>
     </div>`;
