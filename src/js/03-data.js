@@ -214,6 +214,7 @@ async function cargarTodasTransacciones() {
       moneda:          t.moneda || 'ARS'
     }));
     _normalizarCategorias();
+    guardarCacheTransac();
   } catch(e) { console.warn("Error cargando transacciones:", e); throw e; }
 }
 
