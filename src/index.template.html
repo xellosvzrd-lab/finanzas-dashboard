@@ -2102,6 +2102,8 @@
   .cuota-row { padding: .45rem 0; border-bottom: 1px solid var(--border); }
   .cuota-row:last-child { border-bottom: none; }
   .cuota-row-header { display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; }
+  .cuota-row-del-btn { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: .85rem; padding: .1rem .3rem; border-radius: 4px; line-height: 1; }
+  .cuota-row-del-btn:hover { color: var(--red); background: rgba(var(--red-rgb, 220,53,69), .1); }
   .cuota-desc { font-weight: 600; font-size: .875rem; flex: 1; }
   .cuota-badge-comp {
     font-size: .68rem; color: var(--yellow); background: rgba(var(--yellow-rgb), 0.13);
@@ -2199,6 +2201,189 @@
     transition: transform .35s var(--ease-out);
   }
   .cuotas-floor-label { font-size: .69rem; color: var(--text-muted); }
+
+  /* ── RECURRENTES ────────────────────────────────────────── */
+  .recur-section {
+    margin: 0 0 1rem;
+  }
+  .recur-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+  }
+  .recur-section-title {
+    color: var(--text-muted);
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .recur-badge {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: .65rem;
+    font-weight: 700;
+  }
+  .recur-manage-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: .7rem;
+    cursor: pointer;
+  }
+  .recur-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .recur-row {
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: .8rem;
+  }
+  .recur-row--ok {
+    background: rgba(var(--green-rgb, 76,175,77), .07);
+    border: 1px solid rgba(var(--green-rgb, 76,175,77), .2);
+  }
+  .recur-row--pending {
+    background: rgba(var(--accent-rgb), .06);
+    border: 1px solid rgba(var(--accent-rgb), .25);
+    cursor: pointer;
+  }
+  .recur-row--suggest {
+    background: var(--card);
+    border: 1px dashed var(--border);
+  }
+  .recur-row-icon { flex-shrink: 0; font-size: 1rem; }
+  .recur-row-info { flex: 1; min-width: 0; }
+  .recur-row-name {
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .recur-row-cat { color: var(--text-muted); font-size: .7rem; margin-top: 1px; }
+  .recur-tag-suggest {
+    background: var(--bg2);
+    color: var(--text-muted);
+    border-radius: 4px;
+    font-size: .6rem;
+    padding: 1px 5px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+  .recur-suggest-actions { display: flex; gap: 4px; margin-top: 5px; }
+  .btn-recur-confirm {
+    background: rgba(var(--accent-rgb), .15);
+    color: var(--accent);
+    border: 1px solid rgba(var(--accent-rgb), .3);
+    border-radius: 5px;
+    padding: 2px 10px;
+    font-size: .7rem;
+    cursor: pointer;
+  }
+  .btn-recur-ignore {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 2px 10px;
+    font-size: .7rem;
+    cursor: pointer;
+  }
+  .recur-row-right { text-align: right; flex-shrink: 0; }
+  .recur-status-ok { color: var(--green); font-size: .75rem; font-weight: 600; }
+  .recur-status-warn { color: var(--accent); font-size: .75rem; font-weight: 600; }
+  .recur-status-sub { color: var(--text-muted); font-size: .65rem; }
+  /* Modal */
+  .modal-recur {
+    max-width: 400px;
+    width: 92%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 14px;
+    padding: 1.2rem;
+  }
+  .modal-recur-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .modal-recur-title { color: var(--text); font-size: 1rem; font-weight: 700; margin: 0; }
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .modal-recur-section-label {
+    color: var(--text-muted);
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: .8rem 0 .4rem;
+  }
+  .modal-recur-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .8rem;
+  }
+  .modal-recur-row:last-child { border-bottom: none; }
+  .modal-recur-info { flex: 1; }
+  .modal-recur-name { color: var(--text); font-size: .8rem; }
+  .modal-recur-cat { color: var(--text-muted); font-size: .7rem; }
+  .pill-toggle {
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: .7rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: var(--bg2);
+    color: var(--text-muted);
+  }
+  .pill-toggle--on { background: rgba(var(--green-rgb,76,175,77),.12); color: var(--green); border-color: rgba(var(--green-rgb,76,175,77),.3); }
+  .modal-recur-del { color: rgba(var(--accent-rgb),.5); font-size: 1.1rem; cursor: pointer; padding: 0 4px; }
+  .modal-recur-add { margin-top: 1rem; }
+  .modal-recur-add-form { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .modal-recur-input {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: .8rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .modal-recur-add-actions { display: flex; gap: 6px; }
+  .btn-recur-add-trigger {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 8px;
+    font-size: .8rem;
+    cursor: pointer;
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -2971,6 +3156,19 @@
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
 
+        <!-- RECURRENTES -->
+        <section id="recurrentes-section" class="recur-section" style="display:none">
+          <div class="recur-section-header">
+            <span class="recur-section-title">
+              📋 Recurrentes
+              <span id="recur-badge" class="recur-badge" style="display:none"></span>
+            </span>
+            <button class="recur-manage-btn" onclick="abrirModalRecurrentes()">⚙️ Gestionar</button>
+          </div>
+          <div id="recur-list"></div>
+        </section>
+        <!-- /RECURRENTES -->
+
         <!-- Tarjeta cuotas activas -->
         <div class="cuotas-card" id="cuotas-card" style="display:none">
           <div class="cuotas-header" onclick="toggleCuotasCard()"
@@ -3532,6 +3730,38 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- MODAL RECURRENTES -->
+<div id="modal-recurrentes" class="modal-overlay" style="display:none" onclick="if(event.target===this)cerrarModalRecurrentes()">
+  <div class="modal-content modal-recur">
+    <div class="modal-recur-header">
+      <h3 class="modal-recur-title">⚙️ Mis recurrentes</h3>
+      <button class="modal-close-btn" onclick="cerrarModalRecurrentes()">×</button>
+    </div>
+    <div id="modal-recur-body"></div>
+    <div class="modal-recur-add">
+      <div id="modal-recur-add-form" style="display:none" class="modal-recur-add-form">
+        <select id="modal-recur-cat" class="modal-recur-input">
+          <option value="">Categoría…</option>
+        </select>
+        <input id="modal-recur-desc" type="text" class="modal-recur-input" placeholder="Descripción (ej: Spotify)">
+        <select id="modal-recur-fuente" class="modal-recur-input">
+          <option value="">Fuente (opcional)</option>
+        </select>
+        <select id="modal-recur-resp" class="modal-recur-input">
+          <option value="Mío">Mío</option>
+          <option value="Compartido">Compartido</option>
+        </select>
+        <div class="modal-recur-add-actions">
+          <button class="btn-recur-confirm" onclick="_guardarRecurrenteManualForm()">Agregar</button>
+          <button class="btn-recur-ignore" onclick="document.getElementById('modal-recur-add-form').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+      <button class="btn-recur-add-trigger" onclick="_mostrarFormRecurManual()">+ Agregar recurrente manual</button>
+    </div>
+  </div>
+</div>
+<!-- /MODAL RECURRENTES -->
 
 <!-- ════════════════════════════════════════════════════════
      JAVASCRIPT

@@ -2201,6 +2201,189 @@
     transition: transform .35s var(--ease-out);
   }
   .cuotas-floor-label { font-size: .69rem; color: var(--text-muted); }
+
+  /* ── RECURRENTES ────────────────────────────────────────── */
+  .recur-section {
+    margin: 0 0 1rem;
+  }
+  .recur-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+  }
+  .recur-section-title {
+    color: var(--text-muted);
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .recur-badge {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: .65rem;
+    font-weight: 700;
+  }
+  .recur-manage-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: .7rem;
+    cursor: pointer;
+  }
+  .recur-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .recur-row {
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: .8rem;
+  }
+  .recur-row--ok {
+    background: rgba(var(--green-rgb, 76,175,77), .07);
+    border: 1px solid rgba(var(--green-rgb, 76,175,77), .2);
+  }
+  .recur-row--pending {
+    background: rgba(var(--accent-rgb), .06);
+    border: 1px solid rgba(var(--accent-rgb), .25);
+    cursor: pointer;
+  }
+  .recur-row--suggest {
+    background: var(--card);
+    border: 1px dashed var(--border);
+  }
+  .recur-row-icon { flex-shrink: 0; font-size: 1rem; }
+  .recur-row-info { flex: 1; min-width: 0; }
+  .recur-row-name {
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .recur-row-cat { color: var(--text-muted); font-size: .7rem; margin-top: 1px; }
+  .recur-tag-suggest {
+    background: var(--bg2);
+    color: var(--text-muted);
+    border-radius: 4px;
+    font-size: .6rem;
+    padding: 1px 5px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+  .recur-suggest-actions { display: flex; gap: 4px; margin-top: 5px; }
+  .btn-recur-confirm {
+    background: rgba(var(--accent-rgb), .15);
+    color: var(--accent);
+    border: 1px solid rgba(var(--accent-rgb), .3);
+    border-radius: 5px;
+    padding: 2px 10px;
+    font-size: .7rem;
+    cursor: pointer;
+  }
+  .btn-recur-ignore {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 2px 10px;
+    font-size: .7rem;
+    cursor: pointer;
+  }
+  .recur-row-right { text-align: right; flex-shrink: 0; }
+  .recur-status-ok { color: var(--green); font-size: .75rem; font-weight: 600; }
+  .recur-status-warn { color: var(--accent); font-size: .75rem; font-weight: 600; }
+  .recur-status-sub { color: var(--text-muted); font-size: .65rem; }
+  /* Modal */
+  .modal-recur {
+    max-width: 400px;
+    width: 92%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 14px;
+    padding: 1.2rem;
+  }
+  .modal-recur-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .modal-recur-title { color: var(--text); font-size: 1rem; font-weight: 700; margin: 0; }
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .modal-recur-section-label {
+    color: var(--text-muted);
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: .8rem 0 .4rem;
+  }
+  .modal-recur-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .8rem;
+  }
+  .modal-recur-row:last-child { border-bottom: none; }
+  .modal-recur-info { flex: 1; }
+  .modal-recur-name { color: var(--text); font-size: .8rem; }
+  .modal-recur-cat { color: var(--text-muted); font-size: .7rem; }
+  .pill-toggle {
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: .7rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: var(--bg2);
+    color: var(--text-muted);
+  }
+  .pill-toggle--on { background: rgba(var(--green-rgb,76,175,77),.12); color: var(--green); border-color: rgba(var(--green-rgb,76,175,77),.3); }
+  .modal-recur-del { color: rgba(var(--accent-rgb),.5); font-size: 1.1rem; cursor: pointer; padding: 0 4px; }
+  .modal-recur-add { margin-top: 1rem; }
+  .modal-recur-add-form { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .modal-recur-input {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: .8rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .modal-recur-add-actions { display: flex; gap: 6px; }
+  .btn-recur-add-trigger {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 8px;
+    font-size: .8rem;
+    cursor: pointer;
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -2973,6 +3156,19 @@
         <!-- Alertas de tendencia -->
         <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
 
+        <!-- RECURRENTES -->
+        <section id="recurrentes-section" class="recur-section" style="display:none">
+          <div class="recur-section-header">
+            <span class="recur-section-title">
+              📋 Recurrentes
+              <span id="recur-badge" class="recur-badge" style="display:none"></span>
+            </span>
+            <button class="recur-manage-btn" onclick="abrirModalRecurrentes()">⚙️ Gestionar</button>
+          </div>
+          <div id="recur-list"></div>
+        </section>
+        <!-- /RECURRENTES -->
+
         <!-- Tarjeta cuotas activas -->
         <div class="cuotas-card" id="cuotas-card" style="display:none">
           <div class="cuotas-header" onclick="toggleCuotasCard()"
@@ -3534,6 +3730,38 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- MODAL RECURRENTES -->
+<div id="modal-recurrentes" class="modal-overlay" style="display:none" onclick="if(event.target===this)cerrarModalRecurrentes()">
+  <div class="modal-content modal-recur">
+    <div class="modal-recur-header">
+      <h3 class="modal-recur-title">⚙️ Mis recurrentes</h3>
+      <button class="modal-close-btn" onclick="cerrarModalRecurrentes()">×</button>
+    </div>
+    <div id="modal-recur-body"></div>
+    <div class="modal-recur-add">
+      <div id="modal-recur-add-form" style="display:none" class="modal-recur-add-form">
+        <select id="modal-recur-cat" class="modal-recur-input">
+          <option value="">Categoría…</option>
+        </select>
+        <input id="modal-recur-desc" type="text" class="modal-recur-input" placeholder="Descripción (ej: Spotify)">
+        <select id="modal-recur-fuente" class="modal-recur-input">
+          <option value="">Fuente (opcional)</option>
+        </select>
+        <select id="modal-recur-resp" class="modal-recur-input">
+          <option value="Mío">Mío</option>
+          <option value="Compartido">Compartido</option>
+        </select>
+        <div class="modal-recur-add-actions">
+          <button class="btn-recur-confirm" onclick="_guardarRecurrenteManualForm()">Agregar</button>
+          <button class="btn-recur-ignore" onclick="document.getElementById('modal-recur-add-form').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+      <button class="btn-recur-add-trigger" onclick="_mostrarFormRecurManual()">+ Agregar recurrente manual</button>
+    </div>
+  </div>
+</div>
+<!-- /MODAL RECURRENTES -->
 
 <!-- ════════════════════════════════════════════════════════
      JAVASCRIPT
@@ -9064,6 +9292,181 @@ async function eliminarAccion(id) {
   renderAcciones();
 }
 
+// ─── RECURRENTES ──────────────────────────────────────────────
+let recurrentesActivas = []; // cargadas desde Supabase
+
+// ─── DETECCIÓN ───────────────────────────────────────────────
+
+function detectarCandidatas() {
+  // Filtra: solo gastos sin cuotas
+  const gastos = allTransac.filter(t => t.tipo === "Gasto" && !t.compra_id);
+
+  // Agrupa por descripcion||categoria → meses en que aparece
+  const grupos = {};
+  for (const t of gastos) {
+    const key = t.descripcion + "||" + t.categoria;
+    const mes = t.fecha.slice(0, 7); // "YYYY-MM"
+    if (!grupos[key]) {
+      grupos[key] = { descripcion: t.descripcion, categoria: t.categoria, meses: new Set(), ultimo: t };
+    }
+    grupos[key].meses.add(mes);
+    if (t.fecha > grupos[key].ultimo.fecha) grupos[key].ultimo = t;
+  }
+
+  // Claves ya confirmadas
+  const confirmadas = new Set(
+    recurrentesActivas.map(r => r.descripcion + "||" + r.categoria)
+  );
+
+  // Claves ignoradas este mes
+  const mesActual = new Date().toISOString().slice(0, 7);
+  let ignoradas = [];
+  try {
+    ignoradas = JSON.parse(localStorage.getItem("recur_ignoradas_" + USUARIO + "_" + mesActual) || "[]");
+  } catch(e) {}
+  const ignoradasSet = new Set(ignoradas);
+
+  return Object.values(grupos).filter(g =>
+    g.meses.size >= 2 &&
+    !confirmadas.has(g.descripcion + "||" + g.categoria) &&
+    !ignoradasSet.has(g.descripcion + "||" + g.categoria)
+  );
+}
+
+function getEstadoMes(recurrente) {
+  const mesActual = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  const encontrada = allTransac.find(t =>
+    t.descripcion === recurrente.descripcion &&
+    t.categoria   === recurrente.categoria &&
+    t.fecha.startsWith(mesActual) &&
+    !t.compra_id
+  );
+  return encontrada
+    ? { ok: true, monto: encontrada.monto }
+    : { ok: false };
+}
+
+function ignorarCandidata(descripcion, categoria) {
+  const mesActual = new Date().toISOString().slice(0, 7);
+  const key = "recur_ignoradas_" + USUARIO + "_" + mesActual;
+  let ignoradas = [];
+  try { ignoradas = JSON.parse(localStorage.getItem(key) || "[]"); } catch(e) {}
+  const keyStr = descripcion + "||" + categoria;
+  if (!ignoradas.includes(keyStr)) {
+    ignoradas.push(keyStr);
+    localStorage.setItem(key, JSON.stringify(ignoradas));
+  }
+  renderRecurrentes();
+}
+
+// ─── SUPABASE CRUD ────────────────────────────────────────────
+
+async function cargarRecurrentes() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('recurrentes')
+      .select('*')
+      .eq('usuario', USUARIO)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    recurrentesActivas = data || [];
+  } catch(e) {
+    console.warn("Error cargando recurrentes:", e);
+    recurrentesActivas = [];
+  }
+}
+
+async function confirmarRecurrente(candidata) {
+  try {
+    const payload = {
+      user_id:        supabaseSession.user.id,
+      usuario:        USUARIO,
+      descripcion:    candidata.descripcion,
+      categoria:      candidata.categoria,
+      monto_ref:      candidata.ultimo.monto,
+      fuente:         candidata.ultimo.fuente || null,
+      responsabilidad: candidata.ultimo.responsabilidad || 'Mío',
+      activa:         true
+    };
+    const { error } = await supabaseClient.from('recurrentes').insert([payload]);
+    if (error) throw error;
+    await cargarRecurrentes();
+    renderRecurrentes();
+    showToast("✅ Recurrente confirmada", "ok");
+  } catch(e) {
+    showToast("❌ Error al confirmar", "err");
+  }
+}
+
+async function toggleRecurrente(id) {
+  const r = recurrentesActivas.find(x => x.id === id);
+  if (!r) return;
+  try {
+    const { error } = await supabaseClient
+      .from('recurrentes').update({ activa: !r.activa }).eq('id', id);
+    if (error) throw error;
+    await cargarRecurrentes();
+    _renderModalRecurrentes();
+    renderRecurrentes();
+  } catch(e) {
+    showToast("❌ Error al actualizar", "err");
+  }
+}
+
+async function eliminarRecurrente(id) {
+  if (!confirm("¿Eliminar esta recurrente?")) return;
+  try {
+    const { error } = await supabaseClient.from('recurrentes').delete().eq('id', id);
+    if (error) throw error;
+    await cargarRecurrentes();
+    _renderModalRecurrentes();
+    renderRecurrentes();
+    showToast("✅ Recurrente eliminada", "ok");
+  } catch(e) {
+    showToast("❌ Error al eliminar", "err");
+  }
+}
+
+async function agregarRecurrenteManual(descripcion, categoria, fuente, responsabilidad) {
+  if (!descripcion || !categoria) { showToast("Completá descripción y categoría", "err"); return; }
+  try {
+    const payload = {
+      user_id:        supabaseSession.user.id,
+      usuario:        USUARIO,
+      descripcion,
+      categoria,
+      monto_ref:      null,
+      fuente:         fuente || null,
+      responsabilidad: responsabilidad || 'Mío',
+      activa:         true
+    };
+    const { error } = await supabaseClient.from('recurrentes').insert([payload]);
+    if (error) throw error;
+    await cargarRecurrentes();
+    _renderModalRecurrentes();
+    renderRecurrentes();
+    showToast("✅ Recurrente agregada", "ok");
+  } catch(e) {
+    showToast("❌ Error al agregar", "err");
+  }
+}
+
+// ─── NAVEGACIÓN AL FORM ──────────────────────────────────────
+
+function cargarRecurrenteForm(recurrente) {
+  navegarA('nueva');
+  setTimeout(() => {
+    setTipo('Gasto');
+    document.getElementById('f-descripcion').value = recurrente.descripcion || '';
+    const selCat = document.getElementById('f-categoria');
+    const selFte = document.getElementById('f-fuente');
+    if (selCat) selCat.value = recurrente.categoria || '';
+    if (selFte) selFte.value = recurrente.fuente || '';
+    seleccionarResp(recurrente.responsabilidad || 'Mío');
+    document.getElementById('f-monto').focus();
+  }, 80);
+  showToast("📋 " + recurrente.descripcion + " — ingresá el monto", "ok");
+}
 </script>
 </body>
 </html>
