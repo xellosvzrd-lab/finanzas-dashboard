@@ -2203,6 +2203,10 @@
   .cuotas-floor-label { font-size: .69rem; color: var(--text-muted); }
 
   /* ── RECURRENTES ────────────────────────────────────────── */
+  #modal-recurrentes {
+    position: fixed; inset: 0; z-index: 200;
+    background: var(--overlay); display: flex; align-items: center; justify-content: center; padding: 1rem;
+  }
   .recur-section {
     margin: 0 0 1rem;
   }
@@ -3165,7 +3169,7 @@
             </span>
             <button class="recur-manage-btn" onclick="abrirModalRecurrentes()">⚙️ Gestionar</button>
           </div>
-          <div id="recur-list"></div>
+          <div id="recur-list" class="recur-list"></div>
         </section>
         <!-- /RECURRENTES -->
 
