@@ -177,11 +177,15 @@ function cargarRecurrenteForm(recurrente) {
 
 // ─── RENDER SECCIÓN MI MES ────────────────────────────────────
 
+function _esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function renderRecurrentes() {
   const section = document.getElementById('recurrentes-section');
   const list    = document.getElementById('recur-list');
   const badge   = document.getElementById('recur-badge');
-  if (!section || !list) return;
+  if (!section || !list || !badge) return;
 
   const activas = recurrentesActivas.filter(r => r.activa);
   _candidatasDetectadas = detectarCandidatas();
@@ -207,8 +211,8 @@ function renderRecurrentes() {
       return `<div class="recur-row recur-row--ok">
         <div class="recur-row-icon">✅</div>
         <div class="recur-row-info">
-          <div class="recur-row-name">${r.descripcion}</div>
-          <div class="recur-row-cat">${r.categoria}</div>
+          <div class="recur-row-name">${_esc(r.descripcion)}</div>
+          <div class="recur-row-cat">${_esc(r.categoria)}</div>
         </div>
         <div class="recur-row-right">
           <div class="recur-status-ok">${fmt(estado.monto)}</div>
@@ -218,8 +222,8 @@ function renderRecurrentes() {
       return `<div class="recur-row recur-row--pending" data-recur-id="${r.id}" onclick="_cargarRecurrentePorId(this.dataset.recurId)">
         <div class="recur-row-icon">⚠️</div>
         <div class="recur-row-info">
-          <div class="recur-row-name">${r.descripcion}</div>
-          <div class="recur-row-cat">${r.categoria} · tocá para cargar</div>
+          <div class="recur-row-name">${_esc(r.descripcion)}</div>
+          <div class="recur-row-cat">${_esc(r.categoria)} · tocá para cargar</div>
         </div>
         <div class="recur-row-right">
           <div class="recur-status-warn">pendiente</div>
@@ -233,8 +237,8 @@ function renderRecurrentes() {
     <div class="recur-row recur-row--suggest">
       <div class="recur-row-icon">💡</div>
       <div class="recur-row-info">
-        <div class="recur-row-name">${c.descripcion} <span class="recur-tag-suggest">sugerida</span></div>
-        <div class="recur-row-cat">${c.categoria} · apareció ${c.meses.size} meses</div>
+        <div class="recur-row-name">${_esc(c.descripcion)} <span class="recur-tag-suggest">sugerida</span></div>
+        <div class="recur-row-cat">${_esc(c.categoria)} · apareció ${c.meses.size} meses</div>
         <div class="recur-suggest-actions">
           <button class="btn-recur-confirm" onclick="_confirmarCandidataIdx(${idx})">✓ Confirmar</button>
           <button class="btn-recur-ignore"  onclick="_ignorarCandidataIdx(${idx})">Ignorar</button>
@@ -300,8 +304,8 @@ function _renderModalRecurrentes() {
 function _htmlModalRow(r) {
   return `<div class="modal-recur-row">
     <div class="modal-recur-info">
-      <div class="modal-recur-name">${r.descripcion}</div>
-      <div class="modal-recur-cat">${r.categoria}${r.fuente ? ' · ' + r.fuente : ''}</div>
+      <div class="modal-recur-name">${_esc(r.descripcion)}</div>
+      <div class="modal-recur-cat">${_esc(r.categoria)}${r.fuente ? ' · ' + _esc(r.fuente) : ''}</div>
     </div>
     <span class="pill-toggle ${r.activa ? 'pill-toggle--on' : ''}"
           onclick="toggleRecurrente('${r.id}')">
