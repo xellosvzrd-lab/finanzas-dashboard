@@ -170,6 +170,6 @@ function cargarRecurrenteForm(recurrente) {
     if (selFte) selFte.value = recurrente.fuente || '';
     seleccionarResp(recurrente.responsabilidad || 'Mío');
     document.getElementById('f-monto').focus();
-  }, 30);
+  }, 80);
   showToast("📋 " + recurrente.descripcion + " — ingresá el monto", "ok");
 }
