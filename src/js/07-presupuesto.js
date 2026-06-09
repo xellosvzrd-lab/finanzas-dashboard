@@ -47,6 +47,7 @@ async function cargarPresupuesto() {
   await cargarCuotasActivas();
   _renderCuotasCard();
   _inicializarDisclosureCuotas();
+  renderRecurrentes();
   if (window.lucide) lucide.createIcons();
 }
 
