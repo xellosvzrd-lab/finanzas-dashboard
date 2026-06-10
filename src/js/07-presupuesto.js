@@ -508,6 +508,7 @@ function renderPresupuesto() {
     _s('mm-sc-ahorro-sub', 'acumulado: ' + fmt(ahorroAcumCat));
     const partnerEl = document.getElementById('mm-sc-comp-partner');
     if (partnerEl) partnerEl.textContent = PARTNER;
+    renderMetaAhorro();
   })();
 
   const subTotal = document.getElementById("pres-kpi-total-sub");
@@ -902,5 +903,7 @@ function actualizarKpisPres() {
   if (subTotal) {
     subTotal.textContent = totalPctPres.toFixed(0) + "% del sueldo asignado";
   }
+
+  renderMetaAhorro();
 }
 
