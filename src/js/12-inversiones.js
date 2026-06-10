@@ -77,6 +77,7 @@ if ('serviceWorker' in navigator) {
 
 // ===== PLAZOS FIJOS =====
 let _plazosCache = [];
+let _accionesTotalCache = { usd: 0, ars: 0 };
 
 function _normalizarPlazo(p) {
   return { ...p, fechaInicio: p.fecha_inicio || p.fechaInicio, fechaVencimiento: p.fecha_vencimiento || p.fechaVencimiento };
@@ -93,8 +94,9 @@ async function loadPlazos() {
 async function renderPlazos() {
   const el = document.getElementById("plazo-lista");
   if (!el) return;
-  _renderTotalesInversiones(0, 0);
+  _renderTotalesInversiones();
   const plazos = await loadPlazos();
+  _renderTotalesInversiones();
   if (!plazos.length) {
     el.innerHTML = `<div style="text-align:center;padding:2rem 1rem">
       <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/><circle cx="12" cy="13" r="2"/></svg>
@@ -276,8 +278,9 @@ async function _fetchPrecio(simbolo) {
   }
 }
 
-function _renderTotalesInversiones(accionesUSD, accionesARS) {
+function _renderTotalesInversiones() {
   const plazos    = _plazosCache;
+  const { usd: accionesUSD, ars: accionesARS } = _accionesTotalCache;
   const plazosARS = plazos.filter(p => (p.moneda || "ARS") === "ARS").reduce((s,p) => s + p.monto, 0);
   const plazosUSD = plazos.filter(p => p.moneda === "USD").reduce((s,p) => s + p.monto, 0);
   const totalARS  = plazosARS + accionesARS;
@@ -361,9 +364,11 @@ async function renderAcciones() {
   if (!lista) return;
   const acciones = await loadAcciones();
 
-  _renderTotalesInversiones(0, 0); // render inmediato con valores de plazos
+  _renderTotalesInversiones(); // render inmediato con valores de plazos + última cotización conocida
 
   if (!acciones.length) {
+    _accionesTotalCache = { usd: 0, ars: 0 };
+    _renderTotalesInversiones();
     lista.innerHTML = `<div style="text-align:center;padding:2rem 1rem">
       <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
       <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">Sin acciones ni cripto</div>
@@ -429,7 +434,8 @@ async function renderAcciones() {
   if (totalEl) {
     totalEl.innerHTML = `<span id="accion-ts" style="font-size:.7rem;color:var(--text-muted)">Actualizado ${_tiempoTranscurrido(_accionesUltimaActualizacion)}</span>`;
   }
-  _renderTotalesInversiones(totalUSD, totalARS);
+  _accionesTotalCache = { usd: totalUSD, ars: totalARS };
+  _renderTotalesInversiones();
 }
 
 function _renderFormAccion(a) {
