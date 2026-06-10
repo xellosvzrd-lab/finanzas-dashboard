@@ -1882,6 +1882,25 @@
   .mm-sc-val   { font-family: var(--font-display); font-size: 22px; font-weight: 700;
                   font-variant-numeric: tabular-nums; letter-spacing: -0.02em; margin-top: 2px; }
   .mm-sc-sub   { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+  .mm-sc-meta-link {
+    font-size: 11px; color: var(--accent); margin-top: 6px; cursor: pointer;
+  }
+  .mm-sc-meta-top { display: flex; align-items: center; justify-content: space-between; }
+  .mm-sc-meta-edit { cursor: pointer; font-size: .85rem; opacity: .7; }
+  .mm-sc-meta-bar-track {
+    background: var(--bg2); border-radius: 6px; height: 8px; overflow: hidden; margin: 8px 0 4px;
+  }
+  .mm-sc-meta-bar-fill {
+    background: var(--pos); height: 100%; border-radius: 6px; transition: width .5s var(--ease-out);
+  }
+  .mm-sc-meta-pct { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); }
+  .mm-sc-meta-badge {
+    display: inline-block; margin-top: 6px; font-size: 11px; color: var(--text-muted);
+    background: var(--bg2); border-radius: 10px; padding: 2px 8px;
+  }
+  .meta-check-label {
+    display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: .8rem; margin-top: 2px;
+  }
 
   /* ─── TRANSACCIONES MOBILE LIST ────────────────────────────── */
   .trans-mobile-filters { gap: 7px; flex-wrap: wrap; padding: .5rem 0; }
@@ -3132,10 +3151,26 @@
         <!-- Row 2: 4 stat-cards (desktop) -->
         <div class="mm-row2">
           <div class="card mm-sc">
-            <div class="mm-sc-icon">🐷</div>
-            <div class="mm-sc-label">Ahorro acumulado</div>
-            <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
-            <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
+            <div id="mm-sc-ahorro-default">
+              <div class="mm-sc-icon">🐷</div>
+              <div class="mm-sc-label">Ahorro acumulado</div>
+              <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
+              <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
+              <div class="mm-sc-meta-link" onclick="abrirModalMeta()">🎯 Definir meta de ahorro</div>
+            </div>
+            <div id="mm-sc-ahorro-meta" style="display:none">
+              <div class="mm-sc-meta-top">
+                <div class="mm-sc-icon">🎯</div>
+                <span class="mm-sc-meta-edit" onclick="abrirModalMeta()">✏️</span>
+              </div>
+              <div class="mm-sc-label" id="mm-sc-meta-nombre">—</div>
+              <div class="mm-sc-meta-bar-track">
+                <div class="mm-sc-meta-bar-fill" id="mm-sc-meta-bar"></div>
+              </div>
+              <div class="mm-sc-meta-pct" id="mm-sc-meta-pct">0%</div>
+              <div class="mm-sc-sub" id="mm-sc-meta-sub">—</div>
+              <div class="mm-sc-meta-badge" id="mm-sc-meta-badge" style="display:none">🤝 Compartida con <span id="mm-sc-meta-partner"></span></div>
+            </div>
           </div>
           <div class="card mm-sc" id="mm-sc-comp-card">
             <div class="mm-sc-icon">🤝</div>
@@ -3766,6 +3801,33 @@
   </div>
 </div>
 <!-- /MODAL RECURRENTES -->
+
+<!-- MODAL META DE AHORRO -->
+<div id="modal-meta-ahorro" class="modal-overlay" style="display:none" onclick="if(event.target===this)cerrarModalMeta()">
+  <div class="modal-content modal-recur">
+    <div class="modal-recur-header">
+      <h3 class="modal-recur-title">🎯 Meta de ahorro</h3>
+      <button class="modal-close-btn" onclick="cerrarModalMeta()">×</button>
+    </div>
+    <div class="modal-recur-add-form" style="display:flex">
+      <input id="meta-nombre" type="text" class="modal-recur-input" placeholder="Nombre (ej: Vacaciones a Bariloche)">
+      <input id="meta-monto" type="text" inputmode="decimal" class="modal-recur-input" placeholder="Monto objetivo">
+      <select id="meta-moneda" class="modal-recur-input">
+        <option value="ARS">ARS</option>
+        <option value="USD">USD</option>
+      </select>
+      <input id="meta-fecha" type="date" class="modal-recur-input">
+      <label class="meta-check-label">
+        <input type="checkbox" id="meta-compartida"> Meta compartida con <span id="meta-partner-label">Ama</span>
+      </label>
+      <div class="modal-recur-add-actions">
+        <button class="btn-recur-confirm" onclick="_guardarMetaForm()">Guardar</button>
+        <button class="btn-recur-ignore" id="meta-btn-eliminar" onclick="_eliminarMetaForm()" style="display:none">Eliminar meta</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /MODAL META DE AHORRO -->
 
 <!-- ════════════════════════════════════════════════════════
      JAVASCRIPT

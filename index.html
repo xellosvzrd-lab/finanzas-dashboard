@@ -1882,6 +1882,25 @@
   .mm-sc-val   { font-family: var(--font-display); font-size: 22px; font-weight: 700;
                   font-variant-numeric: tabular-nums; letter-spacing: -0.02em; margin-top: 2px; }
   .mm-sc-sub   { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+  .mm-sc-meta-link {
+    font-size: 11px; color: var(--accent); margin-top: 6px; cursor: pointer;
+  }
+  .mm-sc-meta-top { display: flex; align-items: center; justify-content: space-between; }
+  .mm-sc-meta-edit { cursor: pointer; font-size: .85rem; opacity: .7; }
+  .mm-sc-meta-bar-track {
+    background: var(--bg2); border-radius: 6px; height: 8px; overflow: hidden; margin: 8px 0 4px;
+  }
+  .mm-sc-meta-bar-fill {
+    background: var(--pos); height: 100%; border-radius: 6px; transition: width .5s var(--ease-out);
+  }
+  .mm-sc-meta-pct { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); }
+  .mm-sc-meta-badge {
+    display: inline-block; margin-top: 6px; font-size: 11px; color: var(--text-muted);
+    background: var(--bg2); border-radius: 10px; padding: 2px 8px;
+  }
+  .meta-check-label {
+    display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: .8rem; margin-top: 2px;
+  }
 
   /* ─── TRANSACCIONES MOBILE LIST ────────────────────────────── */
   .trans-mobile-filters { gap: 7px; flex-wrap: wrap; padding: .5rem 0; }
@@ -2203,6 +2222,10 @@
   .cuotas-floor-label { font-size: .69rem; color: var(--text-muted); }
 
   /* ── RECURRENTES ────────────────────────────────────────── */
+  #modal-recurrentes {
+    position: fixed; inset: 0; z-index: 200;
+    background: var(--overlay); display: flex; align-items: center; justify-content: center; padding: 1rem;
+  }
   .recur-section {
     margin: 0 0 1rem;
   }
@@ -3128,10 +3151,26 @@
         <!-- Row 2: 4 stat-cards (desktop) -->
         <div class="mm-row2">
           <div class="card mm-sc">
-            <div class="mm-sc-icon">🐷</div>
-            <div class="mm-sc-label">Ahorro acumulado</div>
-            <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
-            <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
+            <div id="mm-sc-ahorro-default">
+              <div class="mm-sc-icon">🐷</div>
+              <div class="mm-sc-label">Ahorro acumulado</div>
+              <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
+              <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
+              <div class="mm-sc-meta-link" onclick="abrirModalMeta()">🎯 Definir meta de ahorro</div>
+            </div>
+            <div id="mm-sc-ahorro-meta" style="display:none">
+              <div class="mm-sc-meta-top">
+                <div class="mm-sc-icon">🎯</div>
+                <span class="mm-sc-meta-edit" onclick="abrirModalMeta()">✏️</span>
+              </div>
+              <div class="mm-sc-label" id="mm-sc-meta-nombre">—</div>
+              <div class="mm-sc-meta-bar-track">
+                <div class="mm-sc-meta-bar-fill" id="mm-sc-meta-bar"></div>
+              </div>
+              <div class="mm-sc-meta-pct" id="mm-sc-meta-pct">0%</div>
+              <div class="mm-sc-sub" id="mm-sc-meta-sub">—</div>
+              <div class="mm-sc-meta-badge" id="mm-sc-meta-badge" style="display:none">🤝 Compartida con <span id="mm-sc-meta-partner"></span></div>
+            </div>
           </div>
           <div class="card mm-sc" id="mm-sc-comp-card">
             <div class="mm-sc-icon">🤝</div>
@@ -3165,7 +3204,7 @@
             </span>
             <button class="recur-manage-btn" onclick="abrirModalRecurrentes()">⚙️ Gestionar</button>
           </div>
-          <div id="recur-list"></div>
+          <div id="recur-list" class="recur-list"></div>
         </section>
         <!-- /RECURRENTES -->
 
@@ -3763,6 +3802,33 @@
 </div>
 <!-- /MODAL RECURRENTES -->
 
+<!-- MODAL META DE AHORRO -->
+<div id="modal-meta-ahorro" class="modal-overlay" style="display:none" onclick="if(event.target===this)cerrarModalMeta()">
+  <div class="modal-content modal-recur">
+    <div class="modal-recur-header">
+      <h3 class="modal-recur-title">🎯 Meta de ahorro</h3>
+      <button class="modal-close-btn" onclick="cerrarModalMeta()">×</button>
+    </div>
+    <div class="modal-recur-add-form" style="display:flex">
+      <input id="meta-nombre" type="text" class="modal-recur-input" placeholder="Nombre (ej: Vacaciones a Bariloche)">
+      <input id="meta-monto" type="text" inputmode="decimal" class="modal-recur-input" placeholder="Monto objetivo">
+      <select id="meta-moneda" class="modal-recur-input">
+        <option value="ARS">ARS</option>
+        <option value="USD">USD</option>
+      </select>
+      <input id="meta-fecha" type="date" class="modal-recur-input">
+      <label class="meta-check-label">
+        <input type="checkbox" id="meta-compartida"> Meta compartida con <span id="meta-partner-label">Ama</span>
+      </label>
+      <div class="modal-recur-add-actions">
+        <button class="btn-recur-confirm" onclick="_guardarMetaForm()">Guardar</button>
+        <button class="btn-recur-ignore" id="meta-btn-eliminar" onclick="_eliminarMetaForm()" style="display:none">Eliminar meta</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /MODAL META DE AHORRO -->
+
 <!-- ════════════════════════════════════════════════════════
      JAVASCRIPT
 ════════════════════════════════════════════════════════ -->
@@ -4308,7 +4374,7 @@ async function iniciarApp() {
     // Actualizar en background sin bloquear la UI
     const badge = document.getElementById("refresh-badge");
     if (badge) badge.style.display = "block";
-    Promise.all([cargarCategorias(), cargarTodasTransacciones()])
+    Promise.all([cargarCategorias(), cargarTodasTransacciones(), cargarRecurrentes()])
       .then(() => { ocultarErrorCarga(); _renderApp(); if (badge) badge.style.display = "none"; })
       .catch(e => {
         console.warn("Background refresh error:", e);
@@ -4318,7 +4384,7 @@ async function iniciarApp() {
   } else {
     // Primera vez o cache vacío → esperar el fetch
     try {
-      await Promise.all([cargarCategorias(), cargarTodasTransacciones()]);
+      await Promise.all([cargarCategorias(), cargarTodasTransacciones(), cargarRecurrentes()]);
       ocultarErrorCarga();
       _renderApp();
     } catch(e) {
@@ -6715,6 +6781,7 @@ async function cargarPresupuesto() {
   await cargarCuotasActivas();
   _renderCuotasCard();
   _inicializarDisclosureCuotas();
+  renderRecurrentes();
   if (window.lucide) lucide.createIcons();
 }
 
@@ -9293,7 +9360,8 @@ async function eliminarAccion(id) {
 }
 
 // ─── RECURRENTES ──────────────────────────────────────────────
-let recurrentesActivas = []; // cargadas desde Supabase
+let recurrentesActivas    = []; // cargadas desde Supabase
+let _candidatasDetectadas = []; // candidatas del ciclo de render actual
 
 // ─── DETECCIÓN ───────────────────────────────────────────────
 
@@ -9466,6 +9534,264 @@ function cargarRecurrenteForm(recurrente) {
     document.getElementById('f-monto').focus();
   }, 80);
   showToast("📋 " + recurrente.descripcion + " — ingresá el monto", "ok");
+}
+
+// ─── RENDER SECCIÓN MI MES ────────────────────────────────────
+
+function _esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderRecurrentes() {
+  const section = document.getElementById('recurrentes-section');
+  const list    = document.getElementById('recur-list');
+  const badge   = document.getElementById('recur-badge');
+  if (!section || !list || !badge) return;
+
+  const activas = recurrentesActivas.filter(r => r.activa);
+  _candidatasDetectadas = detectarCandidatas();
+
+  if (!activas.length && !_candidatasDetectadas.length) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+
+  const estados    = activas.map(r => ({ r, estado: getEstadoMes(r) }));
+  const pendientes = estados.filter(x => !x.estado.ok).length;
+
+  if (pendientes > 0) {
+    badge.textContent = pendientes + ' pendiente' + (pendientes > 1 ? 's' : '');
+    badge.style.display = '';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  const filasActivas = estados.map(({ r, estado }) => {
+    if (estado.ok) {
+      return `<div class="recur-row recur-row--ok">
+        <div class="recur-row-icon">✅</div>
+        <div class="recur-row-info">
+          <div class="recur-row-name">${_esc(r.descripcion)}</div>
+          <div class="recur-row-cat">${_esc(r.categoria)}</div>
+        </div>
+        <div class="recur-row-right">
+          <div class="recur-status-ok">${fmt(estado.monto)}</div>
+        </div>
+      </div>`;
+    } else {
+      return `<div class="recur-row recur-row--pending" data-recur-id="${r.id}" onclick="_cargarRecurrentePorId(this.dataset.recurId)">
+        <div class="recur-row-icon">⚠️</div>
+        <div class="recur-row-info">
+          <div class="recur-row-name">${_esc(r.descripcion)}</div>
+          <div class="recur-row-cat">${_esc(r.categoria)} · tocá para cargar</div>
+        </div>
+        <div class="recur-row-right">
+          <div class="recur-status-warn">pendiente</div>
+          ${r.monto_ref ? `<div class="recur-status-sub">~${fmt(r.monto_ref)}</div>` : ''}
+        </div>
+      </div>`;
+    }
+  }).join('');
+
+  const filasCandidatas = _candidatasDetectadas.map((c, idx) => `
+    <div class="recur-row recur-row--suggest">
+      <div class="recur-row-icon">💡</div>
+      <div class="recur-row-info">
+        <div class="recur-row-name">${_esc(c.descripcion)} <span class="recur-tag-suggest">sugerida</span></div>
+        <div class="recur-row-cat">${_esc(c.categoria)} · apareció ${c.meses.size} meses</div>
+        <div class="recur-suggest-actions">
+          <button class="btn-recur-confirm" onclick="_confirmarCandidataIdx(${idx})">✓ Confirmar</button>
+          <button class="btn-recur-ignore"  onclick="_ignorarCandidataIdx(${idx})">Ignorar</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  list.innerHTML = filasActivas + filasCandidatas;
+}
+
+// Helpers para onclick seguros (sin JSON en HTML)
+function _cargarRecurrentePorId(id) {
+  const r = recurrentesActivas.find(x => x.id === id);
+  if (r) cargarRecurrenteForm(r);
+}
+function _confirmarCandidataIdx(idx) {
+  const c = _candidatasDetectadas[idx];
+  if (c) confirmarRecurrente(c);
+}
+function _ignorarCandidataIdx(idx) {
+  const c = _candidatasDetectadas[idx];
+  if (c) ignorarCandidata(c.descripcion, c.categoria);
+}
+
+// ─── MODAL GESTIÓN ────────────────────────────────────────────
+
+function abrirModalRecurrentes() {
+  _renderModalRecurrentes();
+  _poblarSelectsModal();
+  document.getElementById('modal-recurrentes').style.display = 'flex';
+}
+
+function cerrarModalRecurrentes() {
+  document.getElementById('modal-recurrentes').style.display = 'none';
+  document.getElementById('modal-recur-add-form').style.display = 'none';
+}
+
+function _renderModalRecurrentes() {
+  const body = document.getElementById('modal-recur-body');
+  if (!body) return;
+
+  const activas  = recurrentesActivas.filter(r => r.activa);
+  const pausadas = recurrentesActivas.filter(r => !r.activa);
+
+  let html = '';
+
+  if (activas.length) {
+    html += `<div class="modal-recur-section-label">Activas</div>`;
+    html += activas.map(r => _htmlModalRow(r)).join('');
+  }
+  if (pausadas.length) {
+    html += `<div class="modal-recur-section-label">Pausadas</div>`;
+    html += pausadas.map(r => _htmlModalRow(r)).join('');
+  }
+  if (!recurrentesActivas.length) {
+    html = `<p style="color:var(--text-muted);font-size:.8rem;padding:.5rem 0">Aún no hay recurrentes confirmadas.</p>`;
+  }
+
+  body.innerHTML = html;
+}
+
+function _htmlModalRow(r) {
+  return `<div class="modal-recur-row">
+    <div class="modal-recur-info">
+      <div class="modal-recur-name">${_esc(r.descripcion)}</div>
+      <div class="modal-recur-cat">${_esc(r.categoria)}${r.fuente ? ' · ' + _esc(r.fuente) : ''}</div>
+    </div>
+    <span class="pill-toggle ${r.activa ? 'pill-toggle--on' : ''}"
+          onclick="toggleRecurrente('${r.id}')">
+      ${r.activa ? 'activa' : 'pausada'}
+    </span>
+    <span class="modal-recur-del" onclick="eliminarRecurrente('${r.id}')">×</span>
+  </div>`;
+}
+
+function _poblarSelectsModal() {
+  const selCat  = document.getElementById('modal-recur-cat');
+  const selFte  = document.getElementById('modal-recur-fuente');
+  const selResp = document.getElementById('modal-recur-resp');
+  if (selCat) {
+    selCat.innerHTML = '<option value="">Categoría…</option>' +
+      categGasto.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+  if (selFte) {
+    selFte.innerHTML = '<option value="">Fuente (opcional)</option>' +
+      categFuentes.map(f => `<option value="${f}">${f}</option>`).join('');
+  }
+  if (selResp) {
+    selResp.innerHTML = categResponsabilidad
+      .map(r => `<option value="${r}">${r}</option>`).join('');
+  }
+}
+
+function _mostrarFormRecurManual() {
+  _poblarSelectsModal();
+  document.getElementById('modal-recur-desc').value = '';
+  document.getElementById('modal-recur-add-form').style.display = '';
+}
+
+function _guardarRecurrenteManualForm() {
+  const desc   = document.getElementById('modal-recur-desc').value.trim();
+  const cat    = document.getElementById('modal-recur-cat').value;
+  const fuente = document.getElementById('modal-recur-fuente').value;
+  const resp   = document.getElementById('modal-recur-resp').value;
+  agregarRecurrenteManual(desc, cat, fuente, resp);
+  document.getElementById('modal-recur-add-form').style.display = 'none';
+}
+// ─── METAS DE AHORRO ──────────────────────────────────────────
+let metaActiva = null; // meta activa cargada desde Supabase (propia o compartida del partner)
+
+// ─── SUPABASE: CARGA ──────────────────────────────────────────
+
+async function cargarMetaAhorro() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('metas_ahorro')
+      .select('*')
+      .eq('activa', true);
+    if (error) throw error;
+    const metas = data || [];
+    const propia = metas.find(m => m.usuario === USUARIO);
+    const compartidaPartner = metas.find(m => m.compartida && m.usuario !== USUARIO);
+    metaActiva = propia || compartidaPartner || null;
+  } catch(e) {
+    console.warn("Error cargando meta de ahorro:", e);
+    metaActiva = null;
+  }
+}
+
+// ─── PROGRESO ─────────────────────────────────────────────────
+
+function calcularProgresoMeta(meta) {
+  const desde = new Date(meta.fecha_inicio);
+  const total = allTransac
+    .filter(t => t.categoria === "Ahorro" && !esTransferencia(t) && new Date(t.fecha) >= desde)
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const pct = meta.monto_objetivo > 0 ? Math.min(100, (total / meta.monto_objetivo) * 100) : 0;
+  return { total, pct, restante: Math.max(0, meta.monto_objetivo - total) };
+}
+
+// ─── SUPABASE: CRUD ───────────────────────────────────────────
+
+async function guardarMetaAhorro({ nombre, monto_objetivo, moneda, fecha_objetivo, compartida }) {
+  if (!nombre || !(monto_objetivo > 0)) {
+    showToast("Completá nombre y monto objetivo", "err");
+    return;
+  }
+  try {
+    const propia = metaActiva && metaActiva.usuario === USUARIO ? metaActiva : null;
+    if (propia) {
+      const { error: errArchivar } = await supabaseClient
+        .from('metas_ahorro')
+        .update({ activa: false })
+        .eq('id', propia.id);
+      if (errArchivar) throw errArchivar;
+    }
+    const payload = {
+      user_id:        supabaseSession.user.id,
+      usuario:        USUARIO,
+      nombre,
+      monto_objetivo,
+      moneda,
+      fecha_objetivo: fecha_objetivo || null,
+      compartida:     !!compartida,
+      activa:         true
+    };
+    const { error } = await supabaseClient.from('metas_ahorro').insert([payload]);
+    if (error) throw error;
+    await cargarMetaAhorro();
+    renderMetaAhorro();
+    cerrarModalMeta();
+    showToast("✅ Meta guardada", "ok");
+  } catch(e) {
+    showToast("❌ Error al guardar la meta", "err");
+  }
+}
+
+async function eliminarMetaAhorro() {
+  const propia = metaActiva && metaActiva.usuario === USUARIO ? metaActiva : null;
+  if (!propia) return;
+  if (!confirm("¿Eliminar esta meta de ahorro?")) return;
+  try {
+    const { error } = await supabaseClient.from('metas_ahorro').delete().eq('id', propia.id);
+    if (error) throw error;
+    await cargarMetaAhorro();
+    renderMetaAhorro();
+    cerrarModalMeta();
+    showToast("✅ Meta eliminada", "ok");
+  } catch(e) {
+    showToast("❌ Error al eliminar la meta", "err");
+  }
 }
 </script>
 </body>
