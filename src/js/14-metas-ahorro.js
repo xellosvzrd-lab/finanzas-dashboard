@@ -27,7 +27,7 @@ function calcularProgresoMeta(meta) {
   const total = allTransac
     .filter(t => t.categoria === "Ahorro" && !esTransferencia(t) && new Date(t.fecha) >= desde)
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const pct = Math.min(100, (total / meta.monto_objetivo) * 100);
+  const pct = meta.monto_objetivo > 0 ? Math.min(100, (total / meta.monto_objetivo) * 100) : 0;
   return { total, pct, restante: Math.max(0, meta.monto_objetivo - total) };
 }
 
