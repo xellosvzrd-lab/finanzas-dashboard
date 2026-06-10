@@ -83,3 +83,84 @@ async function eliminarMetaAhorro() {
     showToast("❌ Error al eliminar la meta", "err");
   }
 }
+
+// ─── RENDER TARJETA MI MES ────────────────────────────────────
+
+function renderMetaAhorro() {
+  const cardDefault = document.getElementById('mm-sc-ahorro-default');
+  const cardMeta    = document.getElementById('mm-sc-ahorro-meta');
+  if (!cardDefault || !cardMeta) return;
+
+  if (!metaActiva) {
+    cardDefault.style.display = '';
+    cardMeta.style.display = 'none';
+    return;
+  }
+
+  cardDefault.style.display = 'none';
+  cardMeta.style.display = '';
+
+  const { total, pct, restante } = calcularProgresoMeta(metaActiva);
+
+  document.getElementById('mm-sc-meta-nombre').textContent = metaActiva.nombre;
+  document.getElementById('mm-sc-meta-bar').style.width = pct + '%';
+  document.getElementById('mm-sc-meta-pct').textContent = Math.round(pct) + '%';
+
+  let sub = `${fmtMoneda(total, metaActiva.moneda)} / ${fmtMoneda(metaActiva.monto_objetivo, metaActiva.moneda)} · faltan ${fmtMoneda(restante, metaActiva.moneda)}`;
+  if (metaActiva.fecha_objetivo) {
+    sub += ` · meta: ${fmtFecha(metaActiva.fecha_objetivo)}`;
+  }
+  document.getElementById('mm-sc-meta-sub').textContent = sub;
+
+  const badge = document.getElementById('mm-sc-meta-badge');
+  if (metaActiva.compartida) {
+    document.getElementById('mm-sc-meta-partner').textContent = PARTNER;
+    badge.style.display = '';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  if (pct >= 100) {
+    const flag = USUARIO + "_meta_celebrada_" + metaActiva.id;
+    if (!localStorage.getItem(flag)) {
+      _confettiBrief({ count: 80 });
+      showToast("¡Felicitaciones, cumpliste tu meta de ahorro! 🎉", "ok");
+      localStorage.setItem(flag, "1");
+    }
+  }
+}
+
+// ─── MODAL META DE AHORRO ─────────────────────────────────────
+
+function abrirModalMeta() {
+  _renderModalMeta();
+  document.getElementById('modal-meta-ahorro').style.display = 'flex';
+}
+
+function cerrarModalMeta() {
+  document.getElementById('modal-meta-ahorro').style.display = 'none';
+}
+
+function _renderModalMeta() {
+  const propia = metaActiva && metaActiva.usuario === USUARIO ? metaActiva : null;
+  document.getElementById('meta-nombre').value     = propia ? propia.nombre : '';
+  document.getElementById('meta-monto').value      = propia ? propia.monto_objetivo : '';
+  document.getElementById('meta-moneda').value     = propia ? propia.moneda : 'ARS';
+  document.getElementById('meta-fecha').value      = propia && propia.fecha_objetivo ? propia.fecha_objetivo : '';
+  document.getElementById('meta-compartida').checked = propia ? !!propia.compartida : false;
+  document.getElementById('meta-partner-label').textContent = PARTNER;
+  document.getElementById('meta-btn-eliminar').style.display = propia ? '' : 'none';
+}
+
+function _guardarMetaForm() {
+  const nombre     = document.getElementById('meta-nombre').value.trim();
+  const monto      = parsearDecimal(document.getElementById('meta-monto').value);
+  const moneda     = document.getElementById('meta-moneda').value;
+  const fecha      = document.getElementById('meta-fecha').value;
+  const compartida = document.getElementById('meta-compartida').checked;
+  guardarMetaAhorro({ nombre, monto_objetivo: monto, moneda, fecha_objetivo: fecha, compartida });
+}
+
+function _eliminarMetaForm() {
+  eliminarMetaAhorro();
+}
