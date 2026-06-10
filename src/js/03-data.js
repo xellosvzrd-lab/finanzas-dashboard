@@ -163,7 +163,7 @@ async function iniciarApp() {
     // Actualizar en background sin bloquear la UI
     const badge = document.getElementById("refresh-badge");
     if (badge) badge.style.display = "block";
-    Promise.all([cargarCategorias(), cargarTodasTransacciones(), cargarRecurrentes()])
+    Promise.all([cargarCategorias(), cargarTodasTransacciones(), cargarRecurrentes(), cargarMetaAhorro()])
       .then(() => { ocultarErrorCarga(); _renderApp(); if (badge) badge.style.display = "none"; })
       .catch(e => {
         console.warn("Background refresh error:", e);
@@ -173,7 +173,7 @@ async function iniciarApp() {
   } else {
     // Primera vez o cache vacío → esperar el fetch
     try {
-      await Promise.all([cargarCategorias(), cargarTodasTransacciones(), cargarRecurrentes()]);
+      await Promise.all([cargarCategorias(), cargarTodasTransacciones(), cargarRecurrentes(), cargarMetaAhorro()]);
       ocultarErrorCarga();
       _renderApp();
     } catch(e) {
