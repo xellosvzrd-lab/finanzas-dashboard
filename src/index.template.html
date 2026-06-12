@@ -608,6 +608,10 @@
   }
   .saldado-badge { animation: badgeEntrada 0.3s var(--ease-out); }
   .comp-balance-sub  { font-size: .83rem; color: var(--text-muted); margin-top: .2rem; }
+  .comp-balance-usd-row { display:none; align-items:center; gap:.5rem; margin-top:.5rem; }
+  .comp-balance-usd-row.visible { display:flex; }
+  .comp-balance-usd-pill { font-size:.85rem; font-weight:700; padding:.25rem .7rem; border-radius:99px; background:rgba(var(--accent-rgb),.12); color:var(--accent); }
+  .comp-balance-usd-label { font-size:.78rem; color:var(--text-muted); }
   .comp-saldar-btn {
     padding: .45rem 1.1rem;
     background: var(--accent); color: var(--white); border: none;
@@ -2934,6 +2938,10 @@
               <div class="comp-balance-info">
                 <div class="comp-balance-label">Balance del mes</div>
                 <div class="comp-balance-value" id="comp-balance-valor">$0</div>
+                <div class="comp-balance-usd-row" id="comp-balance-usd-row">
+                  <span class="comp-balance-usd-pill" id="comp-balance-usd-pill"></span>
+                  <span class="comp-balance-usd-label" id="comp-balance-usd-label"></span>
+                </div>
                 <div class="comp-balance-sub" id="comp-balance-sub">—</div>
               </div>
               <div class="comp-balance-actions">

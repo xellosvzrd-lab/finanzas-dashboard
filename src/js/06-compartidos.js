@@ -313,37 +313,54 @@ function cargarCompartidos() {
   const balanceFinalARS = totalCompNetARS + totalA_ARS - totalB_ARS;
   const balanceFinalUSD = totalCompNetUSD + totalA_USD - totalB_USD;
 
-  const balEl  = document.getElementById("comp-balance-valor");
-  const balSub = document.getElementById("comp-balance-sub");
+  const balEl      = document.getElementById("comp-balance-valor");
+  const balSub     = document.getElementById("comp-balance-sub");
+  const usdRow     = document.getElementById("comp-balance-usd-row");
+  const usdPill    = document.getElementById("comp-balance-usd-pill");
+  const usdLabel   = document.getElementById("comp-balance-usd-label");
 
-  const hayUSD = filasCompUSD.length > 0 || catsReembUSD.length > 0;
-  const estaAMano = balanceFinalARS === 0 && balanceFinalUSD === 0;
-  balEl.textContent = estaAMano
-    ? "¡A mano!"
-    : fmt(Math.abs(balanceFinalARS)) + (hayUSD && balanceFinalUSD !== 0 ? " + " + fmtMoneda(Math.abs(balanceFinalUSD), "USD") : "");
-  balEl.className = "comp-balance-value " + (estaAMano ? "a-mano" : balanceFinalARS >= 0 ? "positivo" : "negativo");
-  if (estaAMano) _confettiBrief({ count: 40, colors: ["#5A8C6B", "#C8845A", "#EDE8E3"] });
+  const estaAMano  = balanceFinalARS === 0 && balanceFinalUSD === 0;
+  const arsPos     = balanceFinalARS > 0;
+  const arsNeg     = balanceFinalARS < 0;
+  const usdPos     = balanceFinalUSD > 0;
+  const usdNeg     = balanceFinalUSD < 0;
+  const mixto      = (arsPos || arsNeg) && (usdPos || usdNeg) && (arsPos !== usdPos);
 
-  const desglose = [];
-  if (totalCompNetARS > 0) desglose.push(`Compartidos ARS: ${fmt(totalCompNetARS)}`);
-  if (totalA_ARS > 0)      desglose.push(`Reembolsos ARS: ${fmt(totalA_ARS)}`);
-  if (totalCompNetUSD > 0) desglose.push(`Compartidos USD: ${fmtMoneda(totalCompNetUSD,"USD")}`);
-  if (totalA_USD > 0)      desglose.push(`Reembolsos USD: ${fmtMoneda(totalA_USD,"USD")}`);
+  // Ocultar fila USD por defecto
+  if (usdRow) usdRow.classList.remove("visible");
 
-  const debeAma = balanceFinalARS > 0 || balanceFinalUSD > 0;
-  const vosDebés = balanceFinalARS < 0 || balanceFinalUSD < 0;
-
-  if (debeAma && !vosDebés) {
-    balSub.textContent = `✅ ${PARTNER} te debe — ${desglose.join(" + ")}`;
-  } else if (vosDebés && !debeAma) {
-    const partes = [];
-    if (balanceFinalARS < 0) partes.push(fmt(Math.abs(balanceFinalARS)));
-    if (balanceFinalUSD < 0) partes.push(fmtMoneda(Math.abs(balanceFinalUSD), "USD"));
-    balSub.textContent = `⚠️ Vos le debés ${partes.join(" + ")} a ${PARTNER}`;
-  } else if (debeAma || vosDebés) {
-    balSub.textContent = `⚖️ Deudas mixtas — ${desglose.join(" | ")}`;
-  } else {
+  if (estaAMano) {
+    balEl.textContent = "¡A mano!";
+    balEl.className = "comp-balance-value a-mano";
     balSub.textContent = "✅ Están a mano — sin deuda pendiente";
+    _confettiBrief({ count: 40, colors: ["#5A8C6B", "#C8845A", "#EDE8E3"] });
+  } else if (mixto) {
+    // Monedas en direcciones opuestas — mostrar ARS en principal, USD en pill secundario
+    const arsAbs = Math.abs(balanceFinalARS);
+    const usdAbs = Math.abs(balanceFinalUSD);
+    balEl.textContent = fmt(arsAbs);
+    balEl.className   = "comp-balance-value " + (arsPos ? "positivo" : "negativo");
+    if (usdRow && usdPill && usdLabel) {
+      usdRow.classList.add("visible");
+      usdPill.textContent  = fmtMoneda(usdAbs, "USD");
+      const usdQuienDebe   = usdNeg ? `vos le debés a ${PARTNER}` : `${PARTNER} te debe`;
+      usdLabel.textContent = usdQuienDebe;
+    }
+    const arsQuienDebe = arsPos ? `${PARTNER} te debe` : `vos le debés`;
+    balSub.textContent = `${arsQuienDebe} ${fmt(arsAbs)} en pesos`;
+  } else {
+    // Misma dirección o solo una moneda
+    const partes = [];
+    if (balanceFinalARS !== 0) partes.push(fmt(Math.abs(balanceFinalARS)));
+    if (balanceFinalUSD !== 0) partes.push(fmtMoneda(Math.abs(balanceFinalUSD), "USD"));
+    balEl.textContent = partes.join(" + ");
+    const positivo = balanceFinalARS > 0 || (balanceFinalARS === 0 && balanceFinalUSD > 0);
+    balEl.className = "comp-balance-value " + (positivo ? "positivo" : "negativo");
+    if (positivo) {
+      balSub.textContent = `✅ ${PARTNER} te debe — ${partes.join(" + ")}`;
+    } else {
+      balSub.textContent = `⚠️ Vos le debés ${partes.join(" + ")} a ${PARTNER}`;
+    }
   }
   // ── CONTRIBUCIÓN DEL MES ─────────────────────────────────────
   const contribCard = document.getElementById("comp-contrib");
