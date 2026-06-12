@@ -353,7 +353,21 @@ function renderPresupuesto() {
 
   // Totales KPI — presupuestoActual[cat] almacena % (0–100), se convierte a monto según sueldoEfectivo
   const totalPresARS = categGasto.reduce((s, c) => s + ((presupuestoActual[c] || 0) / 100) * sueldoEfectivo, 0);
-  const totalGasto   = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
+
+  // Gastos USD de Ama convertidos a ARS (sus propios "Mío" + 50% compartidos; NO los "De Ama" que paga Daniel)
+  let gastoUSDEnARS = 0;
+  if (USUARIO.toLowerCase() === "ama" && tipoCambioMEP) {
+    const gasUSDMio = dataMesDaniel
+      .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
+               && (t.responsabilidad || "Mío") === "Mío")
+      .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+    const gasUSDComp = dataMesSinLiq
+      .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
+               && t.responsabilidad === "Compartido")
+      .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+    gastoUSDEnARS = (gasUSDMio + gasUSDComp * 0.5) * tipoCambioMEP;
+  }
+  const totalGasto = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0) + gastoUSDEnARS;
   const disponible   = sueldoEfectivo - totalPresARS;
 
   // ── ALERTAS DE TENDENCIA ─────────────────────────────────────
@@ -851,7 +865,19 @@ function actualizarKpisPres() {
   });
   const totalPresARS = (totalPctPres / 100) * sueldoEfectivo;
 
-  const totalGasto = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0);
+  let gastoUSDEnARSKpi = 0;
+  if (USUARIO.toLowerCase() === "ama" && tipoCambioMEP) {
+    const gasUSDMioKpi = dataMesDaniel
+      .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
+               && (t.responsabilidad || "Mío") === "Mío")
+      .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+    const gasUSDCompKpi = dataMesSinLiq
+      .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
+               && t.responsabilidad === "Compartido")
+      .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+    gastoUSDEnARSKpi = (gasUSDMioKpi + gasUSDCompKpi * 0.5) * tipoCambioMEP;
+  }
+  const totalGasto = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0) + gastoUSDEnARSKpi;
   const disponible = sueldoEfectivo - totalPresARS;
 
   const kpiTotal = document.getElementById("pres-kpi-total");
