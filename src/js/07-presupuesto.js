@@ -291,15 +291,11 @@ function renderPresupuesto() {
     .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)
              && (t.moneda || "ARS") === "ARS")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  // Para Ama: sueldoEfectivo incluye saldo USD × MEP
+  // Para Ama: sueldoEfectivo incluye ingresos salariales USD × MEP (sin restar gastos USD)
   const ingresosUSDPres = dataMesDaniel
-    .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
+    .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const gastosUSDPres = dataMesDaniel
-    .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
-    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const saldoUSDPres = ingresosUSDPres - gastosUSDPres;
-  const usdEnARSPres = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? saldoUSDPres * tipoCambioMEP : 0;
+  const usdEnARSPres = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? ingresosUSDPres * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSPres;
 
   // Gasto efectivo por categoría usando lógica de responsabilidad:
@@ -656,7 +652,10 @@ function renderPresupuesto() {
 function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   const $ = id => document.getElementById(id);
   const heroAmt = $("mm-hero-amount");
-  if (heroAmt) heroAmt.textContent = fmt(Math.max(0, saldoReal));
+  if (heroAmt) {
+    heroAmt.textContent = (saldoReal < 0 ? "−" : "") + fmt(Math.abs(saldoReal));
+    heroAmt.style.color = saldoReal < 0 ? "var(--red)" : "";
+  }
   const heroSub = $("mm-hero-sub");
   if (heroSub) heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
 
@@ -796,12 +795,9 @@ function actualizarKpisPres() {
              && (t.moneda || "ARS") === "ARS")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
   const ingUSDKpi = dataMesDaniel
-    .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
+    .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const gasUSDKpi = dataMes
-    .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
-    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const usdEnARSKpi = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? (ingUSDKpi - gasUSDKpi) * tipoCambioMEP : 0;
+  const usdEnARSKpi = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? ingUSDKpi * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSKpi;
 
   const gastoPorCat = {};

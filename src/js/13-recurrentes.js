@@ -1,44 +1,5 @@
 // ─── RECURRENTES ──────────────────────────────────────────────
-let recurrentesActivas    = []; // cargadas desde Supabase
-let _candidatasDetectadas = []; // candidatas del ciclo de render actual
-
-// ─── DETECCIÓN ───────────────────────────────────────────────
-
-function detectarCandidatas() {
-  // Filtra: solo gastos sin cuotas
-  const gastos = allTransac.filter(t => t.tipo === "Gasto" && !t.compra_id);
-
-  // Agrupa por descripcion||categoria → meses en que aparece
-  const grupos = {};
-  for (const t of gastos) {
-    const key = t.descripcion + "||" + t.categoria;
-    const mes = t.fecha.slice(0, 7); // "YYYY-MM"
-    if (!grupos[key]) {
-      grupos[key] = { descripcion: t.descripcion, categoria: t.categoria, meses: new Set(), ultimo: t };
-    }
-    grupos[key].meses.add(mes);
-    if (t.fecha > grupos[key].ultimo.fecha) grupos[key].ultimo = t;
-  }
-
-  // Claves ya confirmadas
-  const confirmadas = new Set(
-    recurrentesActivas.map(r => r.descripcion + "||" + r.categoria)
-  );
-
-  // Claves ignoradas este mes
-  const mesActual = new Date().toISOString().slice(0, 7);
-  let ignoradas = [];
-  try {
-    ignoradas = JSON.parse(localStorage.getItem("recur_ignoradas_" + USUARIO + "_" + mesActual) || "[]");
-  } catch(e) {}
-  const ignoradasSet = new Set(ignoradas);
-
-  return Object.values(grupos).filter(g =>
-    g.meses.size >= 2 &&
-    !confirmadas.has(g.descripcion + "||" + g.categoria) &&
-    !ignoradasSet.has(g.descripcion + "||" + g.categoria)
-  );
-}
+let recurrentesActivas = []; // cargadas desde Supabase
 
 function getEstadoMes(recurrente) {
   const mesActual = new Date().toISOString().slice(0, 7); // "YYYY-MM"
@@ -51,19 +12,6 @@ function getEstadoMes(recurrente) {
   return encontrada
     ? { ok: true, monto: encontrada.monto }
     : { ok: false };
-}
-
-function ignorarCandidata(descripcion, categoria) {
-  const mesActual = new Date().toISOString().slice(0, 7);
-  const key = "recur_ignoradas_" + USUARIO + "_" + mesActual;
-  let ignoradas = [];
-  try { ignoradas = JSON.parse(localStorage.getItem(key) || "[]"); } catch(e) {}
-  const keyStr = descripcion + "||" + categoria;
-  if (!ignoradas.includes(keyStr)) {
-    ignoradas.push(keyStr);
-    localStorage.setItem(key, JSON.stringify(ignoradas));
-  }
-  renderRecurrentes();
 }
 
 // ─── SUPABASE CRUD ────────────────────────────────────────────
@@ -80,28 +28,6 @@ async function cargarRecurrentes() {
   } catch(e) {
     console.warn("Error cargando recurrentes:", e);
     recurrentesActivas = [];
-  }
-}
-
-async function confirmarRecurrente(candidata) {
-  try {
-    const payload = {
-      user_id:        supabaseSession.user.id,
-      usuario:        USUARIO,
-      descripcion:    candidata.descripcion,
-      categoria:      candidata.categoria,
-      monto_ref:      candidata.ultimo.monto,
-      fuente:         candidata.ultimo.fuente || null,
-      responsabilidad: candidata.ultimo.responsabilidad || 'Mío',
-      activa:         true
-    };
-    const { error } = await supabaseClient.from('recurrentes').insert([payload]);
-    if (error) throw error;
-    await cargarRecurrentes();
-    renderRecurrentes();
-    showToast("✅ Recurrente confirmada", "ok");
-  } catch(e) {
-    showToast("❌ Error al confirmar", "err");
   }
 }
 
@@ -188,9 +114,8 @@ function renderRecurrentes() {
   if (!section || !list || !badge) return;
 
   const activas = recurrentesActivas.filter(r => r.activa);
-  _candidatasDetectadas = detectarCandidatas();
 
-  if (!activas.length && !_candidatasDetectadas.length) {
+  if (!activas.length) {
     section.style.display = 'none';
     return;
   }
@@ -206,7 +131,7 @@ function renderRecurrentes() {
     badge.style.display = 'none';
   }
 
-  const filasActivas = estados.map(({ r, estado }) => {
+  list.innerHTML = estados.map(({ r, estado }) => {
     if (estado.ok) {
       return `<div class="recur-row recur-row--ok">
         <div class="recur-row-icon">✅</div>
@@ -232,36 +157,12 @@ function renderRecurrentes() {
       </div>`;
     }
   }).join('');
-
-  const filasCandidatas = _candidatasDetectadas.map((c, idx) => `
-    <div class="recur-row recur-row--suggest">
-      <div class="recur-row-icon">💡</div>
-      <div class="recur-row-info">
-        <div class="recur-row-name">${_esc(c.descripcion)} <span class="recur-tag-suggest">sugerida</span></div>
-        <div class="recur-row-cat">${_esc(c.categoria)} · apareció ${c.meses.size} meses</div>
-        <div class="recur-suggest-actions">
-          <button class="btn-recur-confirm" onclick="_confirmarCandidataIdx(${idx})">✓ Confirmar</button>
-          <button class="btn-recur-ignore"  onclick="_ignorarCandidataIdx(${idx})">Ignorar</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-
-  list.innerHTML = filasActivas + filasCandidatas;
 }
 
-// Helpers para onclick seguros (sin JSON en HTML)
+// Helper para onclick seguro (sin JSON en HTML)
 function _cargarRecurrentePorId(id) {
   const r = recurrentesActivas.find(x => x.id === id);
   if (r) cargarRecurrenteForm(r);
-}
-function _confirmarCandidataIdx(idx) {
-  const c = _candidatasDetectadas[idx];
-  if (c) confirmarRecurrente(c);
-}
-function _ignorarCandidataIdx(idx) {
-  const c = _candidatasDetectadas[idx];
-  if (c) ignorarCandidata(c.descripcion, c.categoria);
 }
 
 // ─── MODAL GESTIÓN ────────────────────────────────────────────
