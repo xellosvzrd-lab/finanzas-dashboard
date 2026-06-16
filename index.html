@@ -5390,7 +5390,7 @@ function duplicarTransaccion(id) {
     setTipo(t.tipo);
     setMoneda(t.moneda || "ARS");
     document.getElementById("f-fecha").valueAsDate = new Date();
-    document.getElementById("f-monto").value       = t.monto;
+    document.getElementById("f-monto").value       = String(Math.abs(Number(t.monto))).replace('.', ',');
     document.getElementById("f-descripcion").value = t.descripcion || "";
     const selCat  = document.getElementById("f-categoria");
     const selFte  = document.getElementById("f-fuente");
@@ -5415,7 +5415,7 @@ function abrirEditorTransaccion(id) {
   document.getElementById("edit-fecha").value           = t.fecha;
   document.getElementById("edit-tipo").value            = t.tipo;
   document.getElementById("edit-moneda").value          = t.moneda || "ARS";
-  document.getElementById("edit-monto").value           = Math.abs(Number(t.monto));
+  document.getElementById("edit-monto").value           = String(Math.abs(Number(t.monto))).replace('.', ',');
   document.getElementById("edit-responsabilidad").value = t.responsabilidad || "Mío";
   document.getElementById("edit-descripcion").value     = t.descripcion || "";
 
