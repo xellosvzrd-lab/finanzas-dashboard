@@ -8289,12 +8289,16 @@ function animatePct(el, toValue, duration = 680) {
 
 // ─── FORMATEO ─────────────────────────────────────────────────
 function fmt(n) {
-  const s = new Intl.NumberFormat("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(n));
+  const abs = Math.abs(n);
+  const dec = abs % 1 !== 0 ? 2 : 0;
+  const s = new Intl.NumberFormat("es-AR", { minimumFractionDigits: dec, maximumFractionDigits: 2 }).format(abs);
   return (n < 0 ? "−" : "") + "$" + s;
 }
 function fmtMoneda(n, moneda) {
   if (moneda === "USD") {
-    return "U$S " + new Intl.NumberFormat("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(n));
+    const abs = Math.abs(n);
+    const dec = abs % 1 !== 0 ? 2 : 0;
+    return "U$S " + new Intl.NumberFormat("es-AR", { minimumFractionDigits: dec, maximumFractionDigits: 2 }).format(abs);
   }
   return fmt(n);
 }
