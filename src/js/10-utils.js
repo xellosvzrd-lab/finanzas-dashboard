@@ -76,7 +76,7 @@ function renderSparklines(curMes, curAnio) {
       && (t.moneda || "ARS") === "ARS"
     ).reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     const gas = Math.max(0, g(mine, "Gasto", "Mío")         - g(mine, "Ingreso", "Mío"))
-              + Math.max(0, g(all,  "Gasto", "Compartido")   - g(all,  "Ingreso", "Compartido")) * 0.5
+              + Math.max(0, g(all,  "Gasto", "Compartido")   - g(all,  "Ingreso", "Compartido")) * obtenerFactorCompartidoPropio(m, y)
               + Math.max(0, g(all,  "Gasto", "De Daniel")    - g(all,  "Ingreso", "De Daniel"));
     const bal  = ing - gas;
     const aho  = ing > 0 ? (bal / ing) * 100 : 0;

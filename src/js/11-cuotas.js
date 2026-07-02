@@ -183,7 +183,7 @@ function _renderCuotasCard() {
     const cuotasTrans = allTransac.filter(t => t.compra_id === c.id);
     const pagadas        = cuotasTrans.filter(t => (t.mes_liquidacion || "") < mesActualStr).length;
     const pagadasDisplay = cuotasTrans.filter(t => (t.mes_liquidacion || "") <= mesActualStr).length;
-    const factor  = c.responsabilidad === "Compartido" ? 0.5 : 1;
+    const esCompartida   = c.responsabilidad === "Compartido";
 
     if (pagadas >= c.cuotas_total) {
       toComplete.push(c.id);
@@ -193,6 +193,13 @@ function _renderCuotasCard() {
     cuotasTrans.forEach(t => {
       const m = t.mes_liquidacion;
       if (!m) return;
+      // El ratio puede variar mes a mes — se resuelve por cada cuota individual,
+      // no una sola vez por compra, porque cada cuota cae en un mes distinto.
+      let factor = 1;
+      if (esCompartida) {
+        const [fy, fm] = m.split("-").map(Number);
+        factor = obtenerFactorCompartidoPropio(fm, fy);
+      }
       const monto = Number(t.monto) * factor;
       if (m === mesActualStr) estesMes += monto;
       else if (m > mesActualStr) futuro += monto;
