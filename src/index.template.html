@@ -3678,6 +3678,25 @@
   </div>
 </div>
 
+<!-- MODAL: aceptar invitación de workspace -->
+<div id="modal-invitacion" style="display:none;position:fixed;inset:0;z-index:9999;
+     background:var(--overlay);align-items:center;justify-content:center;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;
+              padding:2rem;max-width:380px;width:90%;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:.5rem;">🤝</div>
+    <h2 style="margin:0 0 .5rem;font-size:1.2rem;">Invitación a un workspace</h2>
+    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 1.25rem;">
+      Vas a unirte a un workspace compartido. Esto es definitivo en esta versión —
+      no se puede combinar con datos propios ya cargados.
+    </p>
+    <div style="display:flex;gap:.6rem;justify-content:center;">
+      <button class="btn" style="background:none;color:var(--text-muted)" onclick="cerrarModalInvitacion()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarAceptarInvitacion()">Unirme →</button>
+    </div>
+    <div id="modal-invitacion-msg" style="margin-top:.75rem;font-size:.82rem;min-height:1rem;"></div>
+  </div>
+</div>
+
 <!-- MODAL MODO RÁFAGA -->
 <div class="rafaga-overlay" id="rafaga-overlay" onclick="if(event.target===this)cerrarRafaga()">
   <div class="rafaga-modal" role="dialog" aria-modal="true" aria-labelledby="rafaga-title">

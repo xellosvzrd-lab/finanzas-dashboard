@@ -71,3 +71,44 @@ async function revocarInvitacion(inviteId) {
     console.warn("Error revocando invitación:", e);
   }
 }
+
+// Se llama una vez por sesión, desde iniciarApp() (Tarea 9), después de que
+// USUARIO y workspaceMembers ya están resueltos.
+function aceptarInvitacionPendiente() {
+  const token = sessionStorage.getItem("fp_invite_token");
+  if (!token) return;
+  document.getElementById("modal-invitacion").style.display = "flex";
+}
+
+function cerrarModalInvitacion() {
+  sessionStorage.removeItem("fp_invite_token");
+  document.getElementById("modal-invitacion").style.display = "none";
+}
+
+async function confirmarAceptarInvitacion() {
+  const token = sessionStorage.getItem("fp_invite_token");
+  const msg   = document.getElementById("modal-invitacion-msg");
+  if (!token) { cerrarModalInvitacion(); return; }
+
+  msg.innerHTML = "⏳ Uniéndote...";
+  const { error } = await supabaseClient.rpc("accept_workspace_invite", { p_token: token });
+
+  const MENSAJES = {
+    INVITE_NOT_FOUND:        "Ese link de invitación no existe.",
+    INVITE_REVOKED:          "Esa invitación fue revocada.",
+    INVITE_ALREADY_ACCEPTED: "Esa invitación ya fue aceptada.",
+    INVITE_EXPIRED:          "Ese link de invitación venció — pedile a tu pareja que genere uno nuevo.",
+    ALREADY_MEMBER:          "Ya formás parte de ese workspace.",
+    HAS_OWN_DATA:            "Ya tenés datos propios cargados — no podemos unirte automáticamente a otro workspace. Contactanos para resolverlo a mano.",
+  };
+
+  if (error) {
+    const codigo = (error.message || "").match(/[A-Z_]{5,}/)?.[0];
+    msg.innerHTML = `<span style="color:var(--red)">${escapeHtml(MENSAJES[codigo] || "No se pudo procesar la invitación.")}</span>`;
+    return;
+  }
+
+  sessionStorage.removeItem("fp_invite_token");
+  msg.innerHTML = '<span style="color:var(--green)">✅ ¡Listo! Recargando...</span>';
+  setTimeout(() => window.location.reload(), 1200);
+}

@@ -1,5 +1,12 @@
 // ─── INICIALIZACIÓN ───────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
+  const _inviteParam = new URLSearchParams(window.location.search).get("invite");
+  if (_inviteParam) {
+    sessionStorage.setItem("fp_invite_token", _inviteParam);
+    // Limpiar el query param de la URL visible sin recargar la página
+    window.history.replaceState({}, "", window.location.pathname);
+  }
+
   if (window.lucide) lucide.createIcons();
   document.getElementById("f-fecha").valueAsDate = new Date();
   poblarSelectoresFecha();
