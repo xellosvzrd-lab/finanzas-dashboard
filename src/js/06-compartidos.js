@@ -131,6 +131,9 @@ function cargarCompartidos() {
     compPorCatUSD[cat] = { daniel: 0, ama: 0 };
   });
 
+  // Nota: las claves .daniel/.ama de estos mapas representan "yo" (USUARIO) y
+  // "el otro" (PARTNER) respectivamente — no los nombres literales. Por eso se
+  // usa pctUsuarioMes/pctPartnerMes (relativos a la sesión), no pctDaniel/pctAma.
   datos.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t => {
     const cat    = t.categoria;
     const moneda = (t.moneda || "ARS").toUpperCase();
@@ -138,9 +141,9 @@ function cargarCompartidos() {
     if (!map[cat]) map[cat] = { daniel: 0, ama: 0 };
     const m = Math.abs(Number(t.monto));
     if ((t.usuario || USUARIO) === PARTNER) {
-      map[cat].ama += m / 2;
+      map[cat].ama += m * (pctUsuarioMes / 100);
     } else {
-      map[cat].daniel += m / 2;
+      map[cat].daniel += m * (pctPartnerMes / 100);
     }
   });
 
@@ -152,9 +155,9 @@ function cargarCompartidos() {
     if (!map[cat]) map[cat] = { daniel: 0, ama: 0 };
     const m = Math.abs(Number(t.monto));
     if ((t.usuario || USUARIO) === PARTNER) {
-      map[cat].ama -= m / 2;
+      map[cat].ama -= m * (pctUsuarioMes / 100);
     } else {
-      map[cat].daniel -= m / 2;
+      map[cat].daniel -= m * (pctPartnerMes / 100);
     }
   });
 
@@ -198,8 +201,12 @@ function cargarCompartidos() {
       const txsAll     = [...txsGasto, ...txsIngreso];
       const drillId    = "comp-drill-" + r.cat.replace(/\s+/g,"_") + "-" + monedaFilter;
       const drillRows  = txsAll.map(t => {
-        const m         = Math.abs(Number(t.monto));
-        const esAma     = (t.usuario || "Daniel").toLowerCase() === "ama";
+        const m           = Math.abs(Number(t.monto));
+        // Antes: "esAma" comparaba literalmente contra "ama", lo que asignaba
+        // el bucket equivocado en la sesión de Ama. Se usa PARTNER (relativo a
+        // la sesión) para que coincida con la lógica de compPorCat de arriba.
+        const pagoPartner = (t.usuario || USUARIO) === PARTNER;
+        const share       = pagoPartner ? m * (pctUsuarioMes / 100) : m * (pctPartnerMes / 100);
         const esGasto   = t.tipo === "Gasto";
         const signo     = esGasto ? "+" : "−";
         const color     = esGasto ? "var(--accent)" : "var(--green)";
@@ -210,7 +217,7 @@ function cargarCompartidos() {
           </td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:var(--text-muted);">Bruto: ${fmtMoneda(m, monedaFilter)}</td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:${color};">
-            ${signo}${fmtMoneda(m/2, monedaFilter)} ${esAma ? "("+PARTNER+")" : "("+USUARIO+")"}
+            ${signo}${fmtMoneda(share, monedaFilter)} ${pagoPartner ? "("+PARTNER+")" : "("+USUARIO+")"}
           </td>
         </tr>`;
       }).join("");
@@ -411,6 +418,8 @@ function cargarCompartidos() {
   const contribCard = document.getElementById("comp-contrib");
   if (contribCard) {
     const totalAmbos = totalCompDanielARS + totalCompAmaARS;
+    const subtitleEl = document.getElementById("comp-contrib-subtitle");
+    if (subtitleEl) subtitleEl.textContent = `gastos divididos ${Math.round(pctUsuarioMes)}/${Math.round(pctPartnerMes)}`;
     if (totalAmbos > 0.01) {
       const pctU = Math.max(0, Math.min(1, totalCompDanielARS / totalAmbos));
       const pctP = Math.max(0, Math.min(1, totalCompAmaARS   / totalAmbos));
