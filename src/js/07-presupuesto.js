@@ -116,7 +116,7 @@ function sugerirPresupuestoDesdeHistorial() {
       const iComp = dataMes.filter(t => t.tipo==="Ingreso" && t.categoria===cat && t.responsabilidad==="Compartido" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
       const gDeU  = dataMes.filter(t => t.tipo==="Gasto" && t.categoria===cat && t.responsabilidad==="De "+USUARIO && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
       const iDeU  = dataMes.filter(t => t.tipo==="Ingreso" && t.categoria===cat && t.responsabilidad==="De "+USUARIO && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
-      const gastoCat = Math.max(0, gMio - iMio) + Math.max(0, gComp - iComp) * 0.5 + Math.max(0, gDeU - iDeU);
+      const gastoCat = Math.max(0, gMio - iMio) + Math.max(0, gComp - iComp) * obtenerFactorCompartidoPropio(mes, anio) + Math.max(0, gDeU - iDeU);
       acum[cat] += (gastoCat / sueldo) * 100;
       conteo[cat]++;
     });
@@ -217,7 +217,10 @@ function montoEfectivoGasto(t) {
   const resp = t.responsabilidad || "Mío";
   const m = Math.abs(Number(t.monto));
   if (resp === "De " + PARTNER)    return 0;
-  if (resp === "Compartido") return m / 2;
+  if (resp === "Compartido") {
+    const { year, month } = getMesLiquidacion(t);
+    return m * obtenerFactorCompartidoPropio(month, year);
+  }
   return m; // "Mío"
 }
 
@@ -246,7 +249,7 @@ function buildMonthlyData(nMeses) {
       .reduce((total, cat) => {
         const mio  = dataUsuario.filter(t => t.tipo==="Gasto" && t.categoria===cat && (t.responsabilidad||"Mío")==="Mío" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
         const comp = dataMes.filter(t => t.tipo==="Gasto" && t.categoria===cat && t.responsabilidad==="Compartido" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
-        return total + mio + comp * 0.5;
+        return total + mio + comp * obtenerFactorCompartidoPropio(m, y);
       }, 0);
     result.push({ m, y, sueldo, gastado });
   }
@@ -275,6 +278,8 @@ function renderPresupuesto() {
   destroyPresupuestoCharts();
   const mes  = parseInt(document.getElementById("pres-mes").value);
   const anio = parseInt(document.getElementById("pres-anio").value);
+  const notePctEl = document.getElementById("pres-note-comp-pct");
+  if (notePctEl) notePctEl.textContent = Math.round(obtenerFactorCompartidoPropio(mes, anio) * 100) + "%";
 
   // Todas las transacciones del mes (ambos usuarios, necesario para el cálculo Compartido)
   const dataMes = allTransac.filter(t => {
@@ -305,6 +310,7 @@ function renderPresupuesto() {
   //   "Mío" ingresos Daniel         → restan al gasto (reintegros propios)
   const gastoPorCat = {};
   let surplusTotal = 0;
+  const factorCompMes = obtenerFactorCompartidoPropio(mes, anio);
   categGasto.forEach(cat => {
     // Gastos "Mío" de Daniel → 100% (neteado con ingresos "Mío")
     const gastosMio = dataMesDaniel
@@ -347,8 +353,8 @@ function renderPresupuesto() {
     const netMio  = gastosMio - ingresosMio;
     const netComp = gastosComp - ingresosComp;
     const netDeJ  = deJGasto - deJIngreso;
-    surplusTotal += Math.max(0, -netMio) + Math.max(0, -netComp) * 0.5 + Math.max(0, -netDeJ);
-    gastoPorCat[cat] = Math.max(0, netMio) + Math.max(0, netComp) * 0.5 + Math.max(0, netDeJ);
+    surplusTotal += Math.max(0, -netMio) + Math.max(0, -netComp) * factorCompMes + Math.max(0, -netDeJ);
+    gastoPorCat[cat] = Math.max(0, netMio) + Math.max(0, netComp) * factorCompMes + Math.max(0, netDeJ);
   });
 
   // Totales KPI — presupuestoActual[cat] almacena % (0–100), se convierte a monto según sueldoEfectivo
@@ -365,7 +371,7 @@ function renderPresupuesto() {
       .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
                && t.responsabilidad === "Compartido")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    gastoUSDEnARS = (gasUSDMio + gasUSDComp * 0.5) * tipoCambioMEP;
+    gastoUSDEnARS = (gasUSDMio + gasUSDComp * factorCompMes) * tipoCambioMEP;
   }
   const totalGasto = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0) + gastoUSDEnARS;
   const disponible   = sueldoEfectivo - totalPresARS;
@@ -380,6 +386,7 @@ function renderPresupuesto() {
     });
     const dataPrevUsuario = dataPrev.filter(t => (t.usuario || "Daniel") === USUARIO);
     const prevGastoPorCat = {};
+    const factorCompPrevMes = obtenerFactorCompartidoPropio(prevMes, prevAnio);
     categGasto.forEach(cat => {
       const gastosMio   = dataPrevUsuario.filter(t => t.tipo==="Gasto" && t.categoria===cat && (t.responsabilidad||"Mío")==="Mío" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
       const ingresosMio = dataPrevUsuario.filter(t => t.tipo==="Ingreso" && t.categoria===cat && (t.responsabilidad||"Mío")==="Mío" && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
@@ -388,7 +395,7 @@ function renderPresupuesto() {
       const deJGasto    = dataPrev.filter(t => t.tipo==="Gasto" && t.categoria===cat && t.responsabilidad==="De "+USUARIO && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
       const deJIngreso  = dataPrev.filter(t => t.tipo==="Ingreso" && t.categoria===cat && t.responsabilidad==="De "+USUARIO && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
       const netComp = Math.max(0, gastosComp - ingresosComp);
-      prevGastoPorCat[cat] = Math.max(0, gastosMio - ingresosMio) + netComp * 0.5 + Math.max(0, deJGasto - deJIngreso);
+      prevGastoPorCat[cat] = Math.max(0, gastosMio - ingresosMio) + netComp * factorCompPrevMes + Math.max(0, deJGasto - deJIngreso);
     });
 
     const umbralARS = 1000;
@@ -816,6 +823,7 @@ function actualizarKpisPres() {
 
   const gastoPorCat = {};
   let surplusTotal = 0;
+  const factorCompMes = obtenerFactorCompartidoPropio(mes, anio);
   categGasto.forEach(cat => {
     const gastosMio = dataMesDaniel
       .filter(t => t.tipo === "Gasto" && t.categoria === cat
@@ -850,8 +858,8 @@ function actualizarKpisPres() {
     const netMio  = gastosMio - ingresosMio;
     const netComp = gastosComp - ingresosComp;
     const netDeJ  = deJGastoP - deJIngresoP;
-    surplusTotal += Math.max(0, -netMio) + Math.max(0, -netComp) * 0.5 + Math.max(0, -netDeJ);
-    gastoPorCat[cat] = Math.max(0, netMio) + Math.max(0, netComp) * 0.5 + Math.max(0, netDeJ);
+    surplusTotal += Math.max(0, -netMio) + Math.max(0, -netComp) * factorCompMes + Math.max(0, -netDeJ);
+    gastoPorCat[cat] = Math.max(0, netMio) + Math.max(0, netComp) * factorCompMes + Math.max(0, netDeJ);
   });
 
   // Los inputs almacenan porcentajes (0–100); se convierte a monto con el sueldo
@@ -875,7 +883,7 @@ function actualizarKpisPres() {
       .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
                && t.responsabilidad === "Compartido")
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    gastoUSDEnARSKpi = (gasUSDMioKpi + gasUSDCompKpi * 0.5) * tipoCambioMEP;
+    gastoUSDEnARSKpi = (gasUSDMioKpi + gasUSDCompKpi * factorCompMes) * tipoCambioMEP;
   }
   const totalGasto = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0) + gastoUSDEnARSKpi;
   const disponible = sueldoEfectivo - totalPresARS;

@@ -26,6 +26,30 @@ function inicializarSelectoresCompartidos() {
     selAnio.appendChild(o);
   }
   selAnio.onchange = cargarCompartidos;
+
+  // ── Reparto: inputs enlazados (tipear uno autocompleta el otro a 100-valor) ──
+  const repA = document.getElementById("reparto-pct-a");
+  const repB = document.getElementById("reparto-pct-b");
+  if (repA && repB && !repA.dataset.bound) {
+    repA.dataset.bound = "1";
+    repA.addEventListener("input", () => {
+      const v = Math.max(0, Math.min(100, parsearDecimal(repA.value)));
+      repB.value = String(100 - v).replace(".", ",");
+    });
+    repB.addEventListener("input", () => {
+      const v = Math.max(0, Math.min(100, parsearDecimal(repB.value)));
+      repA.value = String(100 - v).replace(".", ",");
+    });
+  }
+}
+
+// Lee el input A (proporción de USUARIO) y guarda el reparto del mes actualmente visualizado.
+function _guardarReparto() {
+  const mes  = parseInt(document.getElementById("comp-mes").value);
+  const anio = parseInt(document.getElementById("comp-anio").value);
+  const pctUsuario = Math.max(0, Math.min(100, parsearDecimal(document.getElementById("reparto-pct-a").value)));
+  const pctDaniel  = USUARIO === "Daniel" ? pctUsuario : 100 - pctUsuario;
+  guardarProporcionMes(mes, anio, pctDaniel);
 }
 
 // Calcula balance compartido del mes/año sin tocar DOM ni DB.
@@ -39,16 +63,22 @@ function _calcularBalanceCompartido(mes, anio) {
     const { year, month } = getMesLiquidacion(t);
     return month === mes && year === anio && t.tipo === "Ingreso";
   });
+  const { pctDaniel: _balPctDaniel, pctAma: _balPctAma } = obtenerProporcionParaMes(mes, anio);
+  const pctUsuario = USUARIO === "Daniel" ? _balPctDaniel : _balPctAma;
+  const pctPartner = 100 - pctUsuario;
   let compNetARS = 0, compNetUSD = 0;
-  const addComp = (t, sign) => {
-    const m = Math.abs(Number(t.monto)) / 2;
-    if ((t.moneda || "ARS").toUpperCase() === "USD") compNetUSD += sign * m;
-    else compNetARS += sign * m;
+  // esGasto=true: si pagó PARTNER, vos le debés tu propia parte (resta);
+  //   si pagaste vos, PARTNER te debe su parte (suma). esGasto=false (reintegro) invierte el signo.
+  const addComp = (t, esGasto) => {
+    const monto       = Math.abs(Number(t.monto));
+    const pagoPartner = (t.usuario || USUARIO) === PARTNER;
+    const share       = pagoPartner ? monto * (pctUsuario / 100) : monto * (pctPartner / 100);
+    const signo       = (pagoPartner ? -1 : 1) * (esGasto ? 1 : -1);
+    if ((t.moneda || "ARS").toUpperCase() === "USD") compNetUSD += signo * share;
+    else compNetARS += signo * share;
   };
-  datos.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t =>
-    addComp(t, (t.usuario || USUARIO) === PARTNER ? -1 : 1));
-  datosIng.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t =>
-    addComp(t, (t.usuario || USUARIO) === PARTNER ? 1 : -1));
+  datos.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t => addComp(t, true));
+  datosIng.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t => addComp(t, false));
   let aARS = 0, aUSD = 0, bARS = 0, bUSD = 0;
   datos.filter(t => (t.responsabilidad || "Mío") === "De " + PARTNER && (t.usuario || USUARIO) === USUARIO).forEach(t => {
     if ((t.moneda || "ARS").toUpperCase() === "USD") aUSD += Math.abs(Number(t.monto));
@@ -65,6 +95,21 @@ function cargarCompartidos() {
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
   const CATS = [...new Set([...categGasto, ...categIngreso])].sort();
+
+  // ── Reparto del mes: resolver ratio vigente (con herencia) y pre-llenar UI ──
+  const { pctDaniel: _repPctDaniel, pctAma: _repPctAma } = obtenerProporcionParaMes(mes, anio);
+  const pctUsuarioMes = USUARIO === "Daniel" ? _repPctDaniel : _repPctAma;
+  const pctPartnerMes = 100 - pctUsuarioMes;
+  const repInputA  = document.getElementById("reparto-pct-a");
+  const repInputB  = document.getElementById("reparto-pct-b");
+  const repNombreA = document.getElementById("reparto-nombre-a");
+  const repNombreB = document.getElementById("reparto-nombre-b");
+  if (repInputA && repInputB) {
+    repInputA.value = String(pctUsuarioMes).replace(".", ",");
+    repInputB.value = String(pctPartnerMes).replace(".", ",");
+  }
+  if (repNombreA) repNombreA.textContent = USUARIO;
+  if (repNombreB) repNombreB.textContent = PARTNER;
 
   // Filtrar transacciones del mes/año seleccionado — gastos para compPorCat y reembolsos
   const datos = allTransac.filter(t => {
@@ -86,6 +131,9 @@ function cargarCompartidos() {
     compPorCatUSD[cat] = { daniel: 0, ama: 0 };
   });
 
+  // Nota: las claves .daniel/.ama de estos mapas representan "yo" (USUARIO) y
+  // "el otro" (PARTNER) respectivamente — no los nombres literales. Por eso se
+  // usa pctUsuarioMes/pctPartnerMes (relativos a la sesión), no pctDaniel/pctAma.
   datos.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t => {
     const cat    = t.categoria;
     const moneda = (t.moneda || "ARS").toUpperCase();
@@ -93,9 +141,9 @@ function cargarCompartidos() {
     if (!map[cat]) map[cat] = { daniel: 0, ama: 0 };
     const m = Math.abs(Number(t.monto));
     if ((t.usuario || USUARIO) === PARTNER) {
-      map[cat].ama += m / 2;
+      map[cat].ama += m * (pctUsuarioMes / 100);
     } else {
-      map[cat].daniel += m / 2;
+      map[cat].daniel += m * (pctPartnerMes / 100);
     }
   });
 
@@ -107,9 +155,9 @@ function cargarCompartidos() {
     if (!map[cat]) map[cat] = { daniel: 0, ama: 0 };
     const m = Math.abs(Number(t.monto));
     if ((t.usuario || USUARIO) === PARTNER) {
-      map[cat].ama -= m / 2;
+      map[cat].ama -= m * (pctUsuarioMes / 100);
     } else {
-      map[cat].daniel -= m / 2;
+      map[cat].daniel -= m * (pctPartnerMes / 100);
     }
   });
 
@@ -153,8 +201,12 @@ function cargarCompartidos() {
       const txsAll     = [...txsGasto, ...txsIngreso];
       const drillId    = "comp-drill-" + r.cat.replace(/\s+/g,"_") + "-" + monedaFilter;
       const drillRows  = txsAll.map(t => {
-        const m         = Math.abs(Number(t.monto));
-        const esAma     = (t.usuario || "Daniel").toLowerCase() === "ama";
+        const m           = Math.abs(Number(t.monto));
+        // Antes: "esAma" comparaba literalmente contra "ama", lo que asignaba
+        // el bucket equivocado en la sesión de Ama. Se usa PARTNER (relativo a
+        // la sesión) para que coincida con la lógica de compPorCat de arriba.
+        const pagoPartner = (t.usuario || USUARIO) === PARTNER;
+        const share       = pagoPartner ? m * (pctUsuarioMes / 100) : m * (pctPartnerMes / 100);
         const esGasto   = t.tipo === "Gasto";
         const signo     = esGasto ? "+" : "−";
         const color     = esGasto ? "var(--accent)" : "var(--green)";
@@ -165,7 +217,7 @@ function cargarCompartidos() {
           </td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:var(--text-muted);">Bruto: ${fmtMoneda(m, monedaFilter)}</td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:${color};">
-            ${signo}${fmtMoneda(m/2, monedaFilter)} ${esAma ? "("+PARTNER+")" : "("+USUARIO+")"}
+            ${signo}${fmtMoneda(share, monedaFilter)} ${pagoPartner ? "("+PARTNER+")" : "("+USUARIO+")"}
           </td>
         </tr>`;
       }).join("");
@@ -366,6 +418,8 @@ function cargarCompartidos() {
   const contribCard = document.getElementById("comp-contrib");
   if (contribCard) {
     const totalAmbos = totalCompDanielARS + totalCompAmaARS;
+    const subtitleEl = document.getElementById("comp-contrib-subtitle");
+    if (subtitleEl) subtitleEl.textContent = `gastos divididos ${Math.round(pctUsuarioMes)}/${Math.round(pctPartnerMes)}`;
     if (totalAmbos > 0.01) {
       const pctU = Math.max(0, Math.min(1, totalCompDanielARS / totalAmbos));
       const pctP = Math.max(0, Math.min(1, totalCompAmaARS   / totalAmbos));

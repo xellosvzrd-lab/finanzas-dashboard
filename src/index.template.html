@@ -351,6 +351,28 @@
   }
   .mes-selector select:focus { outline: none; border-color: var(--accent); }
 
+  /* ─── REPARTO DE COMPARTIDOS ────────────────────────────────── */
+  .reparto-control {
+    display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
+    font-size: .82rem; color: var(--text-muted);
+  }
+  .reparto-label  { font-weight: 600; color: var(--text); }
+  .reparto-nombre { color: var(--text); font-weight: 500; }
+  .reparto-sep    { color: var(--text-faint); }
+  .reparto-input {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); border-radius: 7px; padding: .3rem .4rem;
+    width: 52px; text-align: right; font-family: inherit; font-size: .84rem;
+    transition: border-color .15s;
+  }
+  .reparto-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .reparto-guardar-btn {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 7px;
+    padding: .3rem .5rem; cursor: pointer; font-size: .9rem; line-height: 1;
+    transition: border-color .15s, background .15s;
+  }
+  .reparto-guardar-btn:hover { border-color: var(--accent); background: var(--bg3); }
+
   /* Sub-section header bars */
   .chart-title,
   .comp-title,
@@ -1559,6 +1581,8 @@
     .pres-bar-wrap { min-width: auto; }
     .pres-input { width: 88px; }
     .pres-note { font-size: .73rem; }
+    .reparto-control { width: 100%; }
+    .reparto-input { width: 44px; }
 
     /* Toast: centrado abajo */
     .toast { left: 1rem; right: 1rem; bottom: 1rem; }
@@ -2929,6 +2953,19 @@
           <select id="comp-anio"></select>
         </div>
 
+        <!-- Reparto de gastos compartidos del mes -->
+        <div class="reparto-control" id="reparto-control" style="margin-bottom:1.5rem">
+          <span class="reparto-label">Reparto:</span>
+          <span class="reparto-nombre" id="reparto-nombre-a">Daniel</span>
+          <input type="text" inputmode="decimal" id="reparto-pct-a" class="reparto-input" value="50">
+          <span class="reparto-pct-sign">%</span>
+          <span class="reparto-sep">/</span>
+          <span class="reparto-nombre" id="reparto-nombre-b">Ama</span>
+          <input type="text" inputmode="decimal" id="reparto-pct-b" class="reparto-input" value="50">
+          <span class="reparto-pct-sign">%</span>
+          <button class="reparto-guardar-btn" id="reparto-guardar-btn" onclick="_guardarReparto()" title="Guardar reparto del mes">💾</button>
+        </div>
+
         <!-- Hero row: balance + contribución -->
         <div class="comp-hero-row">
 
@@ -2953,7 +2990,7 @@
           <!-- Contribución del mes -->
           <div class="card comp-contrib" id="comp-contrib" style="display:none">
             <div class="comp-contrib-title">Contribución del mes</div>
-            <div class="comp-contrib-subtitle">gastos divididos al 50%</div>
+            <div class="comp-contrib-subtitle" id="comp-contrib-subtitle">gastos divididos al 50%</div>
             <div class="comp-contrib-rows">
               <div class="comp-contrib-row">
                 <div class="comp-contrib-top">
@@ -3296,7 +3333,7 @@
         </div>
 
         <p class="pres-note">
-          💡 Los valores se ingresan como <strong>% del sueldo</strong> del mes. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → 50% · <strong id="pres-note-partner">De Ama</strong> → 0%.
+          💡 Los valores se ingresan como <strong>% del sueldo</strong> del mes. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → <strong id="pres-note-comp-pct">50%</strong> · <strong id="pres-note-partner">De Ama</strong> → 0%.
         </p>
         <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
 

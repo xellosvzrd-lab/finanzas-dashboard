@@ -2,6 +2,7 @@
 async function cargarResumenMes() {
   const mes  = document.getElementById("sel-mes-resumen").value;
   const anio = document.getElementById("sel-anio-resumen").value;
+  const factorCompResumen = obtenerFactorCompartidoPropio(parseInt(mes), parseInt(anio));
 
   // Todas las transacciones del mes (ambos usuarios — necesario para Comp y "De Daniel")
   const dataMesAll = allTransac.filter(t => {
@@ -40,7 +41,7 @@ async function cargarResumenMes() {
 
       const real =
         Math.max(0, g(datos,      "Gasto",   "Mío")        - g(datos,      "Ingreso", "Mío"))
-      + Math.max(0, g(dataMesAll, "Gasto",   "Compartido") - g(dataMesAll, "Ingreso", "Compartido")) * 0.5
+      + Math.max(0, g(dataMesAll, "Gasto",   "Compartido") - g(dataMesAll, "Ingreso", "Compartido")) * factorCompResumen
       + Math.max(0, g(dataMesAll, "Gasto",   "De Daniel")  - g(dataMesAll, "Ingreso", "De Daniel"));
 
       if (real > 0) (mon === "USD" ? catMapUSD : catMapARS)[cat] = real;
@@ -72,7 +73,7 @@ async function cargarResumenMes() {
   if (ingresosUSD > 0) ingSubParts.push(`+ ${fmtMoneda(ingresosUSD,"USD")} USD`);
   document.getElementById("kpi-ingresos-sub").textContent = ingSubParts.join(" · ");
 
-  const gasSubParts = ["Mío 100% · Comp 50% · Reembolsos Ama"];
+  const gasSubParts = [`Mío 100% · Comp ${Math.round(factorCompResumen * 100)}% · Reembolsos ${PARTNER}`];
   if (gastosNetUSD > 0) gasSubParts.push(`+ ${fmtMoneda(gastosNetUSD,"USD")} USD`);
   document.getElementById("kpi-gastos-sub").textContent = gasSubParts.join(" · ");
 
@@ -118,6 +119,7 @@ async function cargarResumenMes() {
       .filter(t => !esTransferencia(t) && !CATS_INGRESO_REAL.includes(t.categoria))
       .map(t => t.categoria))];
     const prevCatMapARS = {};
+    const factorCompPrevResumen = obtenerFactorCompartidoPropio(prevMesNum, prevAnioNum);
     prevAllExpCats.forEach(cat => {
       const gp = (arr, tipo, resp) => arr.filter(t =>
         !esTransferencia(t) && t.tipo === tipo && t.categoria === cat
@@ -126,7 +128,7 @@ async function cargarResumenMes() {
       ).reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
       const real =
         Math.max(0, gp(prevDatos,    "Gasto","Mío")       - gp(prevDatos,   "Ingreso","Mío"))
-      + Math.max(0, gp(prevDataAll,  "Gasto","Compartido")- gp(prevDataAll, "Ingreso","Compartido")) * 0.5
+      + Math.max(0, gp(prevDataAll,  "Gasto","Compartido")- gp(prevDataAll, "Ingreso","Compartido")) * factorCompPrevResumen
       + Math.max(0, gp(prevDataAll,  "Gasto","De Daniel") - gp(prevDataAll, "Ingreso","De Daniel"));
       if (real > 0) prevCatMapARS[cat] = real;
     });
