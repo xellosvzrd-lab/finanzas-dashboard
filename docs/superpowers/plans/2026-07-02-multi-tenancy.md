@@ -245,6 +245,24 @@ create index idx_recurrentes_workspace_id            on recurrentes(workspace_id
 create index idx_proporcion_compartidos_workspace_id on proporcion_compartidos(workspace_id);
 ```
 
+- [ ] **Paso 3b — AGREGADO post-incidente en producción: `default` de transición**
+
+Como el SQL corre contra la instancia real de Supabase independientemente de qué rama de git esté deployada, y `main` (producción) todavía corre el cliente viejo — que no envía `workspace_id` al insertar — dejar la columna `not null` sin `default` rompe **todos los inserts nuevos en producción** hasta que el cliente de esta feature se mergee. Mitigación temporal (solo válida mientras exista un único workspace real; se puede quitar el `default` después del merge del cliente nuevo, no es obligatorio):
+
+```sql
+alter table transacciones          alter column workspace_id set default '<workspace-id>';
+alter table categorias             alter column workspace_id set default '<workspace-id>';
+alter table presupuesto            alter column workspace_id set default '<workspace-id>';
+alter table compras_cuotas         alter column workspace_id set default '<workspace-id>';
+alter table metas_ahorro           alter column workspace_id set default '<workspace-id>';
+alter table plazos_fijos           alter column workspace_id set default '<workspace-id>';
+alter table acciones               alter column workspace_id set default '<workspace-id>';
+alter table recurrentes            alter column workspace_id set default '<workspace-id>';
+alter table proporcion_compartidos alter column workspace_id set default '<workspace-id>';
+```
+
+**Lección para la próxima migración big-bang de este tipo:** cuando el backend (Supabase) es compartido entre ramas de git pero el frontend no, aplicar `not null` sin `default` en una columna nueva rompe el cliente que todavía no conoce esa columna. Evaluar `set default` desde el Paso 3 original en vez de agregarlo como parche reactivo.
+
 - [ ] **Paso 4: Commit**
 
 ```bash
@@ -307,8 +325,12 @@ create policy "transacciones_update" on transacciones
 create policy "transacciones_delete" on transacciones
   for delete using (user_id = auth.uid() and workspace_id = my_workspace_id());
 
+-- CORREGIDO post-incidente en producción: categorias es per-usuario
+-- (unique(tipo,valor,user_id)), no workspace-wide — el SELECT original de
+-- este plan causaba categorías duplicadas al fusionar las listas de Daniel
+-- y Ama. Ver spec, sección "Corrección post-implementación".
 create policy "categorias_select" on categorias
-  for select using (workspace_id = my_workspace_id());
+  for select using (workspace_id = my_workspace_id() and user_id = auth.uid());
 create policy "categorias_insert" on categorias
   for insert with check (workspace_id = my_workspace_id() and user_id = auth.uid());
 create policy "categorias_update" on categorias
@@ -316,8 +338,10 @@ create policy "categorias_update" on categorias
 create policy "categorias_delete" on categorias
   for delete using (user_id = auth.uid() and workspace_id = my_workspace_id());
 
+-- CORREGIDO post-incidente en producción: presupuesto es per-usuario
+-- (unique(mes,anio,categoria,user_id)), mismo problema que categorias.
 create policy "presupuesto_select" on presupuesto
-  for select using (workspace_id = my_workspace_id());
+  for select using (workspace_id = my_workspace_id() and user_id = auth.uid());
 create policy "presupuesto_insert" on presupuesto
   for insert with check (workspace_id = my_workspace_id() and user_id = auth.uid());
 create policy "presupuesto_update" on presupuesto

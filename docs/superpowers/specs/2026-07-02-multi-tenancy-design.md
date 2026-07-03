@@ -125,6 +125,24 @@ Para `proporcion_compartidos` (sin `user_id`), INSERT/UPDATE validan únicamente
 
 **`workspace_invites`:** SELECT/INSERT restringidos a miembros del workspace dueño de la invitación (`workspace_id = my_workspace_id()`). La aceptación de una invitación por parte de alguien de **otro** workspace no pasa por INSERT/UPDATE directo sobre esta tabla — pasa por `accept_workspace_invite(token)`, que al ser `security definer` puede operar sin estar limitada por esa policy.
 
+### Corrección post-implementación: `categorias` y `presupuesto` NO son workspace-wide en SELECT
+
+Al desplegar esto en producción se detectó una regresión real: `categorias` (`unique(tipo, valor, user_id)`) y `presupuesto` (`unique(mes, anio, categoria, user_id)`) estaban diseñadas desde antes de esta feature para que **cada persona mantenga su propia lista/configuración privada**, no para visibilidad compartida — a diferencia de `transacciones`, donde la visibilidad cruzada para "Compartido" es la funcionalidad central. Aplicarles el mismo patrón de SELECT que al resto (`workspace_id = my_workspace_id()`) hizo que Daniel y Ama vieran la unión de sus dos listas de categorías (duplicados) y de sus dos configuraciones de presupuesto por categoría/mes.
+
+**Política correcta para estas 2 tablas específicamente** (el resto del patrón — INSERT/UPDATE/DELETE — no cambia):
+
+```sql
+create policy "categorias_select" on categorias
+  for select using (workspace_id = my_workspace_id() and user_id = auth.uid());
+
+create policy "presupuesto_select" on presupuesto
+  for select using (workspace_id = my_workspace_id() and user_id = auth.uid());
+```
+
+Esto mantiene el aislamiento por workspace (tenant) y **además** restaura el aislamiento por usuario dentro del propio workspace, igual que el comportamiento previo a esta migración. Las 7 tablas restantes (`transacciones`, `compras_cuotas`, `metas_ahorro`, `plazos_fijos`, `acciones`, `recurrentes`, `proporcion_compartidos`) sí son correctamente workspace-wide en SELECT — se verificó manualmente contra producción que no presentan el mismo problema.
+
+**Lección para futuras tablas de contenido:** antes de aplicar el patrón "SELECT workspace-wide" a una tabla nueva, confirmar si esa tabla fue diseñada con semántica per-usuario (buscar `unique(..., user_id)` o constraints equivalentes) — no asumir que todo el contenido de un workspace debe ser visible para todos sus miembros por igual.
+
 ---
 
 ## 3. Flujo de invitación
