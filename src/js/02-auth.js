@@ -6,6 +6,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Limpiar el query param de la URL visible sin recargar la página
     window.history.replaceState({}, "", window.location.pathname);
   }
+  if (sessionStorage.getItem("fp_invite_token")) {
+    const _link = document.getElementById("login-crear-cuenta-link");
+    if (_link) _link.style.display = "block";
+  }
 
   if (window.lucide) lucide.createIcons();
   document.getElementById("f-fecha").valueAsDate = new Date();
@@ -143,8 +147,49 @@ async function volverConfig() {
 function mostrarLogin() {
   document.getElementById("card-login").style.display        = "";
   document.getElementById("card-reset").style.display        = "none";
+  document.getElementById("card-registro").style.display     = "none";
   document.getElementById("card-nueva-password").style.display = "none";
   document.getElementById("test-result").innerHTML = "";
+}
+
+function mostrarRegistro() {
+  document.getElementById("card-login").style.display    = "none";
+  document.getElementById("card-reset").style.display    = "none";
+  document.getElementById("card-registro").style.display = "";
+  document.getElementById("registro-result").innerHTML   = "";
+}
+
+async function guardarRegistro() {
+  const email    = document.getElementById("reg-email").value.trim();
+  const password = document.getElementById("reg-password").value;
+  const res      = document.getElementById("registro-result");
+  const btn      = document.getElementById("btn-registro");
+
+  if (!email || password.length < 6) {
+    res.innerHTML = '<span class="fail">❌ Completá un email válido y una contraseña de al menos 6 caracteres.</span>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "⏳ Creando...";
+  res.innerHTML = "";
+
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) throw error;
+    if (!data.session) {
+      res.innerHTML = '<span class="ok">✅ Revisá tu email para confirmar la cuenta, después volvé a este link de invitación.</span>';
+      btn.textContent = "Enviado";
+      return;
+    }
+    supabaseSession = data.session;
+    await _configurarUsuario(data.session);
+    iniciarApp();
+  } catch(e) {
+    res.innerHTML = `<span class="fail">❌ ${escapeHtml(e.message) || "Error al crear la cuenta"}</span>`;
+    btn.disabled = false;
+    btn.textContent = "Crear cuenta →";
+  }
 }
 
 function mostrarRecuperarPassword() {
