@@ -48,7 +48,7 @@ function _guardarReparto() {
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
   const pctUsuario = Math.max(0, Math.min(100, parsearDecimal(document.getElementById("reparto-pct-a").value)));
-  const pctDaniel  = USUARIO === "Daniel" ? pctUsuario : 100 - pctUsuario;
+  const pctDaniel  = esMiembroReferenciaWorkspace() ? pctUsuario : 100 - pctUsuario;
   guardarProporcionMes(mes, anio, pctDaniel);
 }
 
@@ -64,7 +64,7 @@ function _calcularBalanceCompartido(mes, anio) {
     return month === mes && year === anio && t.tipo === "Ingreso";
   });
   const { pctDaniel: _balPctDaniel, pctAma: _balPctAma } = obtenerProporcionParaMes(mes, anio);
-  const pctUsuario = USUARIO === "Daniel" ? _balPctDaniel : _balPctAma;
+  const pctUsuario = esMiembroReferenciaWorkspace() ? _balPctDaniel : _balPctAma;
   const pctPartner = 100 - pctUsuario;
   let compNetARS = 0, compNetUSD = 0;
   // esGasto=true: si pagó PARTNER, vos le debés tu propia parte (resta);
@@ -92,13 +92,44 @@ function _calcularBalanceCompartido(mes, anio) {
 }
 
 function cargarCompartidos() {
+  if (!PARTNER) {
+    const cont = document.getElementById("page-compartidos");
+    if (cont) {
+      const existente = document.getElementById("comp-empty-state");
+      if (!existente) {
+        const div = document.createElement("div");
+        div.id = "comp-empty-state";
+        div.className = "chart-card";
+        div.style.textAlign = "center";
+        div.style.padding = "2.5rem 1.5rem";
+        div.innerHTML = `
+          <div style="font-size:2.2rem;margin-bottom:.5rem">🤝</div>
+          <h3 style="margin:0 0 .4rem">Todavía no invitaste a tu pareja</h3>
+          <p style="color:var(--text-muted);font-size:.9rem;margin:0 0 1rem">
+            Compartidos se activa cuando hay dos personas en el mismo workspace.
+          </p>
+          <button class="btn btn-primary" onclick="navegarA('config')">Invitar a mi pareja</button>`;
+        cont.prepend(div);
+      }
+    }
+    // Ocultar el resto del contenido de Compartidos mientras no haya pareja
+    // (se excluye liq-modal: es un modal que ya maneja su propia visibilidad)
+    Array.from(document.getElementById("page-compartidos")?.children || [])
+      .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "liq-modal") el.style.display = "none"; });
+    return;
+  }
+  const existente = document.getElementById("comp-empty-state");
+  if (existente) existente.remove();
+  Array.from(document.getElementById("page-compartidos")?.children || [])
+    .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "liq-modal") el.style.display = ""; });
+
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
   const CATS = [...new Set([...categGasto, ...categIngreso])].sort();
 
   // ── Reparto del mes: resolver ratio vigente (con herencia) y pre-llenar UI ──
   const { pctDaniel: _repPctDaniel, pctAma: _repPctAma } = obtenerProporcionParaMes(mes, anio);
-  const pctUsuarioMes = USUARIO === "Daniel" ? _repPctDaniel : _repPctAma;
+  const pctUsuarioMes = esMiembroReferenciaWorkspace() ? _repPctDaniel : _repPctAma;
   const pctPartnerMes = 100 - pctUsuarioMes;
   const repInputA  = document.getElementById("reparto-pct-a");
   const repInputB  = document.getElementById("reparto-pct-b");
@@ -869,7 +900,7 @@ function navegarA(pagina) {
   if (pagina === "presupuesto")  cargarPresupuesto();
   if (pagina === "anual")        cargarAnual();
   if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); }
-  if (pagina === "config")       renderizarConfig();
+  if (pagina === "config")       { renderizarConfig(); renderizarPanelWorkspace(); }
   if (pagina === "inversiones")  { inicializarDisclosureInversiones(); renderPlazos(); renderAcciones(); _iniciarAutoRefreshAcciones(); }
 
   // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)

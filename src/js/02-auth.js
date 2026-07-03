@@ -1,5 +1,16 @@
 // ─── INICIALIZACIÓN ───────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
+  const _inviteParam = new URLSearchParams(window.location.search).get("invite");
+  if (_inviteParam) {
+    sessionStorage.setItem("fp_invite_token", _inviteParam);
+    // Limpiar el query param de la URL visible sin recargar la página
+    window.history.replaceState({}, "", window.location.pathname);
+  }
+  if (sessionStorage.getItem("fp_invite_token")) {
+    const _link = document.getElementById("login-crear-cuenta-link");
+    if (_link) _link.style.display = "block";
+  }
+
   if (window.lucide) lucide.createIcons();
   document.getElementById("f-fecha").valueAsDate = new Date();
   poblarSelectoresFecha();
@@ -24,7 +35,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Intentar recuperar sesión existente
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) { supabaseSession = session; _configurarUsuario(session); iniciarApp(); return; }
+  if (session) { supabaseSession = session; await _configurarUsuario(session); iniciarApp(); return; }
 
   // No hay sesión activa — mostrar pantalla de login
 });
@@ -49,7 +60,7 @@ async function guardarConfig() {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
     supabaseSession = data.session;
-    _configurarUsuario(data.session);
+    await _configurarUsuario(data.session);
     localStorage.setItem("fp_sb_email", email);
     localStorage.removeItem("fp_sb_password");
     iniciarApp();
@@ -136,8 +147,49 @@ async function volverConfig() {
 function mostrarLogin() {
   document.getElementById("card-login").style.display        = "";
   document.getElementById("card-reset").style.display        = "none";
+  document.getElementById("card-registro").style.display     = "none";
   document.getElementById("card-nueva-password").style.display = "none";
   document.getElementById("test-result").innerHTML = "";
+}
+
+function mostrarRegistro() {
+  document.getElementById("card-login").style.display    = "none";
+  document.getElementById("card-reset").style.display    = "none";
+  document.getElementById("card-registro").style.display = "";
+  document.getElementById("registro-result").innerHTML   = "";
+}
+
+async function guardarRegistro() {
+  const email    = document.getElementById("reg-email").value.trim();
+  const password = document.getElementById("reg-password").value;
+  const res      = document.getElementById("registro-result");
+  const btn      = document.getElementById("btn-registro");
+
+  if (!email || password.length < 6) {
+    res.innerHTML = '<span class="fail">❌ Completá un email válido y una contraseña de al menos 6 caracteres.</span>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "⏳ Creando...";
+  res.innerHTML = "";
+
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) throw error;
+    if (!data.session) {
+      res.innerHTML = '<span class="ok">✅ Revisá tu email para confirmar la cuenta, después volvé a este link de invitación.</span>';
+      btn.textContent = "Enviado";
+      return;
+    }
+    supabaseSession = data.session;
+    await _configurarUsuario(data.session);
+    iniciarApp();
+  } catch(e) {
+    res.innerHTML = `<span class="fail">❌ ${escapeHtml(e.message) || "Error al crear la cuenta"}</span>`;
+    btn.disabled = false;
+    btn.textContent = "Crear cuenta →";
+  }
 }
 
 function mostrarRecuperarPassword() {
@@ -188,7 +240,7 @@ async function guardarNuevaPassword() {
     if (error) throw error;
     res.innerHTML = '<span class="ok">✅ Contraseña actualizada. Redirigiendo...</span>';
     localStorage.removeItem("fp_sb_password");
-    setTimeout(() => { _configurarUsuario(supabaseSession); iniciarApp(); }, 1500);
+    setTimeout(async () => { await _configurarUsuario(supabaseSession); iniciarApp(); }, 1500);
   } catch(e) {
     res.innerHTML = `<span class="fail">❌ ${escapeHtml(e.message) || "Error al guardar."}</span>`;
     btn.disabled = false;

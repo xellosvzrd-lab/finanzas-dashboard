@@ -2474,6 +2474,9 @@
               onclick="mostrarRecuperarPassword()">¿Olvidaste tu contraseña?</button>
     </div>
     <div id="test-result"></div>
+    <div id="login-crear-cuenta-link" style="display:none;margin-top:.5rem;font-size:.83rem;color:var(--text-muted)">
+      ¿Te invitaron a un workspace? <a href="#" onclick="mostrarRegistro();return false">Creá tu cuenta acá</a>
+    </div>
     <div class="login-divider">o</div>
     <button class="btn btn-google" id="btn-google-login" onclick="guardarConfigGoogle()">
       <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -2485,6 +2488,27 @@
       Continuar con Google
     </button>
     <div id="google-login-result" style="margin-top:.4rem;font-size:.82rem"></div>
+  </div>
+
+  <!-- ── Pantalla: crear cuenta (para invitados sin Google) ──── -->
+  <div class="setup-card" id="card-registro" style="display:none;">
+    <h1>💰 Crear cuenta</h1>
+    <p>Vas a unirte a un workspace compartido. Elegí tu email y contraseña.</p>
+
+    <label for="reg-email">Email</label>
+    <input type="email" id="reg-email" placeholder="vos@email.com" autocomplete="email"
+           onkeydown="if(event.key==='Enter') guardarRegistro()">
+
+    <label for="reg-password">Contraseña</label>
+    <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"
+           onkeydown="if(event.key==='Enter') guardarRegistro()">
+
+    <div style="display:flex; gap:.75rem; align-items:center;">
+      <button class="btn btn-primary" id="btn-registro" onclick="guardarRegistro()">Crear cuenta →</button>
+      <button class="btn" style="background:none;color:var(--text-muted);font-size:.83rem;padding:.3rem .5rem"
+              onclick="mostrarLogin()">← Ya tengo cuenta</button>
+    </div>
+    <div id="registro-result"></div>
   </div>
 
   <!-- ── Pantalla: recuperar contraseña ───────────────── -->
@@ -3481,6 +3505,14 @@
           </div>
         </div>
 
+        <!-- Mi pareja / Workspace -->
+        <div class="chart-card" style="margin-top:1.5rem">
+          <div class="chart-title">Mi pareja</div>
+          <div id="workspace-panel">
+            <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
+          </div>
+        </div>
+
       </div><!-- /page-config -->
 
       <!-- ── PÁGINA INVERSIONES ────────────────────────────── -->
@@ -3675,6 +3707,25 @@
       Guardar →
     </button>
     <div id="modal-nombre-msg" style="margin-top:.75rem;font-size:.82rem;min-height:1rem;"></div>
+  </div>
+</div>
+
+<!-- MODAL: aceptar invitación de workspace -->
+<div id="modal-invitacion" style="display:none;position:fixed;inset:0;z-index:9999;
+     background:var(--overlay);align-items:center;justify-content:center;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;
+              padding:2rem;max-width:380px;width:90%;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:.5rem;">🤝</div>
+    <h2 style="margin:0 0 .5rem;font-size:1.2rem;">Invitación a un workspace</h2>
+    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 1.25rem;">
+      Vas a unirte a un workspace compartido. Esto es definitivo en esta versión —
+      no se puede combinar con datos propios ya cargados.
+    </p>
+    <div style="display:flex;gap:.6rem;justify-content:center;">
+      <button class="btn" style="background:none;color:var(--text-muted)" onclick="cerrarModalInvitacion()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarAceptarInvitacion()">Unirme →</button>
+    </div>
+    <div id="modal-invitacion-msg" style="margin-top:.75rem;font-size:.82rem;min-height:1rem;"></div>
   </div>
 </div>
 
