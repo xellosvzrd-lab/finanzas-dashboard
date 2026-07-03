@@ -31,7 +31,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Intentar recuperar sesión existente
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) { supabaseSession = session; _configurarUsuario(session); iniciarApp(); return; }
+  if (session) { supabaseSession = session; await _configurarUsuario(session); iniciarApp(); return; }
 
   // No hay sesión activa — mostrar pantalla de login
 });
@@ -56,7 +56,7 @@ async function guardarConfig() {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
     supabaseSession = data.session;
-    _configurarUsuario(data.session);
+    await _configurarUsuario(data.session);
     localStorage.setItem("fp_sb_email", email);
     localStorage.removeItem("fp_sb_password");
     iniciarApp();
@@ -195,7 +195,7 @@ async function guardarNuevaPassword() {
     if (error) throw error;
     res.innerHTML = '<span class="ok">✅ Contraseña actualizada. Redirigiendo...</span>';
     localStorage.removeItem("fp_sb_password");
-    setTimeout(() => { _configurarUsuario(supabaseSession); iniciarApp(); }, 1500);
+    setTimeout(async () => { await _configurarUsuario(supabaseSession); iniciarApp(); }, 1500);
   } catch(e) {
     res.innerHTML = `<span class="fail">❌ ${escapeHtml(e.message) || "Error al guardar."}</span>`;
     btn.disabled = false;

@@ -20,11 +20,11 @@ function ocultarErrorCarga() {
 
 function _setVariablesUsuario(nombre) {
   USUARIO = nombre;
-  PARTNER = USUARIO.toLowerCase() === "daniel" ? "Ama" : "Daniel";
+  PARTNER = resolverPartnerNombre(); // null si todavía no hay nadie más en mi workspace
   CATS_INGRESO_REAL = USUARIO.toLowerCase() === "ama"
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
-  categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
+  categResponsabilidad = PARTNER ? ["Mío", "Compartido", "De " + PARTNER] : ["Mío"];
   const _savedTheme = localStorage.getItem('fin-theme');
   const _defaultTheme = USUARIO.toLowerCase() === "ama" ? "light" : "dark";
   document.documentElement.dataset.theme = _savedTheme || _defaultTheme;
@@ -35,7 +35,7 @@ function _setVariablesUsuario(nombre) {
   if (_moon) _moon.style.display = _activeTheme === 'dark' ? 'none' : '';
 }
 
-function _configurarUsuario(session) {
+async function _configurarUsuario(session) {
   const metaNombre   = session.user.user_metadata?.nombre;
   const metaEmojis   = session.user.user_metadata?.cat_emojis;
   const isGoogleOnly = session.user.app_metadata?.provider === 'google'
@@ -46,6 +46,7 @@ function _configurarUsuario(session) {
     if (res) res.innerHTML = '<span class="fail">❌ Esta cuenta de Google no está vinculada a ningún usuario. Iniciá sesión con email y vinculá tu cuenta desde Categorías → Cuenta y Seguridad.</span>';
     return;
   }
+  await cargarWorkspaceMembers();
   _setVariablesUsuario(metaNombre || "");
   if (USUARIO && metaEmojis && typeof metaEmojis === "object") {
     localStorage.setItem(USUARIO + "_cat_emojis", JSON.stringify(metaEmojis));
@@ -116,6 +117,8 @@ async function guardarNombre() {
     return;
   }
 
+  await supabaseClient.from('workspace_members').update({ nombre }).eq('user_id', supabaseSession.user.id);
+  await cargarWorkspaceMembers();
   _setVariablesUsuario(nombre);
 
   document.getElementById("modal-nombre").style.display = "none";
@@ -180,6 +183,7 @@ async function iniciarApp() {
       mostrarErrorCarga("No se pudo conectar al servidor. Verificá la URL en Configuración o tu conexión a internet.");
     }
   }
+  aceptarInvitacionPendiente();
 }
 
 // ─── CATEGORÍAS Y FUENTES ─────────────────────────────────────

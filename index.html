@@ -4060,7 +4060,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Intentar recuperar sesión existente
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) { supabaseSession = session; _configurarUsuario(session); iniciarApp(); return; }
+  if (session) { supabaseSession = session; await _configurarUsuario(session); iniciarApp(); return; }
 
   // No hay sesión activa — mostrar pantalla de login
 });
@@ -4085,7 +4085,7 @@ async function guardarConfig() {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
     supabaseSession = data.session;
-    _configurarUsuario(data.session);
+    await _configurarUsuario(data.session);
     localStorage.setItem("fp_sb_email", email);
     localStorage.removeItem("fp_sb_password");
     iniciarApp();
@@ -4224,7 +4224,7 @@ async function guardarNuevaPassword() {
     if (error) throw error;
     res.innerHTML = '<span class="ok">✅ Contraseña actualizada. Redirigiendo...</span>';
     localStorage.removeItem("fp_sb_password");
-    setTimeout(() => { _configurarUsuario(supabaseSession); iniciarApp(); }, 1500);
+    setTimeout(async () => { await _configurarUsuario(supabaseSession); iniciarApp(); }, 1500);
   } catch(e) {
     res.innerHTML = `<span class="fail">❌ ${escapeHtml(e.message) || "Error al guardar."}</span>`;
     btn.disabled = false;
@@ -4311,11 +4311,11 @@ function ocultarErrorCarga() {
 
 function _setVariablesUsuario(nombre) {
   USUARIO = nombre;
-  PARTNER = USUARIO.toLowerCase() === "daniel" ? "Ama" : "Daniel";
+  PARTNER = resolverPartnerNombre(); // null si todavía no hay nadie más en mi workspace
   CATS_INGRESO_REAL = USUARIO.toLowerCase() === "ama"
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
-  categResponsabilidad = ["Mío", "Compartido", "De " + PARTNER];
+  categResponsabilidad = PARTNER ? ["Mío", "Compartido", "De " + PARTNER] : ["Mío"];
   const _savedTheme = localStorage.getItem('fin-theme');
   const _defaultTheme = USUARIO.toLowerCase() === "ama" ? "light" : "dark";
   document.documentElement.dataset.theme = _savedTheme || _defaultTheme;
@@ -4326,7 +4326,7 @@ function _setVariablesUsuario(nombre) {
   if (_moon) _moon.style.display = _activeTheme === 'dark' ? 'none' : '';
 }
 
-function _configurarUsuario(session) {
+async function _configurarUsuario(session) {
   const metaNombre   = session.user.user_metadata?.nombre;
   const metaEmojis   = session.user.user_metadata?.cat_emojis;
   const isGoogleOnly = session.user.app_metadata?.provider === 'google'
@@ -4337,6 +4337,7 @@ function _configurarUsuario(session) {
     if (res) res.innerHTML = '<span class="fail">❌ Esta cuenta de Google no está vinculada a ningún usuario. Iniciá sesión con email y vinculá tu cuenta desde Categorías → Cuenta y Seguridad.</span>';
     return;
   }
+  await cargarWorkspaceMembers();
   _setVariablesUsuario(metaNombre || "");
   if (USUARIO && metaEmojis && typeof metaEmojis === "object") {
     localStorage.setItem(USUARIO + "_cat_emojis", JSON.stringify(metaEmojis));
@@ -4407,6 +4408,8 @@ async function guardarNombre() {
     return;
   }
 
+  await supabaseClient.from('workspace_members').update({ nombre }).eq('user_id', supabaseSession.user.id);
+  await cargarWorkspaceMembers();
   _setVariablesUsuario(nombre);
 
   document.getElementById("modal-nombre").style.display = "none";
@@ -4471,6 +4474,7 @@ async function iniciarApp() {
       mostrarErrorCarga("No se pudo conectar al servidor. Verificá la URL en Configuración o tu conexión a internet.");
     }
   }
+  aceptarInvitacionPendiente();
 }
 
 // ─── CATEGORÍAS Y FUENTES ─────────────────────────────────────
