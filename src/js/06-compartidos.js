@@ -92,6 +92,37 @@ function _calcularBalanceCompartido(mes, anio) {
 }
 
 function cargarCompartidos() {
+  if (!PARTNER) {
+    const cont = document.getElementById("page-compartidos");
+    if (cont) {
+      const existente = document.getElementById("comp-empty-state");
+      if (!existente) {
+        const div = document.createElement("div");
+        div.id = "comp-empty-state";
+        div.className = "chart-card";
+        div.style.textAlign = "center";
+        div.style.padding = "2.5rem 1.5rem";
+        div.innerHTML = `
+          <div style="font-size:2.2rem;margin-bottom:.5rem">🤝</div>
+          <h3 style="margin:0 0 .4rem">Todavía no invitaste a tu pareja</h3>
+          <p style="color:var(--text-muted);font-size:.9rem;margin:0 0 1rem">
+            Compartidos se activa cuando hay dos personas en el mismo workspace.
+          </p>
+          <button class="btn btn-primary" onclick="navegarA('config')">Invitar a mi pareja</button>`;
+        cont.prepend(div);
+      }
+    }
+    // Ocultar el resto del contenido de Compartidos mientras no haya pareja
+    // (se excluye liq-modal: es un modal que ya maneja su propia visibilidad)
+    Array.from(document.getElementById("page-compartidos")?.children || [])
+      .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "liq-modal") el.style.display = "none"; });
+    return;
+  }
+  const existente = document.getElementById("comp-empty-state");
+  if (existente) existente.remove();
+  Array.from(document.getElementById("page-compartidos")?.children || [])
+    .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "liq-modal") el.style.display = ""; });
+
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
   const CATS = [...new Set([...categGasto, ...categIngreso])].sort();
