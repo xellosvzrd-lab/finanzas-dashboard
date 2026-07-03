@@ -32,7 +32,7 @@ function obtenerProporcionParaMes(mes, anio) {
 // obtenerProporcionParaMes() directamente.
 function obtenerFactorCompartidoPropio(mes, anio) {
   const { pctDaniel, pctAma } = obtenerProporcionParaMes(mes, anio);
-  const pct = USUARIO === "Daniel" ? pctDaniel : pctAma;
+  const pct = esMiembroReferenciaWorkspace() ? pctDaniel : pctAma;
   return pct / 100;
 }
 

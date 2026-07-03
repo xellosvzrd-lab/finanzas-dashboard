@@ -20,6 +20,17 @@ function resolverPartnerNombre() {
   return otro ? otro.nombre : null;
 }
 
+// Ancla determinística para columnas legadas tipo pct_daniel/pct_ama que
+// necesitan distinguir a los 2 miembros de un workspace sin depender de
+// nombres literales ("Daniel"/"Ama" eran solo el ancla original del piloto).
+// Se ordena por user_id: quien tenga el user_id más chico es "el miembro A".
+// Mismo criterio en escritura y lectura → resultado consistente para ambos.
+function esMiembroReferenciaWorkspace() {
+  if (!supabaseSession || !workspaceMembers.length) return true;
+  const ids = workspaceMembers.map(m => m.user_id).sort();
+  return ids[0] === supabaseSession.user.id;
+}
+
 async function generarInvitacion() {
   try {
     const miWorkspaceId = workspaceMembers.find(m => m.user_id === supabaseSession.user.id)?.workspace_id;

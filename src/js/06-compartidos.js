@@ -48,7 +48,7 @@ function _guardarReparto() {
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
   const pctUsuario = Math.max(0, Math.min(100, parsearDecimal(document.getElementById("reparto-pct-a").value)));
-  const pctDaniel  = USUARIO === "Daniel" ? pctUsuario : 100 - pctUsuario;
+  const pctDaniel  = esMiembroReferenciaWorkspace() ? pctUsuario : 100 - pctUsuario;
   guardarProporcionMes(mes, anio, pctDaniel);
 }
 
@@ -64,7 +64,7 @@ function _calcularBalanceCompartido(mes, anio) {
     return month === mes && year === anio && t.tipo === "Ingreso";
   });
   const { pctDaniel: _balPctDaniel, pctAma: _balPctAma } = obtenerProporcionParaMes(mes, anio);
-  const pctUsuario = USUARIO === "Daniel" ? _balPctDaniel : _balPctAma;
+  const pctUsuario = esMiembroReferenciaWorkspace() ? _balPctDaniel : _balPctAma;
   const pctPartner = 100 - pctUsuario;
   let compNetARS = 0, compNetUSD = 0;
   // esGasto=true: si pagó PARTNER, vos le debés tu propia parte (resta);
@@ -129,7 +129,7 @@ function cargarCompartidos() {
 
   // ── Reparto del mes: resolver ratio vigente (con herencia) y pre-llenar UI ──
   const { pctDaniel: _repPctDaniel, pctAma: _repPctAma } = obtenerProporcionParaMes(mes, anio);
-  const pctUsuarioMes = USUARIO === "Daniel" ? _repPctDaniel : _repPctAma;
+  const pctUsuarioMes = esMiembroReferenciaWorkspace() ? _repPctDaniel : _repPctAma;
   const pctPartnerMes = 100 - pctUsuarioMes;
   const repInputA  = document.getElementById("reparto-pct-a");
   const repInputB  = document.getElementById("reparto-pct-b");

@@ -6101,7 +6101,7 @@ function _guardarReparto() {
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
   const pctUsuario = Math.max(0, Math.min(100, parsearDecimal(document.getElementById("reparto-pct-a").value)));
-  const pctDaniel  = USUARIO === "Daniel" ? pctUsuario : 100 - pctUsuario;
+  const pctDaniel  = esMiembroReferenciaWorkspace() ? pctUsuario : 100 - pctUsuario;
   guardarProporcionMes(mes, anio, pctDaniel);
 }
 
@@ -6117,7 +6117,7 @@ function _calcularBalanceCompartido(mes, anio) {
     return month === mes && year === anio && t.tipo === "Ingreso";
   });
   const { pctDaniel: _balPctDaniel, pctAma: _balPctAma } = obtenerProporcionParaMes(mes, anio);
-  const pctUsuario = USUARIO === "Daniel" ? _balPctDaniel : _balPctAma;
+  const pctUsuario = esMiembroReferenciaWorkspace() ? _balPctDaniel : _balPctAma;
   const pctPartner = 100 - pctUsuario;
   let compNetARS = 0, compNetUSD = 0;
   // esGasto=true: si pagó PARTNER, vos le debés tu propia parte (resta);
@@ -6182,7 +6182,7 @@ function cargarCompartidos() {
 
   // ── Reparto del mes: resolver ratio vigente (con herencia) y pre-llenar UI ──
   const { pctDaniel: _repPctDaniel, pctAma: _repPctAma } = obtenerProporcionParaMes(mes, anio);
-  const pctUsuarioMes = USUARIO === "Daniel" ? _repPctDaniel : _repPctAma;
+  const pctUsuarioMes = esMiembroReferenciaWorkspace() ? _repPctDaniel : _repPctAma;
   const pctPartnerMes = 100 - pctUsuarioMes;
   const repInputA  = document.getElementById("reparto-pct-a");
   const repInputB  = document.getElementById("reparto-pct-b");
@@ -10124,7 +10124,7 @@ function obtenerProporcionParaMes(mes, anio) {
 // obtenerProporcionParaMes() directamente.
 function obtenerFactorCompartidoPropio(mes, anio) {
   const { pctDaniel, pctAma } = obtenerProporcionParaMes(mes, anio);
-  const pct = USUARIO === "Daniel" ? pctDaniel : pctAma;
+  const pct = esMiembroReferenciaWorkspace() ? pctDaniel : pctAma;
   return pct / 100;
 }
 
@@ -10168,6 +10168,17 @@ function resolverPartnerNombre() {
   if (!supabaseSession) return null;
   const otro = workspaceMembers.find(m => m.user_id !== supabaseSession.user.id);
   return otro ? otro.nombre : null;
+}
+
+// Ancla determinística para columnas legadas tipo pct_daniel/pct_ama que
+// necesitan distinguir a los 2 miembros de un workspace sin depender de
+// nombres literales ("Daniel"/"Ama" eran solo el ancla original del piloto).
+// Se ordena por user_id: quien tenga el user_id más chico es "el miembro A".
+// Mismo criterio en escritura y lectura → resultado consistente para ambos.
+function esMiembroReferenciaWorkspace() {
+  if (!supabaseSession || !workspaceMembers.length) return true;
+  const ids = workspaceMembers.map(m => m.user_id).sort();
+  return ids[0] === supabaseSession.user.id;
 }
 
 async function generarInvitacion() {
