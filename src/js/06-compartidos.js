@@ -869,7 +869,7 @@ function navegarA(pagina) {
   if (pagina === "presupuesto")  cargarPresupuesto();
   if (pagina === "anual")        cargarAnual();
   if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); }
-  if (pagina === "config")       renderizarConfig();
+  if (pagina === "config")       { renderizarConfig(); renderizarPanelWorkspace(); }
   if (pagina === "inversiones")  { inicializarDisclosureInversiones(); renderPlazos(); renderAcciones(); _iniciarAutoRefreshAcciones(); }
 
   // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)

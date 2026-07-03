@@ -112,3 +112,61 @@ async function confirmarAceptarInvitacion() {
   msg.innerHTML = '<span style="color:var(--green)">✅ ¡Listo! Recargando...</span>';
   setTimeout(() => window.location.reload(), 1200);
 }
+
+async function renderizarPanelWorkspace() {
+  const cont = document.getElementById('workspace-panel');
+  if (!cont) return;
+
+  const partnerNombre = resolverPartnerNombre();
+  if (partnerNombre) {
+    cont.innerHTML = `
+      <div style="display:flex;align-items:center;gap:.6rem;color:var(--text)">
+        <span style="font-size:1.3rem">🤝</span>
+        <span>Compartís este workspace con <strong>${escapeHtml(partnerNombre)}</strong>.</span>
+      </div>`;
+    return;
+  }
+
+  const pendientes = await listarInvitacionesPendientes();
+  if (pendientes.length) {
+    const inv = pendientes[0];
+    const url = `${window.location.origin}${window.location.pathname}?invite=${inv.token}`;
+    cont.innerHTML = `
+      <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 .6rem">
+        Todavía no invitaste a tu pareja. Tenés una invitación pendiente — compartile este link:
+      </p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+        <input type="text" readonly value="${escapeHtml(url)}" id="workspace-invite-url"
+               style="flex:1;min-width:200px;padding:.5rem .7rem;border-radius:8px;
+                      border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.8rem">
+        <button class="btn btn-primary" onclick="_copiarInviteUrl()">Copiar</button>
+        <button class="btn" style="background:none;color:var(--red)" onclick="_revocarYRerender('${inv.id}')">Revocar</button>
+      </div>`;
+    return;
+  }
+
+  cont.innerHTML = `
+    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 .6rem">
+      Todavía no invitaste a tu pareja a este workspace.
+    </p>
+    <button class="btn btn-primary" onclick="_generarYRerender()">Invitar a mi pareja</button>`;
+}
+
+async function _generarYRerender() {
+  const url = await generarInvitacion();
+  if (url) showToast("✅ Link de invitación generado", "ok");
+  await renderizarPanelWorkspace();
+}
+
+async function _revocarYRerender(inviteId) {
+  await revocarInvitacion(inviteId);
+  await renderizarPanelWorkspace();
+}
+
+function _copiarInviteUrl() {
+  const input = document.getElementById('workspace-invite-url');
+  if (!input) return;
+  input.select();
+  navigator.clipboard?.writeText(input.value);
+  showToast("✅ Link copiado", "ok");
+}
