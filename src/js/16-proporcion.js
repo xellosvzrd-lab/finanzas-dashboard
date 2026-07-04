@@ -42,8 +42,8 @@ async function guardarProporcionMes(mes, anio, pctDanielInput) {
     const { error } = await supabaseClient
       .from('proporcion_compartidos')
       .upsert(
-        { mes, anio, pct_daniel: pctDaniel, updated_by: USUARIO, updated_at: new Date().toISOString() },
-        { onConflict: 'mes,anio' }
+        { mes, anio, pct_daniel: pctDaniel, updated_by: USUARIO, updated_at: new Date().toISOString(), workspace_id: miWorkspaceId() },
+        { onConflict: 'workspace_id,mes,anio' }
       );
     if (error) throw error;
     const idx = proporcionesCompartidos.findIndex(p => p.mes === mes && p.anio === anio);

@@ -49,6 +49,7 @@ async function guardarMetaAhorro({ nombre, monto_objetivo, moneda, fecha_objetiv
     }
     const payload = {
       user_id:        supabaseSession.user.id,
+      workspace_id:   miWorkspaceId(),
       usuario:        USUARIO,
       nombre,
       monto_objetivo,

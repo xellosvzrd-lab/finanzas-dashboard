@@ -74,7 +74,7 @@ async function guardarPresupuesto() {
     if (items.length) {
       const rows = items.map(it => ({
         mes, anio, categoria: it.categoria, porcentaje: it.presupuesto,
-        usuario: USUARIO, user_id: supabaseSession.user.id
+        usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId()
       }));
       const { error: insErr } = await supabaseClient.from('presupuesto').insert(rows);
       if (insErr) throw insErr;

@@ -20,6 +20,13 @@ function resolverPartnerNombre() {
   return otro ? otro.nombre : null;
 }
 
+// workspace_id de la sesión actual. Requerido en todo insert/upsert a las
+// tablas de contenido (RLS exige workspace_id = my_workspace_id() server-side).
+function miWorkspaceId() {
+  if (!supabaseSession) return null;
+  return workspaceMembers.find(m => m.user_id === supabaseSession.user.id)?.workspace_id || null;
+}
+
 // Ancla determinística para columnas legadas tipo pct_daniel/pct_ama que
 // necesitan distinguir a los 2 miembros de un workspace sin depender de
 // nombres literales ("Daniel"/"Ama" eran solo el ancla original del piloto).
@@ -33,8 +40,8 @@ function esMiembroReferenciaWorkspace() {
 
 async function generarInvitacion() {
   try {
-    const miWorkspaceId = workspaceMembers.find(m => m.user_id === supabaseSession.user.id)?.workspace_id;
-    if (!miWorkspaceId) throw new Error("No se encontró mi workspace");
+    const wsId = miWorkspaceId();
+    if (!wsId) throw new Error("No se encontró mi workspace");
 
     // Revocar cualquier invitación pendiente previa antes de crear una nueva
     const pendientes = await listarInvitacionesPendientes();
@@ -42,7 +49,7 @@ async function generarInvitacion() {
 
     const { data, error } = await supabaseClient
       .from('workspace_invites')
-      .insert({ workspace_id: miWorkspaceId, created_by: supabaseSession.user.id })
+      .insert({ workspace_id: wsId, created_by: supabaseSession.user.id })
       .select('token')
       .single();
     if (error) throw error;

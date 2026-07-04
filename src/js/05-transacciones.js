@@ -549,7 +549,8 @@ async function guardarTransaccion() {
                 mes_liquidacion: mesLiq || null,
                 categoria_id: _getCategoriaId(cat, tipoActual),
                 cuenta_id:    _getCuentaId(fuente),
-                user_id: supabaseSession.user.id })
+                user_id: supabaseSession.user.id,
+                workspace_id: miWorkspaceId() })
       .select().single();
     if (error) {
       if (error.code === '42703' || error.message?.includes('mes_liquidacion')) {
@@ -641,7 +642,8 @@ async function guardarCompraEnCuotas() {
       monto_cuota: montoCuota,
       primer_mes_liq: primerMesLiq,
       cft_anual_pct: cftPct,
-      user_id: supabaseSession.user.id
+      user_id: supabaseSession.user.id,
+      workspace_id: miWorkspaceId()
     });
     if (errCompra) throw errCompra;
 
@@ -669,7 +671,8 @@ async function guardarCompraEnCuotas() {
         cuota_total: cuotasTotal,
         categoria_id: _getCategoriaId(categoria, "Gasto"),
         cuenta_id:    _getCuentaId(fuente),
-        user_id: supabaseSession.user.id
+        user_id: supabaseSession.user.id,
+        workspace_id: miWorkspaceId()
       };
     });
 
@@ -866,7 +869,8 @@ async function guardarRafaga() {
       id: crypto.randomUUID(), ...v,
       categoria_id: _getCategoriaId(v.categoria, v.tipo),
       cuenta_id:    _getCuentaId(v.fuente),
-      user_id: supabaseSession.user.id
+      user_id: supabaseSession.user.id,
+      workspace_id: miWorkspaceId()
     }));
     const { error } = await supabaseClient.from('transacciones').insert(rows);
     if (error) throw error;

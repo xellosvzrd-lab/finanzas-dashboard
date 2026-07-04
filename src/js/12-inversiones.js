@@ -194,7 +194,7 @@ async function guardarPlazo() {
   if (!desc || !monto || !tna || !ini || !venc) { showToast("⚠️ Completá todos los campos", "error"); return; }
   if (venc <= ini) { showToast("⚠️ Vencimiento debe ser posterior al inicio", "error"); return; }
   const editId = document.getElementById("pf-id")?.value;
-  const row = { descripcion: desc, monto, moneda, tna, fecha_inicio: ini, fecha_vencimiento: venc, usuario: USUARIO, user_id: supabaseSession.user.id };
+  const row = { descripcion: desc, monto, moneda, tna, fecha_inicio: ini, fecha_vencimiento: venc, usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId() };
   let error;
   if (editId) {
     ({ error } = await supabaseClient.from('plazos_fijos').update(row).eq('id', editId));
@@ -492,7 +492,7 @@ async function guardarAccion() {
     if (accion) delete _precioCache[accion.simbolo];
     ({ error } = await supabaseClient.from('acciones').update({ cantidad, nombre, precio_compra }).eq('id', editId));
   } else {
-    ({ error } = await supabaseClient.from('acciones').insert({ simbolo, cantidad, nombre, precio_compra, usuario: USUARIO, user_id: supabaseSession.user.id }));
+    ({ error } = await supabaseClient.from('acciones').insert({ simbolo, cantidad, nombre, precio_compra, usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId() }));
   }
   if (error) { showToast("⚠️ Error al guardar", "error"); console.error(error); return; }
   cerrarFormAccion();

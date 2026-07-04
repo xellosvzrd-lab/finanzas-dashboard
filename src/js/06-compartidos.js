@@ -582,7 +582,8 @@ async function confirmarSaldarTodo() {
           usuario: USUARIO,
           categoria_id: _getCategoriaId(item.cat, item.tipo),
           cuenta_id:    _getCuentaId(fuente),
-          user_id: supabaseSession.user.id
+          user_id: supabaseSession.user.id,
+          workspace_id: miWorkspaceId()
         })
         .select().single();
       if (error) throw error;
@@ -646,7 +647,8 @@ async function confirmarLiquidar() {
         usuario: USUARIO,
         categoria_id: _getCategoriaId(cat, tipo),
         cuenta_id:    _getCuentaId(fuente),
-        user_id: supabaseSession.user.id
+        user_id: supabaseSession.user.id,
+        workspace_id: miWorkspaceId()
       })
       .select().single();
     if (error) throw error;
