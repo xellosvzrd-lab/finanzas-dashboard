@@ -65,6 +65,7 @@ async function agregarRecurrenteManual(descripcion, categoria, fuente, responsab
   try {
     const payload = {
       user_id:        supabaseSession.user.id,
+      workspace_id:   miWorkspaceId(),
       usuario:        USUARIO,
       descripcion,
       categoria,

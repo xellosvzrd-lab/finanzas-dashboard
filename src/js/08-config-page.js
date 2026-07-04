@@ -74,7 +74,7 @@ async function agregarCategoria(tipoAPI) {
   try {
     const { error } = await supabaseClient
       .from('categorias')
-      .insert({ tipo: tipoAPI, valor, usuario: USUARIO, user_id: supabaseSession.user.id });
+      .insert({ tipo: tipoAPI, valor, usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId() });
     if (error) throw error;
     if      (tipoAPI === "GASTO")     { categGasto.push(valor);     categGasto.sort(); }
     else if (tipoAPI === "INGRESO")   { categIngreso.push(valor);   categIngreso.sort(); }

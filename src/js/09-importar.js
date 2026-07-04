@@ -139,7 +139,8 @@ async function confirmarImport() {
       id: crypto.randomUUID(), ...f,
       categoria_id: _getCategoriaId(f.categoria, f.tipo),
       cuenta_id:    _getCuentaId(f.fuente),
-      user_id: supabaseSession.user.id
+      user_id: supabaseSession.user.id,
+      workspace_id: miWorkspaceId()
     }));
     const { error } = await supabaseClient.from('transacciones').insert(rows);
     if (error) throw error;

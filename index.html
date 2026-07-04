@@ -5718,7 +5718,8 @@ async function guardarTransaccion() {
                 mes_liquidacion: mesLiq || null,
                 categoria_id: _getCategoriaId(cat, tipoActual),
                 cuenta_id:    _getCuentaId(fuente),
-                user_id: supabaseSession.user.id })
+                user_id: supabaseSession.user.id,
+                workspace_id: miWorkspaceId() })
       .select().single();
     if (error) {
       if (error.code === '42703' || error.message?.includes('mes_liquidacion')) {
@@ -5810,7 +5811,8 @@ async function guardarCompraEnCuotas() {
       monto_cuota: montoCuota,
       primer_mes_liq: primerMesLiq,
       cft_anual_pct: cftPct,
-      user_id: supabaseSession.user.id
+      user_id: supabaseSession.user.id,
+      workspace_id: miWorkspaceId()
     });
     if (errCompra) throw errCompra;
 
@@ -5838,7 +5840,8 @@ async function guardarCompraEnCuotas() {
         cuota_total: cuotasTotal,
         categoria_id: _getCategoriaId(categoria, "Gasto"),
         cuenta_id:    _getCuentaId(fuente),
-        user_id: supabaseSession.user.id
+        user_id: supabaseSession.user.id,
+        workspace_id: miWorkspaceId()
       };
     });
 
@@ -6035,7 +6038,8 @@ async function guardarRafaga() {
       id: crypto.randomUUID(), ...v,
       categoria_id: _getCategoriaId(v.categoria, v.tipo),
       cuenta_id:    _getCuentaId(v.fuente),
-      user_id: supabaseSession.user.id
+      user_id: supabaseSession.user.id,
+      workspace_id: miWorkspaceId()
     }));
     const { error } = await supabaseClient.from('transacciones').insert(rows);
     if (error) throw error;
@@ -6635,7 +6639,8 @@ async function confirmarSaldarTodo() {
           usuario: USUARIO,
           categoria_id: _getCategoriaId(item.cat, item.tipo),
           cuenta_id:    _getCuentaId(fuente),
-          user_id: supabaseSession.user.id
+          user_id: supabaseSession.user.id,
+          workspace_id: miWorkspaceId()
         })
         .select().single();
       if (error) throw error;
@@ -6699,7 +6704,8 @@ async function confirmarLiquidar() {
         usuario: USUARIO,
         categoria_id: _getCategoriaId(cat, tipo),
         cuenta_id:    _getCuentaId(fuente),
-        user_id: supabaseSession.user.id
+        user_id: supabaseSession.user.id,
+        workspace_id: miWorkspaceId()
       })
       .select().single();
     if (error) throw error;
@@ -7073,7 +7079,7 @@ async function guardarPresupuesto() {
     if (items.length) {
       const rows = items.map(it => ({
         mes, anio, categoria: it.categoria, porcentaje: it.presupuesto,
-        usuario: USUARIO, user_id: supabaseSession.user.id
+        usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId()
       }));
       const { error: insErr } = await supabaseClient.from('presupuesto').insert(rows);
       if (insErr) throw insErr;
@@ -8012,7 +8018,7 @@ async function agregarCategoria(tipoAPI) {
   try {
     const { error } = await supabaseClient
       .from('categorias')
-      .insert({ tipo: tipoAPI, valor, usuario: USUARIO, user_id: supabaseSession.user.id });
+      .insert({ tipo: tipoAPI, valor, usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId() });
     if (error) throw error;
     if      (tipoAPI === "GASTO")     { categGasto.push(valor);     categGasto.sort(); }
     else if (tipoAPI === "INGRESO")   { categIngreso.push(valor);   categIngreso.sort(); }
@@ -8356,7 +8362,8 @@ async function confirmarImport() {
       id: crypto.randomUUID(), ...f,
       categoria_id: _getCategoriaId(f.categoria, f.tipo),
       cuenta_id:    _getCuentaId(f.fuente),
-      user_id: supabaseSession.user.id
+      user_id: supabaseSession.user.id,
+      workspace_id: miWorkspaceId()
     }));
     const { error } = await supabaseClient.from('transacciones').insert(rows);
     if (error) throw error;
@@ -9363,7 +9370,7 @@ async function guardarPlazo() {
   if (!desc || !monto || !tna || !ini || !venc) { showToast("⚠️ Completá todos los campos", "error"); return; }
   if (venc <= ini) { showToast("⚠️ Vencimiento debe ser posterior al inicio", "error"); return; }
   const editId = document.getElementById("pf-id")?.value;
-  const row = { descripcion: desc, monto, moneda, tna, fecha_inicio: ini, fecha_vencimiento: venc, usuario: USUARIO, user_id: supabaseSession.user.id };
+  const row = { descripcion: desc, monto, moneda, tna, fecha_inicio: ini, fecha_vencimiento: venc, usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId() };
   let error;
   if (editId) {
     ({ error } = await supabaseClient.from('plazos_fijos').update(row).eq('id', editId));
@@ -9661,7 +9668,7 @@ async function guardarAccion() {
     if (accion) delete _precioCache[accion.simbolo];
     ({ error } = await supabaseClient.from('acciones').update({ cantidad, nombre, precio_compra }).eq('id', editId));
   } else {
-    ({ error } = await supabaseClient.from('acciones').insert({ simbolo, cantidad, nombre, precio_compra, usuario: USUARIO, user_id: supabaseSession.user.id }));
+    ({ error } = await supabaseClient.from('acciones').insert({ simbolo, cantidad, nombre, precio_compra, usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId() }));
   }
   if (error) { showToast("⚠️ Error al guardar", "error"); console.error(error); return; }
   cerrarFormAccion();
@@ -9741,6 +9748,7 @@ async function agregarRecurrenteManual(descripcion, categoria, fuente, responsab
   try {
     const payload = {
       user_id:        supabaseSession.user.id,
+      workspace_id:   miWorkspaceId(),
       usuario:        USUARIO,
       descripcion,
       categoria,
@@ -9975,6 +9983,7 @@ async function guardarMetaAhorro({ nombre, monto_objetivo, moneda, fecha_objetiv
     }
     const payload = {
       user_id:        supabaseSession.user.id,
+      workspace_id:   miWorkspaceId(),
       usuario:        USUARIO,
       nombre,
       monto_objetivo,
@@ -10134,8 +10143,8 @@ async function guardarProporcionMes(mes, anio, pctDanielInput) {
     const { error } = await supabaseClient
       .from('proporcion_compartidos')
       .upsert(
-        { mes, anio, pct_daniel: pctDaniel, updated_by: USUARIO, updated_at: new Date().toISOString() },
-        { onConflict: 'mes,anio' }
+        { mes, anio, pct_daniel: pctDaniel, updated_by: USUARIO, updated_at: new Date().toISOString(), workspace_id: miWorkspaceId() },
+        { onConflict: 'workspace_id,mes,anio' }
       );
     if (error) throw error;
     const idx = proporcionesCompartidos.findIndex(p => p.mes === mes && p.anio === anio);
@@ -10170,6 +10179,13 @@ function resolverPartnerNombre() {
   return otro ? otro.nombre : null;
 }
 
+// workspace_id de la sesión actual. Requerido en todo insert/upsert a las
+// tablas de contenido (RLS exige workspace_id = my_workspace_id() server-side).
+function miWorkspaceId() {
+  if (!supabaseSession) return null;
+  return workspaceMembers.find(m => m.user_id === supabaseSession.user.id)?.workspace_id || null;
+}
+
 // Ancla determinística para columnas legadas tipo pct_daniel/pct_ama que
 // necesitan distinguir a los 2 miembros de un workspace sin depender de
 // nombres literales ("Daniel"/"Ama" eran solo el ancla original del piloto).
@@ -10183,8 +10199,8 @@ function esMiembroReferenciaWorkspace() {
 
 async function generarInvitacion() {
   try {
-    const miWorkspaceId = workspaceMembers.find(m => m.user_id === supabaseSession.user.id)?.workspace_id;
-    if (!miWorkspaceId) throw new Error("No se encontró mi workspace");
+    const wsId = miWorkspaceId();
+    if (!wsId) throw new Error("No se encontró mi workspace");
 
     // Revocar cualquier invitación pendiente previa antes de crear una nueva
     const pendientes = await listarInvitacionesPendientes();
@@ -10192,7 +10208,7 @@ async function generarInvitacion() {
 
     const { data, error } = await supabaseClient
       .from('workspace_invites')
-      .insert({ workspace_id: miWorkspaceId, created_by: supabaseSession.user.id })
+      .insert({ workspace_id: wsId, created_by: supabaseSession.user.id })
       .select('token')
       .single();
     if (error) throw error;
