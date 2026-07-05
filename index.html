@@ -751,8 +751,18 @@
   .inv-hero-row    { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
   .inv-hero-card   { position: relative; overflow: hidden; border-radius: var(--r-lg);
                       padding: 24px 28px; color: #fff;
-                      background: linear-gradient(140deg, var(--brand) 0%, var(--brand-2) 100%);
-                      box-shadow: 0 18px 44px color-mix(in oklab, var(--brand) 38%, transparent); }
+                      background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent) 0%, color-mix(in oklab, var(--brand-2) 20%, transparent) 100%);
+                      backdrop-filter: blur(var(--card-blur)) saturate(160%);
+                      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+                      border: 1px solid rgba(255,255,255,0.18);
+                      box-shadow: 0 18px 44px color-mix(in oklab, var(--brand) 28%, transparent), inset 0 1px 0 rgba(255,255,255,.25); }
+  .inv-hero-card::before {
+    content: "";
+    position: absolute; top: 0; left: 6%; right: 6%; height: 36%;
+    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0));
+    border-radius: var(--r-lg) var(--r-lg) 60% 60%;
+    pointer-events: none;
+  }
   .inv-hero-eyebrow { font-size: 14px; font-weight: 600; opacity: .9; position: relative; }
   .inv-hero-total   { font-size: 38px; font-weight: 700; line-height: 1.05; margin-top: 6px; position: relative; }
   .inv-hero-usd     { font-size: 14px; opacity: .8; margin-top: 3px; position: relative; }
@@ -1427,9 +1437,19 @@
   .mm-hero {
     border-radius: 28px; padding: 24px 22px;
     position: relative; overflow: hidden; color: #fff;
-    background: linear-gradient(150deg, var(--brand) 0%, var(--brand-2) 100%);
-    box-shadow: 0 18px 40px color-mix(in oklab, var(--brand) 40%, transparent);
+    background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent) 0%, color-mix(in oklab, var(--brand-2) 20%, transparent) 100%);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: 0 18px 40px color-mix(in oklab, var(--brand) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.25);
     margin-bottom: 12px;
+  }
+  .mm-hero::before {
+    content: "";
+    position: absolute; top: 0; left: 6%; right: 6%; height: 36%;
+    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0));
+    border-radius: 28px 28px 60% 60%;
+    pointer-events: none;
   }
   .mm-hero-orb {
     position: absolute; width: 180px; height: 180px; border-radius: 999px;
