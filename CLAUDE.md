@@ -29,7 +29,7 @@
 - Liquid glass palette — vidrio translúcido índigo (unificado, sin distinción Daniel/Ama)
 - Users: Daniel y Ama comparten el mismo tema único (ya no hay distinción dark/light por usuario)
 - `PARTNER` variable is dynamic — use it for responsibility labels, never hardcode
-- `[data-theme="light"]` es un alias idéntico a `[data-theme="dark"]` — el toggle de tema queda como no-op visual, no se tocó su lógica JS
+- `[data-theme="light"]` tiene su propia paleta clara (índigo pastel) — el toggle de tema (`toggleTheme()`) vuelve a cambiar el look real, disponible para cualquiera de los dos usuarios
 - Chart.js for all charts with animations enabled
 - Mobile responsiveness is critical — test for overflow and max-width constraints on every UI change
 
@@ -271,10 +271,10 @@ async function cargarTodasTransacciones() {
 
 ## 9. Patrones CSS importantes
 
-### Variables de tema (unificado — liquid glass índigo)
+### Variables de tema (dark índigo + light índigo pastel)
 ```css
-:root[data-theme="dark"]  { /* tema único */ }
-:root[data-theme="light"] { /* alias idéntico — toggle es no-op visual */ }
+:root[data-theme="dark"]  { /* tema oscuro por defecto */ }
+:root[data-theme="light"] { /* tema claro real, misma marca índigo */ }
 ```
 
 ### Clases semánticas clave
