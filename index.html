@@ -1381,8 +1381,15 @@
 
   /* Fallback sin blur — el vidrio se vuelve panel semi-opaco sólido */
   @supports not (backdrop-filter: blur(1px)) {
-    .card, .chart-card, .kpi-card, .plazo-card, .comp-balance-card, .topnav, .bn-pill {
+    :root[data-theme='dark'] .card, :root[data-theme='dark'] .chart-card, :root[data-theme='dark'] .kpi-card,
+    :root[data-theme='dark'] .plazo-card, :root[data-theme='dark'] .comp-balance-card,
+    :root[data-theme='dark'] .topnav, :root[data-theme='dark'] .bn-pill {
       background: #221c30;
+    }
+    :root[data-theme='light'] .card, :root[data-theme='light'] .chart-card, :root[data-theme='light'] .kpi-card,
+    :root[data-theme='light'] .plazo-card, :root[data-theme='light'] .comp-balance-card,
+    :root[data-theme='light'] .topnav, :root[data-theme='light'] .bn-pill {
+      background: #ece7f7;
     }
     .mm-hero, .inv-hero-card {
       background: linear-gradient(150deg, var(--brand) 0%, var(--brand-2) 100%);
