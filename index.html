@@ -1383,12 +1383,12 @@
   @supports not (backdrop-filter: blur(1px)) {
     :root[data-theme='dark'] .card, :root[data-theme='dark'] .chart-card, :root[data-theme='dark'] .kpi-card,
     :root[data-theme='dark'] .plazo-card, :root[data-theme='dark'] .comp-balance-card,
-    :root[data-theme='dark'] .topnav, :root[data-theme='dark'] .bn-pill {
+    :root[data-theme='dark'] .topnav, :root[data-theme='dark'] .bn-pill, :root[data-theme='dark'] .sidebar {
       background: #221c30;
     }
     :root[data-theme='light'] .card, :root[data-theme='light'] .chart-card, :root[data-theme='light'] .kpi-card,
     :root[data-theme='light'] .plazo-card, :root[data-theme='light'] .comp-balance-card,
-    :root[data-theme='light'] .topnav, :root[data-theme='light'] .bn-pill {
+    :root[data-theme='light'] .topnav, :root[data-theme='light'] .bn-pill, :root[data-theme='light'] .sidebar {
       background: #ece7f7;
     }
     .mm-hero, .inv-hero-card {
@@ -1934,7 +1934,10 @@
     .sidebar {
       display: flex; flex-direction: column;
       width: 232px; flex-shrink: 0;
-      background: var(--elev); border-right: 1px solid var(--line);
+      background: var(--card);
+      backdrop-filter: blur(var(--card-blur)) saturate(160%);
+      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+      border-right: 1px solid var(--line);
       padding: 22px 14px;
       position: sticky; top: 0; height: 100vh; overflow-y: auto;
     }
@@ -2036,13 +2039,21 @@
   .sidebar .nav-item {
     display: flex; align-items: center; gap: 12px;
     padding: 10px 12px; border-radius: 12px;
-    background: none; border: none; cursor: pointer;
+    background: none; border: 1px solid transparent; cursor: pointer;
     color: var(--text-dim); font-weight: 600; font-size: 14.5px;
     font-family: inherit; text-align: left; width: 100%;
-    transition: background .15s, color .15s;
+    transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
   }
-  .sidebar .nav-item:hover { background: var(--surface-2); color: var(--text); }
-  .sidebar .nav-item.active { background: var(--brand-soft); color: var(--brand); font-weight: 700; }
+  .sidebar .nav-item:hover { background: var(--glass); color: var(--text); border-color: var(--glass-border); }
+  .sidebar .nav-item.active {
+    color: var(--white); font-weight: 700;
+    background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent), color-mix(in oklab, var(--brand-2) 20%, transparent));
+    border-color: var(--glass-border);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow: 0 2px 12px color-mix(in oklab, var(--brand) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.3);
+  }
+  .sidebar .nav-item.active i, .sidebar .nav-item.active svg { color: var(--white); }
   .sidebar-spacer { flex: 1; }
   .sidebar-footer {
     display: flex; align-items: center; gap: 10px;
