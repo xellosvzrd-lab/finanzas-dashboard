@@ -26,10 +26,10 @@
 - Current working branch: `feature/voice-capture` (1 commit ahead of main as of 2026-07-02)
 
 ## UI/Design Preferences
-- Warm-earth palette with terracotta tones (modern, warm, intimate aesthetic)
-- Users: Daniel (dark theme) and Ama (light theme)
+- Liquid glass palette — vidrio translúcido índigo (unificado, sin distinción Daniel/Ama)
+- Users: Daniel y Ama comparten el mismo tema único (ya no hay distinción dark/light por usuario)
 - `PARTNER` variable is dynamic — use it for responsibility labels, never hardcode
-- No dark mode for Daniel's theme by design; Ama has `[data-theme="light"]`
+- `[data-theme="light"]` es un alias idéntico a `[data-theme="dark"]` — el toggle de tema queda como no-op visual, no se tocó su lógica JS
 - Chart.js for all charts with animations enabled
 - Mobile responsiveness is critical — test for overflow and max-width constraints on every UI change
 
@@ -271,10 +271,10 @@ async function cargarTodasTransacciones() {
 
 ## 9. Patrones CSS importantes
 
-### Variables de tema (Ama tiene modo claro)
+### Variables de tema (unificado — liquid glass índigo)
 ```css
-:root { /* dark */ }
-[data-theme="light"] { /* Ama only */ }
+:root[data-theme="dark"]  { /* tema único */ }
+:root[data-theme="light"] { /* alias idéntico — toggle es no-op visual */ }
 ```
 
 ### Clases semánticas clave

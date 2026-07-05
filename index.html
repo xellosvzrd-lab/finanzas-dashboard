@@ -726,7 +726,7 @@
 
   /* ─── PLAZOS FIJOS ──────────────────────────────────────────── */
   .plazo-card { background: var(--card); backdrop-filter: blur(var(--card-blur)) saturate(160%); -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: .65rem; box-shadow: var(--shadow); transition: border-color .18s, box-shadow .18s; }
-  .plazo-card:hover { border-color: var(--border2); box-shadow: var(--shadow), 0 0 20px rgba(200,132,90,.08); }
+  .plazo-card:hover { border-color: var(--border2); box-shadow: var(--shadow), 0 0 20px rgba(var(--accent-rgb),.12); }
   .plazo-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; }
   .plazo-desc { font-weight: 700; font-size: .93rem; line-height: 1.25; }
   .plazo-badge { font-size: .68rem; font-weight: 700; padding: .15rem .5rem; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
@@ -1378,6 +1378,9 @@
   @supports not (backdrop-filter: blur(1px)) {
     .card, .chart-card, .kpi-card, .plazo-card, .comp-balance-card, .topnav, .bn-pill {
       background: #221c30;
+    }
+    .mm-hero, .inv-hero-card {
+      background: linear-gradient(150deg, var(--brand) 0%, var(--brand-2) 100%);
     }
   }
   .bn-item {
@@ -8533,10 +8536,10 @@ function renderSparklines(curMes, curAnio) {
     seriesAho.push(aho);
   }
 
-  renderSparklineSVG("spark-ingresos", seriesIng, "#34d399");
-  renderSparklineSVG("spark-gastos",   seriesGas, "#f87171");
-  renderSparklineSVG("spark-balance",  seriesBal, "#C8845A");
-  renderSparklineSVG("spark-ahorro",   seriesAho, "#fbbf24");
+  renderSparklineSVG("spark-ingresos", seriesIng, "#4ec476");
+  renderSparklineSVG("spark-gastos",   seriesGas, "#e56e4a");
+  renderSparklineSVG("spark-balance",  seriesBal, "#7a74e8");
+  renderSparklineSVG("spark-ahorro",   seriesAho, "#d2bc3a");
 }
 
 // ─── ANIMACIÓN KPI ────────────────────────────────────────────
