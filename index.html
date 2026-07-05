@@ -172,6 +172,8 @@
     border: 1px solid var(--line);
     border-radius: var(--r-md);
     box-shadow: var(--shadow-card);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
   }
 
   /* ─── FOCUS VISIBLE ─────────────────────────────────────── */
@@ -386,6 +388,8 @@
   }
   .kpi-card {
     background: var(--card);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
     border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1rem 1.1rem;
     min-width: 0;
@@ -469,6 +473,8 @@
 
   .chart-card {
     background: var(--card);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
     border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.4rem;
     transition: border-color .25s;
@@ -586,6 +592,8 @@
 
   .comp-balance-card {
     background: var(--surface);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
     border: 1px solid var(--line);
     border-radius: var(--r-md);
     padding: 1.2rem 1.6rem;
@@ -717,7 +725,7 @@
   .comp-tfoot-total { font-size: .95rem; font-weight: 800 !important; }
 
   /* ─── PLAZOS FIJOS ──────────────────────────────────────────── */
-  .plazo-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: .65rem; box-shadow: var(--shadow); transition: border-color .18s, box-shadow .18s; }
+  .plazo-card { background: var(--card); backdrop-filter: blur(var(--card-blur)) saturate(160%); -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: .65rem; box-shadow: var(--shadow); transition: border-color .18s, box-shadow .18s; }
   .plazo-card:hover { border-color: var(--border2); box-shadow: var(--shadow), 0 0 20px rgba(200,132,90,.08); }
   .plazo-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; }
   .plazo-desc { font-weight: 700; font-size: .93rem; line-height: 1.25; }
@@ -1349,9 +1357,18 @@
   .bn-pill {
     display: flex; align-items: center; justify-content: space-between;
     background: var(--surface); border: 1px solid var(--line);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
     border-radius: 24px; padding: 10px 16px;
     box-shadow: var(--shadow-card);
     pointer-events: all;
+  }
+
+  /* Fallback sin blur — el vidrio se vuelve panel semi-opaco sólido */
+  @supports not (backdrop-filter: blur(1px)) {
+    .card, .chart-card, .kpi-card, .plazo-card, .comp-balance-card, .topnav, .bn-pill {
+      background: #221c30;
+    }
   }
   .bn-item {
     flex: 1; display: flex; flex-direction: column;
@@ -1785,6 +1802,8 @@
     gap: 1rem;
     padding: 0 1.8rem;
     background: var(--card);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
     border-bottom: 1px solid var(--border);
     height: 62px;
     position: sticky;
