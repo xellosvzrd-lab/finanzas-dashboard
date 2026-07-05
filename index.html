@@ -1949,19 +1949,8 @@
   /* ─── SIDEBAR (desktop ≥ 860px) ─────────────────────────── */
   .sidebar { display: none; }
   @media (min-width: 860px) {
-    .topnav    { display: none !important; }
     .bottom-nav{ display: none !important; }
     .layout    { display: flex; }
-    .sidebar {
-      display: flex; flex-direction: column;
-      width: 232px; flex-shrink: 0;
-      background: var(--card);
-      backdrop-filter: blur(var(--card-blur)) saturate(160%);
-      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-      border-right: 1px solid var(--line);
-      padding: 22px 14px;
-      position: sticky; top: 0; height: 100vh; overflow-y: auto;
-    }
     .main { padding: 22px 30px 3rem; }
   }
   @media (min-width: 769px) and (max-width: 859px) { .bottom-nav { display: none; } }
