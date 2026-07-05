@@ -2684,7 +2684,7 @@
       <div class="sidebar-footer">
         <div class="sidebar-avatar" id="sidebar-avatar">D</div>
         <div style="flex:1;min-width:0">
-          <div class="sidebar-username" id="sidebar-user">Daniel</div>
+          <div class="sidebar-username" id="sidebar-user"></div>
           <div class="sidebar-usersub">Plan compartido · Ama</div>
         </div>
         <button class="btn-theme" id="btn-theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
@@ -3006,7 +3006,7 @@
         <div class="page-header">
           <div class="page-header-left">
             <p class="page-eyebrow" id="eyebrow-compartidos">COMPARTIDOS</p>
-            <h1 id="comp-titulo">Compartidos con Ama</h1>
+            <h1 id="comp-titulo">Compartidos</h1>
           </div>
           <div style="display:flex;align-items:center;gap:.75rem">
             <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
@@ -3024,11 +3024,11 @@
         <!-- Reparto de gastos compartidos del mes -->
         <div class="reparto-control" id="reparto-control" style="margin-bottom:1.5rem">
           <span class="reparto-label">Reparto:</span>
-          <span class="reparto-nombre" id="reparto-nombre-a">Daniel</span>
+          <span class="reparto-nombre" id="reparto-nombre-a"></span>
           <input type="text" inputmode="decimal" id="reparto-pct-a" class="reparto-input" value="50">
           <span class="reparto-pct-sign">%</span>
           <span class="reparto-sep">/</span>
-          <span class="reparto-nombre" id="reparto-nombre-b">Ama</span>
+          <span class="reparto-nombre" id="reparto-nombre-b"></span>
           <input type="text" inputmode="decimal" id="reparto-pct-b" class="reparto-input" value="50">
           <span class="reparto-pct-sign">%</span>
           <button class="reparto-guardar-btn" id="reparto-guardar-btn" onclick="_guardarReparto()" title="Guardar reparto del mes">💾</button>
@@ -3062,7 +3062,7 @@
             <div class="comp-contrib-rows">
               <div class="comp-contrib-row">
                 <div class="comp-contrib-top">
-                  <span class="comp-contrib-name" id="comp-contrib-name-a">Daniel</span>
+                  <span class="comp-contrib-name" id="comp-contrib-name-a"></span>
                   <div class="comp-contrib-meta">
                     <span class="comp-contrib-amt num" id="comp-fairness-a-amt">—</span>
                     <span class="comp-contrib-pct" id="comp-fairness-a">—</span>
@@ -3074,7 +3074,7 @@
               </div>
               <div class="comp-contrib-row">
                 <div class="comp-contrib-top">
-                  <span class="comp-contrib-name" id="comp-contrib-name-b">Ama</span>
+                  <span class="comp-contrib-name" id="comp-contrib-name-b"></span>
                   <div class="comp-contrib-meta">
                     <span class="comp-contrib-amt num" id="comp-fairness-b-amt">—</span>
                     <span class="comp-contrib-pct" id="comp-fairness-b">—</span>
@@ -3110,8 +3110,8 @@
                 <thead>
                   <tr>
                     <th>Categoría</th>
-                    <th style="text-align:right" id="comp-th-usuario">Daniel</th>
-                    <th style="text-align:right" id="comp-th-partner">Ama</th>
+                    <th style="text-align:right" id="comp-th-usuario"></th>
+                    <th style="text-align:right" id="comp-th-partner"></th>
                     <th style="text-align:right">Neto</th>
                   </tr>
                 </thead>
@@ -3148,7 +3148,7 @@
               </table>
             </div>
             <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
-              <span id="comp-nota">* Neto por categoría: positivo = Ama te debe · negativo = vos le debés a Ama.</span>
+              <span id="comp-nota">* Neto por categoría: positivo = te deben · negativo = debés.</span>
             </div>
           </div>
 
@@ -3296,7 +3296,7 @@
           </div>
           <div class="card mm-sc" id="mm-sc-comp-card">
             <div class="mm-sc-icon">🤝</div>
-            <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">Ama</span></div>
+            <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">tu pareja</span></div>
             <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
             <div class="mm-sc-sub" id="mm-sc-comp-label">balance del mes</div>
           </div>
@@ -3401,7 +3401,7 @@
         </div>
 
         <p class="pres-note">
-          💡 Los valores se ingresan en <strong>pesos ($)</strong> por categoría; el % del sueldo se calcula solo. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → <strong id="pres-note-comp-pct">50%</strong> · <strong id="pres-note-partner">De Ama</strong> → 0%.
+          💡 Los valores se ingresan en <strong>pesos ($)</strong> por categoría; el % del sueldo se calcula solo. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → <strong id="pres-note-comp-pct">50%</strong> · <strong id="pres-note-partner">De tu pareja</strong> → 0%.
         </p>
         <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
 
@@ -3967,7 +3967,7 @@
       </select>
       <input id="meta-fecha" type="date" class="modal-recur-input">
       <label class="meta-check-label">
-        <input type="checkbox" id="meta-compartida"> Meta compartida con <span id="meta-partner-label">Ama</span>
+        <input type="checkbox" id="meta-compartida"> Meta compartida con <span id="meta-partner-label">tu pareja</span>
       </label>
       <div class="modal-recur-add-actions">
         <button class="btn-recur-confirm" onclick="_guardarMetaForm()">Guardar</button>
@@ -4016,8 +4016,8 @@ function escapeHtml(s) {
 // ─── ESTADO GLOBAL ───────────────────────────────────────────
 let supabaseClient  = null;
 let supabaseSession = null;
-let USUARIO         = "Daniel";
-let PARTNER         = "Ama";
+let USUARIO         = "";   // se resuelve en _setVariablesUsuario() tras el login — nunca hardcodear un usuario real acá
+let PARTNER         = null; // idem — null hasta confirmar que hay alguien más en el workspace
 let comprasEnCuotas = [];  // loaded by cargarCuotasActivas()
 let CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
 let tipoCambioMEP   = null;
@@ -4480,17 +4480,19 @@ async function _configurarUsuario(session) {
 
 function _actualizarStringsUsuario() {
   const tit = document.getElementById("comp-titulo");
-  if (tit) tit.textContent = "Compartidos con " + PARTNER;
+  if (tit) tit.textContent = PARTNER ? "Compartidos con " + PARTNER : "Compartidos";
   const nota = document.getElementById("comp-nota");
-  if (nota) nota.textContent = `* Neto por categoría: positivo = ${PARTNER} te debe · negativo = vos le debés a ${PARTNER}.`;
+  if (nota) nota.textContent = PARTNER
+    ? `* Neto por categoría: positivo = ${PARTNER} te debe · negativo = vos le debés a ${PARTNER}.`
+    : "* Neto por categoría: positivo = te deben · negativo = debés.";
   const thU = document.getElementById("comp-th-usuario");
   if (thU) thU.textContent = USUARIO;
   const thP = document.getElementById("comp-th-partner");
-  if (thP) thP.textContent = PARTNER;
+  if (thP) thP.textContent = PARTNER || "";
   const gastSub = document.getElementById("pres-kpi-gastado-sub");
-  if (gastSub) gastSub.textContent = `50% compartidos · sin "De ${PARTNER}"`;
+  if (gastSub) gastSub.textContent = PARTNER ? `50% compartidos · sin "De ${PARTNER}"` : "50% compartidos";
   const noteP = document.getElementById("pres-note-partner");
-  if (noteP) noteP.textContent = "De " + PARTNER;
+  if (noteP) noteP.textContent = PARTNER ? "De " + PARTNER : "De tu pareja";
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) sidebarUser.textContent = USUARIO;
   const greeting = document.getElementById("mm-greeting");
@@ -7572,7 +7574,7 @@ function renderPresupuesto() {
     _s('mm-sc-ahorro',     fmt(ahorroMesCat));
     _s('mm-sc-ahorro-sub', 'acumulado: ' + fmt(ahorroAcumCat));
     const partnerEl = document.getElementById('mm-sc-comp-partner');
-    if (partnerEl) partnerEl.textContent = PARTNER;
+    if (partnerEl) partnerEl.textContent = PARTNER || "tu pareja";
     renderMetaAhorro();
   })();
 
@@ -10090,7 +10092,7 @@ function renderMetaAhorro() {
 
   const badge = document.getElementById('mm-sc-meta-badge');
   if (metaActiva.compartida) {
-    document.getElementById('mm-sc-meta-partner').textContent = PARTNER;
+    document.getElementById('mm-sc-meta-partner').textContent = PARTNER || "tu pareja";
     badge.style.display = '';
   } else {
     badge.style.display = 'none';
@@ -10124,7 +10126,7 @@ function _renderModalMeta() {
   document.getElementById('meta-moneda').value     = propia ? propia.moneda : 'ARS';
   document.getElementById('meta-fecha').value      = propia && propia.fecha_objetivo ? propia.fecha_objetivo : '';
   document.getElementById('meta-compartida').checked = propia ? !!propia.compartida : false;
-  document.getElementById('meta-partner-label').textContent = PARTNER;
+  document.getElementById('meta-partner-label').textContent = PARTNER || "tu pareja";
   document.getElementById('meta-btn-eliminar').style.display = propia ? '' : 'none';
 }
 
