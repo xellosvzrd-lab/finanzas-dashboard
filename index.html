@@ -277,15 +277,20 @@
 
   .nav-item {
     display: flex; align-items: center; gap: .7rem;
-    padding: .62rem 1.5rem; cursor: pointer;
-    color: var(--text-muted); font-size: .875rem; font-weight: 500;
-    box-shadow: inset 2px 0 0 transparent; transition: background .16s var(--ease-out), color .16s var(--ease-out), box-shadow .16s var(--ease-out);
+    padding: .5rem 1rem; cursor: pointer;
+    color: var(--text-muted); font-size: .875rem; font-weight: 600;
+    border-radius: 999px; border: 1px solid transparent;
+    transition: background .16s var(--ease-out), color .16s var(--ease-out), border-color .16s var(--ease-out), box-shadow .16s var(--ease-out);
     margin: .04rem 0;
   }
-  .nav-item:hover { background: var(--accent-dim); color: var(--text); box-shadow: inset 2px 0 0 var(--accent); }
+  .nav-item:hover { background: var(--glass); color: var(--text); border-color: var(--glass-border); }
   .nav-item.active {
-    color: var(--accent); box-shadow: inset 2px 0 0 var(--accent);
-    background: var(--accent-dim);
+    color: var(--white);
+    background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent), color-mix(in oklab, var(--brand-2) 20%, transparent));
+    border-color: var(--glass-border);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow: 0 2px 12px color-mix(in oklab, var(--brand) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.3);
   }
   .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--accent)); }
   .nav-icon { font-size: 1rem; width: 1.25rem; text-align: center; }
