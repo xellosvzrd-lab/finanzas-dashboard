@@ -3336,7 +3336,7 @@
             <thead>
               <tr>
                 <th>Categoría</th>
-                <th style="text-align:right">% Sueldo</th>
+                <th style="text-align:right">Presupuesto</th>
                 <th style="text-align:right">Gastado</th>
                 <th style="text-align:right">Restante</th>
                 <th>Progreso</th>
@@ -3357,7 +3357,7 @@
         </div>
 
         <p class="pres-note">
-          💡 Los valores se ingresan como <strong>% del sueldo</strong> del mes. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → <strong id="pres-note-comp-pct">50%</strong> · <strong id="pres-note-partner">De Ama</strong> → 0%.
+          💡 Los valores se ingresan en <strong>pesos ($)</strong> por categoría; el % del sueldo se calcula solo. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → <strong id="pres-note-comp-pct">50%</strong> · <strong id="pres-note-partner">De Ama</strong> → 0%.
         </p>
         <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
 
@@ -5003,9 +5003,8 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
       // Badge de ejecución vs presupuesto (solo ARS, si hay presupuesto cargado)
       let presTag = "";
       if (moneda === "ARS" && salarioBase > 0) {
-        const pctPres = presupuestoActual[cat] || 0;
-        if (pctPres > 0) {
-          const montoPres = (pctPres / 100) * salarioBase;
+        const montoPres = presupuestoActual[cat] || 0;
+        if (montoPres > 0) {
           const ejec = Math.round(val / montoPres * 100);
           const color  = ejec >= 100 ? "var(--red)"    : ejec >= 80 ? "var(--yellow)"    : "var(--green)";
           const dimBg  = ejec >= 100 ? "var(--red-dim)" : ejec >= 80 ? "var(--yellow-dim)" : "var(--green-dim)";
@@ -7045,7 +7044,7 @@ async function cargarPresupuesto() {
     const { data, error } = presRes.value;
     if (error) throw error;
     presupuestoActual = {};
-    data.forEach(d => { presupuestoActual[d.categoria] = d.porcentaje; });
+    data.forEach(d => { presupuestoActual[d.categoria] = d.monto; });
   } catch(e) { console.warn("Error cargando presupuesto:", e); }
   renderPresupuesto();
   inicializarDisclosureMimes();
@@ -7067,7 +7066,7 @@ async function guardarPresupuesto() {
     const cat = inp.dataset.cat;
     const val = parsearDecimal(inp.value);
     presupuestoActual[cat] = val;
-    if (val > 0) items.push({ categoria: cat, presupuesto: val });
+    if (val > 0) items.push({ categoria: cat, monto: val });
   });
 
   msg.innerHTML = "⏳ Guardando...";
@@ -7078,7 +7077,7 @@ async function guardarPresupuesto() {
     if (delErr) throw delErr;
     if (items.length) {
       const rows = items.map(it => ({
-        mes, anio, categoria: it.categoria, porcentaje: it.presupuesto,
+        mes, anio, categoria: it.categoria, monto: it.monto,
         usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId()
       }));
       const { error: insErr } = await supabaseClient.from('presupuesto').insert(rows);
@@ -7122,7 +7121,7 @@ function sugerirPresupuestoDesdeHistorial() {
       const gDeU  = dataMes.filter(t => t.tipo==="Gasto" && t.categoria===cat && t.responsabilidad==="De "+USUARIO && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
       const iDeU  = dataMes.filter(t => t.tipo==="Ingreso" && t.categoria===cat && t.responsabilidad==="De "+USUARIO && !esTransferencia(t) && (t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
       const gastoCat = Math.max(0, gMio - iMio) + Math.max(0, gComp - iComp) * obtenerFactorCompartidoPropio(mes, anio) + Math.max(0, gDeU - iDeU);
-      acum[cat] += (gastoCat / sueldo) * 100;
+      acum[cat] += gastoCat;
       conteo[cat]++;
     });
   });
@@ -7132,8 +7131,8 @@ function sugerirPresupuestoDesdeHistorial() {
     const cat = inp.dataset.cat;
     if (!conteo[cat]) return;
     const promedio = acum[cat] / conteo[cat];
-    if (promedio > 0.05) {
-      inp.value = String(Math.round(promedio * 10) / 10).replace(".", ",");
+    if (promedio > 1) {
+      inp.value = String(Math.round(promedio)).replace(".", ",");
       aplicados++;
     }
   });
@@ -7362,8 +7361,9 @@ function renderPresupuesto() {
     gastoPorCat[cat] = Math.max(0, netMio) + Math.max(0, netComp) * factorCompMes + Math.max(0, netDeJ);
   });
 
-  // Totales KPI — presupuestoActual[cat] almacena % (0–100), se convierte a monto según sueldoEfectivo
-  const totalPresARS = categGasto.reduce((s, c) => s + ((presupuestoActual[c] || 0) / 100) * sueldoEfectivo, 0);
+  // Totales KPI — presupuestoActual[cat] almacena el monto ($) directamente
+  const totalPresARS = categGasto.reduce((s, c) => s + (presupuestoActual[c] || 0), 0);
+  const totalPctAsig  = sueldoEfectivo > 0 ? (totalPresARS / sueldoEfectivo) * 100 : 0;
 
   // Gastos USD de Ama convertidos a ARS (sus propios "Mío" + 50% compartidos; NO los "De Ama" que paga Daniel)
   let gastoUSDEnARS = 0;
@@ -7521,8 +7521,7 @@ function renderPresupuesto() {
     _s('mm-dl-sueldo',  fmt(sueldoEfectivo));
     _s('mm-dl-gastado', fmt(totalGasto));
     _s('mm-dl-presup',  fmt(totalPresARS));
-    const totalPct = categGasto.reduce((s, c) => s + (presupuestoActual[c] || 0), 0);
-    _s('mm-dl-presup-sub', totalPct.toFixed(0) + '% del sueldo');
+    _s('mm-dl-presup-sub', totalPctAsig.toFixed(0) + '% del sueldo');
     const margen = sueldoEfectivo - totalPresARS;
     const mEl = document.getElementById('mm-dl-margen');
     if (mEl) { mEl.textContent = fmt(Math.abs(margen)); mEl.style.color = margen >= 0 ? 'var(--save)' : 'var(--neg)'; }
@@ -7535,8 +7534,7 @@ function renderPresupuesto() {
 
   const subTotal = document.getElementById("pres-kpi-total-sub");
   if (subTotal) {
-    const totalPct = categGasto.reduce((s, c) => s + (presupuestoActual[c] || 0), 0);
-    subTotal.textContent = totalPct.toFixed(0) + "% del sueldo asignado";
+    subTotal.textContent = totalPctAsig.toFixed(0) + "% del sueldo asignado";
   }
 
   // Anillo de progreso total
@@ -7550,8 +7548,8 @@ function renderPresupuesto() {
   const daysPct = esEsteMesPacing ? hoyPacing.getDate() / new Date(anio, mes, 0).getDate() : null;
 
   tbody.innerHTML = categGasto.map(cat => {
-    const pct_sueldo = presupuestoActual[cat] || 0;     // % guardado
-    const pres       = (pct_sueldo / 100) * sueldoEfectivo;     // monto ARS calculado
+    const pres       = presupuestoActual[cat] || 0;     // monto ($) guardado
+    const pct_sueldo = sueldoEfectivo > 0 ? (pres / sueldoEfectivo) * 100 : 0;     // % calculado
     const gasto      = gastoPorCat[cat]       || 0;
     const rest  = pres - gasto;
     const pct   = pres > 0 ? (gasto / pres) * 100 : 0;
@@ -7600,12 +7598,12 @@ function renderPresupuesto() {
       <td><span style="display:inline-flex;align-items:center;gap:7px">${catEmoji ? `<span style="font-size:1.05rem;width:24px;text-align:center">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}<span>${cat}</span></span>${pacingHtml}</td>
       <td style="text-align:right">
         <div style="display:flex;align-items:center;justify-content:flex-end;gap:.3rem">
+          <span style="color:var(--text-muted);font-size:.8rem">$</span>
           <input type="text" inputmode="decimal" class="pres-input" data-cat="${cat}"
-                 value="${pct_sueldo > 0 ? String(pct_sueldo).replace('.', ',') : ''}" placeholder="—"
-                 style="max-width:68px" oninput="actualizarKpisPres()">
-          <span style="color:var(--text-muted);font-size:.8rem">%</span>
+                 value="${pres > 0 ? String(pres).replace('.', ',') : ''}" placeholder="—"
+                 style="max-width:88px" oninput="actualizarKpisPres()">
         </div>
-        <span class="pres-monto-live" style="color:var(--text-muted);font-size:.71rem;display:block;text-align:right;margin-top:.1rem">${sueldo > 0 && pct_sueldo > 0 ? fmt(pres) : ''}</span>
+        <span class="pres-monto-live" style="color:var(--text-muted);font-size:.71rem;display:block;text-align:right;margin-top:.1rem">${sueldo > 0 && pres > 0 ? pct_sueldo.toFixed(1).replace('.', ',') + '%' : ''}</span>
       </td>
       <td style="text-align:right">${gastoStr}</td>
       <td style="text-align:right">${restStr}</td>
@@ -7616,12 +7614,11 @@ function renderPresupuesto() {
   // Footer de totales
   const tfoot = document.getElementById("pres-tfoot");
   if (tfoot) {
-    const totalPctAsig = categGasto.reduce((s, c) => s + (presupuestoActual[c] || 0), 0);
     const totalRest    = totalPresARS - totalGasto;
     const totalEjec    = totalPresARS > 0 ? (totalGasto / totalPresARS * 100).toFixed(0) : 0;
     tfoot.innerHTML = `<tr class="pres-tfoot-row">
       <td><strong>TOTAL</strong></td>
-      <td style="text-align:right"><strong>${totalPctAsig.toFixed(0)}% <small style="color:var(--text-muted);font-weight:400">(${fmt(totalPresARS)})</small></strong></td>
+      <td style="text-align:right"><strong>${fmt(totalPresARS)} <small style="color:var(--text-muted);font-weight:400">(${totalPctAsig.toFixed(0)}%)</small></strong></td>
       <td style="text-align:right"><strong style="color:var(--red)">${fmt(totalGasto)}</strong></td>
       <td style="text-align:right"><strong style="color:${totalRest>=0?"var(--green)":"var(--red)"}">${totalRest<0?"−":""}${fmt(Math.abs(totalRest))}</strong></td>
       <td><strong style="color:var(--text-muted)">${totalEjec}% ejecutado</strong></td>
@@ -7771,7 +7768,7 @@ function _renderMMCats(gastoPorCat, sueldoEfectivo) {
   const rows = categGasto
     .map(cat => {
       const gasto = gastoPorCat[cat] || 0;
-      const presARS = ((presupuestoActual[cat] || 0) / 100) * sueldoEfectivo;
+      const presARS = presupuestoActual[cat] || 0;
       return { cat, gasto, presARS };
     })
     .filter(r => r.gasto > 0 || r.presARS > 0)
@@ -7867,16 +7864,15 @@ function actualizarKpisPres() {
     gastoPorCat[cat] = Math.max(0, netMio) + Math.max(0, netComp) * factorCompMes + Math.max(0, netDeJ);
   });
 
-  // Los inputs almacenan porcentajes (0–100); se convierte a monto con el sueldo
-  let totalPctPres = 0;
+  // Los inputs almacenan el monto ($) directamente; el % se calcula con el sueldo
+  let totalPresARS = 0;
   document.querySelectorAll("#pres-tbody .pres-input").forEach(inp => {
-    const pct = parsearDecimal(inp.value);
-    totalPctPres += pct;
-    // Actualizar importe en vivo junto al input
+    const monto = parsearDecimal(inp.value);
+    totalPresARS += monto;
+    // Actualizar % en vivo junto al input
     const liveEl = inp.closest("td") && inp.closest("td").querySelector(".pres-monto-live");
-    if (liveEl) liveEl.textContent = (pct > 0 && sueldoEfectivo > 0) ? fmt((pct / 100) * sueldoEfectivo) : "";
+    if (liveEl) liveEl.textContent = (monto > 0 && sueldoEfectivo > 0) ? (monto / sueldoEfectivo * 100).toFixed(1).replace('.', ',') + '%' : "";
   });
-  const totalPresARS = (totalPctPres / 100) * sueldoEfectivo;
 
   let gastoUSDEnARSKpi = 0;
   if (USUARIO.toLowerCase() === "ama" && tipoCambioMEP) {
@@ -7936,6 +7932,7 @@ function actualizarKpisPres() {
 
   const subTotal = document.getElementById("pres-kpi-total-sub");
   if (subTotal) {
+    const totalPctPres = sueldoEfectivo > 0 ? (totalPresARS / sueldoEfectivo) * 100 : 0;
     subTotal.textContent = totalPctPres.toFixed(0) + "% del sueldo asignado";
   }
 
