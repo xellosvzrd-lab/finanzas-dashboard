@@ -27,7 +27,7 @@
 
 ## UI/Design Preferences
 - Liquid glass palette — vidrio translúcido índigo (unificado, sin distinción Daniel/Ama)
-- Users: Daniel y Ama comparten el mismo tema único (ya no hay distinción dark/light por usuario)
+- Users: Daniel y Ama pueden usar cualquiera de los dos temas (dark/light) — no hay una asociación fija por usuario, cualquiera puede togglear
 - `PARTNER` variable is dynamic — use it for responsibility labels, never hardcode
 - `[data-theme="light"]` tiene su propia paleta clara (índigo pastel) — el toggle de tema (`toggleTheme()`) vuelve a cambiar el look real, disponible para cualquiera de los dos usuarios
 - Chart.js for all charts with animations enabled
