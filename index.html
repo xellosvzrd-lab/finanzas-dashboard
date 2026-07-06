@@ -5639,12 +5639,12 @@ function abrirEditorTransaccion(id) {
 
   const cats = t.tipo === "Gasto" ? categGasto : categIngreso;
   const selCat = document.getElementById("edit-categoria");
-  selCat.innerHTML = cats.map(c => `<option value="${c}" ${c === t.categoria ? "selected" : ""}>${c}</option>`).join("");
+  selCat.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}" ${c === t.categoria ? "selected" : ""}>${escapeHtml(c)}</option>`).join("");
 
   const selFuente = document.getElementById("edit-fuente");
   const todasFuentesEdit = [...categFuentes, ...categFuentesTC];
   selFuente.innerHTML = `<option value="">— Sin especificar —</option>` +
-    todasFuentesEdit.map(f => `<option value="${f}" ${f === (t.fuente || "") ? "selected" : ""}>${f}</option>`).join("");
+    todasFuentesEdit.map(f => `<option value="${escapeHtml(f)}" ${f === (t.fuente || "") ? "selected" : ""}>${escapeHtml(f)}</option>`).join("");
   selFuente.onchange = function() { _actualizarEditMesLiqField(this.value); };
 
   _actualizarEditMesLiqField(t.fuente || "");
