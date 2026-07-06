@@ -9180,9 +9180,9 @@ function inicializarDisclosureMimes() {
   const el  = document.getElementById("pres-desglose");
   const btn = document.getElementById("btn-toggle-desglose");
   if (!el || !btn) return;
-  // Default: Daniel expandido, Ama colapsado. Override si hay valor guardado.
+  // Default: expandido para todos. Override si hay valor guardado.
   const saved = localStorage.getItem(USUARIO + "_disclosure_mimes");
-  const defaultExpanded = USUARIO.toLowerCase() !== "ama";
+  const defaultExpanded = true;
   const expanded = saved !== null ? saved === "1" : defaultExpanded;
   el.style.display  = expanded ? "" : "none";
   btn.textContent   = expanded ? "Ocultar desglose ▴" : "Ver desglose ▾";
