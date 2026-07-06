@@ -88,7 +88,7 @@ let USUARIO         = "Daniel";       // Seteado por _setVariablesUsuario() desd
 let PARTNER         = "Ama";          // Derivado de USUARIO. Opuesto entre "Daniel" y "Ama"
 let comprasEnCuotas = [];             // Loaded by cargarCuotasActivas()
 let CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
-let tipoCambioMEP   = null;           // Solo Ama — dólar MEP venta, para convertir USD a ARS
+let tipoCambioMEP   = null;           // Se fetchea para todos; solo se suma al sueldo si PREF_USD_MEP === true
 let allTransac      = [];             // TODAS las transacciones cargadas (paginadas si >1000)
 let resumenData     = [];
 
@@ -182,7 +182,7 @@ inicializarDisclosureMimes()     // llamada al final de cargarPresupuesto()
 toggleDetalleCompartidos()       // toggle tabla detalle en Compartidos
 inicializarDisclosureCompartidos() // llamada al final de cargarCompartidos()
 ```
-- Default Daniel=expandido, Ama=colapsado
+- Default: expandido para todos (`prefers-color-scheme` ya no aplica acá, es un default fijo)
 - Persistido en localStorage: `USUARIO + "_disclosure_mimes"` / `"_disclosure_compartidos"`
 
 ### Responsabilidad en formulario (Nueva transacción)
@@ -252,8 +252,7 @@ async function cargarTodasTransacciones() {
 
 - Los inputs almacenan **montos absolutos en pesos ($)** por categoría (columna `presupuesto.monto`, ex `porcentaje`).
 - El % del sueldo es un campo **calculado** en runtime, no se almacena: `(monto / salaryBase) × 100`
-- **Daniel:** `salaryBase = ARS ingresos (Sueldo + Otros Ingresos)`
-- **Ama:** `salaryBase = ARS ingresos + saldoUSD × tipoCambioMEP` (net-USD approach estable)
+- `salaryBase = ARS ingresos (Sueldo + Otros Ingresos[ + Intereses])`. Si el usuario tiene la preferencia `PREF_USD_MEP` activada (checkbox en Categorías → Cuenta y Seguridad, persistida como `usd_mep` en `user_metadata`), se suma `saldoUSD × tipoCambioMEP` y "Intereses" pasa a contar como ingreso real (net-USD approach estable). Ya no depende del nombre de usuario.
 - El % se actualiza **en vivo** al tipear (`actualizarKpisPres()` → `.pres-monto-live` span)
 - Datos separados por usuario via `usuario` en GET/POST
 - Migración de esquema: `docs/supabase/migrations/2026-07-05-presupuesto-monto.sql`
@@ -366,11 +365,10 @@ Usa **variables CSS** (`var(--card)`, `var(--border)`, `var(--bg2)`) para respet
 // Ambos usuarios
 CATS_TRANSFERENCIA = ["Internas"]   // excluidas de gráficos
 
-// Daniel
-CATS_INGRESO_REAL  = ["Sueldo", "Otros Ingresos"]
-
-// Ama
-CATS_INGRESO_ARS  = ["Sueldo", "Otros Ingresos", "Intereses"]
+// CATS_INGRESO_REAL depende de la preferencia PREF_USD_MEP (user_metadata.usd_mep), no del nombre:
+CATS_INGRESO_REAL = PREF_USD_MEP
+  ? ["Sueldo", "Otros Ingresos", "Intereses"]
+  : ["Sueldo", "Otros Ingresos"]
 CATS_EXCLUIR      = ["Cambio"]  // cambio de divisas, tratamiento especial
 ```
 
