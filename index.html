@@ -3557,6 +3557,10 @@
           <div id="cuenta-identities">
             <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
           </div>
+          <label style="display:flex;align-items:flex-start;gap:.6rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);cursor:pointer;font-size:.85rem;color:var(--text)">
+            <input type="checkbox" id="pref-usd-mep" onchange="guardarPrefUsdMep(this.checked)" style="margin-top:.15rem;flex-shrink:0">
+            <span>Cobro parte de mis ingresos en USD — convertir a ARS con dólar MEP en mi presupuesto</span>
+          </label>
         </div>
 
         <!-- Mi pareja / Workspace -->
@@ -4248,6 +4252,17 @@ async function renderizarSeccionCuenta() {
       ${!hasGoogle ? `<button class="btn btn-ghost" id="btn-vincular-google" onclick="vincularGoogle()" style="font-size:.8rem;padding:.4rem .85rem">Vincular →</button>` : ''}
     </div>
     <div id="cuenta-msg" style="margin-top:.5rem;font-size:.82rem"></div>`;
+  const _prefChk = document.getElementById('pref-usd-mep');
+  if (_prefChk) _prefChk.checked = PREF_USD_MEP;
+}
+
+function guardarPrefUsdMep(checked) {
+  PREF_USD_MEP = !!checked;
+  CATS_INGRESO_REAL = PREF_USD_MEP
+    ? ["Sueldo", "Otros Ingresos", "Intereses"]
+    : ["Sueldo", "Otros Ingresos"];
+  supabaseClient.auth.updateUser({ data: { usd_mep: PREF_USD_MEP } }).catch(() => {});
+  if (typeof cargarPresupuesto === "function") cargarPresupuesto();
 }
 
 async function volverConfig() {
