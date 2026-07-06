@@ -8382,13 +8382,13 @@ function parsearImport() {
     tbodyRows.push(`
       <tr class="${rowClass}">
         <td>${idx + 1}</td>
-        <td>${fechaRaw}</td>
+        <td>${escapeHtml(fechaRaw)}</td>
         <td class="${tipoClass}">${tipoNorm}</td>
-        <td>${categoria}</td>
+        <td>${escapeHtml(categoria)}</td>
         <td>${isNaN(monto) ? montoRaw : fmtMoneda(monto, monedaVal)}</td>
-        <td>${descripcion || "—"}</td>
-        <td>${respVal}</td>
-        <td>${fuente || "—"}</td>
+        <td>${escapeHtml(descripcion) || "—"}</td>
+        <td>${escapeHtml(respVal)}</td>
+        <td>${escapeHtml(fuente) || "—"}</td>
         <td>${monBadge}</td>
         <td>${errList.length ? `<span class="err-badge">⚠ ${errList.join(", ")}</span>` : "✅"}</td>
       </tr>`);
