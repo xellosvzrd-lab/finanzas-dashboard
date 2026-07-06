@@ -9262,7 +9262,7 @@ function inicializarRespButtons() {
     { valor: "De " + PARTNER, label: "Lo pagó " + (PARTNER || "tu pareja") },
   ];
   sel.innerHTML = opciones.map(op =>
-    `<option value="${op.valor}">${op.label}</option>`
+    `<option value="${escapeHtml(op.valor)}">${escapeHtml(op.label)}</option>`
   ).join("");
   sel.value = "Mío";
 }
