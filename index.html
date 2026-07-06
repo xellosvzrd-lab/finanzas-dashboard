@@ -6376,7 +6376,7 @@ function cargarCompartidos() {
         </tr>`;
       }).join("");
       const liqBtn = monedaFilter === "ARS" && net !== 0
-        ? `<button onclick="event.stopPropagation();abrirLiquidar('${r.cat.replace(/'/g,"\\'")}',${Math.abs(net)},'${net>0?"Ingreso":"Gasto"}')"
+        ? `<button onclick="event.stopPropagation();abrirLiquidar('${escapeHtml(r.cat.replace(/\\/g,"\\\\").replace(/'/g,"\\'"))}',${Math.abs(net)},'${net>0?"Ingreso":"Gasto"}')"
              style="margin-left:.5rem;padding:.15rem .5rem;font-size:.7rem;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text-muted);cursor:pointer;vertical-align:middle">Liquidar</button>`
         : "";
       const _catEmo = getCatEmoji(r.cat);
