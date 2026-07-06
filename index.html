@@ -4031,6 +4031,7 @@ let PARTNER         = null; // idem — null hasta confirmar que hay alguien má
 let comprasEnCuotas = [];  // loaded by cargarCuotasActivas()
 let CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
 let tipoCambioMEP   = null;
+let PREF_USD_MEP    = false; // preferencia usuario: convertir ingresos USD→ARS vía dólar MEP (user_metadata.usd_mep)
 let allTransac  = [];
 let resumenData = [];
 // Categorías de movimiento entre cuentas propias — se muestran en la tabla
@@ -4443,7 +4444,7 @@ function ocultarErrorCarga() {
 function _setVariablesUsuario(nombre) {
   USUARIO = nombre;
   PARTNER = resolverPartnerNombre(); // null si todavía no hay nadie más en mi workspace
-  CATS_INGRESO_REAL = USUARIO.toLowerCase() === "ama"
+  CATS_INGRESO_REAL = PREF_USD_MEP
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
   categResponsabilidad = PARTNER ? ["Mío", "Compartido", "De " + PARTNER] : ["Mío"];
@@ -4460,6 +4461,7 @@ function _setVariablesUsuario(nombre) {
 async function _configurarUsuario(session) {
   const metaNombre   = session.user.user_metadata?.nombre;
   const metaEmojis   = session.user.user_metadata?.cat_emojis;
+  PREF_USD_MEP       = session.user.user_metadata?.usd_mep === true;
   const isGoogleOnly = session.user.app_metadata?.provider === 'google'
                     && !session.user.app_metadata?.providers?.includes('email');
   if (isGoogleOnly && !metaNombre) {
