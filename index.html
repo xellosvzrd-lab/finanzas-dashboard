@@ -6377,7 +6377,7 @@ function cargarCompartidos() {
           </td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:var(--text-muted);">Bruto: ${fmtMoneda(m, monedaFilter)}</td>
           <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:${color};">
-            ${signo}${fmtMoneda(share, monedaFilter)} ${pagoPartner ? "("+PARTNER+")" : "("+USUARIO+")"}
+            ${signo}${fmtMoneda(share, monedaFilter)} ${pagoPartner ? "("+escapeHtml(PARTNER)+")" : "("+escapeHtml(USUARIO)+")"}
           </td>
         </tr>`;
       }).join("");
@@ -6443,8 +6443,8 @@ function cargarCompartidos() {
     </tr>`;
   }
   tfootHtml += `<tr style="font-size:.73rem;color:var(--text-muted)">
-    <td colspan="2">Pagado ${USUARIO}</td>
-    <td>Pagado ${PARTNER}</td>
+    <td colspan="2">Pagado ${escapeHtml(USUARIO)}</td>
+    <td>Pagado ${escapeHtml(PARTNER)}</td>
     <td style="text-align:right">Total a cobrar</td>
   </tr>`;
   tfootComp.innerHTML = tfootHtml;
@@ -6513,8 +6513,8 @@ function cargarCompartidos() {
     </tr>`;
   }
   tfootR += `<tr style="font-size:.73rem;color:var(--text-muted)">
-    <td colspan="2">${USUARIO} pagó por ${PARTNER}</td>
-    <td>${PARTNER} pagó por ${USUARIO}</td>
+    <td colspan="2">${escapeHtml(USUARIO)} pagó por ${escapeHtml(PARTNER)}</td>
+    <td>${escapeHtml(PARTNER)} pagó por ${escapeHtml(USUARIO)}</td>
     <td style="text-align:right">Saldo neto</td>
   </tr>`;
   tfootReemb.innerHTML = tfootR;
