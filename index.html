@@ -8474,14 +8474,15 @@ function descargarTemplateCSV() {
   const fuenteEj = categFuentes[0]   || "Efectivo";
   const fuenteTC = categFuentesTC[0] || "";
   const catEj    = categGasto[0]     || "Alimentación";
+  const csvSafe = v => /^[=+\-@]/.test(String(v ?? "")) ? "'" + v : (v ?? "");
   // mes_liquidacion: solo para TC y solo cuando la fecha de compra ≠ mes del resumen
   const lineas = [
     "fecha;tipo;categoria;monto;descripcion;responsabilidad;fuente;moneda;mes_liquidacion",
-    `15/${mes}/${anio};Gasto;${catEj};4500;Ejemplo gasto;Mío;${fuenteEj};ARS;`,
+    `15/${mes}/${anio};Gasto;${csvSafe(catEj)};4500;Ejemplo gasto;Mío;${csvSafe(fuenteEj)};ARS;`,
     `01/${mes}/${anio};Ingreso;Sueldo;180000;Sueldo ${mes}/${anio};Mío;;ARS;`,
     fuenteTC
-      ? `15/01/${anio};Gasto;${catEj};8000;Compra enero en TC;Mío;${fuenteTC};ARS;${anio}-${mes}`
-      : `15/01/${anio};Gasto;${catEj};8000;Compra TC (mes_liq distinto);Mío;;ARS;${anio}-${mes}`,
+      ? `15/01/${anio};Gasto;${csvSafe(catEj)};8000;Compra enero en TC;Mío;${csvSafe(fuenteTC)};ARS;${anio}-${mes}`
+      : `15/01/${anio};Gasto;${csvSafe(catEj)};8000;Compra TC (mes_liq distinto);Mío;;ARS;${anio}-${mes}`,
   ];
   const blob = new Blob([lineas.join("\n")], { type: "text/csv;charset=utf-8;" });
   const url  = URL.createObjectURL(blob);
