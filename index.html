@@ -4449,7 +4449,7 @@ function _setVariablesUsuario(nombre) {
     : ["Sueldo", "Otros Ingresos"];
   categResponsabilidad = PARTNER ? ["Mío", "Compartido", "De " + PARTNER] : ["Mío"];
   const _savedTheme = localStorage.getItem('fin-theme');
-  const _defaultTheme = USUARIO.toLowerCase() === "ama" ? "light" : "dark";
+  const _defaultTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? "dark" : "light";
   document.documentElement.dataset.theme = _savedTheme || _defaultTheme;
   const _sun  = document.getElementById('theme-icon-sun');
   const _moon = document.getElementById('theme-icon-moon');
