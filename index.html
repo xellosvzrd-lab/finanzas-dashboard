@@ -4252,6 +4252,8 @@ async function renderizarSeccionCuenta() {
 async function volverConfig() {
   if (supabaseClient) await supabaseClient.auth.signOut();
   supabaseSession = null;
+  localStorage.removeItem(CACHE_TRANSAC_KEY);
+  localStorage.removeItem(CACHE_CATEG_KEY);
   document.getElementById("app").style.display = "none";
   document.getElementById("mobile-header").style.display = "none";
   closeSidebar();
