@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://eutarjfnlkcehhigqqxr.supabase.co wss://eutarjfnlkcehhigqqxr.supabase.co https://dolarapi.com https://api.coinbase.com https://accounts.google.com; img-src 'self' data:; worker-src blob: https://cdnjs.cloudflare.com;">
-<title>💰 Finanzas Personales — Daniel</title>
+<title>💰 Finanzas Personales</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2699,7 +2699,7 @@
         <div class="sidebar-avatar" id="sidebar-avatar">D</div>
         <div style="flex:1;min-width:0">
           <div class="sidebar-username" id="sidebar-user"></div>
-          <div class="sidebar-usersub">Plan compartido · Ama</div>
+          <div class="sidebar-usersub" id="sidebar-usersub">Mi cuenta</div>
         </div>
         <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -2832,7 +2832,7 @@
             <option value="">Todas</option>
             <option value="Mío">Mío</option>
             <option value="Compartido">Compartido</option>
-            <option value="De Ama">De Ama</option>
+            <option value="De Ama" id="fil-resp-de-partner">De Ama</option>
           </select>
           <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="clearTimeout(_filtroDebounce);_filtroDebounce=setTimeout(filtrarTabla,120)" aria-label="Buscar transacciones">
         </div>
@@ -3146,8 +3146,8 @@
                 <thead>
                   <tr>
                     <th>Categoría</th>
-                    <th style="text-align:right">Daniel pagó</th>
-                    <th style="text-align:right">Ama pagó</th>
+                    <th style="text-align:right" id="comp-reemb-th-usuario">Daniel pagó</th>
+                    <th style="text-align:right" id="comp-reemb-th-partner">Ama pagó</th>
                     <th style="text-align:right">Neto</th>
                   </tr>
                 </thead>
@@ -3901,7 +3901,7 @@
         <select id="edit-responsabilidad">
           <option value="Mío">Mío</option>
           <option value="Compartido">Compartido</option>
-          <option value="De Ama">De Ama</option>
+          <option value="De Ama" id="edit-resp-de-partner">De Ama</option>
         </select>
       </div>
       <div class="edit-field">
@@ -4040,7 +4040,7 @@ let categGasto           = [];
 let categIngreso         = [];
 let categFuentes         = [];
 let categFuentesTC       = [];
-let categResponsabilidad = ["Mío","Compartido","De Ama"];
+let categResponsabilidad = ["Mío"]; // se resuelve en _setVariablesUsuario() según si hay pareja real
 let _todasCategorias     = [];
 
 function _getCategoriaId(valor, tipoTx) {
@@ -4499,6 +4499,16 @@ function _actualizarStringsUsuario() {
   if (thU) thU.textContent = USUARIO;
   const thP = document.getElementById("comp-th-partner");
   if (thP) thP.textContent = PARTNER || "";
+  const thReembU = document.getElementById("comp-reemb-th-usuario");
+  if (thReembU) thReembU.textContent = `${USUARIO} pagó`;
+  const thReembP = document.getElementById("comp-reemb-th-partner");
+  if (thReembP) thReembP.textContent = `${PARTNER || ""} pagó`;
+  if (PARTNER) {
+    ["edit-resp-de-partner", "fil-resp-de-partner"].forEach(id => {
+      const opt = document.getElementById(id);
+      if (opt) { opt.value = "De " + PARTNER; opt.textContent = "De " + PARTNER; }
+    });
+  }
   const gastSub = document.getElementById("pres-kpi-gastado-sub");
   if (gastSub) gastSub.textContent = PARTNER ? `50% compartidos · sin "De ${PARTNER}"` : "50% compartidos";
   const noteP = document.getElementById("pres-note-partner");
@@ -4825,7 +4835,7 @@ async function cargarResumenMes() {
       const real =
         Math.max(0, g(datos,      "Gasto",   "Mío")        - g(datos,      "Ingreso", "Mío"))
       + Math.max(0, g(dataMesAll, "Gasto",   "Compartido") - g(dataMesAll, "Ingreso", "Compartido")) * factorCompResumen
-      + Math.max(0, g(dataMesAll, "Gasto",   "De Daniel")  - g(dataMesAll, "Ingreso", "De Daniel"));
+      + Math.max(0, g(dataMesAll, "Gasto",   "De " + USUARIO)  - g(dataMesAll, "Ingreso", "De " + USUARIO));
 
       if (real > 0) (mon === "USD" ? catMapUSD : catMapARS)[cat] = real;
     });
@@ -4912,7 +4922,7 @@ async function cargarResumenMes() {
       const real =
         Math.max(0, gp(prevDatos,    "Gasto","Mío")       - gp(prevDatos,   "Ingreso","Mío"))
       + Math.max(0, gp(prevDataAll,  "Gasto","Compartido")- gp(prevDataAll, "Ingreso","Compartido")) * factorCompPrevResumen
-      + Math.max(0, gp(prevDataAll,  "Gasto","De Daniel") - gp(prevDataAll, "Ingreso","De Daniel"));
+      + Math.max(0, gp(prevDataAll,  "Gasto","De " + USUARIO) - gp(prevDataAll, "Ingreso","De " + USUARIO));
       if (real > 0) prevCatMapARS[cat] = real;
     });
     const prevGastos  = Object.values(prevCatMapARS).reduce((s,v) => s+v, 0);
@@ -4936,15 +4946,16 @@ async function cargarResumenMes() {
     document.getElementById("kpi-ahorro-trend").innerHTML   = _tendencia(ahorroNum, prevAhorro,  prevLabel, false);
   }
 
-  // KPI "Ama te debe" — acumulado total (no filtrado por mes)
+  // KPI "[Pareja] te debe" — acumulado total (no filtrado por mes)
+  const respDePartner = "De " + (PARTNER || "");
   const amaDebeTotalMes = allTransac
-    .filter(t => t.tipo === "Gasto" && (t.responsabilidad || "Mío") === "De Ama")
+    .filter(t => t.tipo === "Gasto" && (t.responsabilidad || "Mío") === respDePartner)
     .reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
   const amaKpi = document.getElementById("kpi-ama-debe");
   if (amaKpi) {
     animateKPI(amaKpi, amaDebeTotalMes, fmt);
     document.getElementById("kpi-ama-debe-sub").textContent =
-      amaDebeTotalMes > 0 ? `${allTransac.filter(t=>t.tipo==="Gasto"&&(t.responsabilidad||"Mío")==="De Ama").length} gastos pendientes de reintegro` : "Sin gastos pendientes ✅";
+      amaDebeTotalMes > 0 ? `${allTransac.filter(t=>t.tipo==="Gasto"&&(t.responsabilidad||"Mío")===respDePartner).length} gastos pendientes de reintegro` : "Sin gastos pendientes ✅";
   }
 
   renderCatChart(sortedCatsARS);
@@ -4954,9 +4965,9 @@ async function cargarResumenMes() {
   // Sparklines — últimos 6 meses
   renderSparklines(parseInt(mes), parseInt(anio));
 
-  // Banner "Ama te debe" — chips por categoría
+  // Banner "[Pareja] te debe" — chips por categoría
   const amaDebeCats = {};
-  allTransac.filter(t => t.tipo === "Gasto" && (t.responsabilidad || "Mío") === "De Ama")
+  allTransac.filter(t => t.tipo === "Gasto" && (t.responsabilidad || "Mío") === respDePartner)
     .forEach(t => { amaDebeCats[t.categoria] = (amaDebeCats[t.categoria] || 0) + Math.abs(Number(t.monto)); });
   const topCats = Object.entries(amaDebeCats).sort((a,b) => b[1]-a[1]).slice(0, 4);
   const catsEl  = document.getElementById("ama-debe-cats");
@@ -6426,8 +6437,8 @@ function cargarCompartidos() {
     </tr>`;
   }
   tfootHtml += `<tr style="font-size:.73rem;color:var(--text-muted)">
-    <td colspan="2">Pagado Daniel</td>
-    <td>Pagado Ama</td>
+    <td colspan="2">Pagado ${USUARIO}</td>
+    <td>Pagado ${PARTNER}</td>
     <td style="text-align:right">Total a cobrar</td>
   </tr>`;
   tfootComp.innerHTML = tfootHtml;
@@ -6496,8 +6507,8 @@ function cargarCompartidos() {
     </tr>`;
   }
   tfootR += `<tr style="font-size:.73rem;color:var(--text-muted)">
-    <td colspan="2">Daniel pagó por Ama</td>
-    <td>Ama pagó por Daniel</td>
+    <td colspan="2">${USUARIO} pagó por ${PARTNER}</td>
+    <td>${PARTNER} pagó por ${USUARIO}</td>
     <td style="text-align:right">Saldo neto</td>
   </tr>`;
   tfootReemb.innerHTML = tfootR;
@@ -8332,7 +8343,8 @@ function parsearImport() {
 
     // Normalizar responsabilidad
     const respNorm = resp || "Mío";
-    const respVal  = ["Mío","Compartido","De Ama"].includes(respNorm) ? respNorm : "Mío";
+    const respValidas = PARTNER ? ["Mío","Compartido","De " + PARTNER] : ["Mío","Compartido"];
+    const respVal  = respValidas.includes(respNorm) ? respNorm : "Mío";
 
     // Normalizar moneda
     const monedaUp = monedaRaw.toUpperCase().trim();
@@ -8551,7 +8563,7 @@ function renderSparklines(curMes, curAnio) {
     ).reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     const gas = Math.max(0, g(mine, "Gasto", "Mío")         - g(mine, "Ingreso", "Mío"))
               + Math.max(0, g(all,  "Gasto", "Compartido")   - g(all,  "Ingreso", "Compartido")) * obtenerFactorCompartidoPropio(m, y)
-              + Math.max(0, g(all,  "Gasto", "De Daniel")    - g(all,  "Ingreso", "De Daniel"));
+              + Math.max(0, g(all,  "Gasto", "De " + USUARIO)    - g(all,  "Ingreso", "De " + USUARIO));
     const bal  = ing - gas;
     const aho  = ing > 0 ? (bal / ing) * 100 : 0;
     seriesIng.push(ing);
