@@ -4974,7 +4974,7 @@ async function cargarResumenMes() {
   if (catsEl) {
     catsEl.innerHTML = topCats.length
       ? topCats.map(([cat, val]) =>
-          `<span class="ama-chip"><span class="ama-chip-label">${cat}</span>${fmt(val)}</span>`
+          `<span class="ama-chip"><span class="ama-chip-label">${escapeHtml(cat)}</span>${fmt(val)}</span>`
         ).join("")
       : "";
   }
@@ -5107,7 +5107,7 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
       <div style="margin-bottom:.9rem;">
         <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;font-size:.88rem;cursor:pointer;"
              onclick="document.getElementById('${drillId}').style.display=document.getElementById('${drillId}').style.display==='none'?'block':'none'">
-          <span><span style="font-size:1rem;margin-right:.4rem;">${getCatEmoji(cat,'📌')}</span>${cat}${presTag}
+          <span><span style="font-size:1rem;margin-right:.4rem;">${getCatEmoji(cat,'📌')}</span>${escapeHtml(cat)}${presTag}
             <span style="color:var(--text-muted);font-size:.72rem;margin-left:.3rem;">(${txsCat.length} tx) ▾</span>
           </span>
           <span style="color:var(--text-muted)">${fmtVal(val)} <span style="color:var(--red)">(${pct}%)</span></span>
@@ -6381,7 +6381,7 @@ function cargarCompartidos() {
         : "";
       const _catEmo = getCatEmoji(r.cat);
       return `<tr style="cursor:pointer;" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'table-row':'none'">
-        <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_catEmo}</span>${r.cat}</span> <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
+        <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_catEmo}</span>${escapeHtml(r.cat)}</span> <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
         <td style="text-align:right;color:${r.daniel !== 0 ? 'var(--text)' : 'var(--text-muted)'}">${r.daniel !== 0 ? fmtMoneda(r.daniel, monedaFilter) : "—"}</td>
         <td style="text-align:right;color:${r.ama !== 0 ? 'var(--text-muted)' : 'var(--text-muted)'}">${r.ama !== 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}</td>
         <td style="text-align:right;font-weight:700;color:${net>0?"var(--yellow)":"var(--green)"}">${fmtMoneda(Math.abs(net), monedaFilter)}${liqBtn}</td>
@@ -6467,7 +6467,7 @@ function cargarCompartidos() {
       const netColor = net > 0 ? "var(--yellow)" : net < 0 ? "var(--green)" : "var(--text-muted)";
       const _re = getCatEmoji(cat);
       return `<tr>
-        <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_re}</span>${cat}</span></td>
+        <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_re}</span>${escapeHtml(cat)}</span></td>
         <td style="text-align:right;color:${daniel>0?"var(--accent)":"var(--text-muted)"}">${daniel>0?fmtR(daniel,mon):"—"}</td>
         <td style="text-align:right;color:${ama>0?"var(--yellow)":"var(--text-muted)"}">${ama>0?fmtR(ama,mon):"—"}</td>
         <td style="text-align:right;font-weight:700;color:${netColor}">${net!==0?fmtR(Math.abs(net),mon):"—"}</td>
@@ -6926,7 +6926,7 @@ function cargarAnual() {
       const prom  = total / meses;
       const pct   = totalGas > 0 ? ((total / totalGas) * 100).toFixed(1) : "0.0";
       return `<tr>
-        <td>${cat}</td>
+        <td>${escapeHtml(cat)}</td>
         <td style="text-align:right;font-weight:600;color:var(--red)">${fmt(total)}</td>
         <td style="text-align:right;color:var(--text-muted)">${meses}</td>
         <td style="text-align:right;color:var(--text-muted)">${fmt(prom)}</td>
@@ -6943,7 +6943,7 @@ function cargarAnual() {
       const prom  = total / meses;
       const pct   = totalGasUSD > 0 ? ((total / totalGasUSD) * 100).toFixed(1) : "0.0";
       return `<tr>
-        <td>${cat}</td>
+        <td>${escapeHtml(cat)}</td>
         <td style="text-align:right;font-weight:600;color:var(--red)">${fmtMoneda(total,"USD")}</td>
         <td style="text-align:right;color:var(--text-muted)">${meses}</td>
         <td style="text-align:right;color:var(--text-muted)">${fmtMoneda(prom,"USD")}</td>
@@ -7496,7 +7496,7 @@ function renderPresupuesto() {
       const pctStr = a._isNew ? "Nuevo" : (a.delta > 0 ? "+" : "") + Math.round(a.delta * 100) + "%";
       const cls    = a.delta > 0 ? "up" : "down";
       const icon   = a.delta > 0 ? "🔺" : "🔻";
-      return `<span class="tendencia-chip ${cls}">${icon} ${a.cat} ${pctStr}</span>`;
+      return `<span class="tendencia-chip ${cls}">${icon} ${escapeHtml(a.cat)} ${pctStr}</span>`;
     }).join("");
     el.style.display = "";
     el.innerHTML = `<div class="tendencias-label">Tendencias vs mes anterior</div><div class="tendencia-chips">${chips}</div>`;
@@ -7668,11 +7668,11 @@ function renderPresupuesto() {
 
     const catEmoji = getCatEmoji(cat, '');
     return `<tr class="${rowCls}">
-      <td><span style="display:inline-flex;align-items:center;gap:7px">${catEmoji ? `<span style="font-size:1.05rem;width:24px;text-align:center">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}<span>${cat}</span></span>${pacingHtml}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:7px">${catEmoji ? `<span style="font-size:1.05rem;width:24px;text-align:center">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}<span>${escapeHtml(cat)}</span></span>${pacingHtml}</td>
       <td style="text-align:right">
         <div style="display:flex;align-items:center;justify-content:flex-end;gap:.3rem">
           <span style="color:var(--text-muted);font-size:.8rem">$</span>
-          <input type="text" inputmode="decimal" class="pres-input" data-cat="${cat}"
+          <input type="text" inputmode="decimal" class="pres-input" data-cat="${escapeHtml(cat)}"
                  value="${pres > 0 ? String(pres).replace('.', ',') : ''}" placeholder="—"
                  style="max-width:88px" oninput="actualizarKpisPres()">
         </div>
@@ -7864,7 +7864,7 @@ function _renderMMCats(gastoPorCat, sueldoEfectivo) {
       <div class="mm-cat-top">
         <div class="mm-cat-icon">${emoji}</div>
         <div style="flex:1">
-          <div class="mm-cat-name">${cat}</div>
+          <div class="mm-cat-name">${escapeHtml(cat)}</div>
           <div class="mm-cat-rest">${restText}</div>
         </div>
         ${presARS > 0 ? `<div class="mm-cat-pct" style="color:${pctColor}">${pctNum}%</div>` : ''}
