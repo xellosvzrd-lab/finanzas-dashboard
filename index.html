@@ -7184,7 +7184,7 @@ function sugerirPresupuestoDesdeHistorial() {
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     const ingUSD = dataMesU.filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD").reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     const gasUSD = dataMesU.filter(t => t.tipo === "Gasto"   && !esTransferencia(t) && (t.moneda || "ARS") === "USD").reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    const usdARS = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? (ingUSD - gasUSD) * tipoCambioMEP : 0;
+    const usdARS = PREF_USD_MEP && tipoCambioMEP ? (ingUSD - gasUSD) * tipoCambioMEP : 0;
     const sueldo = sueldoARS + usdARS;
     if (sueldo <= 0) return;
 
@@ -7379,7 +7379,7 @@ function renderPresupuesto() {
   const ingresosUSDPres = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const usdEnARSPres = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? ingresosUSDPres * tipoCambioMEP : 0;
+  const usdEnARSPres = PREF_USD_MEP && tipoCambioMEP ? ingresosUSDPres * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSPres;
 
   // Gasto efectivo por categoría usando lógica de responsabilidad:
@@ -7442,7 +7442,7 @@ function renderPresupuesto() {
 
   // Gastos USD de Ama convertidos a ARS (sus propios "Mío" + 50% compartidos; NO los "De Ama" que paga Daniel)
   let gastoUSDEnARS = 0;
-  if (USUARIO.toLowerCase() === "ama" && tipoCambioMEP) {
+  if (PREF_USD_MEP && tipoCambioMEP) {
     const gasUSDMio = dataMesDaniel
       .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
                && (t.responsabilidad || "Mío") === "Mío")
@@ -7512,7 +7512,7 @@ function renderPresupuesto() {
   animateKPI(document.getElementById("pres-kpi-sueldo"), sueldoEfectivo, fmt);
   const sublSueldo = document.getElementById("pres-kpi-sueldo-sub");
   if (sublSueldo) {
-    sublSueldo.textContent = USUARIO.toLowerCase() === "ama" && tipoCambioMEP && ingresosUSDPres > 0
+    sublSueldo.textContent = PREF_USD_MEP && tipoCambioMEP && ingresosUSDPres > 0
       ? `ARS + ${fmtMoneda(ingresosUSDPres,"USD")} × $${Math.round(tipoCambioMEP).toLocaleString("es-AR")} MEP`
       : "ingresos del mes";
   }
@@ -7895,7 +7895,7 @@ function actualizarKpisPres() {
   const ingUSDKpi = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const usdEnARSKpi = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? ingUSDKpi * tipoCambioMEP : 0;
+  const usdEnARSKpi = PREF_USD_MEP && tipoCambioMEP ? ingUSDKpi * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSKpi;
 
   const gastoPorCat = {};
@@ -7950,7 +7950,7 @@ function actualizarKpisPres() {
   });
 
   let gastoUSDEnARSKpi = 0;
-  if (USUARIO.toLowerCase() === "ama" && tipoCambioMEP) {
+  if (PREF_USD_MEP && tipoCambioMEP) {
     const gasUSDMioKpi = dataMesDaniel
       .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
                && (t.responsabilidad || "Mío") === "Mío")
