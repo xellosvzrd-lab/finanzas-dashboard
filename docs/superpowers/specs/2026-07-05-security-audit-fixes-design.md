@@ -2,18 +2,18 @@
 
 **Date:** 2026-07-05
 **Branch:** `fix/security-audit-julio` (off `main`)
-**Scope:** 5 pre-specified security fixes from a completed audit, applied to `index.html` only.
+**Scope:** 6 pre-specified security fixes from a completed audit, applied to `index.html` only.
 
 ## Overview
 
-A completed security audit of the finanzas dashboard identified five issues in the single-file
+A completed security audit of the finanzas dashboard identified six issues in the single-file
 vanilla HTML/CSS/JS app (`index.html`, ~10,423 lines). This document specifies each fix precisely.
 The fixes are already fully determined by the audit — this design captures the verified current
 state of the code, the exact change per fix, and the global constraints. There is no open design
 space; the value of this doc is accuracy of the change specification and the constraints that keep
 the work minimal and safe.
 
-The five issues:
+The six issues:
 
 | # | Severity | Issue | Location |
 |---|----------|-------|----------|
@@ -22,6 +22,14 @@ The five issues:
 | 3 | MEDIUM | CSV export formula injection | `exportarCSV()` 5502–5546 |
 | 4 | MEDIUM | Missing SRI on 4 CDN `<script>` tags | lines 20–22, 2504 |
 | 5 | MEDIUM-HIGH | Financial data left in localStorage after logout | `volverConfig()` 4252–4260 |
+| 6 | LOW-MEDIUM | CSV formula injection in template download | `descargarTemplateCSV()` ~8464–8483 |
+
+**Note — `fp_sb_password` finding withdrawn:** an earlier draft of this document flagged
+`fp_sb_password` as a plaintext-password-in-localStorage risk. Re-verified directly against
+`index.html`: there is no `localStorage.setItem("fp_sb_password", ...)` anywhere in the file — only
+two defensive `localStorage.removeItem("fp_sb_password")` calls (lines ~4180, ~4357), consistent with
+commit `5baa642` ("security: remove plaintext password from localStorage, add XSS escaping") already
+having fixed this. This is not a real finding and no task in this plan addresses it.
 
 ## Global Constraints
 
@@ -130,13 +138,12 @@ const esc = v => {
 This prefixes a single quote to any value beginning with `=`, `+`, `-`, or `@` **before** quote-escaping
 and wrapping, neutralizing formula interpretation in Excel/Sheets. Apply **only** inside `exportarCSV()`.
 
-**Additional site noted, NOT fixed in this task:** `descargarTemplateCSV()` (line ~8469) builds a
-second `;`-delimited CSV via `new Blob([lineas.join("\n")]...)` at line ~8480, raw-interpolating user
-category/fuente names (`catEj`, `fuenteEj`, `fuenteTC`) with no `esc` helper at all. It is a genuine but
-lower-risk formula-injection candidate (template/example download). It is a **different shape** from
-`exportarCSV()` (no BOM, no quote-escaping, `;` delimiter), so it is not a "confirmed identical
-duplicate." Per the audit's instruction it is flagged here for the human to decide separately and is
-explicitly out of scope for Fix 3.
+**Related site, fixed separately as Fix 6:** `descargarTemplateCSV()` (line ~8464) builds a second
+`;`-delimited CSV via `new Blob([lineas.join("\n")]...)` at line ~8480, raw-interpolating category/fuente
+names (`catEj`, `fuenteEj`, `fuenteTC`) with no `esc` helper at all. It is a **different shape** from
+`exportarCSV()` (no BOM, no quote-wrapping at all — the fields aren't even quote-wrapped, unlike
+`exportarCSV()`'s quoted-CSV output), so it needs its own narrower guard rather than reusing `esc`. See
+Fix 6 below.
 
 ### Fix 4 — Missing SRI on CDN scripts (MEDIUM)
 
@@ -183,17 +190,43 @@ computer cannot read the prior session's financial data via devtools.
 | `fp_fil_mes/anio/tipo/fuente/resp/buscar` | 4669–4674 | filter selections (UI) | no |
 | `fp_invite_token` | 4120, 10326+ | invite flow token | no |
 | `fp_sb_email` | 4149, 4179 | remembered login email | no |
-| `fp_sb_password` | 4180, 4357 | login password (see note) | no |
+| `fp_sb_password` | 4180, 4357 | never set — only defensive `removeItem` calls (already fixed, commit `5baa642`) | n/a |
 
 Only `fp_transac_cache` and `fp_categ_cache` hold financial data. The `fp_sel_*`/`fp_fil_*` keys are UI
 preferences (month, year, filters) — not a data-exposure risk, and clearing them would degrade UX on
 next login for no security benefit. `fp_invite_token`/`fp_sb_email` are low-sensitivity. This fix clears
 **only** the two cache keys; it does not clear anything else.
 
-**Out-of-scope observation (flag to human):** `fp_sb_password` is written to `localStorage` in the login
-path and removed on successful login (line 4180). A plaintext password in `localStorage`, even
-transiently, is a separate finding worth a dedicated review — it is NOT part of these 5 fixes and this
-plan does not touch it.
+### Fix 6 — CSV formula injection in template download (LOW-MEDIUM)
+
+`descargarTemplateCSV()` (index.html:8464-8483) builds a static 3-line CSV template for the user to
+fill in and re-import. It interpolates:
+
+- `catEj = categGasto[0] || "Alimentación"` — a category name
+- `fuenteEj = categFuentes[0] || "Efectivo"` — a fuente name
+- `fuenteTC = categFuentesTC[0] || ""` — a fuente (tarjeta de crédito) name
+
+directly into `;`-delimited template-literal lines (lines ~8474, ~8477, ~8478), with **no
+quoting/escaping of any kind** — unlike `exportarCSV()`, these values aren't even wrapped in quotes.
+Category and fuente names are shared workspace data: either partner can rename a category via the
+category manager to a string like `=cmd|'/c calc'!A0`, and the next time either partner downloads the
+template, that string lands in the CSV unescaped, executing as a formula when opened in Excel/Sheets.
+Same vector class as Fix 3, against category/fuente names instead of transaction fields, and against
+the template/example download instead of the export download. Confirmed real; genuinely lower severity
+than Fix 3 (fewer values interpolated, template downloads are less frequent than exports), hence
+LOW-MEDIUM.
+
+Because this file has no quote-wrapping at all (reusing `exportarCSV()`'s `esc` would introduce
+quote-wrapping into a file format that doesn't use it, changing the template's shape), the fix is a
+narrower, dedicated guard:
+
+```js
+const csvSafe = v => /^[=+\-@]/.test(String(v ?? "")) ? "'" + v : (v ?? "");
+```
+
+Apply `csvSafe()` around `catEj`, `fuenteEj`, and `fuenteTC` at their points of interpolation in the
+`lineas` array. The literal `"Sueldo"` in the second example line is a fixed string, not user data —
+leave it unwrapped.
 
 ## Testing Strategy
 
@@ -210,10 +243,14 @@ Per-fix functional verification is manual (documented per task in the plan):
   console-error check is a manual human follow-up.
 - Fix 5: log in, confirm cache keys exist in devtools → Application → Local Storage, log out, confirm
   both keys are gone.
+- Fix 6: download the template CSV after renaming a category to `=1+1`; confirm the corresponding
+  cell in the downloaded file begins with a leading `'`.
 
 ## Task Breakdown & Order
 
-Five independent tasks touching disjoint line ranges. Order: **Fix 1 → Fix 2 → Fix 3 → Fix 5 → Fix 4.**
-Fixes 1/2/3/5 are mechanical with no external dependency and go first. Fix 4 is last because it needs
-network access (`curl`) to resolve the Supabase version and compute SRI hashes; agents in this
-environment do have `curl` access, but keeping it last isolates the only network-dependent step.
+Six independent tasks touching disjoint line ranges. Order: **Fix 1 → Fix 2 → Fix 3 → Fix 5 → Fix 4 →
+Fix 6.** Fixes 1/2/3/5/6 are mechanical with no external dependency; Fix 4 is placed before Fix 6 because
+it needs network access (`curl`) to resolve the Supabase version and compute SRI hashes — agents in
+this environment do have `curl` access, but isolating the network-dependent step keeps the rest of the
+run offline-safe. Fix 6 is last since it was added after the rest of the plan was finalized and is
+independent of every other fix.

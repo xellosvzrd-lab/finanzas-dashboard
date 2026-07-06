@@ -2,9 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Apply five pre-specified security fixes (2× XSS, CSV formula injection, missing SRI, localStorage data-leak on logout) to the deployed single-file app `index.html`.
+**Goal:** Apply six pre-specified security fixes (2× XSS, 2× CSV formula injection, missing SRI, localStorage data-leak on logout) to the deployed single-file app `index.html`.
 
-**Architecture:** Each fix is a minimal, surgical edit to `index.html` (~10,423-line vanilla HTML/CSS/JS). Fixes 1/2 reuse the existing `escapeHtml()` at output sites; Fix 3 hardens the CSV `esc` helper; Fix 4 pins the Supabase CDN version and adds SRI to 4 `<script>` tags; Fix 5 clears two financial-data cache keys on logout. No build step; edits go directly into the deployed file.
+**Architecture:** Each fix is a minimal, surgical edit to `index.html` (~10,423-line vanilla HTML/CSS/JS). Fixes 1/2 reuse the existing `escapeHtml()` at output sites; Fix 3 hardens the CSV `esc` helper in `exportarCSV()`; Fix 4 pins the Supabase CDN version and adds SRI to 4 `<script>` tags; Fix 5 clears two financial-data cache keys on logout; Fix 6 adds a dedicated `csvSafe()` guard to the unrelated `descargarTemplateCSV()` template builder. No build step; edits go directly into the deployed file.
+
+**Note:** an earlier draft flagged `fp_sb_password` as a plaintext-password-in-localStorage risk. Re-verified against `index.html`: there is no `setItem("fp_sb_password", ...)` anywhere — only two defensive `removeItem` calls (lines ~4180, ~4357), consistent with commit `5baa642` having already fixed this. It is not a real finding and has no task in this plan.
 
 **Tech Stack:** Vanilla HTML/CSS/JS, Supabase JS SDK (CDN), Chart.js/canvas-confetti/lucide (CDN), `node` for the syntax check, `curl`+`openssl` for SRI hashing.
 
@@ -195,7 +197,7 @@ Run:
 ```bash
 grep -n "if (/^\[=+\\\\-@\]/.test(s))" index.html
 ```
-Expected: exactly one match, within `exportarCSV()`. The `descargarTemplateCSV()` function (~8469) is NOT modified in this task (see design doc — flagged separately for the human).
+Expected: exactly one match, within `exportarCSV()`. The `descargarTemplateCSV()` function (~8464) is NOT modified in this task — it is fixed separately in Task 6 with its own dedicated guard (see design doc, Fix 6).
 
 - [ ] **Step 4: Run the syntax check**
 
@@ -372,7 +374,113 @@ Record for the human: no browser automation exists in this environment, so the f
 
 ---
 
-## Post-Plan Notes for the Human (out of scope for the 5 tasks)
+### Task 6: Guard CSV template download against formula injection (Fix 6 — LOW-MEDIUM)
 
-- **`descargarTemplateCSV()` (~line 8480)** builds a second `;`-delimited CSV that raw-interpolates user category/fuente names with no escaping — a lower-risk formula-injection candidate, different in shape from `exportarCSV()`. Not fixed here; decide separately whether to guard it.
-- **`fp_sb_password`** is written to `localStorage` in the login path (removed on success, line ~4180). A plaintext password in localStorage, even transiently, is a separate finding worth its own review. Not touched by these fixes.
+**Files:**
+- Modify: `index.html` — `descargarTemplateCSV()` (audit ~8464-8483)
+
+**Interfaces:**
+- Consumes: nothing existing. Produces a new local const `csvSafe` scoped inside `descargarTemplateCSV()` only — not exported, not reused elsewhere (do not hoist it to module/global scope; it is deliberately narrower than `exportarCSV()`'s `esc` because this file has no quote-wrapping).
+
+- [ ] **Step 1: Locate the current function and confirm exact line numbers**
+
+Run:
+```bash
+grep -n 'function descargarTemplateCSV' index.html
+sed -n '/function descargarTemplateCSV/,/^}/p' index.html
+```
+Expected: `descargarTemplateCSV()` starting at ~line 8464, with body:
+```js
+function descargarTemplateCSV() {
+  const hoy  = new Date();
+  const mes  = String(hoy.getMonth() + 1).padStart(2, "0");
+  const anio = hoy.getFullYear();
+  const fuenteEj = categFuentes[0]   || "Efectivo";
+  const fuenteTC = categFuentesTC[0] || "";
+  const catEj    = categGasto[0]     || "Alimentación";
+  // mes_liquidacion: solo para TC y solo cuando la fecha de compra ≠ mes del resumen
+  const lineas = [
+    "fecha;tipo;categoria;monto;descripcion;responsabilidad;fuente;moneda;mes_liquidacion",
+    `15/${mes}/${anio};Gasto;${catEj};4500;Ejemplo gasto;Mío;${fuenteEj};ARS;`,
+    `01/${mes}/${anio};Ingreso;Sueldo;180000;Sueldo ${mes}/${anio};Mío;;ARS;`,
+    fuenteTC
+      ? `15/01/${anio};Gasto;${catEj};8000;Compra enero en TC;Mío;${fuenteTC};ARS;${anio}-${mes}`
+      : `15/01/${anio};Gasto;${catEj};8000;Compra TC (mes_liq distinto);Mío;;ARS;${anio}-${mes}`,
+  ];
+  const blob = new Blob([lineas.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url; a.download = `template-${anio}-${mes}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+```
+If the current text differs from this (lines may have shifted from other tasks' edits), use the actual current text as the basis for Step 2's replacements — match on the unique surrounding tokens (`categFuentes[0]`, `categFuentesTC[0]`, `categGasto[0]`, the `lineas` array), not on line numbers.
+
+- [ ] **Step 2: Add the `csvSafe` guard and wrap the three interpolated values**
+
+Replace the function body with:
+
+```js
+function descargarTemplateCSV() {
+  const hoy  = new Date();
+  const mes  = String(hoy.getMonth() + 1).padStart(2, "0");
+  const anio = hoy.getFullYear();
+  const fuenteEj = categFuentes[0]   || "Efectivo";
+  const fuenteTC = categFuentesTC[0] || "";
+  const catEj    = categGasto[0]     || "Alimentación";
+  const csvSafe = v => /^[=+\-@]/.test(String(v ?? "")) ? "'" + v : (v ?? "");
+  // mes_liquidacion: solo para TC y solo cuando la fecha de compra ≠ mes del resumen
+  const lineas = [
+    "fecha;tipo;categoria;monto;descripcion;responsabilidad;fuente;moneda;mes_liquidacion",
+    `15/${mes}/${anio};Gasto;${csvSafe(catEj)};4500;Ejemplo gasto;Mío;${csvSafe(fuenteEj)};ARS;`,
+    `01/${mes}/${anio};Ingreso;Sueldo;180000;Sueldo ${mes}/${anio};Mío;;ARS;`,
+    fuenteTC
+      ? `15/01/${anio};Gasto;${csvSafe(catEj)};8000;Compra enero en TC;Mío;${csvSafe(fuenteTC)};ARS;${anio}-${mes}`
+      : `15/01/${anio};Gasto;${csvSafe(catEj)};8000;Compra TC (mes_liq distinto);Mío;;ARS;${anio}-${mes}`,
+  ];
+  const blob = new Blob([lineas.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url; a.download = `template-${anio}-${mes}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+```
+
+Note what changed: added the `csvSafe` const; wrapped every `${catEj}` (3 occurrences), `${fuenteEj}` (1 occurrence), and `${fuenteTC}` (1 occurrence, in the `fuenteTC ? ... : ...` branch) with `csvSafe(...)`. The fixed literal `"Sueldo"` in the second `lineas` entry is NOT wrapped — it is not user-controlled data. `mes`, `anio`, and all the other fixed strings (`"Gasto"`, `"Ingreso"`, `"Mío"`, `"ARS"`, amounts, descriptions) are unchanged.
+
+- [ ] **Step 3: Verify the guard and wrapping**
+
+Run:
+```bash
+grep -n 'const csvSafe' index.html
+grep -c 'csvSafe(catEj)\|csvSafe(fuenteEj)\|csvSafe(fuenteTC)' index.html
+```
+Expected: one `const csvSafe = ...` line inside `descargarTemplateCSV()`; the count command reports 5 (3× `csvSafe(catEj)`, 1× `csvSafe(fuenteEj)`, 1× `csvSafe(fuenteTC)`). Confirm `csvSafe` is not defined anywhere else and not called outside this function:
+```bash
+grep -n 'csvSafe' index.html
+```
+Expected: all matches are inside `descargarTemplateCSV()` (the definition plus its 5 call sites — 6 lines total, though 3 calls to `catEj` land on 3 different `lineas` entries).
+
+- [ ] **Step 4: Run the syntax check**
+
+Run the Global Constraints syntax-check command.
+Expected: `Checked 2 inline <script> blocks, 0 with errors.` (exit 0).
+
+- [ ] **Step 5: Manual functional check (optional)**
+
+In the app's category manager, rename (or create) a gasto category to `=1+1`, then click "Descargar template" (or the equivalent template-download control). Open the downloaded CSV in a text editor and confirm the `categoria` field in the example rows reads `'=1+1` (leading single quote, no quote-wrapping since this file format has none). Browser step; note "pending" if unavailable.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add index.html
+git commit -m "fix(security): neutralizar inyección de fórmulas en template CSV de importación
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
+```
+
+---
+
+## Post-Plan Notes for the Human (out of scope for these 6 tasks)
+
+- **`fp_sb_password` — verified false alarm, no action needed.** An earlier draft of this plan flagged it as a plaintext-password-in-localStorage risk. Direct grep against `index.html` found no `setItem("fp_sb_password", ...)` anywhere — only two defensive `removeItem` calls (lines ~4180, ~4357), consistent with commit `5baa642` ("security: remove plaintext password from localStorage, add XSS escaping") already having addressed this. Nothing to do here.
