@@ -1852,6 +1852,26 @@
   #edit-msg { font-size: .82rem; padding: .3rem 0; min-height: 1.2rem; }
 
   /* ─── TOP NAV ────────────────────────────────────────── */
+  .page-title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.8rem;
+    background: var(--card);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    border-bottom: 1px solid var(--border);
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 101;
+  }
+  .page-title-bar-brand { display: flex; align-items: center; gap: .5rem; font-weight: 700; color: var(--text); }
+  .page-title-bar-logo-icon { font-size: 1.1rem; }
+  .page-title-bar-logo-text { font-family: var(--font-display); font-size: .95rem; }
+  .page-title-bar-current { font-weight: 700; font-size: .92rem; color: var(--text); }
+  @media (max-width: 768px) { .page-title-bar { display: none; } }
+
   .topnav {
     display: flex;
     align-items: center;
@@ -1863,7 +1883,7 @@
     border-bottom: 1px solid var(--border);
     height: 62px;
     position: sticky;
-    top: 0;
+    top: 52px;
     z-index: 100;
   }
   .topnav-brand {
@@ -2648,6 +2668,15 @@
   </div>
   <hr class="mobile-drawer-sep">
   <button class="mobile-drawer-logout" onclick="volverConfig()">🚪 Cerrar sesión</button>
+</div>
+
+<!-- Franja de título (desktop) — queda arriba de todo, el topnav debajo -->
+<div class="page-title-bar" id="page-title-bar">
+  <div class="page-title-bar-brand">
+    <span class="page-title-bar-logo-icon">💰</span>
+    <span class="page-title-bar-logo-text">Finanzas</span>
+  </div>
+  <span class="page-title-bar-current" id="page-title-bar-current">Mi mes</span>
 </div>
 
 <!-- Top nav (desktop) -->
@@ -4529,13 +4558,13 @@ function _actualizarStringsUsuario() {
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) sidebarUser.textContent = USUARIO;
   const greeting = document.getElementById("mm-greeting");
-  if (greeting) greeting.textContent = "Hola 👋";
+  if (greeting) greeting.textContent = `Hola, ${USUARIO} 👋`;
   const sidebarAvatar = document.getElementById("sidebar-avatar");
   if (sidebarAvatar) sidebarAvatar.textContent = USUARIO.charAt(0).toUpperCase();
   const drawerName = document.getElementById("mobile-drawer-name");
   if (drawerName) drawerName.textContent = USUARIO;
   const topnavUser = document.getElementById("topnav-user");
-  if (topnavUser) topnavUser.textContent = USUARIO;
+  if (topnavUser) topnavUser.textContent = "";
   const _eyebrowMeses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
   const _eyebrowNow = new Date();
   const _eyebrowBase = `${_eyebrowMeses[_eyebrowNow.getMonth()]} ${_eyebrowNow.getFullYear()} · ${USUARIO.toUpperCase()}`;
@@ -4588,7 +4617,7 @@ async function iniciarApp() {
   document.getElementById("setup-screen").style.display = "none";
   document.getElementById("app").style.display = "block";
   if (USUARIO) { const su = document.getElementById("sidebar-user"); if (su) su.textContent = USUARIO; }
-  if (USUARIO) { const tu = document.getElementById("topnav-user"); if (tu) tu.textContent = USUARIO; }
+  if (USUARIO) { const tu = document.getElementById("topnav-user"); if (tu) tu.textContent = ""; }
   if (window.innerWidth <= 768) {
     document.getElementById("mobile-header").style.display = "flex";
   }
@@ -6968,6 +6997,7 @@ function cargarAnual() {
 }
 
 const _navOrder = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
+const _navLabel = { presupuesto: "Mi mes", transacciones: "Transacciones", compartidos: "Compartidos", config: "Categorías", inversiones: "Inversiones", resumen: "Resumen" };
 let   _paginaActual = "presupuesto";
 
 function _actualizarNavIndicator() {
@@ -6997,6 +7027,9 @@ function navegarA(pagina) {
   const nextOrder = _navOrder[pagina] ?? -1;
   const goingBack = nextOrder !== -1 && prevOrder !== -1 && nextOrder < prevOrder;
   _paginaActual = pagina;
+
+  const titleBarCurrent = document.getElementById("page-title-bar-current");
+  if (titleBarCurrent) titleBarCurrent.textContent = _navLabel[pagina] || "";
 
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active", "dir-back"));
   const page = document.getElementById("page-" + pagina);
