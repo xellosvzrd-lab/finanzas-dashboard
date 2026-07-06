@@ -1852,26 +1852,6 @@
   #edit-msg { font-size: .82rem; padding: .3rem 0; min-height: 1.2rem; }
 
   /* ─── TOP NAV ────────────────────────────────────────── */
-  .page-title-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.8rem;
-    background: var(--card);
-    backdrop-filter: blur(var(--card-blur)) saturate(160%);
-    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-    border-bottom: 1px solid var(--border);
-    height: 52px;
-    position: sticky;
-    top: 0;
-    z-index: 101;
-  }
-  .page-title-bar-brand { display: flex; align-items: center; gap: .5rem; font-weight: 700; color: var(--text); }
-  .page-title-bar-logo-icon { font-size: 1.1rem; }
-  .page-title-bar-logo-text { font-family: var(--font-display); font-size: .95rem; }
-  .page-title-bar-current { font-weight: 700; font-size: .92rem; color: var(--text); }
-  @media (max-width: 768px) { .page-title-bar { display: none; } }
-
   .topnav {
     display: flex;
     align-items: center;
@@ -1883,8 +1863,9 @@
     border-bottom: 1px solid var(--border);
     height: 62px;
     position: sticky;
-    top: 52px;
+    top: 0;
     z-index: 100;
+    margin-bottom: 18px;
   }
   .topnav-brand {
     font-weight: 800;
@@ -2671,15 +2652,7 @@
 </div>
 
 <!-- Franja de título (desktop) — queda arriba de todo, el topnav debajo -->
-<div class="page-title-bar" id="page-title-bar">
-  <div class="page-title-bar-brand">
-    <span class="page-title-bar-logo-icon">💰</span>
-    <span class="page-title-bar-logo-text">Finanzas</span>
-  </div>
-  <span class="page-title-bar-current" id="page-title-bar-current">Mi mes</span>
-</div>
-
-<!-- Top nav (desktop) -->
+<!-- Top nav (desktop) — se reubica por JS debajo del header de cada página (ver navegarA) -->
 <nav class="topnav" id="topnav">
   <div class="topnav-brand">
     <span id="topnav-user"></span>
@@ -6997,7 +6970,6 @@ function cargarAnual() {
 }
 
 const _navOrder = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
-const _navLabel = { presupuesto: "Mi mes", transacciones: "Transacciones", compartidos: "Compartidos", config: "Categorías", inversiones: "Inversiones", resumen: "Resumen" };
 let   _paginaActual = "presupuesto";
 
 function _actualizarNavIndicator() {
@@ -7028,14 +7000,17 @@ function navegarA(pagina) {
   const goingBack = nextOrder !== -1 && prevOrder !== -1 && nextOrder < prevOrder;
   _paginaActual = pagina;
 
-  const titleBarCurrent = document.getElementById("page-title-bar-current");
-  if (titleBarCurrent) titleBarCurrent.textContent = _navLabel[pagina] || "";
-
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active", "dir-back"));
   const page = document.getElementById("page-" + pagina);
   if (page) {
     if (goingBack) page.classList.add("dir-back");
     page.classList.add("active");
+    // Reubicar el topnav debajo del encabezado propio de esta página (mismo elemento, se mueve)
+    const topnavEl = document.getElementById("topnav");
+    if (topnavEl && window.innerWidth >= 769) {
+      const header = page.firstElementChild;
+      if (header) page.insertBefore(topnavEl, header.nextElementSibling);
+    }
   }
 
   // Top nav (desktop) — 4 tabs en orden: presupuesto, transacciones, compartidos, config
