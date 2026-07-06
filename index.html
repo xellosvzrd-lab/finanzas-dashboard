@@ -5529,7 +5529,11 @@ function exportarCSV() {
   if (!datos.length) { showToast("Sin datos para exportar", "err"); return; }
 
   const cols = ["Fecha","Tipo","Categoría","Monto","Moneda","Fuente","Responsabilidad","Descripción"];
-  const esc  = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
+  const esc  = v => {
+    let s = String(v ?? "");
+    if (/^[=+\-@]/.test(s)) s = "'" + s;
+    return `"${s.replace(/"/g,'""')}"`;
+  };
   const rows = datos.map(t => [
     t.fecha, t.tipo, t.categoria, t.monto, t.moneda || "ARS",
     t.fuente || "", t.responsabilidad || "Mío", t.descripcion || ""
