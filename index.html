@@ -4377,14 +4377,14 @@ function _aplicarCacheCateg(catData) {
   // (f-responsabilidad ahora es hidden input + radio buttons — se inicializa en inicializarRespButtons)
   const filResp = document.getElementById("fil-resp");
   if (filResp) filResp.innerHTML = '<option value="">Todas</option>' +
-    categResponsabilidad.map(rv => `<option value="${rv}">${rv}</option>`).join("");
+    categResponsabilidad.map(rv => `<option value="${escapeHtml(rv)}">${escapeHtml(rv)}</option>`).join("");
   const todasFuentes = [...categFuentes, ...categFuentesTC];
   const selFuente = document.getElementById("f-fuente");
   if (selFuente) selFuente.innerHTML = '<option value="">— Sin especificar —</option>' +
-    todasFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+    todasFuentes.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
   const filFuente = document.getElementById("fil-fuente");
   if (filFuente) filFuente.innerHTML = '<option value="">Todas las fuentes</option>' +
-    todasFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+    todasFuentes.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
   _restaurarFiltros();
 }
 
@@ -5653,7 +5653,7 @@ function abrirEditorTransaccion(id) {
 
   document.getElementById("edit-tipo").onchange = function() {
     const cs = this.value === "Gasto" ? categGasto : categIngreso;
-    selCat.innerHTML = cs.map(c => `<option value="${c}">${c}</option>`).join("");
+    selCat.innerHTML = cs.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
   };
 
   const editMesLiqErr = document.getElementById("edit-mes-liq-err");
@@ -5753,7 +5753,7 @@ function setTipo(tipo) {
   // Actualizar categorías
   const cats = tipo === "Gasto" ? categGasto : categIngreso;
   const sel  = document.getElementById("f-categoria");
-  sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join("");
+  sel.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
 }
 
 async function guardarTransaccion() {
@@ -5980,12 +5980,12 @@ function cerrarRafaga() {
 
 function _optsCategRafaga(tipo) {
   const cats = tipo === "Ingreso" ? categIngreso : categGasto;
-  return cats.map(c => `<option value="${c}">${c}</option>`).join("");
+  return cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
 }
 
 function _optsFuenteRafaga() {
   return '<option value="">— Sin especificar —</option>' +
-    [...categFuentes, ...categFuentesTC].map(f => `<option value="${f}">${f}</option>`).join("");
+    [...categFuentes, ...categFuentesTC].map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
 }
 
 function _rafagaActualizarMesLiq(sel) {
@@ -6000,7 +6000,7 @@ function _rafagaActualizarMesLiq(sel) {
 }
 
 function _optsRespRafaga() {
-  return categResponsabilidad.map(r => `<option value="${r}">${r}</option>`).join("");
+  return categResponsabilidad.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join("");
 }
 
 function agregarFilaRafaga() {
@@ -6664,7 +6664,7 @@ function abrirLiquidar(cat, monto, tipo) {
       : `Registrar pago de ${fmt(monto)} a ${PARTNER}`;
   // Poblar fuentes (incluye tarjetas de crédito)
   const sel = document.getElementById("liq-fuente");
-  sel.innerHTML = [...categFuentes, ...categFuentesTC].map(f => `<option value="${f}">${f}</option>`).join("");
+  sel.innerHTML = [...categFuentes, ...categFuentesTC].map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
   const modal = document.getElementById("liq-modal");
   modal.style.display = "flex";
 }
@@ -6682,7 +6682,7 @@ function abrirSaldarTodo() {
   document.getElementById("liq-subtitulo").textContent =
     `Se crearán ${_settlementItems.length} transacción(es) — una por categoría`;
   const sel = document.getElementById("liq-fuente");
-  sel.innerHTML = [...(categFuentes||[]), ...(categFuentesTC||[])].map(f => `<option value="${f}">${f}</option>`).join("");
+  sel.innerHTML = [...(categFuentes||[]), ...(categFuentesTC||[])].map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
   const btn = document.getElementById("liq-confirmar-btn");
   if (btn) btn.onclick = confirmarSaldarTodo;
   document.getElementById("liq-modal").style.display = "flex";
@@ -8260,7 +8260,7 @@ function _refrescarSelectores() {
   if (selFuente) {
     const curVal = selFuente.value;
     selFuente.innerHTML = '<option value="">— Sin especificar —</option>' +
-      todasFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+      todasFuentes.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
     selFuente.value = curVal;
   }
   // Filtro fuente
@@ -8268,7 +8268,7 @@ function _refrescarSelectores() {
   if (filFuente) {
     const curVal = filFuente.value;
     filFuente.innerHTML = '<option value="">Todas las fuentes</option>' +
-      todasFuentes.map(f => `<option value="${f}">${f}</option>`).join("");
+      todasFuentes.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
     filFuente.value = curVal;
   }
   // Formulario categoría (según tipo actual)
@@ -8391,7 +8391,7 @@ function parsearImport() {
         <td>${escapeHtml(fechaRaw)}</td>
         <td class="${tipoClass}">${tipoNorm}</td>
         <td>${escapeHtml(categoria)}</td>
-        <td>${isNaN(monto) ? montoRaw : fmtMoneda(monto, monedaVal)}</td>
+        <td>${isNaN(monto) ? escapeHtml(montoRaw) : fmtMoneda(monto, monedaVal)}</td>
         <td>${escapeHtml(descripcion) || "—"}</td>
         <td>${escapeHtml(respVal)}</td>
         <td>${escapeHtml(fuente) || "—"}</td>
@@ -9984,15 +9984,15 @@ function _poblarSelectsModal() {
   const selResp = document.getElementById('modal-recur-resp');
   if (selCat) {
     selCat.innerHTML = '<option value="">Categoría…</option>' +
-      categGasto.map(c => `<option value="${c}">${c}</option>`).join('');
+      categGasto.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
   }
   if (selFte) {
     selFte.innerHTML = '<option value="">Fuente (opcional)</option>' +
-      categFuentes.map(f => `<option value="${f}">${f}</option>`).join('');
+      categFuentes.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
   }
   if (selResp) {
     selResp.innerHTML = categResponsabilidad
-      .map(r => `<option value="${r}">${r}</option>`).join('');
+      .map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
   }
 }
 
