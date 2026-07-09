@@ -2533,6 +2533,9 @@
     <div id="login-crear-cuenta-link" style="display:none;margin-top:.5rem;font-size:.83rem;color:var(--text-muted)">
       ¿Te invitaron a un workspace? <a href="#" onclick="mostrarRegistro();return false">Creá tu cuenta acá</a>
     </div>
+    <div id="aviso-navegador-embebido" style="display:none;margin-top:.5rem;font-size:.83rem;color:var(--red)">
+      ⚠️ Estás abriendo este link desde WhatsApp, Instagram u otra app. Si vas a usar "Continuar con Google", primero tocá los tres puntos (⋮) arriba a la derecha y elegí "Abrir en Chrome" — Google no deja iniciar sesión dentro de esas apps.
+    </div>
     <div class="login-divider">o</div>
     <button class="btn btn-google" id="btn-google-login" onclick="guardarConfigGoogle()">
       <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -4124,6 +4127,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (sessionStorage.getItem("fp_invite_token")) {
     const _link = document.getElementById("login-crear-cuenta-link");
     if (_link) _link.style.display = "block";
+    if (_esNavegadorEmbebido()) {
+      const _aviso = document.getElementById("aviso-navegador-embebido");
+      if (_aviso) _aviso.style.display = "block";
+    }
   }
 
   if (window.lucide) lucide.createIcons();
@@ -4186,9 +4193,21 @@ async function guardarConfig() {
   }
 }
 
+// Google bloquea el login OAuth dentro de navegadores embebidos (WebView de
+// WhatsApp, Instagram, Messenger, etc.) — el flujo puede iniciar pero la
+// sesión no persiste, y falla más adelante con un error confuso.
+const _MENSAJE_NAVEGADOR_EMBEBIDO = '❌ Estás abriendo esto desde WhatsApp, Instagram u otra app — Google no deja iniciar sesión ahí. Tocá los tres puntos (⋮) arriba a la derecha y elegí "Abrir en Chrome" (o "Abrir en el navegador"), y volvé a intentar.';
+function _esNavegadorEmbebido() {
+  return /FBAN|FBAV|Instagram|WhatsApp|Line\/|MicroMessenger|Twitter/i.test(navigator.userAgent || "");
+}
+
 async function guardarConfigGoogle() {
   const btn = document.getElementById('btn-google-login');
   const res = document.getElementById('google-login-result');
+  if (_esNavegadorEmbebido()) {
+    res.innerHTML = `<span class="fail">${_MENSAJE_NAVEGADOR_EMBEBIDO}</span>`;
+    return;
+  }
   btn.disabled = true;
   btn.querySelector('svg').nextSibling.textContent = ' Redirigiendo…';
   res.innerHTML = '';
@@ -4206,6 +4225,10 @@ async function guardarConfigGoogle() {
 async function vincularGoogle() {
   const btn = document.getElementById('btn-vincular-google');
   const res = document.getElementById('cuenta-msg');
+  if (_esNavegadorEmbebido()) {
+    if (res) res.innerHTML = `<span class="fail">${_MENSAJE_NAVEGADOR_EMBEBIDO}</span>`;
+    return;
+  }
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Redirigiendo…'; }
   const { error } = await supabaseClient.auth.linkIdentity({
     provider: 'google',
