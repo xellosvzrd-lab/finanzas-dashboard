@@ -4508,6 +4508,7 @@ function _logDiagnostico(contexto, detalle) {
 }
 
 async function _configurarUsuario(session) {
+  _logDiagnostico('_configurarUsuario:entrada', { tieneSessionParam: !!session, tieneNombre: !!session?.user?.user_metadata?.nombre, expiresAt: session?.expires_at });
   const metaNombre   = session.user.user_metadata?.nombre;
   const metaEmojis   = session.user.user_metadata?.cat_emojis;
   const isGoogleOnly = session.user.app_metadata?.provider === 'google'
