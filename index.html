@@ -4585,6 +4585,7 @@ function _actualizarStringsUsuario() {
 }
 
 async function guardarNombre() {
+  window._detenerPollModalNombre?.();
   const input = document.getElementById("input-nombre");
   const msg   = document.getElementById("modal-nombre-msg");
   const nombre = input.value.trim();
@@ -4641,6 +4642,16 @@ async function iniciarApp() {
   if (!USUARIO) {
     document.getElementById("modal-nombre").style.display = "flex";
     setTimeout(() => document.getElementById("input-nombre").focus(), 50);
+    // Diagnóstico temporal: chequea cada segundo si la sesión sigue viva
+    // mientras se muestra este modal, para encontrar el momento exacto en
+    // que desaparece sin depender de que se dispare (y se loguee) un evento.
+    let _pollSeg = 0;
+    const _pollId = setInterval(() => {
+      _pollSeg++;
+      _logDiagnostico('poll-modal-nombre', { segundo: _pollSeg });
+      if (_pollSeg >= 20) clearInterval(_pollId);
+    }, 1000);
+    window._detenerPollModalNombre = () => clearInterval(_pollId);
     return;
   }
 
