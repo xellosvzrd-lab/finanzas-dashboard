@@ -4459,6 +4459,13 @@ function _setVariablesUsuario(nombre) {
   if (_moon) _moon.style.display = _activeTheme === 'dark' ? 'none' : '';
 }
 
+// Detecta el error "Auth session missing!" de supabase-js (sesión perdida
+// entre pasos del login, ej. tras volver de un redirect OAuth en mobile).
+function _esErrorSesionPerdida(error) {
+  return error?.name === "AuthSessionMissingError" ||
+         /session missing/i.test(error?.message || "");
+}
+
 async function _configurarUsuario(session) {
   const metaNombre   = session.user.user_metadata?.nombre;
   const metaEmojis   = session.user.user_metadata?.cat_emojis;
@@ -4549,6 +4556,11 @@ async function guardarNombre() {
   const { error } = await supabaseClient.auth.updateUser({ data: { nombre } });
 
   if (error) {
+    if (_esErrorSesionPerdida(error)) {
+      msg.innerHTML = '<span style="color:var(--red)">Se cerró tu sesión justo en este paso. Tocá "Recargar" e iniciá sesión de nuevo — tu nombre no se perdió, solo hay que reintentar.</span>' +
+        '<button class="btn btn-primary" style="width:100%;margin-top:.6rem" onclick="location.reload()">Recargar →</button>';
+      return;
+    }
     msg.innerHTML = `<span style="color:var(--red)">Error: ${escapeHtml(error.message)}</span>`;
     return;
   }
