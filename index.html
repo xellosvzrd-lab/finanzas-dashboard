@@ -4545,9 +4545,11 @@ async function _configurarUsuario(session) {
   _logDiagnostico('_configurarUsuario:entrada', { tieneSessionParam: !!session, tieneNombre: !!session?.user?.user_metadata?.nombre, expiresAt: session?.expires_at });
   const metaNombre   = session.user.user_metadata?.nombre;
   const metaEmojis   = session.user.user_metadata?.cat_emojis;
+  const intentaCrearCuenta = sessionStorage.getItem('fp_signup_intent') === '1';
+  sessionStorage.removeItem('fp_signup_intent');
   const isGoogleOnly = session.user.app_metadata?.provider === 'google'
                     && !session.user.app_metadata?.providers?.includes('email');
-  if (isGoogleOnly && !metaNombre) {
+  if (isGoogleOnly && !metaNombre && !intentaCrearCuenta) {
     supabaseClient.auth.signOut();
     const res = document.getElementById('google-login-result') || document.getElementById('test-result');
     if (res) res.innerHTML = '<span class="fail">❌ Esta cuenta de Google no está vinculada a ningún usuario. Iniciá sesión con email y vinculá tu cuenta desde Categorías → Cuenta y Seguridad.</span>';
