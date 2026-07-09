@@ -4489,6 +4489,24 @@ function _esErrorSesionPerdida(error) {
          /session missing/i.test(error?.message || "");
 }
 
+// Log de diagnóstico temporal (tabla client_error_logs) para el bug
+// "Auth session missing!" reportado por Sabdy — captura evidencia real en
+// vez de seguir adivinando la causa. No bloquea ni afecta al usuario si falla.
+function _logDiagnostico(contexto, detalle) {
+  try {
+    supabaseClient.from('client_error_logs').insert({
+      contexto,
+      detalle: {
+        ...detalle,
+        ua: navigator.userAgent,
+        url: window.location.href,
+        supabaseSessionEnMemoria: !!supabaseSession,
+        localStorageSbKeys: Object.keys(localStorage).filter(k => k.startsWith('sb-')),
+      },
+    }).then(() => {}, () => {});
+  } catch (e) {}
+}
+
 async function _configurarUsuario(session) {
   const metaNombre   = session.user.user_metadata?.nombre;
   const metaEmojis   = session.user.user_metadata?.cat_emojis;
@@ -4580,6 +4598,7 @@ async function guardarNombre() {
 
   if (error) {
     if (_esErrorSesionPerdida(error)) {
+      _logDiagnostico('guardarNombre:auth_session_missing', { errorMensaje: error.message, errorNombre: error.name });
       msg.innerHTML = '<span style="color:var(--red)">Se cerró tu sesión justo en este paso. Tocá "Recargar" e iniciá sesión de nuevo — tu nombre no se perdió, solo hay que reintentar.</span>' +
         '<button class="btn btn-primary" style="width:100%;margin-top:.6rem" onclick="location.reload()">Recargar →</button>';
       return;
