@@ -8190,7 +8190,7 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
   const msgEl = document.getElementById("cfg-msg-" + tipoKey);
   try {
     const { error } = await supabaseClient
-      .from('categorias').delete().eq('tipo', tipoAPI).eq('valor', valor);
+      .from('categorias').delete().eq('tipo', tipoAPI).eq('valor', valor).eq('usuario', USUARIO);
     if (error) throw error;
     if      (tipoAPI === "GASTO")     categGasto     = categGasto.filter(x => x !== valor);
     else if (tipoAPI === "INGRESO")   categIngreso   = categIngreso.filter(x => x !== valor);
@@ -8296,7 +8296,8 @@ async function ejecutarReclasificarFuente(valor, tipoActual) {
       .from('categorias')
       .update({ tipo: nuevoTipo })
       .eq('tipo', tipoActual)
-      .eq('valor', valor);
+      .eq('valor', valor)
+      .eq('usuario', USUARIO);
     if (error) throw error;
 
     if (nuevoTipo === 'FUENTE_TC') {
