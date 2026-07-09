@@ -4141,6 +4141,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Detectar retorno desde email de recuperación de contraseña
   supabaseClient.auth.onAuthStateChange((event, session) => {
+    _logDiagnostico('onAuthStateChange', { event, tieneSession: !!session });
     if (session) supabaseSession = session;
     if (event === "PASSWORD_RECOVERY") {
       document.getElementById("setup-screen").style.display = "flex";
