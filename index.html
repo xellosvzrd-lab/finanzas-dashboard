@@ -10110,7 +10110,7 @@ async function cargarMetaAhorro() {
 function calcularProgresoMeta(meta) {
   const desde = new Date(meta.fecha_inicio);
   const total = allTransac
-    .filter(t => t.categoria === "Ahorro" && !esTransferencia(t) && new Date(t.fecha) >= desde)
+    .filter(t => t.usuario === USUARIO && t.categoria === "Ahorro" && !esTransferencia(t) && new Date(t.fecha) >= desde)
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
   const pct = meta.monto_objetivo > 0 ? Math.min(100, (total / meta.monto_objetivo) * 100) : 0;
   return { total, pct, restante: Math.max(0, meta.monto_objetivo - total) };
