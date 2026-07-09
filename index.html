@@ -4155,7 +4155,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // Detectar retorno desde email de recuperación de contraseña
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    _logDiagnostico('onAuthStateChange', { event, tieneSession: !!session });
     if (session) supabaseSession = session;
     if (event === "PASSWORD_RECOVERY") {
       document.getElementById("setup-screen").style.display = "flex";
@@ -4523,26 +4522,7 @@ function _esErrorSesionPerdida(error) {
          /session missing/i.test(error?.message || "");
 }
 
-// Log de diagnóstico temporal (tabla client_error_logs) para el bug
-// "Auth session missing!" reportado por Sabdy — captura evidencia real en
-// vez de seguir adivinando la causa. No bloquea ni afecta al usuario si falla.
-function _logDiagnostico(contexto, detalle) {
-  try {
-    supabaseClient.from('client_error_logs').insert({
-      contexto,
-      detalle: {
-        ...detalle,
-        ua: navigator.userAgent,
-        url: window.location.href,
-        supabaseSessionEnMemoria: !!supabaseSession,
-        localStorageSbKeys: Object.keys(localStorage).filter(k => k.startsWith('sb-')),
-      },
-    }).then(() => {}, () => {});
-  } catch (e) {}
-}
-
 async function _configurarUsuario(session) {
-  _logDiagnostico('_configurarUsuario:entrada', { tieneSessionParam: !!session, tieneNombre: !!session?.user?.user_metadata?.nombre, expiresAt: session?.expires_at });
   const metaNombre   = session.user.user_metadata?.nombre;
   const metaEmojis   = session.user.user_metadata?.cat_emojis;
   const intentaCrearCuenta = sessionStorage.getItem('fp_signup_intent') === '1';
@@ -4621,7 +4601,6 @@ function _actualizarStringsUsuario() {
 }
 
 async function guardarNombre() {
-  window._detenerPollModalNombre?.();
   const input = document.getElementById("input-nombre");
   const msg   = document.getElementById("modal-nombre-msg");
   const nombre = input.value.trim();
@@ -4637,7 +4616,6 @@ async function guardarNombre() {
 
   if (error) {
     if (_esErrorSesionPerdida(error)) {
-      _logDiagnostico('guardarNombre:auth_session_missing', { errorMensaje: error.message, errorNombre: error.name });
       msg.innerHTML = '<span style="color:var(--red)">Se cerró tu sesión justo en este paso. Tocá "Recargar" e iniciá sesión de nuevo — tu nombre no se perdió, solo hay que reintentar.</span>' +
         '<button class="btn btn-primary" style="width:100%;margin-top:.6rem" onclick="location.reload()">Recargar →</button>';
       return;
@@ -4678,16 +4656,6 @@ async function iniciarApp() {
   if (!USUARIO) {
     document.getElementById("modal-nombre").style.display = "flex";
     setTimeout(() => document.getElementById("input-nombre").focus(), 50);
-    // Diagnóstico temporal: chequea cada segundo si la sesión sigue viva
-    // mientras se muestra este modal, para encontrar el momento exacto en
-    // que desaparece sin depender de que se dispare (y se loguee) un evento.
-    let _pollSeg = 0;
-    const _pollId = setInterval(() => {
-      _pollSeg++;
-      _logDiagnostico('poll-modal-nombre', { segundo: _pollSeg });
-      if (_pollSeg >= 20) clearInterval(_pollId);
-    }, 1000);
-    window._detenerPollModalNombre = () => clearInterval(_pollId);
     return;
   }
 
