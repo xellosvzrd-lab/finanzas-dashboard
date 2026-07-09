@@ -5036,7 +5036,7 @@ async function cargarResumenMes() {
 
   renderCatChart(sortedCatsARS);
   renderDonutChart(ingresos, gastos, balance);
-  renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, ingresos);
+  renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, ingresos, dataMesAll);
 
   // Sparklines — últimos 6 meses
   renderSparklines(parseInt(mes), parseInt(anio));
@@ -5130,7 +5130,7 @@ function renderDonutChart(ingresos, gastos, balance) {
 }
 
 // ─── TOP GASTOS ───────────────────────────────────────────────
-function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
+function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase, dataMesAll) {
   const el = document.getElementById("top-gastos-list");
   if (!sortedCatsARS.length && !sortedCatsUSD.length) {
     el.innerHTML = '<div class="empty-state">Sin gastos este mes — buen comienzo ✓</div>';
@@ -5155,9 +5155,16 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
           presTag = `<span style="background:${dimBg};color:${color};border-radius:4px;padding:.1rem .35rem;font-size:.67rem;font-weight:700;margin-left:.35rem;white-space:nowrap;">${label} pres.</span>`;
         }
       }
-      const txsCat = datos
-        ? datos.filter(t => t.categoria === cat && !esTransferencia(t) && (t.moneda || "ARS").toUpperCase() === moneda)
-        : [];
+      // El total (val) es responsabilidad-aware: "Mío" propios + "Compartido" de
+      // ambos (×factor) + "De USUARIO". El drill-down debe listar EXACTAMENTE ese
+      // conjunto (desde dataMesAll), no solo lo propio — si no, una categoría con
+      // total>0 mostraba "(0 tx)".
+      const txsCat = (dataMesAll || datos || []).filter(t =>
+        t.categoria === cat && !esTransferencia(t)
+        && (t.moneda || "ARS").toUpperCase() === moneda
+        && ( ((t.responsabilidad || "Mío") === "Mío" && (t.usuario || "Daniel") === USUARIO)
+             || t.responsabilidad === "Compartido"
+             || t.responsabilidad === "De " + USUARIO ));
       const drillId = "drill-" + moneda + "-" + cat.replace(/\s+/g,"_");
       const drillRows = txsCat.map(t => {
         const esGasto = t.tipo === "Gasto";
