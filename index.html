@@ -3813,11 +3813,11 @@
           <tr>
             <th>#</th>
             <th>Fecha</th>
-            <th>Tipo</th>
-            <th>Categoría</th>
-            <th>Monto</th>
-            <th>Moneda</th>
             <th>Descripción</th>
+            <th>Moneda</th>
+            <th>Monto</th>
+            <th>Categoría</th>
+            <th>Tipo</th>
             <th>Resp.</th>
             <th>Fuente</th>
             <th></th>
@@ -3827,7 +3827,11 @@
       </table>
     </div>
     <div class="rafaga-footer">
-      <button class="rafaga-add-btn" onclick="agregarFilaRafaga()">+ Agregar fila</button>
+      <input type="number" id="rafaga-cant-agregar" min="1" value="1" step="1"
+             style="width:3.2rem;text-align:center;padding:.4rem .3rem;border-radius:8px;
+                    border:1px solid var(--border);background:var(--bg2);color:var(--text)"
+             aria-label="Cantidad de filas a agregar">
+      <button class="rafaga-add-btn" onclick="agregarFilasRafaga()">+ Agregar fila</button>
       <span class="rafaga-count" id="rafaga-count">3 filas</span>
       <button class="btn btn-outline" onclick="cerrarRafaga()" style="margin-left:auto">Cancelar</button>
       <button class="btn btn-primary" id="rafaga-guardar-btn" onclick="guardarRafaga()">Guardar todo (3)</button>
@@ -6087,26 +6091,25 @@ function _optsRespRafaga() {
 function agregarFilaRafaga() {
   const tbody = document.getElementById("rafaga-tbody");
   const idx   = tbody.children.length + 1;
-  const hoy   = new Date().toISOString().slice(0, 10);
   const tr    = document.createElement("tr");
   tr.innerHTML = `
     <td style="color:var(--text-muted);text-align:center;font-size:.73rem;padding:.3rem .2rem">${idx}</td>
-    <td><input type="date" class="rf-fecha" value="${hoy}" aria-label="Fecha fila ${idx}"></td>
-    <td>
-      <select class="rf-tipo" aria-label="Tipo fila ${idx}" onchange="this.closest('tr').querySelector('.rf-cat').innerHTML=_optsCategRafaga(this.value)">
-        <option value="Gasto">Gasto</option>
-        <option value="Ingreso">Ingreso</option>
-      </select>
-    </td>
-    <td><select class="rf-cat" aria-label="Categoría fila ${idx}">${_optsCategRafaga("Gasto")}</select></td>
-    <td><input type="text" inputmode="decimal" class="rf-monto" placeholder="0,00" aria-label="Monto fila ${idx}" oninput="formatearMiles(this)"></td>
+    <td><input type="date" class="rf-fecha" aria-label="Fecha fila ${idx}"></td>
+    <td><input type="text" class="rf-desc rafaga-desc" placeholder="Descripción opcional" aria-label="Descripción fila ${idx}"></td>
     <td>
       <select class="rf-moneda" aria-label="Moneda fila ${idx}">
         <option value="ARS">🇦🇷 ARS</option>
         <option value="USD">🇺🇸 USD</option>
       </select>
     </td>
-    <td><input type="text" class="rf-desc rafaga-desc" placeholder="Descripción opcional" aria-label="Descripción fila ${idx}"></td>
+    <td><input type="text" inputmode="decimal" class="rf-monto" placeholder="0,00" aria-label="Monto fila ${idx}" oninput="formatearMiles(this)"></td>
+    <td><select class="rf-cat" aria-label="Categoría fila ${idx}">${_optsCategRafaga("Gasto")}</select></td>
+    <td>
+      <select class="rf-tipo" aria-label="Tipo fila ${idx}" onchange="this.closest('tr').querySelector('.rf-cat').innerHTML=_optsCategRafaga(this.value)">
+        <option value="Gasto">Gasto</option>
+        <option value="Ingreso">Ingreso</option>
+      </select>
+    </td>
     <td><select class="rf-resp" aria-label="Responsabilidad fila ${idx}">${_optsRespRafaga()}</select></td>
     <td>
       <select class="rf-fuente" aria-label="Fuente fila ${idx}" onchange="_rafagaActualizarMesLiq(this)">${_optsFuenteRafaga()}</select>
@@ -6116,6 +6119,12 @@ function agregarFilaRafaga() {
   `;
   tbody.appendChild(tr);
   actualizarContadorRafaga();
+}
+
+function agregarFilasRafaga() {
+  const input = document.getElementById("rafaga-cant-agregar");
+  const cantidad = Math.max(1, parseInt(input?.value, 10) || 1);
+  for (let i = 0; i < cantidad; i++) agregarFilaRafaga();
 }
 
 function eliminarFilaRafaga(btn) {
