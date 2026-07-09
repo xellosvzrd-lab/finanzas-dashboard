@@ -4427,7 +4427,9 @@ function _aplicarCacheCateg(catData) {
   categIngreso         = catData.ingreso          || [];
   categFuentes         = catData.fuentes          || [];
   categFuentesTC       = catData.fuentesTC        || [];
-  categResponsabilidad = catData.responsabilidad  || categResponsabilidad;
+  // categResponsabilidad NO se restaura del cache: lo fija _setVariablesUsuario()
+  // desde PARTNER en cada login (corre antes que _aplicarCacheCateg). Restaurarlo
+  // acá pisaba el valor fresco con uno viejo tras sumarse la pareja al workspace.
   if (catData.todas) _todasCategorias = catData.todas;
   // Poblar selectores con los datos cacheados
   // (f-responsabilidad ahora es hidden input + radio buttons — se inicializa en inicializarRespButtons)
