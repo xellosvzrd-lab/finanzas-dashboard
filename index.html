@@ -8416,7 +8416,7 @@ function parsearImport() {
     if (!categoria) errList.push("Falta categoría");
 
     // Validar monto
-    const monto = parseFloat(montoRaw.replace(",",".").replace(/[^\d.]/g,""));
+    const monto = parsearDecimal(montoRaw.replace(/[^\d.,]/g, ""));
     if (isNaN(monto) || monto <= 0) errList.push("Monto inválido");
 
     // Normalizar responsabilidad
