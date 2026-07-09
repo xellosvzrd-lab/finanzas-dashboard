@@ -5665,7 +5665,7 @@ function _showToastUndo(msg, onUndo) {
   const t = document.getElementById("toast");
   t.innerHTML = `<span style="flex:1">${msg}</span><button class="toast-undo-btn">↩ Deshacer</button><div class="toast-undo-bar"></div>`;
   t.className = "toast toast-err show";
-  const tid = setTimeout(() => { t.className = "toast"; }, 5400);
+  const tid = setTimeout(() => { t.className = "toast"; }, 4900);
   t.querySelector(".toast-undo-btn").onclick = () => {
     clearTimeout(tid);
     t.className = "toast";
