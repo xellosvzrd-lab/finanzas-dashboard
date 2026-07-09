@@ -4624,7 +4624,8 @@ async function guardarNombre() {
     return;
   }
 
-  await supabaseClient.from('workspace_members').update({ nombre }).eq('user_id', supabaseSession.user.id);
+  const { error: errorNombreWs } = await supabaseClient.rpc('set_mi_nombre', { p_nombre: nombre });
+  if (errorNombreWs) console.warn("No se pudo guardar el nombre en workspace_members:", errorNombreWs);
   await cargarWorkspaceMembers();
   _setVariablesUsuario(nombre);
 
