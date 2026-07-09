@@ -4427,7 +4427,9 @@ function _aplicarCacheCateg(catData) {
   categIngreso         = catData.ingreso          || [];
   categFuentes         = catData.fuentes          || [];
   categFuentesTC       = catData.fuentesTC        || [];
-  categResponsabilidad = catData.responsabilidad  || categResponsabilidad;
+  // categResponsabilidad NO se restaura del cache: lo fija _setVariablesUsuario()
+  // desde PARTNER en cada login (corre antes que _aplicarCacheCateg). Restaurarlo
+  // acá pisaba el valor fresco con uno viejo tras sumarse la pareja al workspace.
   if (catData.todas) _todasCategorias = catData.todas;
   // Poblar selectores con los datos cacheados
   // (f-responsabilidad ahora es hidden input + radio buttons — se inicializa en inicializarRespButtons)
@@ -5034,7 +5036,7 @@ async function cargarResumenMes() {
 
   renderCatChart(sortedCatsARS);
   renderDonutChart(ingresos, gastos, balance);
-  renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, ingresos);
+  renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, ingresos, dataMesAll);
 
   // Sparklines — últimos 6 meses
   renderSparklines(parseInt(mes), parseInt(anio));
@@ -5128,7 +5130,7 @@ function renderDonutChart(ingresos, gastos, balance) {
 }
 
 // ─── TOP GASTOS ───────────────────────────────────────────────
-function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
+function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase, dataMesAll) {
   const el = document.getElementById("top-gastos-list");
   if (!sortedCatsARS.length && !sortedCatsUSD.length) {
     el.innerHTML = '<div class="empty-state">Sin gastos este mes — buen comienzo ✓</div>';
@@ -5153,9 +5155,16 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase) {
           presTag = `<span style="background:${dimBg};color:${color};border-radius:4px;padding:.1rem .35rem;font-size:.67rem;font-weight:700;margin-left:.35rem;white-space:nowrap;">${label} pres.</span>`;
         }
       }
-      const txsCat = datos
-        ? datos.filter(t => t.categoria === cat && !esTransferencia(t) && (t.moneda || "ARS").toUpperCase() === moneda)
-        : [];
+      // El total (val) es responsabilidad-aware: "Mío" propios + "Compartido" de
+      // ambos (×factor) + "De USUARIO". El drill-down debe listar EXACTAMENTE ese
+      // conjunto (desde dataMesAll), no solo lo propio — si no, una categoría con
+      // total>0 mostraba "(0 tx)".
+      const txsCat = (dataMesAll || datos || []).filter(t =>
+        t.categoria === cat && !esTransferencia(t)
+        && (t.moneda || "ARS").toUpperCase() === moneda
+        && ( ((t.responsabilidad || "Mío") === "Mío" && (t.usuario || "Daniel") === USUARIO)
+             || t.responsabilidad === "Compartido"
+             || t.responsabilidad === "De " + USUARIO ));
       const drillId = "drill-" + moneda + "-" + cat.replace(/\s+/g,"_");
       const drillRows = txsCat.map(t => {
         const esGasto = t.tipo === "Gasto";
@@ -5663,7 +5672,7 @@ function _showToastUndo(msg, onUndo) {
   const t = document.getElementById("toast");
   t.innerHTML = `<span style="flex:1">${msg}</span><button class="toast-undo-btn">↩ Deshacer</button><div class="toast-undo-bar"></div>`;
   t.className = "toast toast-err show";
-  const tid = setTimeout(() => { t.className = "toast"; }, 5400);
+  const tid = setTimeout(() => { t.className = "toast"; }, 4900);
   t.querySelector(".toast-undo-btn").onclick = () => {
     clearTimeout(tid);
     t.className = "toast";
@@ -5909,7 +5918,7 @@ async function guardarCompraEnCuotas() {
   const categoria       = document.getElementById("f-categoria")?.value || "";
   const fuente          = document.getElementById("f-fuente")?.value || "";
   const responsabilidad = document.querySelector("#f-responsabilidad")?.value || "Mío";
-  const moneda          = document.querySelector(".moneda-btn.active")?.dataset.val || "ARS";
+  const moneda          = monedaActual;
   const descripcion     = document.getElementById("f-descripcion")?.value.trim() || "";
   const montoTotal      = parsearDecimal(document.getElementById("f-monto")?.value);
   const cuotasTotal     = parseInt(document.getElementById("f-cuotas-n")?.value) || 0;
@@ -8190,7 +8199,7 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
   const msgEl = document.getElementById("cfg-msg-" + tipoKey);
   try {
     const { error } = await supabaseClient
-      .from('categorias').delete().eq('tipo', tipoAPI).eq('valor', valor);
+      .from('categorias').delete().eq('tipo', tipoAPI).eq('valor', valor).eq('usuario', USUARIO);
     if (error) throw error;
     if      (tipoAPI === "GASTO")     categGasto     = categGasto.filter(x => x !== valor);
     else if (tipoAPI === "INGRESO")   categIngreso   = categIngreso.filter(x => x !== valor);
@@ -8296,7 +8305,8 @@ async function ejecutarReclasificarFuente(valor, tipoActual) {
       .from('categorias')
       .update({ tipo: nuevoTipo })
       .eq('tipo', tipoActual)
-      .eq('valor', valor);
+      .eq('valor', valor)
+      .eq('usuario', USUARIO);
     if (error) throw error;
 
     if (nuevoTipo === 'FUENTE_TC') {
@@ -8397,8 +8407,13 @@ function parsearImport() {
       const isDash  = /^\d{4}-\d{2}-\d{2}$/.test(fechaRaw);
       if (isSlash) {
         const [d,m,y] = fechaRaw.split("/");
-        const year = y.length === 2 ? `20${y}` : y;
-        fechaValida = `${year}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
+        const dNum = parseInt(d, 10), mNum = parseInt(m, 10);
+        if (dNum < 1 || dNum > 31 || mNum < 1 || mNum > 12) {
+          errList.push("Fecha inválida");
+        } else {
+          const year = y.length === 2 ? `20${y}` : y;
+          fechaValida = `${year}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
+        }
       } else if (isDash) {
         fechaValida = fechaRaw;
       } else {
@@ -8416,7 +8431,7 @@ function parsearImport() {
     if (!categoria) errList.push("Falta categoría");
 
     // Validar monto
-    const monto = parseFloat(montoRaw.replace(",",".").replace(/[^\d.]/g,""));
+    const monto = parsearDecimal(montoRaw.replace(/[^\d.,]/g, ""));
     if (isNaN(monto) || monto <= 0) errList.push("Monto inválido");
 
     // Normalizar responsabilidad
@@ -8926,7 +8941,11 @@ function _renderCuotasCard() {
         const [fy, fm] = m.split("-").map(Number);
         factor = obtenerFactorCompartidoPropio(fm, fy);
       }
-      const monto = Number(t.monto) * factor;
+      const montoBruto = Number(t.monto) * factor;
+      // Los KPIs de cuotas se muestran en ARS (fmt); convertir cuotas USD vía MEP
+      // antes de sumar, para no mezclar ARS y USD 1:1. Mismo patrón (tipoCambioMEP || 1)
+      // que la asignación de inversiones.
+      const monto = (c.moneda === "USD") ? montoBruto * (tipoCambioMEP || 1) : montoBruto;
       if (m === mesActualStr) estesMes += monto;
       else if (m > mesActualStr) futuro += monto;
       if (Object.prototype.hasOwnProperty.call(floorByMes, m)) floorByMes[m] += monto;
@@ -9100,7 +9119,7 @@ function _renderModalCuotas(compraId) {
   document.getElementById("cuotas-modal-progress-label").textContent =
     `${pagadas} de ${c.cuotas_total} pagadas`;
   document.getElementById("cuotas-modal-restante").textContent =
-    restante > 0 ? `${fmt(restante)} restantes` : "Completada";
+    restante > 0 ? `${fmtMoneda(restante, c.moneda || "ARS")} restantes` : "Completada";
   document.getElementById("cuotas-modal-progress-fill").style.transform = `scaleX(${(pct / 100).toFixed(3)})`;
 
   const listHTML = cuotasTrans.map(t => {
@@ -10109,7 +10128,7 @@ async function cargarMetaAhorro() {
 function calcularProgresoMeta(meta) {
   const desde = new Date(meta.fecha_inicio);
   const total = allTransac
-    .filter(t => t.categoria === "Ahorro" && !esTransferencia(t) && new Date(t.fecha) >= desde)
+    .filter(t => t.usuario === USUARIO && t.categoria === "Ahorro" && !esTransferencia(t) && new Date(t.fecha) >= desde)
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
   const pct = meta.monto_objetivo > 0 ? Math.min(100, (total / meta.monto_objetivo) * 100) : 0;
   return { total, pct, restante: Math.max(0, meta.monto_objetivo - total) };
