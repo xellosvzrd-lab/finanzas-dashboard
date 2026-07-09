@@ -5911,7 +5911,7 @@ async function guardarCompraEnCuotas() {
   const categoria       = document.getElementById("f-categoria")?.value || "";
   const fuente          = document.getElementById("f-fuente")?.value || "";
   const responsabilidad = document.querySelector("#f-responsabilidad")?.value || "Mío";
-  const moneda          = document.querySelector(".moneda-btn.active")?.dataset.val || "ARS";
+  const moneda          = monedaActual;
   const descripcion     = document.getElementById("f-descripcion")?.value.trim() || "";
   const montoTotal      = parsearDecimal(document.getElementById("f-monto")?.value);
   const cuotasTotal     = parseInt(document.getElementById("f-cuotas-n")?.value) || 0;
@@ -8929,7 +8929,11 @@ function _renderCuotasCard() {
         const [fy, fm] = m.split("-").map(Number);
         factor = obtenerFactorCompartidoPropio(fm, fy);
       }
-      const monto = Number(t.monto) * factor;
+      const montoBruto = Number(t.monto) * factor;
+      // Los KPIs de cuotas se muestran en ARS (fmt); convertir cuotas USD vía MEP
+      // antes de sumar, para no mezclar ARS y USD 1:1. Mismo patrón (tipoCambioMEP || 1)
+      // que la asignación de inversiones.
+      const monto = (c.moneda === "USD") ? montoBruto * (tipoCambioMEP || 1) : montoBruto;
       if (m === mesActualStr) estesMes += monto;
       else if (m > mesActualStr) futuro += monto;
       if (Object.prototype.hasOwnProperty.call(floorByMes, m)) floorByMes[m] += monto;
@@ -9103,7 +9107,7 @@ function _renderModalCuotas(compraId) {
   document.getElementById("cuotas-modal-progress-label").textContent =
     `${pagadas} de ${c.cuotas_total} pagadas`;
   document.getElementById("cuotas-modal-restante").textContent =
-    restante > 0 ? `${fmt(restante)} restantes` : "Completada";
+    restante > 0 ? `${fmtMoneda(restante, c.moneda || "ARS")} restantes` : "Completada";
   document.getElementById("cuotas-modal-progress-fill").style.transform = `scaleX(${(pct / 100).toFixed(3)})`;
 
   const listHTML = cuotasTrans.map(t => {
