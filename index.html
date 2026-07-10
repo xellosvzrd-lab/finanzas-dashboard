@@ -6926,7 +6926,7 @@ function cargarAnual() {
   txsAnioARS.forEach(t => {
     const { month: m } = getMesLiquidacion(t);
     const monto = Math.abs(Number(t.monto));
-    if (t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)) {
+    if (t.tipo === "Ingreso") {
       byMes[m].ingresos += monto;
     } else if (t.tipo === "Gasto") {
       byMes[m].gastos += monto;
@@ -6941,7 +6941,7 @@ function cargarAnual() {
   const tasaAhorro = totalIng > 0 ? ((balance / totalIng) * 100) : 0;
 
   // Totales USD anuales
-  const totalIngUSD = txsAnioUSD.filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria))
+  const totalIngUSD = txsAnioUSD.filter(t => t.tipo === "Ingreso")
     .reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
   const totalGasUSD = txsAnioUSD.filter(t => t.tipo === "Gasto")
     .reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
