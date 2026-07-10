@@ -845,6 +845,7 @@
     transition: border-color .15s;
   }
   .cfg-item:hover { border-color: var(--border2); }
+  .cfg-item--pill { border-radius: 999px; padding: .45rem 1rem; }
   .cfg-item-name { flex: 1; }
   .cfg-emoji-btn {
     background: none; border: 1px solid transparent; cursor: pointer;
@@ -8133,8 +8134,8 @@ function _renderLista(tipo, items, tipoAPI) {
       <div class="cfg-item">
         <button class="cfg-emoji-btn" onclick='editarEmojiCategoria(${JSON.stringify(item)},this)' title="Cambiar emoji">${emo}</button>
         <span class="cfg-item-name">${escapeHtml(item)}</span>
-        <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${JSON.stringify(item)},false,this)" title="Ocultar" style="opacity:.6">Ocultar</button>
-        <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}',${JSON.stringify(item)},this)" title="Eliminar">✕</button>
+        <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${JSON.stringify(item)},false,this)' title="Ocultar" style="opacity:.6">Ocultar</button>
+        <button class="cfg-del-btn" onclick='eliminarCategoria("${tipoAPI}",${JSON.stringify(item)},this)' title="Eliminar">✕</button>
       </div>`;
     }).join("");
 
@@ -8143,7 +8144,7 @@ function _renderLista(tipo, items, tipoAPI) {
       html += inactivas.map(item => `
         <div class="cfg-item" style="opacity:.55">
           <span class="cfg-item-name">${escapeHtml(item)}</span>
-          <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${JSON.stringify(item)},true,this)" title="Activar">Activar</button>
+          <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${JSON.stringify(item)},true,this)' title="Activar">Activar</button>
         </div>`).join("");
     }
   }
@@ -8165,22 +8166,22 @@ function _renderListaFuentes(tipo, items, tipoAPI) {
   const reclasifLabel = esTC ? "→ pago inmediato" : "→ TC";
   let html = items.map(item => {
     const itemJ = JSON.stringify(item);
-    return `<div class="cfg-item">
+    return `<div class="cfg-item${esTC ? ' cfg-item--pill' : ''}">
       ${esTC ? '<span class="tc-badge">TC</span>' : ''}
       <span class="cfg-item-name" style="${esTC ? 'margin-left:.4rem' : ''}">${escapeHtml(item)}</span>
-      <button class="cfg-reclasif-btn" onclick="confirmarReclasificarFuente(${itemJ},'${tipoAPI}')" title="Cambiar tipo">${reclasifLabel}</button>
-      <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${itemJ},false,this)" title="Ocultar" style="opacity:.6">Ocultar</button>
-      <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}',${itemJ},this)" title="Eliminar">✕</button>
+      <button class="cfg-reclasif-btn" onclick='confirmarReclasificarFuente(${itemJ},"${tipoAPI}")' title="Cambiar tipo">${reclasifLabel}</button>
+      <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${itemJ},false,this)' title="Ocultar" style="opacity:.6">Ocultar</button>
+      <button class="cfg-del-btn" onclick='eliminarCategoria("${tipoAPI}",${itemJ},this)' title="Eliminar">✕</button>
     </div>`;
   }).join("");
 
   if (inactivas.length) {
     html += `<div style="font-size:.75rem;color:var(--text-muted);margin:.6rem 0 .3rem;letter-spacing:.04em;text-transform:uppercase">Disponibles (inactivas)</div>`;
     html += inactivas.map(item => `
-      <div class="cfg-item" style="opacity:.55">
+      <div class="cfg-item${esTC ? ' cfg-item--pill' : ''}" style="opacity:.55">
         ${esTC ? '<span class="tc-badge">TC</span>' : ''}
         <span class="cfg-item-name" style="${esTC ? 'margin-left:.4rem' : ''}">${escapeHtml(item)}</span>
-        <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${JSON.stringify(item)},true,this)" title="Activar">Activar</button>
+        <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${JSON.stringify(item)},true,this)' title="Activar">Activar</button>
       </div>`).join("");
   }
 
