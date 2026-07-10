@@ -837,6 +837,7 @@
   }
   .cfg-item {
     display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; row-gap: .35rem;
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: 999px;
@@ -845,7 +846,7 @@
     transition: border-color .15s;
   }
   .cfg-item:hover { border-color: var(--border2); }
-  .cfg-item-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cfg-item-name { flex: 1 1 100px; min-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .cfg-emoji-btn {
     background: none; border: 1px solid transparent; cursor: pointer;
     font-size: 1.1rem; padding: .1rem .25rem; border-radius: 6px;
