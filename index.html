@@ -8154,21 +8154,37 @@ function _renderLista(tipo, items, tipoAPI) {
 function _renderListaFuentes(tipo, items, tipoAPI) {
   const el = document.getElementById("cfg-lista-" + tipo);
   if (!el) return;
-  if (!items.length) {
+
+  const inactivas = _todasCategorias.filter(r => r.tipo === tipoAPI && r.activa === false).map(r => r.valor).sort();
+
+  if (!items.length && !inactivas.length) {
     el.innerHTML = '<div style="color:var(--text-muted);font-size:.84rem;padding:.5rem">Sin ítems</div>';
     return;
   }
   const esTC = tipoAPI === "FUENTE_TC";
   const reclasifLabel = esTC ? "→ pago inmediato" : "→ TC";
-  el.innerHTML = items.map(item => {
+  let html = items.map(item => {
     const itemJ = JSON.stringify(item);
     return `<div class="cfg-item">
       ${esTC ? '<span class="tc-badge">TC</span>' : ''}
       <span class="cfg-item-name" style="${esTC ? 'margin-left:.4rem' : ''}">${escapeHtml(item)}</span>
       <button class="cfg-reclasif-btn" onclick="confirmarReclasificarFuente(${itemJ},'${tipoAPI}')" title="Cambiar tipo">${reclasifLabel}</button>
+      <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${itemJ},false,this)" title="Ocultar" style="opacity:.6">Ocultar</button>
       <button class="cfg-del-btn" onclick="eliminarCategoria('${tipoAPI}',${itemJ},this)" title="Eliminar">✕</button>
     </div>`;
   }).join("");
+
+  if (inactivas.length) {
+    html += `<div style="font-size:.75rem;color:var(--text-muted);margin:.6rem 0 .3rem;letter-spacing:.04em;text-transform:uppercase">Disponibles (inactivas)</div>`;
+    html += inactivas.map(item => `
+      <div class="cfg-item" style="opacity:.55">
+        ${esTC ? '<span class="tc-badge">TC</span>' : ''}
+        <span class="cfg-item-name" style="${esTC ? 'margin-left:.4rem' : ''}">${escapeHtml(item)}</span>
+        <button class="cfg-reclasif-btn" onclick="toggleCategoria('${tipoAPI}',${JSON.stringify(item)},true,this)" title="Activar">Activar</button>
+      </div>`).join("");
+  }
+
+  el.innerHTML = html;
 }
 
 async function agregarCategoria(tipoAPI) {
