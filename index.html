@@ -10155,7 +10155,13 @@ function calcularProgresoMeta(meta) {
   const desde = new Date(meta.fecha_inicio);
   const total = allTransac
     .filter(t => t.usuario === USUARIO && t.categoria === "Ahorro" && !esTransferencia(t) && new Date(t.fecha) >= desde)
-    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+    .reduce((s, t) => {
+      const monto  = Math.abs(Number(t.monto));
+      const moneda = t.moneda || "ARS";
+      if (moneda === meta.moneda) return s + monto;
+      if (!tipoCambioMEP) return s; // sin cotización MEP no se puede convertir con certeza — se excluye en vez de mezclar 1:1
+      return s + (moneda === "USD" ? monto * tipoCambioMEP : monto / tipoCambioMEP);
+    }, 0);
   const pct = meta.monto_objetivo > 0 ? Math.min(100, (total / meta.monto_objetivo) * 100) : 0;
   return { total, pct, restante: Math.max(0, meta.monto_objetivo - total) };
 }
