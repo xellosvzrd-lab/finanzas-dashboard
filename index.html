@@ -4045,6 +4045,14 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 
+// Serializa a JSON y escapa el resultado como contenido de atributo HTML, para poder
+// interpolarlo dentro de un onclick='...' sin que una comilla (simple o doble) dentro
+// del valor original rompa el atributo. El navegador decodifica las entidades antes de
+// ejecutar el atributo como JS, así que el string decodificado llega intacto.
+function escAttrJSON(obj) {
+  return escapeHtml(JSON.stringify(obj));
+}
+
 // ─── ESTADO GLOBAL ───────────────────────────────────────────
 let supabaseClient  = null;
 let supabaseSession = null;
@@ -5176,7 +5184,9 @@ function renderTopGastos(sortedCatsARS, sortedCatsUSD, datos, salarioBase, dataM
         && ( ((t.responsabilidad || "Mío") === "Mío" && (t.usuario || "Daniel") === USUARIO)
              || t.responsabilidad === "Compartido"
              || t.responsabilidad === "De " + USUARIO ));
-      const drillId = "drill-" + moneda + "-" + cat.replace(/\s+/g,"_");
+      // Id basado en índice, no en el nombre de categoría (texto libre del usuario) — evita
+      // que un nombre con comillas rompa el atributo id/onclick generado por innerHTML.
+      const drillId = "drill-" + moneda + "-" + i;
       const drillRows = txsCat.map(t => {
         const esGasto = t.tipo === "Gasto";
         const bruto   = Math.abs(Number(t.monto));
@@ -6451,12 +6461,14 @@ function cargarCompartidos() {
 
   // Función auxiliar que genera las filas de una moneda dada
   function buildCompRows(filas, monedaFilter) {
-    return filas.map(r => {
+    return filas.map((r, i) => {
       const net        = r.daniel - r.ama;
       const txsGasto   = datos.filter(t => t.categoria === r.cat && (t.responsabilidad || "Mío") === "Compartido" && (t.moneda || "ARS").toUpperCase() === monedaFilter);
       const txsIngreso = datosIngresos.filter(t => t.categoria === r.cat && (t.responsabilidad || "Mío") === "Compartido" && (t.moneda || "ARS").toUpperCase() === monedaFilter);
       const txsAll     = [...txsGasto, ...txsIngreso];
-      const drillId    = "comp-drill-" + r.cat.replace(/\s+/g,"_") + "-" + monedaFilter;
+      // Id basado en índice, no en el nombre de categoría (texto libre, compartido con la
+      // pareja) — evita que un nombre con comillas rompa el atributo id/onclick.
+      const drillId    = "comp-drill-" + monedaFilter + "-" + i;
       const drillRows  = txsAll.map(t => {
         const m           = Math.abs(Number(t.monto));
         // Antes: "esAma" comparaba literalmente contra "ama", lo que asignaba
@@ -8181,10 +8193,10 @@ function _renderLista(tipo, items, tipoAPI) {
       const emo = getCatEmoji(item);
       return `
       <div class="cfg-item">
-        <button class="cfg-emoji-btn" onclick='editarEmojiCategoria(${JSON.stringify(item)},this)' title="Cambiar emoji">${emo}</button>
+        <button class="cfg-emoji-btn" onclick='editarEmojiCategoria(${escAttrJSON(item)},this)' title="Cambiar emoji">${emo}</button>
         <span class="cfg-item-name">${escapeHtml(item)}</span>
-        <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${JSON.stringify(item)},false,this)' title="Ocultar" style="opacity:.6">Ocultar</button>
-        <button class="cfg-del-btn" onclick='eliminarCategoria("${tipoAPI}",${JSON.stringify(item)},this)' title="Eliminar">✕</button>
+        <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${escAttrJSON(item)},false,this)' title="Ocultar" style="opacity:.6">Ocultar</button>
+        <button class="cfg-del-btn" onclick='eliminarCategoria("${tipoAPI}",${escAttrJSON(item)},this)' title="Eliminar">✕</button>
       </div>`;
     }).join("");
 
@@ -8193,7 +8205,7 @@ function _renderLista(tipo, items, tipoAPI) {
       html += inactivas.map(item => `
         <div class="cfg-item" style="opacity:.55">
           <span class="cfg-item-name">${escapeHtml(item)}</span>
-          <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${JSON.stringify(item)},true,this)' title="Activar">Activar</button>
+          <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${escAttrJSON(item)},true,this)' title="Activar">Activar</button>
         </div>`).join("");
     }
   }
@@ -8214,7 +8226,7 @@ function _renderListaFuentes(tipo, items, tipoAPI) {
   const esTC = tipoAPI === "FUENTE_TC";
   const reclasifLabel = esTC ? "→ pago inmediato" : "→ TC";
   let html = items.map(item => {
-    const itemJ = JSON.stringify(item);
+    const itemJ = escAttrJSON(item);
     return `<div class="cfg-item">
       ${esTC ? '<span class="tc-badge">TC</span>' : ''}
       <span class="cfg-item-name" style="${esTC ? 'margin-left:.4rem' : ''}">${escapeHtml(item)}</span>
@@ -8230,7 +8242,7 @@ function _renderListaFuentes(tipo, items, tipoAPI) {
       <div class="cfg-item" style="opacity:.55">
         ${esTC ? '<span class="tc-badge">TC</span>' : ''}
         <span class="cfg-item-name" style="${esTC ? 'margin-left:.4rem' : ''}">${escapeHtml(item)}</span>
-        <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${JSON.stringify(item)},true,this)' title="Activar">Activar</button>
+        <button class="cfg-reclasif-btn" onclick='toggleCategoria("${tipoAPI}",${escAttrJSON(item)},true,this)' title="Activar">Activar</button>
       </div>`).join("");
   }
 
@@ -8260,7 +8272,7 @@ async function agregarCategoria(tipoAPI) {
     renderizarConfig();
     _refrescarSelectores();
     input.value = "";
-    msg.innerHTML = `<span style="color:var(--green)">✅ "${valor}" agregado.</span>`;
+    msg.innerHTML = `<span style="color:var(--green)">✅ "${escapeHtml(valor)}" agregado.</span>`;
   } catch(e) {
     msg.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message) || "Error de conexión."}</span>`;
   }
@@ -8283,11 +8295,11 @@ async function eliminarCategoria(tipoAPI, valor, btn) {
     guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, fuentesTC: categFuentesTC, responsabilidad: categResponsabilidad });
     renderizarConfig();
     _refrescarSelectores();
-    if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" eliminado.</span>`; }
+    if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${escapeHtml(valor)}" eliminado.</span>`; }
   } catch(e) {
     const esFKViolation = e.code === '23503' || e.message?.includes('violates foreign key');
     const msg = esFKViolation
-      ? `❌ "${valor}" tiene transacciones asociadas y no se puede eliminar. Podés ocultarla con "Ocultar".`
+      ? `❌ "${escapeHtml(valor)}" tiene transacciones asociadas y no se puede eliminar. Podés ocultarla con "Ocultar".`
       : '❌ Error de conexión.';
     if (msgEl) { msgEl.innerHTML = `<span style="color:var(--red)">${msg}</span>`; }
     btn.disabled = false;
@@ -8326,7 +8338,7 @@ async function toggleCategoria(tipoAPI, valor, activar, btn) {
     guardarCacheCateg({ gasto: categGasto, ingreso: categIngreso, fuentes: categFuentes, fuentesTC: categFuentesTC, responsabilidad: categResponsabilidad });
     renderizarConfig();
     _refrescarSelectores();
-    if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" ${activar ? "activada" : "desactivada"}.</span>`; }
+    if (msgEl) { msgEl.innerHTML = `<span style="color:var(--green)">✅ "${escapeHtml(valor)}" ${activar ? "activada" : "desactivada"}.</span>`; }
   } catch(e) {
     if (msgEl) { msgEl.innerHTML = '<span style="color:var(--red)">❌ Error de conexión.</span>'; }
     btn.disabled = false;
@@ -8350,12 +8362,11 @@ async function confirmarReclasificarFuente(valor, tipoActual) {
 
     const nuevoTipo  = tipoActual === 'FUENTE_TC' ? 'FUENTE' : 'FUENTE_TC';
     const nuevoLabel = nuevoTipo  === 'FUENTE_TC' ? 'tarjeta de crédito' : 'pago inmediato';
-    const esc = valor.replace(/'/g, "\\'");
 
     if (count > 0) {
       msgEl.innerHTML = `<div class="cfg-confirm-inline">
         <span>${count} transacción${count !== 1 ? 'es' : ''} de esta fuente seguirán usando su fecha original. ¿Marcar como ${nuevoLabel}?</span>
-        <button class="btn btn-primary" style="font-size:.8rem;padding:.3rem .7rem" onclick="ejecutarReclasificarFuente('${esc}','${tipoActual}')">Confirmar</button>
+        <button class="btn btn-primary" style="font-size:.8rem;padding:.3rem .7rem" onclick="ejecutarReclasificarFuente(${escAttrJSON(valor)},'${tipoActual}')">Confirmar</button>
         <button class="btn" style="font-size:.8rem;padding:.3rem .7rem" onclick="renderizarConfig()">Cancelar</button>
       </div>`;
     } else {
@@ -8398,7 +8409,7 @@ async function ejecutarReclasificarFuente(valor, tipoActual) {
     const destKey = nuevoTipo === 'FUENTE_TC' ? 'fuentetc' : 'fuente';
     const destEl  = document.getElementById("cfg-msg-" + destKey);
     if (destEl) {
-      destEl.innerHTML = `<span style="color:var(--green)">✅ "${valor}" marcado como ${nuevoLabel}.</span>`;
+      destEl.innerHTML = `<span style="color:var(--green)">✅ "${escapeHtml(valor)}" marcado como ${nuevoLabel}.</span>`;
       setTimeout(() => { destEl.innerHTML = ""; }, 3000);
     }
   } catch(e) {
@@ -8551,7 +8562,7 @@ function parsearImport() {
       <tr class="${rowClass}">
         <td>${idx + 1}</td>
         <td>${escapeHtml(fechaRaw)}</td>
-        <td class="${tipoClass}">${tipoNorm}</td>
+        <td class="${tipoClass}">${escapeHtml(tipoNorm)}</td>
         <td>${escapeHtml(categoria)}</td>
         <td>${isNaN(monto) ? escapeHtml(montoRaw) : fmtMoneda(monto, monedaVal)}</td>
         <td>${escapeHtml(descripcion) || "—"}</td>
