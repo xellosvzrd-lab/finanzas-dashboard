@@ -6744,7 +6744,7 @@ function cargarCompartidos() {
   const mesComp  = parseInt(document.getElementById("comp-mes").value);
   const anioComp = parseInt(document.getElementById("comp-anio").value);
   const yaLiquidado = allTransac.some(t =>
-    t.descripcion === "Liquidación" &&
+    t.es_liquidacion === true &&
     (t.usuario || "Daniel") === USUARIO &&
     (() => { const { year, month } = getMesLiquidacion(t); return month === mesComp && year === anioComp; })()
   );
@@ -6828,6 +6828,7 @@ async function confirmarSaldarTodo() {
           id: crypto.randomUUID(),
           fecha, tipo: item.tipo, categoria: item.cat, monto: item.monto,
           descripcion: "Liquidación",
+          es_liquidacion: true,
           responsabilidad: "Mío",
           fuente, moneda: item.moneda,
           usuario: USUARIO,
@@ -6856,7 +6857,7 @@ async function deshacerLiquidacion() {
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
   const txsLiq = allTransac.filter(t =>
-    t.descripcion === "Liquidación" &&
+    t.es_liquidacion === true &&
     (t.usuario || "Daniel") === USUARIO &&
     (() => { const { year, month } = getMesLiquidacion(t); return month === mes && year === anio; })()
   );
@@ -6893,6 +6894,7 @@ async function confirmarLiquidar() {
         id: crypto.randomUUID(),
         fecha, tipo, categoria: cat, monto,
         descripcion: "Liquidación",
+        es_liquidacion: true,
         responsabilidad: "Mío",
         fuente, moneda: "ARS",
         usuario: USUARIO,
@@ -6952,7 +6954,7 @@ function cargarAnual() {
   // Transacciones del año, de todo el workspace (para aplicar responsabilidad igual que Mi mes)
   const txsAnioTodos = allTransac.filter(t => {
     const { year } = getMesLiquidacion(t);
-    return year === anio && !esTransferencia(t) && t.descripcion !== "Liquidación";
+    return year === anio && !esTransferencia(t) && !t.es_liquidacion;
   });
   const txsAnioMio = txsAnioTodos.filter(t => (t.usuario || "Daniel") === USUARIO);
 
@@ -7537,8 +7539,8 @@ function renderPresupuesto() {
   });
   // Solo las transacciones de Daniel (para "Mío" y KPI sueldo)
   // Excluir Liquidaciones — son transferencias de balance compartido, no gastos/ingresos reales
-  const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO && t.descripcion !== "Liquidación");
-  const dataMesSinLiq = dataMes.filter(t => t.descripcion !== "Liquidación");
+  const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO && !t.es_liquidacion);
+  const dataMesSinLiq = dataMes.filter(t => !t.es_liquidacion);
 
   // Sueldo KPI = ingresos reales del usuario (ARS)
   const sueldo = dataMesDaniel
@@ -8055,8 +8057,8 @@ function actualizarKpisPres() {
     const { year, month } = getMesLiquidacion(t);
     return month === mes && year === anio;
   });
-  const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO && t.descripcion !== "Liquidación");
-  const dataMesSinLiq = dataMes.filter(t => t.descripcion !== "Liquidación");
+  const dataMesDaniel = dataMes.filter(t => (t.usuario || "Daniel") === USUARIO && !t.es_liquidacion);
+  const dataMesSinLiq = dataMes.filter(t => !t.es_liquidacion);
 
   const sueldo = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)
