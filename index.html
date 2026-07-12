@@ -6896,43 +6896,73 @@ function _poblarAnioAnual() {
   }
 }
 
+// Gasto neto de una categoría/moneda en un período, aplicando la misma lógica de
+// responsabilidad que Mi mes: "Mío" 100% (neteado con ingresos "Mío"), "Compartido"
+// neteado × factorComp del período, "De "+USUARIO (el partner pagó) 100%, "De "+PARTNER
+// (yo pagué por el partner) 0% — excluido porque no queda incluido en dataTodosPeriodo.
+function _gastoCategoriaResponsable(cat, moneda, dataUsuarioPeriodo, dataTodosPeriodo, factorComp) {
+  const esDeCat = t => t.categoria === cat && !esTransferencia(t) && (t.moneda || "ARS") === moneda;
+  const suma = (arr, tipo, resp) => arr
+    .filter(t => esDeCat(t) && t.tipo === tipo && (resp === "Mío" ? (t.responsabilidad || "Mío") === "Mío" : t.responsabilidad === resp))
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+
+  const netMio  = suma(dataUsuarioPeriodo, "Gasto", "Mío")     - suma(dataUsuarioPeriodo, "Ingreso", "Mío");
+  const netComp = suma(dataTodosPeriodo,   "Gasto", "Compartido") - suma(dataTodosPeriodo, "Ingreso", "Compartido");
+  const netDeJ  = suma(dataTodosPeriodo,   "Gasto", "De " + USUARIO) - suma(dataTodosPeriodo, "Ingreso", "De " + USUARIO);
+
+  return Math.max(0, netMio) + Math.max(0, netComp) * factorComp + Math.max(0, netDeJ);
+}
+
 function cargarAnual() {
   _poblarAnioAnual();
   const anio = parseInt(document.getElementById("anual-anio").value);
   const MESES_LABEL = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
-  // Transacciones ARS del año (para chart + tabla ARS)
-  const txsAnioARS = allTransac.filter(t => {
+  // Transacciones del año, de todo el workspace (para aplicar responsabilidad igual que Mi mes)
+  const txsAnioTodos = allTransac.filter(t => {
     const { year } = getMesLiquidacion(t);
-    return year === anio
-      && (t.usuario || "Daniel") === USUARIO
-      && !esTransferencia(t)
-      && (t.moneda || "ARS") === "ARS";
+    return year === anio && !esTransferencia(t) && t.descripcion !== "Liquidación";
   });
+  const txsAnioMio = txsAnioTodos.filter(t => (t.usuario || "Daniel") === USUARIO);
+
+  // Transacciones ARS del año (para chart + tabla ARS)
+  const txsAnioARS      = txsAnioMio.filter(t => (t.moneda || "ARS") === "ARS");
+  const txsAnioTodosARS = txsAnioTodos.filter(t => (t.moneda || "ARS") === "ARS");
 
   // Transacciones USD del año (para tabla USD)
-  const txsAnioUSD = allTransac.filter(t => {
-    const { year } = getMesLiquidacion(t);
-    return year === anio
-      && (t.usuario || "Daniel") === USUARIO
-      && !esTransferencia(t)
-      && (t.moneda || "ARS") === "USD";
-  });
+  const txsAnioUSD      = txsAnioMio.filter(t => (t.moneda || "ARS") === "USD");
+  const txsAnioTodosUSD = txsAnioTodos.filter(t => (t.moneda || "ARS") === "USD");
 
-  // Agrupar ARS por mes (1-12)
+  // Agrupar por mes (1-12): ingresos propios (sin cambios) + gastos con responsabilidad (como Mi mes)
   const byMes = {};
-  for (let m = 1; m <= 12; m++) byMes[m] = { ingresos: 0, gastos: 0, cats: {} };
+  const dataMioPorMes = {}, dataTodosPorMesARS = {};
+  for (let m = 1; m <= 12; m++) {
+    byMes[m] = { ingresos: 0, gastos: 0, cats: {} };
+    dataMioPorMes[m] = [];
+    dataTodosPorMesARS[m] = [];
+  }
 
   txsAnioARS.forEach(t => {
     const { month: m } = getMesLiquidacion(t);
-    const monto = Math.abs(Number(t.monto));
-    if (t.tipo === "Ingreso") {
-      byMes[m].ingresos += monto;
-    } else if (t.tipo === "Gasto") {
-      byMes[m].gastos += monto;
-      byMes[m].cats[t.categoria] = (byMes[m].cats[t.categoria] || 0) + monto;
-    }
+    dataMioPorMes[m].push(t);
+    if (t.tipo === "Ingreso") byMes[m].ingresos += Math.abs(Number(t.monto));
   });
+  txsAnioTodosARS.forEach(t => {
+    const { month: m } = getMesLiquidacion(t);
+    dataTodosPorMesARS[m].push(t);
+  });
+
+  for (let m = 1; m <= 12; m++) {
+    const factorCompMes = obtenerFactorCompartidoPropio(m, anio);
+    const categoriasMes = new Set(dataTodosPorMesARS[m].filter(t => t.tipo === "Gasto").map(t => t.categoria));
+    categoriasMes.forEach(cat => {
+      const gasto = _gastoCategoriaResponsable(cat, "ARS", dataMioPorMes[m], dataTodosPorMesARS[m], factorCompMes);
+      if (gasto > 0) {
+        byMes[m].gastos += gasto;
+        byMes[m].cats[cat] = (byMes[m].cats[cat] || 0) + gasto;
+      }
+    });
+  }
 
   // Totales ARS anuales
   const totalIng   = Object.values(byMes).reduce((s,m) => s + m.ingresos, 0);
@@ -6940,11 +6970,31 @@ function cargarAnual() {
   const balance    = totalIng - totalGas;
   const tasaAhorro = totalIng > 0 ? ((balance / totalIng) * 100) : 0;
 
-  // Totales USD anuales
+  // Totales USD anuales (mismo criterio de responsabilidad que ARS)
   const totalIngUSD = txsAnioUSD.filter(t => t.tipo === "Ingreso")
     .reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
-  const totalGasUSD = txsAnioUSD.filter(t => t.tipo === "Gasto")
-    .reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
+
+  const dataMioPorMesUSD = {}, dataTodosPorMesUSD = {};
+  for (let m = 1; m <= 12; m++) { dataMioPorMesUSD[m] = []; dataTodosPorMesUSD[m] = []; }
+  txsAnioUSD.forEach(t => { const { month: m } = getMesLiquidacion(t); dataMioPorMesUSD[m].push(t); });
+  txsAnioTodosUSD.forEach(t => { const { month: m } = getMesLiquidacion(t); dataTodosPorMesUSD[m].push(t); });
+
+  const catTotalsUSDResp = {};
+  const catMesesUSDResp  = {};
+  let totalGasUSD = 0;
+  for (let m = 1; m <= 12; m++) {
+    const factorCompMes = obtenerFactorCompartidoPropio(m, anio);
+    const categoriasMes = new Set(dataTodosPorMesUSD[m].filter(t => t.tipo === "Gasto").map(t => t.categoria));
+    categoriasMes.forEach(cat => {
+      const gasto = _gastoCategoriaResponsable(cat, "USD", dataMioPorMesUSD[m], dataTodosPorMesUSD[m], factorCompMes);
+      if (gasto > 0) {
+        totalGasUSD += gasto;
+        catTotalsUSDResp[cat] = (catTotalsUSDResp[cat] || 0) + gasto;
+        if (!catMesesUSDResp[cat]) catMesesUSDResp[cat] = new Set();
+        catMesesUSDResp[cat].add(m);
+      }
+    });
+  }
 
   // ── KPIs ──
   const kpiEl    = document.getElementById("anual-kpis");
@@ -6995,16 +7045,9 @@ function cargarAnual() {
   }
   const sortedCats = Object.entries(catTotals).sort((a,b) => b[1]-a[1]);
 
-  // ── Tabla de categorías USD ──
-  const catTotalsUSD = {};
-  const catMesesUSD  = {};
-  txsAnioUSD.filter(t => t.tipo === "Gasto").forEach(t => {
-    const { month: m } = getMesLiquidacion(t);
-    const monto = Math.abs(Number(t.monto));
-    catTotalsUSD[t.categoria] = (catTotalsUSD[t.categoria] || 0) + monto;
-    if (!catMesesUSD[t.categoria]) catMesesUSD[t.categoria] = new Set();
-    catMesesUSD[t.categoria].add(m);
-  });
+  // ── Tabla de categorías USD (ya calculada con responsabilidad más arriba) ──
+  const catTotalsUSD = catTotalsUSDResp;
+  const catMesesUSD  = catMesesUSDResp;
   const sortedCatsUSD = Object.entries(catTotalsUSD).sort((a,b) => b[1]-a[1]);
 
   const tbody = document.getElementById("anual-tbody");
