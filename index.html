@@ -4133,14 +4133,18 @@ let sortDir = -1; // -1 = desc (más reciente primero), 1 = asc
 let _pendingDelete = null; // { id, timeout }
 
 // ─── CACHE (stale-while-revalidate) ───────────────────────────
+// Namespaceada por user id: en un navegador compartido, si una sesión expira y entra
+// otra cuenta, cada una lee/escribe su propia clave — nunca ve el caché de la otra.
 const CACHE_TRANSAC_KEY = "fp_transac_cache";
 const CACHE_CATEG_KEY   = "fp_categ_cache";
+function _cacheKeyTransac(uid) { return CACHE_TRANSAC_KEY + "_" + (uid || supabaseSession?.user?.id || "anon"); }
+function _cacheKeyCateg(uid)   { return CACHE_CATEG_KEY   + "_" + (uid || supabaseSession?.user?.id || "anon"); }
 
 function guardarCacheTransac() {
-  try { localStorage.setItem(CACHE_TRANSAC_KEY, JSON.stringify(allTransac)); } catch(e) {}
+  try { localStorage.setItem(_cacheKeyTransac(), JSON.stringify(allTransac)); } catch(e) {}
 }
 function guardarCacheCateg(data) {
-  try { localStorage.setItem(CACHE_CATEG_KEY, JSON.stringify(data)); } catch(e) {}
+  try { localStorage.setItem(_cacheKeyCateg(), JSON.stringify(data)); } catch(e) {}
 }
 
 // ─── INICIALIZACIÓN ───────────────────────────────────────────
@@ -4320,10 +4324,11 @@ async function renderizarSeccionCuenta() {
 }
 
 async function volverConfig() {
+  const _uidSaliente = supabaseSession?.user?.id;
   if (supabaseClient) await supabaseClient.auth.signOut();
   supabaseSession = null;
-  localStorage.removeItem(CACHE_TRANSAC_KEY);
-  localStorage.removeItem(CACHE_CATEG_KEY);
+  localStorage.removeItem(_cacheKeyTransac(_uidSaliente));
+  localStorage.removeItem(_cacheKeyCateg(_uidSaliente));
   document.getElementById("app").style.display = "none";
   document.getElementById("mobile-header").style.display = "none";
   closeSidebar();
@@ -4681,8 +4686,8 @@ async function iniciarApp() {
     return;
   }
 
-  const cachedTransac = localStorage.getItem(CACHE_TRANSAC_KEY);
-  const cachedCateg   = localStorage.getItem(CACHE_CATEG_KEY);
+  const cachedTransac = localStorage.getItem(_cacheKeyTransac());
+  const cachedCateg   = localStorage.getItem(_cacheKeyCateg());
 
   if (cachedTransac && cachedCateg) {
     // Cache hit → renderizar inmediatamente con datos guardados
@@ -5617,6 +5622,13 @@ function exportarCSV() {
     catsSelec.size === document.querySelectorAll("#fil-cat-options input").length;
 
   const datos = allTransac.filter(t => {
+    // Mismos filtros que filtrarTabla(), para que el CSV coincida con lo que se ve en pantalla
+    if (_pendingDelete && t.id === _pendingDelete.id) return false;
+    if (t.compra_id && t.mes_liquidacion) {
+      const hoy = new Date();
+      const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+      if (t.mes_liquidacion > mesActualStr) return false;
+    }
     const { year: tYear, month: tMonth } = getMesLiquidacion(t);
     return (t.usuario || "Daniel") === USUARIO
       && (!mes    || tMonth === parseInt(mes))
@@ -5627,7 +5639,8 @@ function exportarCSV() {
       && (!resp   || (t.responsabilidad || "Mío") === resp)
       && (!buscar || (t.descripcion||"").toLowerCase().includes(buscar)
                   || t.categoria.toLowerCase().includes(buscar)
-                  || (t.fuente||"").toLowerCase().includes(buscar));
+                  || (t.fuente||"").toLowerCase().includes(buscar))
+      && (!_filFechaExacta || t.fecha === _filFechaExacta);
   }).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
 
   if (!datos.length) { showToast("Sin datos para exportar", "err"); return; }
@@ -7302,9 +7315,10 @@ async function guardarPresupuesto() {
 
   msg.innerHTML = "⏳ Guardando...";
   try {
-    // Borrar presupuesto existente del mes/año y re-insertar
+    // Borrar presupuesto existente del mes/año y re-insertar (solo el propio — la tabla
+    // no tiene RLS por usuario, así que sin este filtro se borraba también el de la pareja)
     const { error: delErr } = await supabaseClient
-      .from('presupuesto').delete().eq('mes', mes).eq('anio', anio);
+      .from('presupuesto').delete().eq('mes', mes).eq('anio', anio).eq('usuario', USUARIO);
     if (delErr) throw delErr;
     if (items.length) {
       const rows = items.map(it => ({
@@ -9063,11 +9077,11 @@ function _renderCuotasCard() {
     </div>`;
   }).filter(Boolean);
 
-  toComplete.forEach(id => {
-    supabaseClient.from("compras_cuotas")
+  toComplete.forEach(async id => {
+    const { error } = await supabaseClient.from("compras_cuotas")
       .update({ estado: "completada" })
-      .eq("id", id)
-      .then(() => {});
+      .eq("id", id);
+    if (error) { console.warn("No se pudo marcar la compra como completada, se reintentará:", error); return; }
     comprasEnCuotas = comprasEnCuotas.filter(c => c.id !== id);
   });
 
@@ -10213,8 +10227,10 @@ async function cargarMetaAhorro() {
 
 function calcularProgresoMeta(meta) {
   const desde = new Date(meta.fecha_inicio);
+  // Meta compartida: suma el aporte de ambos usuarios (allTransac ya incluye todo el
+  // workspace). Meta propia: solo mis transacciones, como antes.
   const total = allTransac
-    .filter(t => t.usuario === USUARIO && t.categoria === "Ahorro" && !esTransferencia(t) && new Date(t.fecha) >= desde)
+    .filter(t => (meta.compartida || t.usuario === USUARIO) && t.categoria === "Ahorro" && !esTransferencia(t) && new Date(t.fecha) >= desde)
     .reduce((s, t) => {
       const monto  = Math.abs(Number(t.monto));
       const moneda = t.moneda || "ARS";
