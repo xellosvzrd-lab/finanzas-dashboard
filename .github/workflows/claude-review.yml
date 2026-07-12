@@ -7,6 +7,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Instalar Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
       - run: |
           claude -p "Review this PR diff for: 1) UI elements placed on inaccessible pages, 2) uncommitted assumptions, 3) mobile overflow issues. Diff: $(git diff origin/main...HEAD)" --allowedTools "Read,Grep,Glob"
         env:
