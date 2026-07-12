@@ -4662,7 +4662,9 @@ async function fetchTipoCambioMEP() {
     const data = await res.json();
     if (data?.venta) {
       tipoCambioMEP = data.venta;
-      localStorage.setItem(CACHE_MEP_KEY, String(tipoCambioMEP));
+      // setItem en su propio try: si falla (ej. Safari privado, cuota llena), no debe
+      // tirar hacia el catch de abajo y pisar el valor recién obtenido con éxito.
+      try { localStorage.setItem(CACHE_MEP_KEY, String(tipoCambioMEP)); } catch(e) {}
     }
   } catch (e) {
     console.warn("No se pudo obtener el tipo de cambio MEP, usando último valor conocido:", e);
@@ -6978,7 +6980,9 @@ function cargarAnual() {
   txsAnioARS.forEach(t => {
     const { month: m } = getMesLiquidacion(t);
     dataMioPorMes[m].push(t);
-    if (t.tipo === "Ingreso") byMes[m].ingresos += Math.abs(Number(t.monto));
+    // Un Ingreso en una categoría de Gasto es un reintegro/reembolso, ya netadeado
+    // dentro de _gastoCategoriaResponsable() — sumarlo también acá lo contaría 2 veces.
+    if (t.tipo === "Ingreso" && !categGasto.includes(t.categoria)) byMes[m].ingresos += Math.abs(Number(t.monto));
   });
   txsAnioTodosARS.forEach(t => {
     const { month: m } = getMesLiquidacion(t);
@@ -7004,7 +7008,7 @@ function cargarAnual() {
   const tasaAhorro = totalIng > 0 ? ((balance / totalIng) * 100) : 0;
 
   // Totales USD anuales (mismo criterio de responsabilidad que ARS)
-  const totalIngUSD = txsAnioUSD.filter(t => t.tipo === "Ingreso")
+  const totalIngUSD = txsAnioUSD.filter(t => t.tipo === "Ingreso" && !categGasto.includes(t.categoria))
     .reduce((s,t) => s + Math.abs(Number(t.monto)), 0);
 
   const dataMioPorMesUSD = {}, dataTodosPorMesUSD = {};
@@ -7282,7 +7286,7 @@ async function cargarPresupuesto() {
   const mes  = parseInt(document.getElementById("pres-mes").value);
   const anio = parseInt(document.getElementById("pres-anio").value);
   const fetchList = [
-    supabaseClient.from('presupuesto').select('*').eq('mes', mes).eq('anio', anio)
+    supabaseClient.from('presupuesto').select('*').eq('mes', mes).eq('anio', anio).eq('usuario', USUARIO)
   ];
   fetchList.push(fetchTipoCambioMEP());
   const [presRes] = await Promise.allSettled(fetchList);
@@ -7634,7 +7638,7 @@ function renderPresupuesto() {
     const prevAnio = mes === 1 ? anio - 1 : anio;
     const dataPrev = allTransac.filter(t => {
       const { year, month } = getMesLiquidacion(t);
-      return month === prevMes && year === prevAnio;
+      return month === prevMes && year === prevAnio && !t.es_liquidacion;
     });
     const dataPrevUsuario = dataPrev.filter(t => (t.usuario || "Daniel") === USUARIO);
     const prevGastoPorCat = {};
@@ -9964,6 +9968,7 @@ function getEstadoMes(recurrente) {
   const _hoyD = new Date();
   const mesActual = `${_hoyD.getFullYear()}-${String(_hoyD.getMonth()+1).padStart(2,"0")}`;
   const encontrada = allTransac.find(t =>
+    (t.usuario || "Daniel") === USUARIO &&
     t.descripcion === recurrente.descripcion &&
     t.categoria   === recurrente.categoria &&
     t.fecha.startsWith(mesActual) &&
