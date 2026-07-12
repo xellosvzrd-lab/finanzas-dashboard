@@ -4640,15 +4640,21 @@ async function guardarNombre() {
   await iniciarApp();
 }
 
+const CACHE_MEP_KEY = "fp_mep_last";
+
 async function fetchTipoCambioMEP() {
   try {
     const res = await fetch("https://dolarapi.com/v1/dolares/bolsa");
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
-    if (data?.venta) tipoCambioMEP = data.venta;
+    if (data?.venta) {
+      tipoCambioMEP = data.venta;
+      localStorage.setItem(CACHE_MEP_KEY, String(tipoCambioMEP));
+    }
   } catch (e) {
-    console.warn("No se pudo obtener el tipo de cambio MEP:", e);
-    tipoCambioMEP = null;
+    console.warn("No se pudo obtener el tipo de cambio MEP, usando último valor conocido:", e);
+    const ultimo = Number(localStorage.getItem(CACHE_MEP_KEY));
+    tipoCambioMEP = ultimo > 0 ? ultimo : null;
   }
 }
 
