@@ -3131,7 +3131,7 @@
           <div class="chart-card" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;gap:.5rem">
               <h3 style="font-size:1rem;font-weight:700">Desglose por categoría</h3>
-              <span style="font-size:.74rem;color:var(--text-muted)">cada valor ya dividido ÷2</span>
+              <span style="font-size:.74rem;color:var(--text-muted)">ya repartido según el % del mes</span>
             </div>
             <div class="table-wrap">
               <table>
@@ -3150,7 +3150,7 @@
               </table>
             </div>
             <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
-              * Cada valor ya está dividido por 2 — es la parte que le corresponde a cada uno.
+              * Cada valor ya está repartido según el % de reparto configurado para ese mes — es la parte que le corresponde a cada uno.
             </div>
           </div>
 
@@ -6511,7 +6511,7 @@ function cargarCompartidos() {
       return `<tr style="cursor:pointer;" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'table-row':'none'">
         <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_catEmo}</span>${escapeHtml(r.cat)}</span> <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
         <td style="text-align:right;color:${r.daniel !== 0 ? 'var(--text)' : 'var(--text-muted)'}">${r.daniel !== 0 ? fmtMoneda(r.daniel, monedaFilter) : "—"}</td>
-        <td style="text-align:right;color:${r.ama !== 0 ? 'var(--text-muted)' : 'var(--text-muted)'}">${r.ama !== 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}</td>
+        <td style="text-align:right;color:${r.ama !== 0 ? 'var(--text)' : 'var(--text-muted)'}">${r.ama !== 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}</td>
         <td style="text-align:right;font-weight:700;color:${net>0?"var(--yellow)":"var(--green)"}">${fmtMoneda(Math.abs(net), monedaFilter)}${liqBtn}</td>
       </tr>
       <tr id="${drillId}" style="display:none;">
@@ -6520,7 +6520,7 @@ function cargarCompartidos() {
             <thead><tr style="background:var(--bg2);">
               <th colspan="2" style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:left;font-weight:400;">Fecha — Descripción</th>
               <th style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:right;font-weight:400;">Monto bruto</th>
-              <th style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:right;font-weight:400;">Parte (÷2)</th>
+              <th style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:right;font-weight:400;">Parte (%)</th>
             </tr></thead>
             <tbody>${drillRows}</tbody>
           </table>
@@ -9587,7 +9587,9 @@ async function renderPlazos() {
 }
 
 function _renderFormPlazo(p) {
-  const hoy = new Date().toISOString().slice(0,10);
+  // Fecha local, no UTC — toISOString() muestra el día siguiente después de las 21hs ART
+  const _hoyD = new Date();
+  const hoy = `${_hoyD.getFullYear()}-${String(_hoyD.getMonth()+1).padStart(2,"0")}-${String(_hoyD.getDate()).padStart(2,"0")}`;
   const moneda = p?.moneda || "ARS";
   return `<div class="plazo-form">
     ${p ? `<input type="hidden" id="pf-id" value="${p.id}">` : ""}
@@ -9652,6 +9654,7 @@ async function guardarPlazo() {
 }
 
 async function eliminarPlazo(id) {
+  if (!confirm("¿Eliminar este plazo fijo?")) return;
   const { error } = await supabaseClient.from('plazos_fijos').delete().eq('id', id);
   if (error) { showToast("⚠️ Error al eliminar", "error"); return; }
   renderPlazos();
@@ -9772,7 +9775,7 @@ function _renderTotalesInversiones() {
     return s + p.monto * (p.tna / 100) * (dias / 365);
   }, 0);
   const interesEl = document.getElementById("inv-interes-total");
-  if (interesEl && interesTotal > 0) interesEl.textContent = `Interés estimado al vencer: +${fmt(Math.round(interesTotal))}`;
+  if (interesEl) interesEl.textContent = interesTotal > 0 ? `Interés estimado al vencer: +${fmt(Math.round(interesTotal))}` : "";
 
   // legacy div (vacío, JS lo usaba antes)
   const el = document.getElementById("inv-totales");
@@ -9945,6 +9948,7 @@ async function guardarAccion() {
 }
 
 async function eliminarAccion(id) {
+  if (!confirm("¿Eliminar esta tenencia?")) return;
   const { error } = await supabaseClient.from('acciones').delete().eq('id', id);
   if (error) { showToast("⚠️ Error al eliminar", "error"); return; }
   renderAcciones();
@@ -9954,7 +9958,9 @@ async function eliminarAccion(id) {
 let recurrentesActivas = []; // cargadas desde Supabase
 
 function getEstadoMes(recurrente) {
-  const mesActual = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  // Local, no UTC — toISOString() adelanta al mes siguiente después de las 21hs ART
+  const _hoyD = new Date();
+  const mesActual = `${_hoyD.getFullYear()}-${String(_hoyD.getMonth()+1).padStart(2,"0")}`;
   const encontrada = allTransac.find(t =>
     t.descripcion === recurrente.descripcion &&
     t.categoria   === recurrente.categoria &&

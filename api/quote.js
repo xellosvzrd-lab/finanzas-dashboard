@@ -1,5 +1,11 @@
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // El frontend siempre llama con path relativo (mismo origen) — reflejar el origen
+  // solo si coincide con el propio host, en vez de '*', para no exponer esto como
+  // proxy gratuito a Yahoo Finance para cualquier sitio de terceros.
+  const origin = req.headers.origin || '';
+  if (origin && origin === `https://${req.headers.host}`) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
