@@ -6561,6 +6561,32 @@ function _calcularBalanceCompartido(mes, anio) {
   return { balanceARS: compNetARS + aARS - bARS, balanceUSD: compNetUSD + aUSD - bUSD };
 }
 
+// Reembolsos "De X": Sección A = transacciones donde USUARIO pagó/cobró algo que es
+// responsabilidad de PARTNER ("De " + PARTNER, usuario === USUARIO) → PARTNER le debe a
+// USUARIO. Sección B es la inversa. Un Ingreso con la misma responsabilidad que un Gasto
+// (ej. PARTNER devolviendo lo que USUARIO le prestó) resta del total — mismo criterio de
+// neteo que ya usa el bucket "Compartido", que antes no se aplicaba acá.
+function _calcularReembolsos(datosGasto, datosIngreso, USUARIO, PARTNER) {
+  const reembA_ARS = {}, reembA_USD = {};
+  const reembB_ARS = {}, reembB_USD = {};
+
+  const acumular = (mapARS, mapUSD, arr, resp, usuarioEsperado, signo) => {
+    arr.filter(t => (t.responsabilidad || "Mío") === resp && (t.usuario || USUARIO) === usuarioEsperado)
+      .forEach(t => {
+        const cat = t.categoria, mon = (t.moneda || "ARS").toUpperCase();
+        const map = mon === "USD" ? mapUSD : mapARS;
+        map[cat] = (map[cat] || 0) + signo * Math.abs(Number(t.monto));
+      });
+  };
+
+  acumular(reembA_ARS, reembA_USD, datosGasto,   "De " + PARTNER, USUARIO, 1);
+  acumular(reembA_ARS, reembA_USD, datosIngreso, "De " + PARTNER, USUARIO, -1);
+  acumular(reembB_ARS, reembB_USD, datosGasto,   "De " + USUARIO, PARTNER, 1);
+  acumular(reembB_ARS, reembB_USD, datosIngreso, "De " + USUARIO, PARTNER, -1);
+
+  return { reembA_ARS, reembA_USD, reembB_ARS, reembB_USD };
+}
+
 function cargarCompartidos() {
   if (!PARTNER) {
     const cont = document.getElementById("page-compartidos");
@@ -6665,20 +6691,7 @@ function cargarCompartidos() {
   // ── REEMBOLSOS ───────────────────────────────────────────────
   // Sección A: Daniel pagó por Ama ("De Ama" de Daniel) → Ama le debe a Daniel
   // Sección B: Ama pagó por Daniel ("De Daniel" de Ama) → Daniel le debe a Ama
-  const reembA_ARS = {}, reembA_USD = {};
-  const reembB_ARS = {}, reembB_USD = {};
-
-  datos.filter(t => (t.responsabilidad || "Mío") === "De " + PARTNER && (t.usuario || USUARIO) === USUARIO).forEach(t => {
-    const cat = t.categoria, mon = (t.moneda || "ARS").toUpperCase();
-    if (mon === "USD") { reembA_USD[cat] = (reembA_USD[cat]||0) + Math.abs(Number(t.monto)); }
-    else               { reembA_ARS[cat] = (reembA_ARS[cat]||0) + Math.abs(Number(t.monto)); }
-  });
-
-  datos.filter(t => (t.responsabilidad || "Mío") === "De " + USUARIO && (t.usuario || USUARIO) === PARTNER).forEach(t => {
-    const cat = t.categoria, mon = (t.moneda || "ARS").toUpperCase();
-    if (mon === "USD") { reembB_USD[cat] = (reembB_USD[cat]||0) + Math.abs(Number(t.monto)); }
-    else               { reembB_ARS[cat] = (reembB_ARS[cat]||0) + Math.abs(Number(t.monto)); }
-  });
+  const { reembA_ARS, reembA_USD, reembB_ARS, reembB_USD } = _calcularReembolsos(datos, datosIngresos, USUARIO, PARTNER);
 
   // ── RENDERIZAR TABLA COMPARTIDOS (ARS + USD separados) ───────
   // Usar todas las claves del mapa (no solo CATS) para incluir categorías del otro usuario
