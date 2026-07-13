@@ -1272,6 +1272,13 @@
   .skeleton-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: .85rem 1rem; margin-bottom: .55rem; }
   .skeleton-line { display: block; height: .72rem; border-radius: 4px; margin: .32rem 0; }
 
+  /* ─── SCROLL REVEAL (secciones largas de Resumen/Anual) ──────── */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .5s var(--ease-out), transform .5s var(--ease-out);
+  }
+  .scroll-reveal.revealed { opacity: 1; transform: translateY(0); }
 
   /* ─── SPARKLINES ────────────────────────────────────────────── */
   .kpi-spark { margin-top: .6rem; height: 34px; opacity: .75; }
@@ -2836,13 +2843,13 @@
         </div>
 
         <!-- Evolución mensual fusionada — últimos 12 meses -->
-        <div class="chart-card full" style="margin-top:1rem">
+        <div class="chart-card full scroll-reveal" style="margin-top:1rem">
           <div class="chart-title">Evolución mensual — últimos 12 meses</div>
           <div class="chart-wrap" style="height:300px"><canvas id="chart-evol-combo"></canvas></div>
         </div>
 
         <!-- Comparador de meses -->
-        <div class="chart-card full" style="margin-top:1rem">
+        <div class="chart-card full scroll-reveal" style="margin-top:1rem">
           <div class="chart-title">Comparador de meses — ¿dónde se fue la diferencia?</div>
           <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">
             <div class="mes-selector">
@@ -3562,13 +3569,13 @@
         <div class="kpi-grid" id="anual-kpis" style="margin-bottom:1.2rem"></div>
 
         <!-- Gráfico barras por mes -->
-        <div class="chart-card full" style="margin-bottom:1.2rem">
+        <div class="chart-card full scroll-reveal" style="margin-bottom:1.2rem">
           <div class="chart-title">Ingresos vs Gastos — mes a mes</div>
           <div class="chart-wrap" style="height:280px"><canvas id="chart-anual-barras"></canvas></div>
         </div>
 
         <!-- Tabla top categorías -->
-        <div class="chart-card" style="padding:0;overflow:hidden">
+        <div class="chart-card scroll-reveal" style="padding:0;overflow:hidden">
           <table class="tabla" style="margin:0">
             <thead>
               <tr>
@@ -4263,6 +4270,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (window.lucide) lucide.createIcons();
   document.getElementById("f-fecha").valueAsDate = new Date();
   poblarSelectoresFecha();
+  _initScrollReveal();
 
   supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     global: { fetch: (url, opciones) => fetchConTimeout(url, opciones) }
@@ -7424,6 +7432,30 @@ function _actualizarNavIndicator() {
   const activeRect = active.getBoundingClientRect();
   indicator.style.width     = activeRect.width + "px";
   indicator.style.transform = `translateX(${activeRect.left - tabsRect.left}px)`;
+}
+
+// ─── SCROLL REVEAL ──────────────────────────────────────────
+// Secciones marcadas .scroll-reveal (fuera de la primera pantalla en
+// Resumen/Anual) aparecen con fade+slide al entrar en viewport, una sola
+// vez. Se observan todas al boot: aunque su página esté oculta
+// (display:none), el browser recalcula la intersección apenas se vuelve
+// visible al navegar, así que no hace falta re-armar esto por tab.
+function _initScrollReveal() {
+  const els = document.querySelectorAll(".scroll-reveal");
+  if (!els.length) return;
+  if (!("IntersectionObserver" in window)) {
+    els.forEach(el => el.classList.add("revealed"));
+    return;
+  }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("revealed");
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+  els.forEach(el => obs.observe(el));
 }
 
 function navegarA(pagina) {
