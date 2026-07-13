@@ -4016,14 +4016,14 @@
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- MODAL RECURRENTES -->
 <div id="modal-recurrentes" class="modal-overlay" style="display:none" onclick="if(event.target===this)cerrarModalRecurrentes()">
-  <div class="modal-content modal-recur">
+  <div class="modal-content modal-recur" role="dialog" aria-modal="true" aria-labelledby="modal-recurrentes-title">
     <div class="modal-recur-header">
-      <h3 class="modal-recur-title">⚙️ Mis recurrentes</h3>
-      <button class="modal-close-btn" onclick="cerrarModalRecurrentes()">×</button>
+      <h3 class="modal-recur-title" id="modal-recurrentes-title">⚙️ Mis recurrentes</h3>
+      <button class="modal-close-btn" onclick="cerrarModalRecurrentes()" aria-label="Cerrar">×</button>
     </div>
     <div id="modal-recur-body"></div>
     <div class="modal-recur-add">
@@ -4052,10 +4052,10 @@
 
 <!-- MODAL META DE AHORRO -->
 <div id="modal-meta-ahorro" class="modal-overlay" style="display:none" onclick="if(event.target===this)cerrarModalMeta()">
-  <div class="modal-content modal-recur">
+  <div class="modal-content modal-recur" role="dialog" aria-modal="true" aria-labelledby="modal-meta-ahorro-title">
     <div class="modal-recur-header">
-      <h3 class="modal-recur-title">🎯 Meta de ahorro</h3>
-      <button class="modal-close-btn" onclick="cerrarModalMeta()">×</button>
+      <h3 class="modal-recur-title" id="modal-meta-ahorro-title">🎯 Meta de ahorro</h3>
+      <button class="modal-close-btn" onclick="cerrarModalMeta()" aria-label="Cerrar">×</button>
     </div>
     <div class="modal-recur-add-form" style="display:flex">
       <input id="meta-nombre" type="text" class="modal-recur-input" placeholder="Nombre (ej: Vacaciones a Bariloche)">
@@ -4079,10 +4079,10 @@
 
 <!-- MODAL CIERRE DE MES ("Tu mes en números") -->
 <div id="modal-cierre-mes" class="modal-overlay" style="display:none" onclick="if(event.target===this)cerrarModalCierreMes()">
-  <div class="modal-content modal-recur">
+  <div class="modal-content modal-recur" role="dialog" aria-modal="true" aria-labelledby="modal-cierre-mes-title">
     <div class="modal-recur-header">
-      <h3 class="modal-recur-title">📊 Tu mes en números</h3>
-      <button class="modal-close-btn" onclick="cerrarModalCierreMes()">×</button>
+      <h3 class="modal-recur-title" id="modal-cierre-mes-title">📊 Tu mes en números</h3>
+      <button class="modal-close-btn" onclick="cerrarModalCierreMes()" aria-label="Cerrar">×</button>
     </div>
     <div id="cierre-mes-body"></div>
     <div class="modal-recur-add-actions" style="margin-top:1rem">
@@ -5605,7 +5605,18 @@ function inicializarCatOptions() {
 }
 // Cerrar al click fuera o Escape
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") _cerrarMultiSelect();
+  if (e.key !== "Escape") return;
+  _cerrarMultiSelect();
+  // Modales .modal-recur (Recurrentes, Meta de ahorro, Tu mes en números) — cierran con
+  // Escape igual que el resto de los modales de la app.
+  [
+    ["modal-recurrentes", cerrarModalRecurrentes],
+    ["modal-meta-ahorro", cerrarModalMeta],
+    ["modal-cierre-mes", cerrarModalCierreMes],
+  ].forEach(([id, cerrar]) => {
+    const el = document.getElementById(id);
+    if (el && el.style.display !== "none") cerrar();
+  });
 });
 document.addEventListener("click", e => {
   const wrap = e.target.closest(".multi-select-wrap");
