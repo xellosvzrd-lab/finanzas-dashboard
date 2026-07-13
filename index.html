@@ -5320,17 +5320,27 @@ async function cargarResumenMes() {
 // ─── GRÁFICO BARRAS CATEGORÍAS ────────────────────────────────
 function renderCatChart(sortedCats) {
   const ctx = document.getElementById("chart-cat");
-  if (chartCat) chartCat.destroy();
   if (!sortedCats.length) {
+    if (chartCat) { chartCat.destroy(); chartCat = null; }
     ctx.getContext("2d").clearRect(0,0,ctx.width,ctx.height);
+    return;
+  }
+  const labels = sortedCats.map(([k]) => k);
+  const data   = sortedCats.map(([,v]) => v);
+  if (chartCat) {
+    // Reusar la instancia: Chart.js tweenea de los valores viejos a los nuevos
+    // en vez de destruir y volver a crecer las barras desde cero.
+    chartCat.data.labels = labels;
+    chartCat.data.datasets[0].data = data;
+    chartCat.update();
     return;
   }
   chartCat = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: sortedCats.map(([k]) => k),
+      labels,
       datasets: [{
-        data: sortedCats.map(([,v]) => v),
+        data,
         backgroundColor: PALETTE,
         borderRadius: 6,
         borderSkipped: false,
@@ -5354,7 +5364,13 @@ function renderCatChart(sortedCats) {
 // ─── GRÁFICO DONUT ────────────────────────────────────────────
 function renderDonutChart(ingresos, gastos, balance) {
   const ctx = document.getElementById("chart-donut");
-  if (chartDonut) chartDonut.destroy();
+  if (chartDonut) {
+    // El tooltip lee de chart._datosDonut (seteado abajo) en vez de cerrar
+    // sobre ingresos/balance de esta llamada, así queda al día tras el update().
+    chartDonut._datosDonut = { ingresos, balance };
+    chartDonut.data.datasets[0].data = [ingresos, gastos];
+    chartDonut.update();
+  } else {
   chartDonut = new Chart(ctx, {
     type: "doughnut",
     data: {
@@ -5375,13 +5391,18 @@ function renderDonutChart(ingresos, gastos, balance) {
         legend: { position: "bottom", labels: { color: _C.muted, padding: 16, font:{ size:12, family: "'Libre Franklin', system-ui" }, usePointStyle: true } },
         tooltip: { callbacks: {
           label: ctx => " " + fmt(ctx.raw),
-          afterLabel: ctx => ctx.dataIndex === 0
-            ? ` Ahorro: ${ingresos > 0 ? ((balance/ingresos)*100).toFixed(1) : 0}%`
-            : ` Balance: ${fmt(balance)}`
+          afterLabel: ctx => {
+            const d = ctx.chart._datosDonut || { ingresos, balance };
+            return ctx.dataIndex === 0
+              ? ` Ahorro: ${d.ingresos > 0 ? ((d.balance/d.ingresos)*100).toFixed(1) : 0}%`
+              : ` Balance: ${fmt(d.balance)}`;
+          }
         }}
       }
     }
   });
+  chartDonut._datosDonut = { ingresos, balance };
+  }
   // Actualizar texto central
   const centerEl = document.getElementById("donut-center-val");
   if (centerEl) {
@@ -5538,7 +5559,14 @@ function cargarEvolucion() {
   // Chart combo doble eje: barras ingresos/gastos + línea balance acumulado
   const ctxCombo = document.getElementById("chart-evol-combo");
   if (!ctxCombo) return;
-  if (chartEvolCombo) chartEvolCombo.destroy();
+  if (chartEvolCombo) {
+    chartEvolCombo.data.labels = labels;
+    chartEvolCombo.data.datasets[0].data = ingArr;
+    chartEvolCombo.data.datasets[1].data = gasArr;
+    chartEvolCombo.data.datasets[2].data = balArr;
+    chartEvolCombo.update();
+    return;
+  }
   chartEvolCombo = new Chart(ctxCombo, {
     type: "bar",
     data: {
@@ -7330,19 +7358,26 @@ function cargarAnual() {
 
   // ── Gráfico barras por mes (ARS) ──
   const ctx = document.getElementById("chart-anual-barras");
-  if (chartAnualBarras) chartAnualBarras.destroy();
+  const ingresosPorMes = Object.values(byMes).map(m=>m.ingresos);
+  const gastosPorMes   = Object.values(byMes).map(m=>m.gastos);
+  if (chartAnualBarras) {
+    chartAnualBarras.data.datasets[0].data = ingresosPorMes;
+    chartAnualBarras.data.datasets[1].data = gastosPorMes;
+    chartAnualBarras.update();
+  } else {
   chartAnualBarras = new Chart(ctx, {
     data: {
       labels: MESES_LABEL,
       datasets: [
-        { type:"bar", label:"Ingresos ARS", data: Object.values(byMes).map(m=>m.ingresos),
+        { type:"bar", label:"Ingresos ARS", data: ingresosPorMes,
           backgroundColor:"rgba(52,211,153,0.7)", borderRadius:5 },
-        { type:"bar", label:"Gastos ARS",   data: Object.values(byMes).map(m=>m.gastos),
+        { type:"bar", label:"Gastos ARS",   data: gastosPorMes,
           backgroundColor:"rgba(248,113,113,0.7)", borderRadius:5 }
       ]
     },
     options: {
       responsive:true, maintainAspectRatio:false,
+      animation: { duration: 700, easing: "easeOutQuart" },
       plugins:{ legend:{ labels:{ color:"#8C7B72", font:{size:12} } } },
       scales:{
         x:{ ticks:{color:"#8C7B72"}, grid:{color:"rgba(45,41,38,0.06)"} },
@@ -7350,6 +7385,7 @@ function cargarAnual() {
       }
     }
   });
+  }
 
   // ── Tabla de categorías ARS ──
   const catTotals = {};
@@ -10435,11 +10471,11 @@ async function renderAcciones() {
           <div style="font-size:.72rem;color:var(--text-muted);margin-top:.1rem">${escapeHtml(a.nombre || "")} · ${a.cantidad} unidades</div>
         </div>
         <div class="accion-header-valor">
-          <div class="accion-valor-num" id="accion-valor-${a.id}" style="color:var(--text-muted)">—</div>
+          <div class="accion-valor-num" id="accion-valor-${a.id}"><span class="skeleton" style="width:84px;height:1em">&nbsp;</span></div>
           <div id="accion-pnl-${a.id}" style="display:${a.precio_compra ? '' : 'none'};text-align:right;margin-top:.2rem"><span class="accion-pnl" style="color:var(--text-muted)">P&amp;L —</span></div>
         </div>
       </div>
-      <div class="plazo-row" id="accion-precio-${a.id}"><span>Cotización</span><strong style="color:var(--text-muted)">cargando…</strong></div>
+      <div class="plazo-row" id="accion-precio-${a.id}"><span>Cotización</span><strong><span class="skeleton" style="width:64px;height:1em">&nbsp;</span></strong></div>
       <div class="plazo-row" style="margin-top:.45rem;justify-content:flex-end">
         <div style="display:flex;gap:.4rem">
           <button class="cfg-del-btn" onclick="editarAccion('${a.id}')" title="Editar" aria-label="Editar tenencia" style="color:var(--accent)">✎</button>
