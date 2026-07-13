@@ -2327,14 +2327,10 @@
   #compromisos-floor { overflow-x: auto; }
   #compromisos-floor .cuotas-floor-col { flex: 0 0 48px; }
 
-  /* ── RECURRENTES ────────────────────────────────────────── */
-  #modal-recurrentes {
-    position: fixed; inset: 0; z-index: 200;
-    background: var(--overlay); display: flex; align-items: center; justify-content: center; padding: 1rem;
-  }
-
-  /* ── META DE AHORRO ─────────────────────────────────────── */
-  #modal-meta-ahorro {
+  /* Overlay compartido por los modales tipo .modal-recur (Recurrentes, Meta de ahorro,
+     Tu mes en números) — antes eran 2 reglas por ID que no cubrían al tercer modal, que
+     usaba esta clase en el HTML pero nunca tuvo su regla CSS real. */
+  .modal-overlay {
     position: fixed; inset: 0; z-index: 200;
     background: var(--overlay); display: flex; align-items: center; justify-content: center; padding: 1rem;
   }
