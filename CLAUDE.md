@@ -88,7 +88,8 @@ let USUARIO         = "Daniel";       // Seteado por _setVariablesUsuario() desd
 let PARTNER         = "Ama";          // Derivado de USUARIO. Opuesto entre "Daniel" y "Ama"
 let comprasEnCuotas = [];             // Loaded by cargarCuotasActivas()
 let CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
-let tipoCambioMEP   = null;           // Solo Ama — dólar MEP venta, para convertir USD a ARS
+let tipoCambioMEP   = null;           // Dólar MEP venta, para convertir USD a ARS
+let PREF_USD_MEP    = false;          // Preferencia de usuario (Categorías → Cuenta y Seguridad), NO gating por nombre — gatea CATS_INGRESO_REAL (+"Intereses") y toda la matemática de conversión USD→ARS del presupuesto
 let allTransac      = [];             // TODAS las transacciones cargadas (paginadas si >1000)
 let resumenData     = [];
 
@@ -182,7 +183,7 @@ inicializarDisclosureMimes()     // llamada al final de cargarPresupuesto()
 toggleDetalleCompartidos()       // toggle tabla detalle en Compartidos
 inicializarDisclosureCompartidos() // llamada al final de cargarCompartidos()
 ```
-- Default Daniel=expandido, Ama=colapsado
+- Default: expandido para todos (override si hay valor guardado en localStorage)
 - Persistido en localStorage: `USUARIO + "_disclosure_mimes"` / `"_disclosure_compartidos"`
 
 ### Responsabilidad en formulario (Nueva transacción)
@@ -252,8 +253,8 @@ async function cargarTodasTransacciones() {
 
 - Los inputs almacenan **montos absolutos en pesos ($)** por categoría (columna `presupuesto.monto`, ex `porcentaje`).
 - El % del sueldo es un campo **calculado** en runtime, no se almacena: `(monto / salaryBase) × 100`
-- **Daniel:** `salaryBase = ARS ingresos (Sueldo + Otros Ingresos)`
-- **Ama:** `salaryBase = ARS ingresos + saldoUSD × tipoCambioMEP` (net-USD approach estable)
+- Sin `PREF_USD_MEP` tildado: `salaryBase = ARS ingresos (Sueldo + Otros Ingresos)`
+- Con `PREF_USD_MEP` tildado (checkbox en Categorías → Cuenta y Seguridad): `salaryBase = ARS ingresos + saldoUSD × tipoCambioMEP` (net-USD approach estable)
 - El % se actualiza **en vivo** al tipear (`actualizarKpisPres()` → `.pres-monto-live` span)
 - Datos separados por usuario via `usuario` en GET/POST
 - Migración de esquema: `docs/supabase/migrations/2026-07-05-presupuesto-monto.sql`
