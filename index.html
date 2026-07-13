@@ -1453,6 +1453,22 @@
     padding: .3rem .7rem; font-size: .82rem; font-weight: 700;
     font-family: inherit; cursor: pointer; appearance: none;
   }
+  .mm-month-pill {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: var(--r-pill); padding: .25rem .3rem;
+  }
+  .mm-month-pill button {
+    width: 26px; height: 26px; border-radius: 50%; border: none;
+    background: transparent; color: var(--text-dim); font-size: 1rem;
+    font-weight: 700; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mm-month-pill button:hover { background: var(--surface-3); color: var(--text); }
+  .mm-month-pill span {
+    font-size: .82rem; font-weight: 700; color: var(--text);
+    min-width: 7ch; text-align: center;
+  }
   .mm-bell {
     width: 40px; height: 40px; border-radius: var(--r-pill);
     background: var(--surface-2); border: 1px solid var(--line);
@@ -3206,7 +3222,12 @@
           <div>
             <div class="mm-page-title">Mi mes</div>
             <div class="mm-greeting" id="mm-greeting">Hola 👋</div>
-            <div class="mm-month-selects">
+            <div class="mm-month-pill">
+              <button type="button" onclick="cambiarMesPresupuesto(-1)" aria-label="Mes anterior">‹</button>
+              <span id="mm-mes-label"></span>
+              <button type="button" onclick="cambiarMesPresupuesto(1)" aria-label="Mes siguiente">›</button>
+            </div>
+            <div class="mm-month-selects" style="display:none">
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
@@ -3214,8 +3235,12 @@
           <div style="display:flex;align-items:center;gap:8px">
             <button class="btn btn-primary mm-anotar-btn" onclick="navegarA('nueva')">+ Anotar</button>
             <button class="mm-bell" onclick="sugerirPresupuestoDesdeHistorial()"
-                    title="Sugerir presupuesto" aria-label="Sugerir presupuesto">
+                    title="Sugerir presupuesto (promedio 3 meses)" aria-label="Sugerir presupuesto">
               <i data-lucide="bar-chart-2" width="18" height="18"></i>
+            </button>
+            <button class="mm-bell" onclick="copiarPresupuestoMesAnterior()"
+                    title="Copiar presupuesto del mes anterior" aria-label="Copiar presupuesto del mes anterior">
+              <i data-lucide="copy" width="18" height="18"></i>
             </button>
           </div>
         </div>
@@ -7282,9 +7307,39 @@ function inicializarSelectoresPresupuesto() {
   }
 }
 
+const MESES_LARGO = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+// Pill "‹ Mes Año ›" de Mi mes: los <select> ocultos siguen siendo la fuente de
+// verdad (todo el resto del código lee su .value) — esto solo los mueve por vos.
+function cambiarMesPresupuesto(delta) {
+  const selMes  = document.getElementById("pres-mes");
+  const selAnio = document.getElementById("pres-anio");
+  let mes  = parseInt(selMes.value) + delta;
+  let anio = parseInt(selAnio.value);
+  if (mes < 1)       { mes = 12; anio--; }
+  else if (mes > 12) { mes = 1;  anio++; }
+
+  if (![...selAnio.options].some(o => parseInt(o.value) === anio)) {
+    const o = document.createElement("option");
+    o.value = anio; o.textContent = anio;
+    selAnio.appendChild(o);
+  }
+  selMes.value  = String(mes).padStart(2, "0");
+  selAnio.value = String(anio);
+  cargarPresupuesto();
+}
+
+function _actualizarMesPresupuestoLabel() {
+  const mes   = parseInt(document.getElementById("pres-mes")?.value);
+  const anio  = document.getElementById("pres-anio")?.value;
+  const label = document.getElementById("mm-mes-label");
+  if (label && mes && anio) label.textContent = `${MESES_LARGO[mes - 1]} ${anio}`;
+}
+
 async function cargarPresupuesto() {
   const mes  = parseInt(document.getElementById("pres-mes").value);
   const anio = parseInt(document.getElementById("pres-anio").value);
+  _actualizarMesPresupuestoLabel();
   const fetchList = [
     supabaseClient.from('presupuesto').select('*').eq('mes', mes).eq('anio', anio).eq('usuario', USUARIO)
   ];
@@ -7391,6 +7446,45 @@ function sugerirPresupuestoDesdeHistorial() {
   if (!aplicados) { showToast("⚠️ Sin datos en los últimos 3 meses", "error"); return; }
   actualizarKpisPres();
   showToast(`✅ Sugerencia aplicada (${aplicados} categorías). Revisá y guardá.`, "success");
+}
+
+// Trae el presupuesto guardado del mes anterior (tabla `presupuesto`, no gasto real)
+// y lo aplica a los inputs con un ajuste %, para no recargar todo a mano cada mes.
+async function copiarPresupuestoMesAnterior() {
+  const mes  = parseInt(document.getElementById("pres-mes").value);
+  const anio = parseInt(document.getElementById("pres-anio").value);
+  const prevMes  = mes === 1 ? 12 : mes - 1;
+  const prevAnio = mes === 1 ? anio - 1 : anio;
+
+  const ajusteStr = prompt("¿Ajuste % sobre el presupuesto del mes anterior? (0 = igual, -5 = 5% menos)", "0");
+  if (ajusteStr === null) return;
+  const ajustePct = parsearDecimal(ajusteStr);
+
+  const { data, error } = await supabaseClient
+    .from('presupuesto').select('*').eq('mes', prevMes).eq('anio', prevAnio).eq('usuario', USUARIO);
+  if (error) { showToast("❌ Error al buscar el presupuesto anterior", "error"); return; }
+  if (!data || !data.length) {
+    showToast(`⚠️ Sin presupuesto guardado en ${MESES_LARGO[prevMes-1]} ${prevAnio}`, "error");
+    return;
+  }
+
+  const prevPorCat = {};
+  data.forEach(d => { prevPorCat[d.categoria] = Number(d.monto); });
+
+  let aplicados = 0;
+  document.querySelectorAll("#pres-tbody .pres-input").forEach(inp => {
+    const cat = inp.dataset.cat;
+    if (!(cat in prevPorCat)) return;
+    const monto = Math.round(prevPorCat[cat] * (1 + ajustePct / 100));
+    if (monto > 0) {
+      inp.value = String(monto).replace(".", ",");
+      aplicados++;
+    }
+  });
+
+  if (!aplicados) { showToast("⚠️ El mes anterior no tiene categorías en común", "error"); return; }
+  actualizarKpisPres();
+  showToast(`✅ Copiado del mes anterior (${aplicados} categorías). Revisá y guardá.`, "success");
 }
 
 // ─── ANILLO DE PROGRESO DEL PRESUPUESTO ───────────────────────
@@ -9967,16 +10061,32 @@ function getEstadoMes(recurrente) {
   // Local, no UTC — toISOString() adelanta al mes siguiente después de las 21hs ART
   const _hoyD = new Date();
   const mesActual = `${_hoyD.getFullYear()}-${String(_hoyD.getMonth()+1).padStart(2,"0")}`;
-  const encontrada = allTransac.find(t =>
+  const matchRecur = t =>
     (t.usuario || "Daniel") === USUARIO &&
     t.descripcion === recurrente.descripcion &&
     t.categoria   === recurrente.categoria &&
-    t.fecha.startsWith(mesActual) &&
-    !t.compra_id
-  );
-  return encontrada
-    ? { ok: true, monto: encontrada.monto }
-    : { ok: false };
+    !t.compra_id;
+
+  const encontrada = allTransac.find(t => matchRecur(t) && t.fecha.startsWith(mesActual));
+  if (encontrada) {
+    // Comparar contra su última aparición previa (cualquier mes anterior a este) para
+    // detectar suba/baja de precio — mismo umbral ±15% que las alertas de tendencia.
+    const previas = allTransac
+      .filter(t => matchRecur(t) && !t.fecha.startsWith(mesActual) && t.id !== encontrada.id)
+      .sort((a, b) => b.fecha.localeCompare(a.fecha));
+    let deltaPct = null;
+    if (previas.length) {
+      const montoPrev = Math.abs(Number(previas[0].monto));
+      const montoAct  = Math.abs(Number(encontrada.monto));
+      if (montoPrev > 0) {
+        const delta = ((montoAct - montoPrev) / montoPrev) * 100;
+        if (Math.abs(delta) >= 15) deltaPct = Math.round(delta);
+      }
+    }
+    return { ok: true, monto: encontrada.monto, deltaPct };
+  }
+  // Sin urgencia recién iniciado el mes — recién avisa fuerte a partir del día 20
+  return { ok: false, urgente: _hoyD.getDate() >= 20 };
 }
 
 // ─── SUPABASE CRUD ────────────────────────────────────────────
@@ -10088,7 +10198,7 @@ function renderRecurrentes() {
   section.style.display = '';
 
   const estados    = activas.map(r => ({ r, estado: getEstadoMes(r) }));
-  const pendientes = estados.filter(x => !x.estado.ok).length;
+  const pendientes = estados.filter(x => !x.estado.ok && x.estado.urgente).length;
 
   if (pendientes > 0) {
     badge.textContent = pendientes + ' pendiente' + (pendientes > 1 ? 's' : '');
@@ -10099,6 +10209,9 @@ function renderRecurrentes() {
 
   list.innerHTML = estados.map(({ r, estado }) => {
     if (estado.ok) {
+      const cambioTag = estado.deltaPct != null
+        ? `<div class="recur-status-sub" style="color:${estado.deltaPct > 0 ? 'var(--red)' : 'var(--green)'}">${estado.deltaPct > 0 ? '▲' : '▼'} ${Math.abs(estado.deltaPct)}% vs. última vez</div>`
+        : '';
       return `<div class="recur-row recur-row--ok">
         <div class="recur-row-icon">✅</div>
         <div class="recur-row-info">
@@ -10107,9 +10220,10 @@ function renderRecurrentes() {
         </div>
         <div class="recur-row-right">
           <div class="recur-status-ok">${fmt(estado.monto)}</div>
+          ${cambioTag}
         </div>
       </div>`;
-    } else {
+    } else if (estado.urgente) {
       return `<div class="recur-row recur-row--pending" data-recur-id="${r.id}" onclick="_cargarRecurrentePorId(this.dataset.recurId)">
         <div class="recur-row-icon">⚠️</div>
         <div class="recur-row-info">
@@ -10118,6 +10232,18 @@ function renderRecurrentes() {
         </div>
         <div class="recur-row-right">
           <div class="recur-status-warn">pendiente</div>
+          ${r.monto_ref ? `<div class="recur-status-sub">~${fmt(r.monto_ref)}</div>` : ''}
+        </div>
+      </div>`;
+    } else {
+      // Todavía no llegó el día "esperable" del mes — se muestra neutro, sin alarmar ni sumar al badge
+      return `<div class="recur-row recur-row--suggest" data-recur-id="${r.id}" onclick="_cargarRecurrentePorId(this.dataset.recurId)">
+        <div class="recur-row-icon">⏳</div>
+        <div class="recur-row-info">
+          <div class="recur-row-name">${_esc(r.descripcion)}</div>
+          <div class="recur-row-cat">${_esc(r.categoria)} · aún no llegó este mes</div>
+        </div>
+        <div class="recur-row-right">
           ${r.monto_ref ? `<div class="recur-status-sub">~${fmt(r.monto_ref)}</div>` : ''}
         </div>
       </div>`;
