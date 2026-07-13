@@ -1390,6 +1390,7 @@
     :root[data-theme='dark'] .rafaga-modal, :root[data-theme='dark'] .cuotas-modal,
     :root[data-theme='dark'] .modal-recur, :root[data-theme='dark'] .edit-modal,
     :root[data-theme='dark'] .cuotas-mes-sheet, :root[data-theme='dark'] .cuotas-card,
+    :root[data-theme='dark'] .compromisos-card-box,
     :root[data-theme='dark'] .liq-inner, :root[data-theme='dark'] #modal-nombre > div,
     :root[data-theme='dark'] #modal-invitacion > div {
       background: #221c30;
@@ -1400,6 +1401,7 @@
     :root[data-theme='light'] .rafaga-modal, :root[data-theme='light'] .cuotas-modal,
     :root[data-theme='light'] .modal-recur, :root[data-theme='light'] .edit-modal,
     :root[data-theme='light'] .cuotas-mes-sheet, :root[data-theme='light'] .cuotas-card,
+    :root[data-theme='light'] .compromisos-card-box,
     :root[data-theme='light'] .liq-inner, :root[data-theme='light'] #modal-nombre > div,
     :root[data-theme='light'] #modal-invitacion > div {
       background: #ece7f7;
@@ -1760,6 +1762,7 @@
      inline-styled (background:var(--card) en el HTML) — el backdrop-filter
      se agrega acá porque no se puede meter en el atributo style. */
   .rafaga-modal, .cuotas-modal, .modal-recur, .edit-modal, .cuotas-mes-sheet, .cuotas-card,
+  .compromisos-card-box,
   .liq-inner, #modal-nombre > div, #modal-invitacion > div {
     backdrop-filter: blur(var(--card-blur)) saturate(160%);
     -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
@@ -2187,7 +2190,7 @@
   }
 
   /* ─── CUOTAS ─────────────────────────────────────────────── */
-  .cuotas-card {
+  .cuotas-card, .compromisos-card-box {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -2196,7 +2199,7 @@
     position: relative;
     overflow: hidden;
   }
-  .cuotas-card::before {
+  .cuotas-card::before, .compromisos-card-box::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; height: 2px;
@@ -3289,16 +3292,9 @@
             </div>
           </div>
 
-          <!-- Quick stats: Ingresos · Gastos · Ahorro -->
+          <!-- Quick stat: Ahorro (Ingresos/Gastos se sacaron de acá — quedaban duplicados
+               con "Desglose del sueldo" de abajo, que ya muestra Sueldo y Gastado) -->
           <div class="mm-quick-stats">
-            <div class="card mm-qs-card">
-              <div class="mm-qs-label">Ingresos</div>
-              <div class="mm-qs-val num" style="color:var(--pos)" id="mm-qs-ingresos">$0</div>
-            </div>
-            <div class="card mm-qs-card">
-              <div class="mm-qs-label">Gastos</div>
-              <div class="mm-qs-val num" style="color:var(--neg)" id="mm-qs-gastos">$0</div>
-            </div>
             <div class="card mm-qs-card">
               <div class="mm-qs-label">Ahorro</div>
               <div class="mm-qs-val num" style="color:var(--save)" id="mm-qs-ahorro">—%</div>
@@ -3418,8 +3414,8 @@
             <div class="cuotas-summary">
               <span>Este mes: <strong id="cuotas-este-mes">$0</strong></span>
               <span>Comprometido futuro: <strong id="cuotas-futuro">$0</strong></span>
+              <span style="color:var(--text-muted);font-size:.78rem">· ver el calendario completo en Compromisos futuros ↓</span>
             </div>
-            <div class="cuotas-floor" id="cuotas-floor"></div>
             <div class="cuotas-body" id="cuotas-rows"></div>
             <div class="cuotas-actions">
               <button class="btn btn-outline" style="font-size:.83rem"
@@ -3430,8 +3426,10 @@
           </div>
         </div>
 
-        <!-- Calendario de compromisos futuros (cuotas + recurrentes, 12 meses) -->
-        <div class="cuotas-card" id="compromisos-card" style="display:none">
+        <!-- Calendario de compromisos futuros (cuotas + recurrentes, 12 meses) — visible en
+             mobile Y desktop (a diferencia de Cuotas activas, que es mobile-only) por eso NO
+             usa la clase .cuotas-card (tiene display:none!important en desktop). -->
+        <div class="compromisos-card-box" id="compromisos-card" style="display:none">
           <div class="cuotas-header" onclick="toggleCompromisosCard()"
                role="button" tabindex="0" aria-expanded="true" aria-controls="compromisos-body-wrap"
                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCompromisosCard()}">
@@ -8235,12 +8233,6 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
     }
   }
 
-  const qsIng = $("mm-qs-ingresos");
-  if (qsIng) qsIng.textContent = fmt(sueldoEfectivo);
-
-  const qsGas = $("mm-qs-gastos");
-  if (qsGas) qsGas.textContent = fmt(totalGasto);
-
   const qsAho = $("mm-qs-ahorro");
   if (qsAho && sueldoEfectivo > 0) {
     const pct = Math.round(Math.max(0, (sueldoEfectivo - totalGasto) / sueldoEfectivo) * 100);
@@ -9418,14 +9410,6 @@ function _renderCuotasCard() {
   const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
   const MESES_CORTOS = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
 
-  // Floor timeline: próximos 6 meses comenzando desde el mes actual
-  const floorMeses = [];
-  for (let i = 0; i < 6; i++) {
-    const d = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1);
-    floorMeses.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-  }
-  const floorByMes = Object.fromEntries(floorMeses.map(m => [m, 0]));
-
   let estesMes = 0, futuro = 0;
   const toComplete = [];
 
@@ -9457,7 +9441,6 @@ function _renderCuotasCard() {
       const monto = (c.moneda === "USD") ? montoBruto * (tipoCambioMEP || 1) : montoBruto;
       if (m === mesActualStr) estesMes += monto;
       else if (m > mesActualStr) futuro += monto;
-      if (Object.prototype.hasOwnProperty.call(floorByMes, m)) floorByMes[m] += monto;
     });
 
     const ultima = cuotasTrans.find(t => Number(t.cuota_nro) === c.cuotas_total);
@@ -9509,25 +9492,6 @@ function _renderCuotasCard() {
   if (_scCount) _scCount.textContent = countLabel;
   _cuotasMesRows = rows.join("");
   document.getElementById("cuotas-rows").innerHTML = _cuotasMesRows;
-
-  // Render floor timeline
-  const floorEl = document.getElementById("cuotas-floor");
-  if (floorEl) {
-    const maxFloor = Math.max(...Object.values(floorByMes), 1);
-    floorEl.innerHTML = floorMeses.map(m => {
-      const mo = parseInt(m.split("-")[1]);
-      const monto = floorByMes[m];
-      const barH = monto > 0 ? Math.max(0.08, monto / maxFloor) : 0;
-      const isCurrent = m === mesActualStr;
-      return `<div class="cuotas-floor-col${isCurrent ? " current" : ""}">
-        <span class="cuotas-floor-amount">${monto > 0 ? fmtShort(monto) : "—"}</span>
-        <div class="cuotas-floor-bar-wrap">
-          <div class="cuotas-floor-bar-fill" style="transform:scaleY(${barH.toFixed(3)})"></div>
-        </div>
-        <span class="cuotas-floor-label">${MESES_CORTOS[mo - 1]}</span>
-      </div>`;
-    }).join("");
-  }
 
   if (window.lucide) lucide.createIcons();
 }
