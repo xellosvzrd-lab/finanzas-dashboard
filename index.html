@@ -1459,10 +1459,11 @@
     border-radius: var(--r-pill); padding: .25rem .3rem;
   }
   .mm-month-pill button {
-    width: 26px; height: 26px; border-radius: 50%; border: none;
+    width: 40px; height: 40px; border-radius: 50%; border: none;
     background: transparent; color: var(--text-dim); font-size: 1rem;
     font-weight: 700; line-height: 1; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
+    transition: background .15s, color .15s;
   }
   .mm-month-pill button:hover { background: var(--surface-3); color: var(--text); }
   .mm-month-pill span {
@@ -2324,7 +2325,14 @@
 
   /* Compromisos futuros: 12 columnas no entran cómodas en el ancho de un celular
      como las 6 de Cuotas — scroll horizontal en vez de apretar cada barra. */
-  #compromisos-floor { overflow-x: auto; }
+  #compromisos-floor {
+    overflow-x: auto;
+    /* Fade en el borde derecho — señal de que hay más meses para scrollear
+       (12 columnas no entran en una pantalla angosta, a diferencia de las
+       6 del floor de Cuotas activas, que sí entran sin necesitar esta pista). */
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+  }
   #compromisos-floor .cuotas-floor-col { flex: 0 0 48px; }
 
   /* Overlay compartido por los modales tipo .modal-recur (Recurrentes, Meta de ahorro,
