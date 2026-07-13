@@ -484,6 +484,7 @@
     -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
     border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.4rem;
+    box-shadow: var(--shadow-card);
     transition: border-color .25s;
   }
   .chart-card:hover {
@@ -575,13 +576,14 @@
   }
   .badge-ingreso { background: var(--green-dim); color: var(--green); }
   .badge-gasto   { background: var(--red-dim);   color: var(--red); }
-  .delete-btn {
+  .delete-btn, .cfg-del-btn {
     background: none; border: none; cursor: pointer;
     color: var(--text-muted); font-size: .95rem; padding: .25rem .45rem;
     border-radius: 6px; transition: color .15s, background .15s;
   }
-  .delete-btn:hover { color: var(--red); background: var(--red-dim); }
+  .delete-btn:hover, .cfg-del-btn:hover { color: var(--red); background: var(--red-dim); }
   /* ─── COMPARTIDOS ────────────────────────────────── */
+  .comp-section-title { font-size: 1rem; font-weight: 700; margin: 0; }
   .comp-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -853,12 +855,8 @@
     line-height: 1; transition: border-color .15s, background .15s; flex-shrink: 0;
   }
   .cfg-emoji-btn:hover { border-color: var(--border); background: var(--bg2); }
-  .cfg-del-btn {
-    background: none; border: none; cursor: pointer;
-    color: var(--text-muted); font-size: .85rem; padding: .15rem .35rem;
-    border-radius: 5px; transition: color .15s, background .15s;
-  }
-  .cfg-del-btn:hover { color: var(--red); background: var(--red-dim); }
+  /* .cfg-del-btn: mismo tamaño que .delete-btn (regla compartida más arriba) — antes era
+     más chico sin razón funcional para la misma acción (Eliminar) en otra pantalla. */
   .cfg-add-row {
     display: flex; gap: .5rem; margin-top: .35rem; flex-wrap: wrap;
   }
@@ -1670,7 +1668,7 @@
     /* Touch targets mínimos 44px */
     .btn { min-height: 44px; }
     .hamburger-btn { min-height: 44px; min-width: 44px; }
-    .delete-btn { min-height: 44px; min-width: 44px; padding: .35rem .55rem; }
+    .delete-btn, .cfg-del-btn { min-height: 44px; min-width: 44px; padding: .35rem .55rem; }
 
     /* Selectores más grandes para tacto */
     .mes-selector select { padding: .52rem 1rem; min-height: 44px; font-size: .88rem; }
@@ -2761,7 +2759,10 @@
       <!-- ── PÁGINA RESUMEN ────────────────────────────── -->
       <div id="page-resumen" class="page">
         <div class="page-header">
-          <h1>Resumen del mes</h1>
+          <div class="page-header-left">
+            <p class="page-eyebrow" id="eyebrow-resumen">RESUMEN</p>
+            <h1>Resumen del mes</h1>
+          </div>
           <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
             <div class="mes-selector">
               <select id="sel-mes-resumen" onchange="guardarSelFecha();cargarResumenMes()"></select>
@@ -3176,7 +3177,7 @@
           <!-- Tabla izquierda: Compartidos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;gap:.5rem">
-              <h3 style="font-size:1rem;font-weight:700">Desglose por categoría</h3>
+              <h3 class="comp-section-title">Desglose por categoría</h3>
               <span style="font-size:.74rem;color:var(--text-muted)">ya repartido según el % del mes</span>
             </div>
             <div class="table-wrap">
@@ -3203,7 +3204,7 @@
           <!-- Tabla derecha: Reembolsos -->
           <div class="chart-card" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 style="font-size:1rem;font-weight:700;color:var(--accent)">Reembolsos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos individuales cruzados)</span></h3>
+              <h3 class="comp-section-title" style="color:var(--accent)">Reembolsos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos individuales cruzados)</span></h3>
             </div>
             <div class="table-wrap">
               <table>
