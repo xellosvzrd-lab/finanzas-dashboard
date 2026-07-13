@@ -3600,6 +3600,10 @@
           <div id="cuenta-identities">
             <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
           </div>
+          <label style="display:flex;align-items:flex-start;gap:.6rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);cursor:pointer;font-size:.85rem;color:var(--text)">
+            <input type="checkbox" id="pref-usd-mep" onchange="guardarPrefUsdMep(this.checked)" style="margin-top:.15rem;flex-shrink:0">
+            <span>Cobro parte de mis ingresos en USD — convertir a ARS con dólar MEP en mi presupuesto</span>
+          </label>
         </div>
 
         <!-- Mi pareja / Workspace -->
@@ -4086,6 +4090,7 @@ let PARTNER         = null; // idem — null hasta confirmar que hay alguien má
 let comprasEnCuotas = [];  // loaded by cargarCuotasActivas()
 let CATS_INGRESO_REAL = ["Sueldo", "Otros Ingresos"];
 let tipoCambioMEP   = null;
+let PREF_USD_MEP    = false; // preferencia de usuario: convertir ingresos USD→ARS vía dólar MEP (user_metadata.usd_mep)
 let allTransac  = [];
 let resumenData = [];
 // Categorías de movimiento entre cuentas propias — se muestran en la tabla
@@ -4348,6 +4353,8 @@ async function renderizarSeccionCuenta() {
       ${!hasGoogle ? `<button class="btn btn-ghost" id="btn-vincular-google" onclick="vincularGoogle()" style="font-size:.8rem;padding:.4rem .85rem">Vincular →</button>` : ''}
     </div>
     <div id="cuenta-msg" style="margin-top:.5rem;font-size:.82rem"></div>`;
+  const chk = document.getElementById('pref-usd-mep');
+  if (chk) chk.checked = PREF_USD_MEP;
 }
 
 async function volverConfig() {
@@ -4548,18 +4555,27 @@ function ocultarErrorCarga() {
 function _setVariablesUsuario(nombre) {
   USUARIO = nombre;
   PARTNER = resolverPartnerNombre(); // null si todavía no hay nadie más en mi workspace
-  CATS_INGRESO_REAL = USUARIO.toLowerCase() === "ama"
+  CATS_INGRESO_REAL = PREF_USD_MEP
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
   categResponsabilidad = PARTNER ? ["Mío", "Compartido", "De " + PARTNER] : ["Mío"];
   const _savedTheme = localStorage.getItem('fin-theme');
-  const _defaultTheme = USUARIO.toLowerCase() === "ama" ? "light" : "dark";
+  const _defaultTheme = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? "dark" : "light";
   document.documentElement.dataset.theme = _savedTheme || _defaultTheme;
   const _sun  = document.getElementById('theme-icon-sun');
   const _moon = document.getElementById('theme-icon-moon');
   const _activeTheme = _savedTheme || _defaultTheme;
   if (_sun)  _sun.style.display  = _activeTheme === 'dark' ? '' : 'none';
   if (_moon) _moon.style.display = _activeTheme === 'dark' ? 'none' : '';
+}
+
+function guardarPrefUsdMep(checked) {
+  PREF_USD_MEP = !!checked;
+  CATS_INGRESO_REAL = PREF_USD_MEP
+    ? ["Sueldo", "Otros Ingresos", "Intereses"]
+    : ["Sueldo", "Otros Ingresos"];
+  supabaseClient.auth.updateUser({ data: { usd_mep: PREF_USD_MEP } }).catch(() => {});
+  cargarPresupuesto();
 }
 
 // Detecta el error "Auth session missing!" de supabase-js (sesión perdida
@@ -4583,6 +4599,7 @@ async function _configurarUsuario(session) {
     return false;
   }
   await cargarWorkspaceMembers();
+  PREF_USD_MEP = session.user.user_metadata?.usd_mep === true;
   _setVariablesUsuario(metaNombre || "");
   if (USUARIO && metaEmojis && typeof metaEmojis === "object") {
     localStorage.setItem(USUARIO + "_cat_emojis", JSON.stringify(metaEmojis));
@@ -7417,7 +7434,7 @@ function sugerirPresupuestoDesdeHistorial() {
       .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     const ingUSD = dataMesU.filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD").reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
     const gasUSD = dataMesU.filter(t => t.tipo === "Gasto"   && !esTransferencia(t) && (t.moneda || "ARS") === "USD").reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-    const usdARS = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? (ingUSD - gasUSD) * tipoCambioMEP : 0;
+    const usdARS = PREF_USD_MEP && tipoCambioMEP ? (ingUSD - gasUSD) * tipoCambioMEP : 0;
     const sueldo = sueldoARS + usdARS;
     if (sueldo <= 0) return;
 
@@ -7651,7 +7668,7 @@ function renderPresupuesto() {
   const ingresosUSDPres = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const usdEnARSPres = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? ingresosUSDPres * tipoCambioMEP : 0;
+  const usdEnARSPres = PREF_USD_MEP && tipoCambioMEP ? ingresosUSDPres * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSPres;
 
   // Gasto efectivo por categoría usando lógica de responsabilidad:
@@ -7714,7 +7731,7 @@ function renderPresupuesto() {
 
   // Gastos USD de Ama convertidos a ARS (sus propios "Mío" + 50% compartidos; NO los "De Ama" que paga Daniel)
   let gastoUSDEnARS = 0;
-  if (USUARIO.toLowerCase() === "ama" && tipoCambioMEP) {
+  if (PREF_USD_MEP && tipoCambioMEP) {
     const gasUSDMio = dataMesDaniel
       .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
                && (t.responsabilidad || "Mío") === "Mío")
@@ -7784,7 +7801,7 @@ function renderPresupuesto() {
   animateKPI(document.getElementById("pres-kpi-sueldo"), sueldoEfectivo, fmt);
   const sublSueldo = document.getElementById("pres-kpi-sueldo-sub");
   if (sublSueldo) {
-    sublSueldo.textContent = USUARIO.toLowerCase() === "ama" && tipoCambioMEP && ingresosUSDPres > 0
+    sublSueldo.textContent = PREF_USD_MEP && tipoCambioMEP && ingresosUSDPres > 0
       ? `ARS + ${fmtMoneda(ingresosUSDPres,"USD")} × $${Math.round(tipoCambioMEP).toLocaleString("es-AR")} MEP`
       : "ingresos del mes";
   }
@@ -8167,7 +8184,7 @@ function actualizarKpisPres() {
   const ingUSDKpi = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const usdEnARSKpi = USUARIO.toLowerCase() === "ama" && tipoCambioMEP ? ingUSDKpi * tipoCambioMEP : 0;
+  const usdEnARSKpi = PREF_USD_MEP && tipoCambioMEP ? ingUSDKpi * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSKpi;
 
   const gastoPorCat = {};
@@ -8222,7 +8239,7 @@ function actualizarKpisPres() {
   });
 
   let gastoUSDEnARSKpi = 0;
-  if (USUARIO.toLowerCase() === "ama" && tipoCambioMEP) {
+  if (PREF_USD_MEP && tipoCambioMEP) {
     const gasUSDMioKpi = dataMesDaniel
       .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD"
                && (t.responsabilidad || "Mío") === "Mío")
@@ -9478,9 +9495,9 @@ function inicializarDisclosureMimes() {
   const el  = document.getElementById("pres-desglose");
   const btn = document.getElementById("btn-toggle-desglose");
   if (!el || !btn) return;
-  // Default: Daniel expandido, Ama colapsado. Override si hay valor guardado.
+  // Expandido por defecto para todos. Override si hay valor guardado.
   const saved = localStorage.getItem(USUARIO + "_disclosure_mimes");
-  const defaultExpanded = USUARIO.toLowerCase() !== "ama";
+  const defaultExpanded = true;
   const expanded = saved !== null ? saved === "1" : defaultExpanded;
   el.style.display  = expanded ? "" : "none";
   btn.textContent   = expanded ? "Ocultar desglose ▴" : "Ver desglose ▾";
