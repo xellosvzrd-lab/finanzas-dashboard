@@ -3848,7 +3848,7 @@
                   border:1px solid var(--border);background:var(--bg2);color:var(--text);
                   font-size:1rem;margin-bottom:1rem;"
            onkeydown="if(event.key==='Enter') guardarNombre()">
-    <button class="btn btn-primary" style="width:100%" onclick="guardarNombre()">
+    <button class="btn btn-primary" id="btn-guardar-nombre" style="width:100%" onclick="guardarNombre()">
       Guardar →
     </button>
     <div id="modal-nombre-msg" style="margin-top:.75rem;font-size:.82rem;min-height:1rem;"></div>
@@ -4291,6 +4291,9 @@ async function guardarConfig() {
   const password = document.getElementById("sb-password").value;
   const res      = document.getElementById("test-result");
   const btn      = document.getElementById("btn-conectar");
+  // El Enter en los inputs llama a esta función directo (no pasa por el <button disabled>),
+  // así que sin este guard un Enter repetido puede disparar signInWithPassword 2 veces.
+  if (btn.disabled) return;
 
   if (!email || !password) {
     res.innerHTML = '<span class="fail">❌ Completá email y contraseña.</span>';
@@ -4450,6 +4453,7 @@ async function guardarRegistro() {
   const password = document.getElementById("reg-password").value;
   const res      = document.getElementById("registro-result");
   const btn      = document.getElementById("btn-registro");
+  if (btn.disabled) return; // el Enter en los inputs llama a esta función directo
 
   if (!email || password.length < 6) {
     res.innerHTML = '<span class="fail">❌ Completá un email válido y una contraseña de al menos 6 caracteres.</span>';
@@ -4492,6 +4496,7 @@ async function enviarResetPassword() {
   const email = document.getElementById("reset-email").value.trim();
   const res   = document.getElementById("reset-result");
   const btn   = document.getElementById("btn-reset");
+  if (btn.disabled) return; // el Enter en el input llama a esta función directo
   if (!email) { res.innerHTML = '<span class="fail">❌ Ingresá tu email.</span>'; return; }
   btn.disabled = true;
   btn.textContent = "⏳ Enviando...";
@@ -4515,6 +4520,7 @@ async function guardarNuevaPassword() {
   const p2  = document.getElementById("nueva-password2").value;
   const res = document.getElementById("nueva-password-result");
   const btn = document.getElementById("btn-nueva-password");
+  if (btn.disabled) return; // el Enter en los inputs llama a esta función directo
   if (!p1 || p1.length < 6) { res.innerHTML = '<span class="fail">❌ La contraseña debe tener al menos 6 caracteres.</span>'; return; }
   if (p1 !== p2)             { res.innerHTML = '<span class="fail">❌ Las contraseñas no coinciden.</span>'; return; }
   btn.disabled = true;
@@ -4728,13 +4734,16 @@ function _actualizarStringsUsuario() {
 async function guardarNombre() {
   const input = document.getElementById("input-nombre");
   const msg   = document.getElementById("modal-nombre-msg");
+  const btn   = document.getElementById("btn-guardar-nombre");
   const nombre = input.value.trim();
+  if (btn.disabled) return; // el Enter en el input llama a esta función directo
 
   if (!nombre) {
     msg.innerHTML = '<span style="color:var(--red)">Escribí tu nombre primero.</span>';
     return;
   }
 
+  btn.disabled = true;
   msg.innerHTML = '⏳ Guardando...';
 
   const { error } = await supabaseClient.auth.updateUser({ data: { nombre } });
@@ -4746,6 +4755,7 @@ async function guardarNombre() {
       return;
     }
     msg.innerHTML = `<span style="color:var(--red)">Error: ${escapeHtml(error.message)}</span>`;
+    btn.disabled = false;
     return;
   }
 
@@ -5622,6 +5632,16 @@ document.addEventListener("keydown", e => {
   ].forEach(([id, cerrar]) => {
     const el = document.getElementById(id);
     if (el && el.style.display !== "none") cerrar();
+  });
+  // Ráfaga, el editor de transacción y el modal de cuotas usan .classList("open") en vez
+  // de style.display — mecanismo de visibilidad distinto a los modales .modal-recur de arriba.
+  [
+    ["rafaga-overlay", cerrarRafaga],
+    ["edit-overlay", cerrarEditorTransaccion],
+    ["cuotas-modal-overlay", _cerrarModalCuotas],
+  ].forEach(([id, cerrar]) => {
+    const el = document.getElementById(id);
+    if (el && el.classList.contains("open")) cerrar();
   });
 });
 document.addEventListener("click", e => {
