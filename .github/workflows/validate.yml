@@ -64,6 +64,9 @@ jobs:
           "
           node --check /tmp/extracted.js && echo "✅ Sintaxis JS OK" || { echo "❌ Error de sintaxis JS"; exit 1; }
 
+      - name: Tests de lógica de reparto (Mío/Compartido/De X)
+        run: node scripts/test-reparto.js
+
       - name: Verificar estructura HTML básica
         run: |
           check_tag() {
