@@ -275,6 +275,11 @@
   #test-result { margin-top: .8rem; font-size: .88rem; min-height: 1.2em; }
   .ok   { color: var(--green); }
   .fail { color: var(--red); }
+  @media (max-width: 480px) {
+    #setup-screen { padding: 1rem; }
+    .setup-card { padding: 2rem 1.3rem 1.6rem; }
+    .setup-card h1 { font-size: 1.6rem; }
+  }
 
   /* ─── APP ───────────────────────────────────────────────── */
   #app { display: none; }
@@ -4746,6 +4751,14 @@ async function guardarNombre() {
     msg.innerHTML = '<span style="color:var(--red)">Escribí tu nombre primero.</span>';
     return;
   }
+  if (nombre.length < 2) {
+    msg.innerHTML = '<span style="color:var(--red)">Ese nombre es muy corto — probá con al menos 2 letras.</span>';
+    return;
+  }
+  if (nombre.length > 40) {
+    msg.innerHTML = '<span style="color:var(--red)">Ese nombre es demasiado largo (máx. 40 caracteres).</span>';
+    return;
+  }
 
   btn.disabled = true;
   msg.innerHTML = '⏳ Guardando...';
@@ -5729,9 +5742,16 @@ function filtrarTabla() {
 
   const tbody = _el("tabla-body");
   if (!datos.length) {
+    // Distinguir "no hay ninguna transacción todavía" (usuario nuevo) de "el filtro no
+    // matchea nada" (sí hay datos, pero no con este filtro) — mismo mensaje para los dos
+    // casos confundía a un usuario nuevo, que no tiene ningún filtro que "ampliar".
+    const sinTransaccionesDelUsuario = !allTransac.some(t => (t.usuario || "Daniel") === USUARIO);
+    const msg = sinTransaccionesDelUsuario
+      ? "Todavía no cargaste ninguna transacción — tocá \"+ Anotar\" para empezar"
+      : "Nada con ese filtro — probá ampliando la búsqueda";
     requestAnimationFrame(() => {
       if (gen !== _filtroGen) return;
-      tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">Nada con ese filtro — probá ampliando la búsqueda</div></td></tr>';
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">${msg}</div></td></tr>`;
     });
     return;
   }
@@ -5795,7 +5815,11 @@ function _renderMobileList(datos) {
   const el = document.getElementById("trans-mobile-list");
   if (!el) return;
   if (!datos.length) {
-    el.innerHTML = '<div class="empty-state" style="padding:2rem 1rem">Sin movimientos para este filtro</div>';
+    const sinTransaccionesDelUsuario = !allTransac.some(t => (t.usuario || "Daniel") === USUARIO);
+    const msg = sinTransaccionesDelUsuario
+      ? "Todavía no cargaste ninguna transacción"
+      : "Sin movimientos para este filtro";
+    el.innerHTML = `<div class="empty-state" style="padding:2rem 1rem">${msg}</div>`;
     return;
   }
   const byDate = {};
