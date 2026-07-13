@@ -4606,7 +4606,10 @@ async function fetchConTimeout(url, opciones = {}, ms = 15000) {
 
 function mostrarErrorCarga(msg) {
   const el = document.getElementById("error-carga");
-  if (el) { el.innerHTML = `⚠️ ${msg}`; el.style.display = "block"; }
+  if (el) {
+    el.innerHTML = `⚠️ ${msg} <button class="btn btn-primary" style="margin-left:.5rem;padding:.3rem .7rem;font-size:.83rem" onclick="iniciarApp()">Reintentar →</button>`;
+    el.style.display = "block";
+  }
 }
 function ocultarErrorCarga() {
   const el = document.getElementById("error-carga");
@@ -7557,7 +7560,13 @@ async function cargarPresupuesto() {
     if (error) throw error;
     presupuestoActual = {};
     data.forEach(d => { presupuestoActual[d.categoria] = d.monto; });
-  } catch(e) { console.warn("Error cargando presupuesto:", e); }
+  } catch(e) {
+    console.warn("Error cargando presupuesto:", e);
+    // Sin esto, si falla el fetch al cambiar de mes, presupuestoActual queda con los
+    // valores del mes ANTERIOR — se ve como si este mes tuviera ese presupuesto cargado.
+    presupuestoActual = {};
+    showToast("⚠️ No se pudo cargar el presupuesto — revisá tu conexión", "err");
+  }
   renderPresupuesto();
   inicializarDisclosureMimes();
   await cargarCuotasActivas();
@@ -10234,10 +10243,12 @@ function _esCripto(simbolo) {
 }
 
 async function _fetchPrecioCripto(simbolo) {
-  // Coinbase API — CORS OK, sin key
+  // Coinbase API — CORS OK, sin key. Timeout: sin esto, si Coinbase se cuelga (no responde,
+  // no error HTTP), la tenencia queda en "cargando…" para siempre — el auto-refresh de 60s
+  // relanza el mismo fetch colgado en vez de ayudar.
   const base = simbolo.replace(/-USD$/i, "").toUpperCase();
   const url = `https://api.coinbase.com/v2/prices/${base}-USD/spot`;
-  const res = await fetch(url);
+  const res = await fetchConTimeout(url, {}, 8000);
   if (!res.ok) throw new Error("coinbase " + res.status);
   const data = await res.json();
   const precio = parseFloat(data?.data?.amount);
@@ -10246,9 +10257,9 @@ async function _fetchPrecioCripto(simbolo) {
 }
 
 async function _fetchPrecioAccion(simbolo) {
-  // Vercel proxy → Yahoo Finance (evita CORS)
+  // Vercel proxy → Yahoo Finance (evita CORS). Mismo motivo de timeout que _fetchPrecioCripto.
   const url = `/api/quote?symbol=${encodeURIComponent(simbolo)}`;
-  const res = await fetch(url);
+  const res = await fetchConTimeout(url, {}, 8000);
   if (!res.ok) throw new Error("proxy " + res.status);
   const data = await res.json();
   if (!data.price) throw new Error("no price");
