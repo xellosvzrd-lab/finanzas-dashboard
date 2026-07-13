@@ -1,0 +1,132 @@
+/* ───────────────────────────────────────────────────────────
+   Finanzas — sistema visual
+   Grotesca cálida · acento violeta · dark + light
+   ─────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-display: 'Schibsted Grotesk', system-ui, sans-serif;
+  --font-text: 'Hanken Grotesk', system-ui, sans-serif;
+
+  /* radii */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+  --r-xl: 34px;
+  --r-pill: 999px;
+
+  /* semantic accents — same L/C, varying hue (oklch) */
+  --pos:   oklch(0.74 0.15 152);   /* ingresos / verde */
+  --neg:   oklch(0.70 0.16 25);    /* gastos / coral   */
+  --info:  oklch(0.70 0.15 252);   /* azul             */
+  --save:  oklch(0.74 0.13 195);   /* ahorro / teal    */
+  --warn:  oklch(0.78 0.14 75);    /* amarillo cálido  */
+}
+
+/* ── DARK (default) ───────────────────────────────────────── */
+:root[data-theme='dark'] {
+  --bg:        #141019;
+  --bg-grad:   radial-gradient(120% 80% at 80% -10%, #251c39 0%, #141019 55%);
+  --elev:      #1b1626;
+  --surface:   #221c30;
+  --surface-2: #2b2440;
+  --surface-3: #352c4d;
+  --line:        rgba(255,255,255,0.08);
+  --line-strong: rgba(255,255,255,0.15);
+  --text:      #f4f1fa;
+  --text-dim:  #b3aac6;
+  --text-faint:#7e7595;
+  --brand:     oklch(0.74 0.15 300);
+  --brand-2:   oklch(0.78 0.16 330);
+  --brand-ink: #fff;
+  --brand-soft: color-mix(in oklab, var(--brand) 16%, var(--surface));
+  --pos-soft:  color-mix(in oklab, var(--pos) 16%, var(--surface));
+  --neg-soft:  color-mix(in oklab, var(--neg) 16%, var(--surface));
+  --shadow-card: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 30px rgba(0,0,0,.45);
+  --shadow-pop:  0 18px 50px rgba(0,0,0,.55);
+}
+
+/* ── LIGHT ────────────────────────────────────────────────── */
+:root[data-theme='light'] {
+  --bg:        #f4f1fb;
+  --bg-grad:   radial-gradient(120% 80% at 80% -10%, #efe7ff 0%, #f4f1fb 55%);
+  --elev:      #ffffff;
+  --surface:   #ffffff;
+  --surface-2: #f3eefb;
+  --surface-3: #ece4f8;
+  --line:        rgba(28,18,48,0.09);
+  --line-strong: rgba(28,18,48,0.16);
+  --text:      #1a1426;
+  --text-dim:  #5b5370;
+  --text-faint:#8c84a0;
+  --brand:     oklch(0.58 0.18 300);
+  --brand-2:   oklch(0.60 0.19 330);
+  --brand-ink: #fff;
+  --brand-soft: color-mix(in oklab, var(--brand) 12%, #fff);
+  --pos:   oklch(0.58 0.15 152);
+  --neg:   oklch(0.56 0.18 25);
+  --info:  oklch(0.55 0.16 252);
+  --save:  oklch(0.56 0.12 195);
+  --pos-soft:  color-mix(in oklab, var(--pos) 12%, #fff);
+  --neg-soft:  color-mix(in oklab, var(--neg) 12%, #fff);
+  --shadow-card: 0 1px 2px rgba(28,18,48,.05), 0 10px 30px rgba(60,40,110,.08);
+  --shadow-pop:  0 18px 50px rgba(60,40,110,.18);
+}
+
+/* ── screen shell ─────────────────────────────────────────── */
+.fin {
+  font-family: var(--font-text);
+  background: var(--bg);
+  background-image: var(--bg-grad);
+  color: var(--text);
+  width: 100%;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+  position: relative;
+}
+.fin *, .fin *::before, .fin *::after { box-sizing: border-box; }
+.fin h1, .fin h2, .fin h3, .fin h4 { font-family: var(--font-display); margin: 0; font-weight: 600; letter-spacing: -0.025em; }
+.num { font-family: var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+/* utility */
+.fin .muted   { color: var(--text-dim); }
+.fin .faint   { color: var(--text-faint); }
+.fin .pos     { color: var(--pos); }
+.fin .neg     { color: var(--neg); }
+.fin .brandc  { color: var(--brand); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+}
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-text); font-weight: 600; font-size: 12.5px;
+  padding: 5px 11px; border-radius: var(--r-pill);
+  background: var(--surface-2); color: var(--text-dim);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.chip.on { background: var(--brand-soft); color: var(--brand); border-color: color-mix(in oklab, var(--brand) 35%, transparent); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font-text); font-weight: 600; font-size: 14px;
+  padding: 11px 18px; border-radius: var(--r-pill); border: 1px solid transparent;
+  cursor: pointer; white-space: nowrap; transition: transform .12s, filter .15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--brand); color: var(--brand-ink); box-shadow: 0 6px 18px color-mix(in oklab, var(--brand) 40%, transparent); }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-ghost   { background: var(--surface-2); color: var(--text); border-color: var(--line); }
+.btn-ghost:hover { background: var(--surface-3); }
+
+.divider { height: 1px; background: var(--line); border: 0; }
+
+/* scrollbars hidden inside artboards already handled by canvas */
