@@ -4035,6 +4035,22 @@
 </div>
 <!-- /MODAL META DE AHORRO -->
 
+<!-- MODAL CIERRE DE MES ("Tu mes en números") -->
+<div id="modal-cierre-mes" class="modal-overlay" style="display:none" onclick="if(event.target===this)cerrarModalCierreMes()">
+  <div class="modal-content modal-recur">
+    <div class="modal-recur-header">
+      <h3 class="modal-recur-title">📊 Tu mes en números</h3>
+      <button class="modal-close-btn" onclick="cerrarModalCierreMes()">×</button>
+    </div>
+    <div id="cierre-mes-body"></div>
+    <div class="modal-recur-add-actions" style="margin-top:1rem">
+      <button class="btn-recur-confirm" onclick="cerrarModalCierreMes()">Cerrar</button>
+      <button class="btn-recur-ignore" id="cierre-mes-compartir-btn" onclick="compartirCierreMes()" style="display:none">Compartir</button>
+    </div>
+  </div>
+</div>
+<!-- /MODAL CIERRE DE MES -->
+
 <!-- ════════════════════════════════════════════════════════
      JAVASCRIPT
 ════════════════════════════════════════════════════════ -->
@@ -4523,6 +4539,7 @@ function _renderApp() {
   inicializarRespButtons();
   navegarA("presupuesto");
   if (window.lucide) lucide.createIcons();
+  _chequearCierreMes();
 }
 
 // ─── FETCH CON TIMEOUT ────────────────────────────────────────
@@ -9088,6 +9105,137 @@ function toggleDesglose() {
   el.style.display = visible ? "none" : "";
   btn.textContent  = visible ? "Ver desglose ▾" : "Ocultar desglose ▴";
   try { localStorage.setItem(USUARIO + "_disclosure_mimes", visible ? "0" : "1"); } catch(e) {}
+}
+
+// ─── TU MES EN NÚMEROS (cierre de mes) ────────────────────────
+let _cierreMesYaChequeado = false;
+let _cierreMesTextoCompartir = "";
+
+// Se llama una vez por sesión desde _renderApp(). Si detecta que el mes calendario
+// cambió desde la última vez que se vio (localStorage), arma el resumen del mes recién
+// cerrado y muestra el modal. Todo el cálculo es de solo lectura sobre datos ya cargados
+// (allTransac) — solo el total de presupuesto guardado requiere una consulta extra.
+async function _chequearCierreMes() {
+  if (_cierreMesYaChequeado || !USUARIO) return;
+  _cierreMesYaChequeado = true;
+
+  const hoy = new Date();
+  const mesActualStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+  const flagKey = USUARIO + "_cierre_mes_visto";
+  if (localStorage.getItem(flagKey) === mesActualStr) return;
+
+  const prevD    = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+  const prevMes  = prevD.getMonth() + 1, prevAnio = prevD.getFullYear();
+  const prev2D   = new Date(hoy.getFullYear(), hoy.getMonth() - 2, 1);
+  const prev2Mes = prev2D.getMonth() + 1, prev2Anio = prev2D.getFullYear();
+
+  const hayDatos = allTransac.some(t => {
+    const { year, month } = getMesLiquidacion(t);
+    return year === prevAnio && month === prevMes && (t.usuario || "Daniel") === USUARIO;
+  });
+  // Se marca como visto exista o no resumen que mostrar, para no re-chequear cada carga.
+  localStorage.setItem(flagKey, mesActualStr);
+  if (!hayDatos) return;
+
+  const _gastoDelMes = (mes, anio) => {
+    const dataTodos = allTransac.filter(t => {
+      const { year, month } = getMesLiquidacion(t);
+      return year === anio && month === mes && !esTransferencia(t) && !t.es_liquidacion && (t.moneda || "ARS") === "ARS";
+    });
+    const dataMio = dataTodos.filter(t => (t.usuario || "Daniel") === USUARIO);
+    const factorComp = obtenerFactorCompartidoPropio(mes, anio);
+    const cats = new Set(dataTodos.filter(t => t.tipo === "Gasto").map(t => t.categoria));
+    const porCat = {};
+    let total = 0;
+    cats.forEach(cat => {
+      const g = _gastoCategoriaResponsable(cat, "ARS", dataMio, dataTodos, factorComp);
+      if (g > 0) { porCat[cat] = g; total += g; }
+    });
+    return { total, porCat };
+  };
+
+  const { total: gastoPrev, porCat: catsPrev } = _gastoDelMes(prevMes, prevAnio);
+  const { total: gastoPrev2 } = _gastoDelMes(prev2Mes, prev2Anio);
+  const top3 = Object.entries(catsPrev).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const deltaPct = gastoPrev2 > 0 ? Math.round(((gastoPrev - gastoPrev2) / gastoPrev2) * 100) : null;
+
+  let presupuestoPrev = 0;
+  try {
+    const { data } = await supabaseClient
+      .from('presupuesto').select('monto').eq('mes', prevMes).eq('anio', prevAnio).eq('usuario', USUARIO);
+    presupuestoPrev = (data || []).reduce((s, d) => s + Number(d.monto), 0);
+  } catch(e) { /* sin presupuesto guardado ese mes — se omite ese dato */ }
+
+  const _sumaAhorro = moneda => allTransac
+    .filter(t => { const { year, month } = getMesLiquidacion(t); return year === prevAnio && month === prevMes; })
+    .filter(t => t.usuario === USUARIO && t.categoria === "Ahorro" && !esTransferencia(t) && (t.moneda || "ARS") === moneda)
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const ahorroARS = _sumaAhorro("ARS");
+  const ahorroUSD = _sumaAhorro("USD");
+
+  const prevMesStr = `${prevAnio}-${String(prevMes).padStart(2, "0")}`;
+  const cuotasTerminadas = allTransac.filter(t =>
+    (t.usuario || "Daniel") === USUARIO && t.compra_id && t.cuota_nro && t.cuota_total &&
+    Number(t.cuota_nro) === Number(t.cuota_total) && t.mes_liquidacion === prevMesStr
+  );
+
+  _renderModalCierreMes({ prevMes, prevAnio, gastoPrev, presupuestoPrev, top3, deltaPct, ahorroARS, ahorroUSD, cuotasTerminadas });
+}
+
+function _renderModalCierreMes(d) {
+  const modal = document.getElementById('modal-cierre-mes');
+  const body  = document.getElementById('cierre-mes-body');
+  const shareBtn = document.getElementById('cierre-mes-compartir-btn');
+  if (!modal || !body) return;
+
+  const nombreMes = `${MESES_LARGO[d.prevMes - 1]} ${d.prevAnio}`;
+  const pctPres = d.presupuestoPrev > 0 ? Math.round(d.gastoPrev / d.presupuestoPrev * 100) : null;
+  const fila = (label, valor, color) => `<div class="modal-recur-row" style="justify-content:space-between">
+    <span>${label}</span><strong${color ? ` style="color:${color}"` : ""}>${valor}</strong>
+  </div>`;
+
+  let html = `<div class="modal-recur-section-label" style="margin-top:0">${nombreMes}</div>`;
+  html += fila("Gastado", fmt(d.gastoPrev));
+  if (pctPres != null) {
+    html += fila(`vs. presupuesto (${fmt(d.presupuestoPrev)})`, pctPres + "%", pctPres > 100 ? "var(--red)" : "var(--green)");
+  }
+  if (d.deltaPct != null) {
+    html += fila("vs. mes anterior", (d.deltaPct > 0 ? "+" : "") + d.deltaPct + "%", d.deltaPct > 0 ? "var(--red)" : "var(--green)");
+  }
+  if (d.top3.length) {
+    html += `<div class="modal-recur-section-label">Top categorías</div>`;
+    html += d.top3.map(([cat, val]) => fila(`${getCatEmoji(cat, "📌")} ${escapeHtml(cat)}`, fmt(val))).join("");
+  }
+  if (d.ahorroARS > 0 || d.ahorroUSD > 0) {
+    html += `<div class="modal-recur-section-label">Ahorro aportado</div>`;
+    const partes = [d.ahorroARS > 0 ? fmt(d.ahorroARS) : "", d.ahorroUSD > 0 ? fmtMoneda(d.ahorroUSD, "USD") : ""].filter(Boolean);
+    html += fila("💰", partes.join(" + "));
+  }
+  if (d.cuotasTerminadas.length) {
+    html += `<div class="modal-recur-section-label">Cuotas que terminaron</div>`;
+    html += d.cuotasTerminadas.map(t =>
+      `<div class="modal-recur-row">✅ ${escapeHtml(t.descripcion || t.categoria)}</div>`
+    ).join("");
+  }
+  body.innerHTML = html;
+
+  const lineasCompartir = [`📊 ${nombreMes}`, `Gastado: ${fmt(d.gastoPrev)}`];
+  if (pctPres != null) lineasCompartir.push(`vs. presupuesto: ${pctPres}%`);
+  if (d.deltaPct != null) lineasCompartir.push(`vs. mes anterior: ${d.deltaPct > 0 ? "+" : ""}${d.deltaPct}%`);
+  if (d.top3.length) lineasCompartir.push("Top: " + d.top3.map(([c, v]) => `${c} ${fmt(v)}`).join(", "));
+  _cierreMesTextoCompartir = lineasCompartir.join("\n");
+  if (shareBtn) shareBtn.style.display = navigator.share ? "" : "none";
+
+  modal.style.display = 'flex';
+}
+
+function cerrarModalCierreMes() {
+  const modal = document.getElementById('modal-cierre-mes');
+  if (modal) modal.style.display = 'none';
+}
+
+function compartirCierreMes() {
+  if (navigator.share) navigator.share({ text: _cierreMesTextoCompartir }).catch(() => {});
 }
 
 // ─── CUOTAS ACTIVAS ───────────────────────────────────────────
