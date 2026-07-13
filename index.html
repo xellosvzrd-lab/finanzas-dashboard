@@ -4168,7 +4168,9 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("f-fecha").valueAsDate = new Date();
   poblarSelectoresFecha();
 
-  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    global: { fetch: (url, opciones) => fetchConTimeout(url, opciones) }
+  });
 
   // Detectar retorno desde email de recuperación de contraseña
   supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -9427,8 +9429,13 @@ function inicializarDisclosureInversiones() {
 }
 
 function inicializarDisclosureCompartidos() {
-  const el = document.getElementById("comp-detalle");
-  if (el) el.style.display = "";
+  const el  = document.getElementById("comp-detalle");
+  const btn = document.getElementById("btn-toggle-compartidos");
+  if (!el) return;
+  const saved = localStorage.getItem(USUARIO + "_disclosure_compartidos");
+  const expanded = saved !== null ? saved === "1" : true;
+  el.style.display = expanded ? "" : "none";
+  if (btn) btn.textContent = expanded ? "Ocultar detalle ▴" : "Ver detalle ▾";
 }
 
 // ─── MODAL DETALLE CUOTAS MES ─────────────────────────────────
