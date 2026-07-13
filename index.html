@@ -2822,6 +2822,24 @@
           <div class="chart-title">Evolución mensual — últimos 12 meses</div>
           <div class="chart-wrap" style="height:300px"><canvas id="chart-evol-combo"></canvas></div>
         </div>
+
+        <!-- Comparador de meses -->
+        <div class="chart-card full" style="margin-top:1rem">
+          <div class="chart-title">Comparador de meses — ¿dónde se fue la diferencia?</div>
+          <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">
+            <div class="mes-selector">
+              <select id="comp-meses-mes-a"></select>
+              <select id="comp-meses-anio-a"></select>
+            </div>
+            <span style="color:var(--text-muted)">vs.</span>
+            <div class="mes-selector">
+              <select id="comp-meses-mes-b"></select>
+              <select id="comp-meses-anio-b"></select>
+            </div>
+            <button class="btn btn-primary" style="font-size:.83rem" onclick="compararMeses()">Comparar</button>
+          </div>
+          <div id="comp-meses-resultado"></div>
+        </div>
       </div>
 
       <!-- ── PÁGINA TRANSACCIONES ──────────────────────── -->
@@ -4918,6 +4936,109 @@ function poblarSelectoresFecha() {
     if (savedFilMes)  { const el = document.getElementById("fil-mes"); if (el) el.value = savedFilMes; }
     if (savedFilAnio) { const el = document.getElementById("fil-anio"); if (el) el.value = savedFilAnio; }
   } catch(e) {}
+}
+
+// ─── COMPARADOR DE MESES ──────────────────────────────────────
+function _poblarSelectoresComparador() {
+  const hoy   = new Date();
+  const prevD = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+  const pares = [
+    ["comp-meses-mes-a", "comp-meses-anio-a", hoy.getMonth() + 1, hoy.getFullYear()],
+    ["comp-meses-mes-b", "comp-meses-anio-b", prevD.getMonth() + 1, prevD.getFullYear()],
+  ];
+  pares.forEach(([idMes, idAnio, defMes, defAnio]) => {
+    const selMes = document.getElementById(idMes);
+    if (selMes && !selMes.options.length) {
+      MESES_LARGO.forEach((nombre, i) => {
+        const o = document.createElement("option");
+        o.value = String(i + 1).padStart(2, "0"); o.textContent = nombre;
+        if (i + 1 === defMes) o.selected = true;
+        selMes.appendChild(o);
+      });
+    }
+    const selAnio = document.getElementById(idAnio);
+    if (selAnio && !selAnio.options.length) {
+      for (let y = hoy.getFullYear(); y >= hoy.getFullYear() - 4; y--) {
+        const o = document.createElement("option");
+        o.value = y; o.textContent = y;
+        if (y === defAnio) o.selected = true;
+        selAnio.appendChild(o);
+      }
+    }
+  });
+}
+
+// Gasto por categoría (ARS, con responsabilidad) de un mes puntual — reutiliza
+// _gastoCategoriaResponsable(), mismo criterio que Mi mes/Vista Anual/Tu mes en números.
+function _gastoPorCategoriaDelMes(mes, anio) {
+  const dataTodos = allTransac.filter(t => {
+    const { year, month } = getMesLiquidacion(t);
+    return year === anio && month === mes && !esTransferencia(t) && !t.es_liquidacion && (t.moneda || "ARS") === "ARS";
+  });
+  const dataMio = dataTodos.filter(t => (t.usuario || "Daniel") === USUARIO);
+  const factorComp = obtenerFactorCompartidoPropio(mes, anio);
+  const cats = new Set(dataTodos.filter(t => t.tipo === "Gasto").map(t => t.categoria));
+  const porCat = {};
+  cats.forEach(cat => {
+    const g = _gastoCategoriaResponsable(cat, "ARS", dataMio, dataTodos, factorComp);
+    if (g > 0) porCat[cat] = g;
+  });
+  return porCat;
+}
+
+function compararMeses() {
+  const mesA  = parseInt(document.getElementById("comp-meses-mes-a").value);
+  const anioA = parseInt(document.getElementById("comp-meses-anio-a").value);
+  const mesB  = parseInt(document.getElementById("comp-meses-mes-b").value);
+  const anioB = parseInt(document.getElementById("comp-meses-anio-b").value);
+  const el = document.getElementById("comp-meses-resultado");
+  if (!el) return;
+
+  const catsA = _gastoPorCategoriaDelMes(mesA, anioA);
+  const catsB = _gastoPorCategoriaDelMes(mesB, anioB);
+  const todasCats = new Set([...Object.keys(catsA), ...Object.keys(catsB)]);
+
+  const filas = [...todasCats].map(cat => {
+    const a = catsA[cat] || 0, b = catsB[cat] || 0;
+    return { cat, a, b, delta: a - b };
+  }).filter(f => f.a > 0 || f.b > 0)
+    .sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta));
+
+  const totalA = Object.values(catsA).reduce((s, v) => s + v, 0);
+  const totalB = Object.values(catsB).reduce((s, v) => s + v, 0);
+  const totalDelta = totalA - totalB;
+
+  if (!filas.length) {
+    el.innerHTML = '<div class="empty-state">Sin gastos para comparar en ninguno de los dos meses</div>';
+    return;
+  }
+
+  const nombreA = `${MESES_LARGO[mesA - 1]} ${anioA}`;
+  const nombreB = `${MESES_LARGO[mesB - 1]} ${anioB}`;
+  const signo = totalDelta >= 0 ? "+" : "−";
+  const colorTotal = totalDelta >= 0 ? "var(--red)" : "var(--green)";
+
+  let html = `<div style="font-size:.88rem;margin-bottom:.8rem">
+    Gastaste <strong style="color:${colorTotal}">${signo}${fmt(Math.abs(totalDelta))}</strong>
+    en ${escapeHtml(nombreA)} respecto a ${escapeHtml(nombreB)}
+    (${fmt(totalA)} vs. ${fmt(totalB)}).
+  </div>`;
+  html += `<div class="table-wrap"><table><thead><tr>
+    <th>Categoría</th><th style="text-align:right">${escapeHtml(nombreA)}</th>
+    <th style="text-align:right">${escapeHtml(nombreB)}</th><th style="text-align:right">Diferencia</th>
+  </tr></thead><tbody>`;
+  html += filas.map(f => {
+    const color = f.delta > 0 ? "var(--red)" : f.delta < 0 ? "var(--green)" : "var(--text-muted)";
+    const signoF = f.delta > 0 ? "+" : f.delta < 0 ? "−" : "";
+    return `<tr>
+      <td>${getCatEmoji(f.cat, "📌")} ${escapeHtml(f.cat)}</td>
+      <td style="text-align:right">${fmt(f.a)}</td>
+      <td style="text-align:right">${fmt(f.b)}</td>
+      <td style="text-align:right;color:${color};font-weight:600">${signoF}${fmt(Math.abs(f.delta))}</td>
+    </tr>`;
+  }).join("");
+  html += `</tbody></table></div>`;
+  el.innerHTML = html;
 }
 
 // ─── RESUMEN MES ─────────────────────────────────────────────
@@ -7234,7 +7355,7 @@ function navegarA(pagina) {
   if (pagina === "compartidos")  cargarCompartidos();
   if (pagina === "presupuesto")  cargarPresupuesto();
   if (pagina === "anual")        cargarAnual();
-  if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); }
+  if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); _poblarSelectoresComparador(); }
   if (pagina === "config")       { renderizarConfig(); renderizarPanelWorkspace(); }
   if (pagina === "inversiones")  { inicializarDisclosureInversiones(); renderPlazos(); renderAcciones(); _iniciarAutoRefreshAcciones(); }
 
