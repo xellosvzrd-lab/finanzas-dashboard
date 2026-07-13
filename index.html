@@ -3246,20 +3246,6 @@
 
         </div><!-- /comp-grid -->
 
-        <!-- Modal liquidación -->
-        <div id="liq-modal" style="display:none;position:fixed;inset:0;background:var(--overlay);z-index:999;align-items:center;justify-content:center;">
-          <div class="liq-inner" style="background:var(--modal-bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem;min-width:280px;max-width:340px;width:90%">
-            <div style="font-weight:700;font-size:1rem;margin-bottom:.3rem" id="liq-titulo">Liquidar</div>
-            <div style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem" id="liq-subtitulo"></div>
-            <label style="font-size:.83rem;color:var(--text-muted);display:block;margin-bottom:.35rem">Fuente de pago</label>
-            <select id="liq-fuente" style="width:100%;padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.9rem;margin-bottom:1.1rem"></select>
-            <div style="display:flex;gap:.6rem;justify-content:flex-end">
-              <button onclick="cerrarLiquidar()" style="padding:.45rem 1rem;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:.88rem">Cancelar</button>
-              <button id="liq-confirmar-btn" onclick="confirmarLiquidar()" style="padding:.45rem 1.1rem;border-radius:6px;border:none;background:var(--accent);color:var(--white);cursor:pointer;font-size:.88rem;font-weight:600">Confirmar</button>
-            </div>
-          </div>
-        </div>
-
       </div><!-- /page-compartidos -->
 
       <!-- ── PÁGINA PRESUPUESTO (Mi mes Cálida) ───────────── -->
@@ -3848,6 +3834,25 @@
       <button class="fab" id="btn-fab-nueva" onclick="navegarA('nueva')" title="Nueva transacción">+</button>
 
     </main>
+  </div>
+</div>
+
+<!-- Modal liquidación — vive fuera de #app/.page a propósito: estaba anidado
+     dentro de #page-compartidos, y .page.active deja un transform residual
+     (animation fill-mode:both) que convierte a la página en containing
+     block de sus hijos fixed. El modal se posicionaba contra la página
+     (no el viewport) y el bottom-nav/FAB pintaban por encima, seguían
+     tocables con el modal abierto. -->
+<div id="liq-modal" style="display:none;position:fixed;inset:0;background:var(--overlay);z-index:999;align-items:center;justify-content:center;">
+  <div class="liq-inner" style="background:var(--modal-bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem;min-width:280px;max-width:340px;width:90%">
+    <div style="font-weight:700;font-size:1rem;margin-bottom:.3rem" id="liq-titulo">Liquidar</div>
+    <div style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem" id="liq-subtitulo"></div>
+    <label style="font-size:.83rem;color:var(--text-muted);display:block;margin-bottom:.35rem">Fuente de pago</label>
+    <select id="liq-fuente" style="width:100%;padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.9rem;margin-bottom:1.1rem"></select>
+    <div style="display:flex;gap:.6rem;justify-content:flex-end">
+      <button onclick="cerrarLiquidar()" style="padding:.45rem 1rem;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:.88rem">Cancelar</button>
+      <button id="liq-confirmar-btn" onclick="confirmarLiquidar()" style="padding:.45rem 1.1rem;border-radius:6px;border:none;background:var(--accent);color:var(--white);cursor:pointer;font-size:.88rem;font-weight:600">Confirmar</button>
+    </div>
   </div>
 </div>
 
@@ -6715,15 +6720,15 @@ function cargarCompartidos() {
       }
     }
     // Ocultar el resto del contenido de Compartidos mientras no haya pareja
-    // (se excluye liq-modal: es un modal que ya maneja su propia visibilidad)
+    // (liq-modal ya no vive acá — ver comentario en su nueva ubicación fuera de #app)
     Array.from(document.getElementById("page-compartidos")?.children || [])
-      .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "liq-modal") el.style.display = "none"; });
+      .forEach(el => { if (el.id !== "comp-empty-state") el.style.display = "none"; });
     return;
   }
   const existente = document.getElementById("comp-empty-state");
   if (existente) existente.remove();
   Array.from(document.getElementById("page-compartidos")?.children || [])
-    .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "liq-modal") el.style.display = ""; });
+    .forEach(el => { if (el.id !== "comp-empty-state") el.style.display = ""; });
 
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
