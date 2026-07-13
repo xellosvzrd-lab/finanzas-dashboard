@@ -2191,6 +2191,11 @@
       animation-iteration-count: 1      !important;
       transition-duration:       0.01ms !important;
     }
+    /* El árbol ::view-transition-* no matchea el selector universal de arriba
+       (no es parte del DOM regular) — hay que apagarlo acá explícitamente. */
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+      animation-duration: 0.01ms !important;
+    }
   }
 
   /* ─── CUOTAS ─────────────────────────────────────────────── */
@@ -5808,8 +5813,12 @@ function filtrarTabla() {
         fechaExtra = `<div class="fecha-liq-pendiente">Liq. pendiente</div>`;
       }
     }
+    // Nombre estable por transacción — permite que View Transitions empareje
+    // la misma fila entre el render viejo y el nuevo y anime su reubicación
+    // (FLIP) en vez de solo hacer fade-out/fade-in al filtrar/ordenar.
+    const vtName = `tx-${String(t.id).replace(/[^a-zA-Z0-9_-]/g, "")}`;
     return `
-    <tr style="--row-i:${Math.min(i, 16)}">
+    <tr style="--row-i:${Math.min(i, 16)};view-transition-name:${vtName}">
       <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}${fechaExtra}</td>
       <td class="col-hide-xs"><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
       <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="font-size:1rem;width:22px;text-align:center;flex-shrink:0">${getCatEmoji(t.categoria)}</span>${escapeHtml(t.categoria)}</span></td>
@@ -5833,9 +5842,22 @@ function filtrarTabla() {
   }).join("");
   requestAnimationFrame(() => {
     if (gen !== _filtroGen) return;
-    tbody.innerHTML = html;
-    _renderMobileList(datos);
-    if (window.lucide) lucide.createIcons();
+    const aplicarSwap = () => {
+      tbody.innerHTML = html;
+      _renderMobileList(datos);
+      if (window.lucide) lucide.createIcons();
+    };
+    // View Transitions da el reordenamiento (FLIP) gratis emparejando filas por
+    // view-transition-name — se limita a listas chicas/medianas por costo, y se
+    // salta si el usuario prefiere menos movimiento (más allá del guard CSS).
+    const puedeTransicionar = typeof document.startViewTransition === "function"
+      && datos.length <= 60
+      && !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (puedeTransicionar) {
+      document.startViewTransition(aplicarSwap);
+    } else {
+      aplicarSwap();
+    }
   });
 }
 
