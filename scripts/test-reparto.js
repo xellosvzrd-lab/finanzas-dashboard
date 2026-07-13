@@ -75,6 +75,7 @@ function cargarFunciones(context) {
     "parsearDecimal", "getMesLiquidacion", "esTransferencia",
     "obtenerProporcionParaMes", "obtenerFactorCompartidoPropio",
     "_gastoCategoriaResponsable", "calcularProgresoMeta",
+    "_calcularReembolsos",
   ];
   const fns = {};
   nombres.forEach((n) => {
@@ -225,6 +226,49 @@ function run() {
     const meta = { fecha_inicio: "2026-01-01", moneda: "USD", monto_objetivo: 10, compartida: false };
     const { total } = fn.calcularProgresoMeta(meta);
     assert.strictEqual(total, 0);
+  });
+
+  console.log("_calcularReembolsos");
+  setGlobals(context, { USUARIO: "Daniel" });
+  test("bug reportado: un Gasto 'De Ama' se netea con un Ingreso 'De Ama' de la misma categoría", () => {
+    // Caso real reportado por Daniel: gasto de $23.333,17 responsabilidad "De Ama" y un
+    // ingreso de $27.999,80 también "De Ama" en la misma categoría — antes del fix el
+    // ingreso no se restaba nunca, quedaba el gasto entero sin netear.
+    const gastos = [
+      { categoria: "Salud", tipo: "Gasto", responsabilidad: "De Ama", usuario: "Daniel", monto: 23333.17, moneda: "ARS" },
+    ];
+    const ingresos = [
+      { categoria: "Salud", tipo: "Ingreso", responsabilidad: "De Ama", usuario: "Daniel", monto: 27999.80, moneda: "ARS" },
+    ];
+    const { reembA_ARS } = fn._calcularReembolsos(gastos, ingresos, "Daniel", "Ama");
+    const redondear = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
+    assert.strictEqual(redondear(reembA_ARS["Salud"]), redondear(23333.17 - 27999.80));
+  });
+  test("Sección A (yo pagué por el otro) solo cuenta gastos/ingresos donde usuario === yo", () => {
+    const gastos = [
+      { categoria: "Salud", tipo: "Gasto", responsabilidad: "De Ama", usuario: "Daniel", monto: 1000, moneda: "ARS" },
+      { categoria: "Salud", tipo: "Gasto", responsabilidad: "De Ama", usuario: "Ama",    monto: 500,  moneda: "ARS" }, // no debe contar en A
+    ];
+    const { reembA_ARS } = fn._calcularReembolsos(gastos, [], "Daniel", "Ama");
+    assert.strictEqual(reembA_ARS["Salud"], 1000);
+  });
+  test("Sección B (el otro pagó por mí) neta gasto e ingreso igual que la Sección A", () => {
+    const gastos = [
+      { categoria: "Auto", tipo: "Gasto", responsabilidad: "De Daniel", usuario: "Ama", monto: 800, moneda: "ARS" },
+    ];
+    const ingresos = [
+      { categoria: "Auto", tipo: "Ingreso", responsabilidad: "De Daniel", usuario: "Ama", monto: 300, moneda: "ARS" },
+    ];
+    const { reembB_ARS } = fn._calcularReembolsos(gastos, ingresos, "Daniel", "Ama");
+    assert.strictEqual(reembB_ARS["Auto"], 500);
+  });
+  test("separa ARS y USD en mapas distintos", () => {
+    const gastos = [
+      { categoria: "Viaje", tipo: "Gasto", responsabilidad: "De Ama", usuario: "Daniel", monto: 100, moneda: "USD" },
+    ];
+    const { reembA_ARS, reembA_USD } = fn._calcularReembolsos(gastos, [], "Daniel", "Ama");
+    assert.strictEqual(reembA_USD["Viaje"], 100);
+    assert.strictEqual(reembA_ARS["Viaje"] || 0, 0);
   });
 
   console.log(`\n${pasados} test(s) pasados.`);
