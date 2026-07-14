@@ -1628,6 +1628,17 @@
 
   /* ─── MOBILE (≤ 768px) ─────────────────────────────────────── */
   @media (max-width: 768px) {
+    /* Safari iOS hace zoom automático de toda la página al enfocar un input
+       con font-size computado <16px — varios forms/modales del archivo usan
+       .84rem/.9rem/.81rem/.8rem (13-14.4px). Un solo piso genérico en vez de
+       tocar cada selector por separado (form-group, edit-field, modal-recur,
+       rafaga-table, reparto-input, y cualquier otro que exista hoy o se
+       agregue después). Excluye checkbox/radio: no disparan zoom y su tamaño
+       visual puede depender de font-size en estilos custom. */
+    input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+      font-size: 16px !important;
+    }
+
     /* Mostrar header mobile, ocultar sidebar por default */
     .mobile-header { display: flex; }
 
@@ -1753,7 +1764,11 @@
     .edit-overlay { align-items: flex-end; padding: 0; }
     .edit-modal {
       max-width: 100%; border-radius: 16px 16px 0 0;
-      max-height: 90vh; overflow-y: auto; overscroll-behavior: contain;
+      /* dvh descuenta la barra de Safari iOS del viewport real — con vh a
+         secas (mide el viewport grande) el borde superior del modal, con el
+         botón ✕, queda arriba de lo visible y sin overflow-y en el overlay
+         para scrollear hasta él. vh como fallback para browsers sin dvh. */
+      max-height: 90vh; max-height: 90dvh; overflow-y: auto; overscroll-behavior: contain;
       padding-bottom: env(safe-area-inset-bottom, 0px);
       transform: translateY(100%); transition: transform .28s cubic-bezier(.4,0,.2,1);
       animation: none;
@@ -2332,7 +2347,7 @@
   .cuotas-modal {
     background: var(--modal-bg); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1.5rem; width: 100%;
-    max-width: 500px; max-height: 85vh; overflow-y: auto;
+    max-width: 500px; max-height: 85vh; max-height: 85dvh; overflow-y: auto;
   }
   .cuotas-modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
   .cuotas-modal-title { font-size: 1.05rem; font-weight: 800; margin: 0; }
@@ -2503,6 +2518,7 @@
     max-width: 400px;
     width: 92%;
     max-height: 85vh;
+    max-height: 85dvh;
     overflow-y: auto;
     border-radius: 14px;
     padding: 1.2rem;
