@@ -1362,6 +1362,7 @@
     padding: .55rem .75rem; cursor: pointer; font-size: .85rem;
     color: var(--red); font-family: inherit; font-weight: 600;
     text-align: left; transition: background .15s;
+    min-height: 44px;
   }
   .mobile-drawer-logout:hover { background: var(--red-dim, rgba(248,113,113,.1)); }
 
@@ -1373,6 +1374,16 @@
     -webkit-backdrop-filter: blur(3px);
   }
   .sidebar-overlay.open { display: block; }
+  /* Con el drawer abierto, el bottom-nav y el FAB (z-index:200, por encima
+     del scrim en 150) quedaban visibles sin atenuar y seguían tocables
+     debajo del overlay. Los bajamos por debajo del scrim/drawer solo
+     mientras el drawer está abierto (selector de hermanos: ambos vienen
+     después de .mobile-drawer en el DOM). El mobile-header no se toca a
+     propósito: el botón ✕ que cierra el drawer vive ahí. */
+  .mobile-drawer.open ~ .bottom-nav,
+  .mobile-drawer.open ~ #app .fab {
+    z-index: 140;
+  }
 
   /* ─── TABLET (769px – 1100px) ─────────────────────────────── */
   @media (min-width: 769px) and (max-width: 1100px) {
@@ -2693,7 +2704,7 @@
 <!-- Header mobile (solo visible en pantallas chicas) -->
 <header class="mobile-header" id="mobile-header" style="display:none;">
   <span class="mobile-logo">Finanzas</span>
-  <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menú">
+  <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menú" aria-expanded="false" aria-controls="mobile-drawer">
     <span id="hamburger-icon">☰</span>
   </button>
 </header>
@@ -2702,7 +2713,7 @@
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <!-- Mini-drawer mobile: usuario + logout -->
-<div class="mobile-drawer" id="mobile-drawer">
+<div class="mobile-drawer" id="mobile-drawer" inert>
   <div class="mobile-drawer-user">
     <span class="mobile-drawer-name" id="mobile-drawer-name">—</span>
     <span class="mobile-drawer-sub">Mi cuenta</span>
@@ -5724,12 +5735,14 @@ document.addEventListener("keydown", e => {
     const el = document.getElementById(id);
     if (el && el.style.display !== "none") cerrar();
   });
-  // Ráfaga, el editor de transacción y el modal de cuotas usan .classList("open") en vez
-  // de style.display — mecanismo de visibilidad distinto a los modales .modal-recur de arriba.
+  // Ráfaga, el editor de transacción, el modal de cuotas y el drawer mobile usan
+  // .classList("open") en vez de style.display — mecanismo de visibilidad distinto
+  // a los modales .modal-recur de arriba.
   [
     ["rafaga-overlay", cerrarRafaga],
     ["edit-overlay", cerrarEditorTransaccion],
     ["cuotas-modal-overlay", _cerrarModalCuotas],
+    ["mobile-drawer", closeSidebar],
   ].forEach(([id, cerrar]) => {
     const el = document.getElementById(id);
     if (el && el.classList.contains("open")) cerrar();
@@ -7631,17 +7644,30 @@ function toggleSidebar() {
   const drawer  = document.getElementById("mobile-drawer");
   const overlay = document.getElementById("sidebar-overlay");
   const icon    = document.getElementById("hamburger-icon");
+  const btn     = document.querySelector(".hamburger-btn");
   if (!drawer) return;
   const open = drawer.classList.toggle("open");
   if (overlay) overlay.classList.toggle("open", open);
   if (icon)    icon.textContent = open ? "✕" : "☰";
+  // inert: mientras el drawer está fuera de pantalla (solo transform, sigue
+  // en el DOM) no debe quedar en el orden de tab ni ser enfocable.
+  drawer.inert = !open;
+  btn?.setAttribute("aria-expanded", String(open));
+  if (open) drawer.querySelector(".mobile-drawer-logout")?.focus();
 }
 function closeSidebar() {
-  const drawer = document.getElementById("mobile-drawer");
-  if (drawer) drawer.classList.remove("open");
+  const drawer  = document.getElementById("mobile-drawer");
+  const wasOpen = drawer?.classList.contains("open");
+  if (drawer) { drawer.classList.remove("open"); drawer.inert = true; }
   document.getElementById("sidebar-overlay")?.classList.remove("open");
   const icon = document.getElementById("hamburger-icon");
   if (icon) icon.textContent = "☰";
+  const btn = document.querySelector(".hamburger-btn");
+  btn?.setAttribute("aria-expanded", "false");
+  // Devolver el foco al hamburger solo si el drawer realmente estaba abierto
+  // (closeSidebar() también se llama en cada navegación como no-op de limpieza,
+  // ahí no hay que robarle el foco a lo que el usuario haya tocado).
+  if (wasOpen) btn?.focus();
 }
 
 // Mostrar/ocultar header mobile al cambiar tamaño de ventana (ej: rotación)
