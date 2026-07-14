@@ -4863,6 +4863,7 @@ async function iniciarApp() {
   if (window.innerWidth <= 768) {
     document.getElementById("mobile-header").style.display = "flex";
   }
+  _syncMobileHeaderHeight();
   // El bottom-nav vive fuera de #setup-screen/#app, así que su display:none
   // inicial (inline) es lo único que lo esconde durante el login — a partir
   // de acá el @media (max-width:768px) hace su trabajo normal.
@@ -7663,6 +7664,21 @@ function closeSidebar() {
   if (wasOpen) btn?.focus();
 }
 
+// Altura real de .mobile-header medida en el navegador (offsetHeight), en vez
+// de confiar en que env(safe-area-inset-top) dé el mismo valor en el CSS de
+// .main que en el propio header. En PWA instalada en pantalla de inicio
+// (modo standalone), iOS calcula ese env() de forma inconsistente respecto
+// a Safari normal — con dos calc() separados, el header y el padding de
+// .main podían quedar desincronizados. Midiendo el offsetHeight real no
+// importa cuánto valga el inset en cada modo: .main siempre deja el espacio
+// exacto que el header realmente ocupa.
+function _syncMobileHeaderHeight() {
+  const mh = document.getElementById("mobile-header");
+  if (!mh || mh.style.display === "none" || window.innerWidth > 768) return;
+  const h = mh.offsetHeight;
+  if (h > 0) document.documentElement.style.setProperty("--mh-h", h + "px");
+}
+
 // Mostrar/ocultar header mobile al cambiar tamaño de ventana (ej: rotación)
 window.addEventListener("resize", () => {
   const mh = document.getElementById("mobile-header");
@@ -7672,6 +7688,7 @@ window.addEventListener("resize", () => {
     mh.style.display = window.innerWidth <= 768 ? "flex" : "none";
     if (window.innerWidth > 768) closeSidebar(); // cerrar drawer si amplían pantalla
   }
+  _syncMobileHeaderHeight();
   requestAnimationFrame(_actualizarNavIndicator);
 });
 
