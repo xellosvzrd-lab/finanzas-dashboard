@@ -482,6 +482,13 @@
     gap: 1.25rem; margin-bottom: 2.2rem;
   }
   @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+  /* La variante de 3 columnas de Resumen vivía como inline style — le ganaba
+     siempre a las media queries de arriba y de la banda tablet (769-1100px,
+     más abajo), así que en esa banda quedaba con 3 columnas de ~230px
+     apretadas en vez de colapsar. Un id específico entra en cascada de forma
+     predecible sin necesitar !important. */
+  #resumen-charts-grid { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 1100px) { #resumen-charts-grid { grid-template-columns: 1fr; } }
 
   .chart-card {
     background: var(--card);
@@ -2234,8 +2241,16 @@
     from { transform: scale(0.6); opacity: 0; }
     to   { transform: scale(1);   opacity: 1; }
   }
-  @media (min-width: 769px) {
-    .fab { display: none; } /* en desktop/tablet cada pantalla ya tiene su propio botón "+ Anotar" */
+  @media (min-width: 860px) {
+    /* En la banda 769-859px (ej. iPad portrait) el bottom-nav y el FAB ya
+       estaban ocultos, pero .mm-anotar-btn (el botón "+ Anotar" de escritorio
+       en el header de Mi mes) recién aparece a partir de 860px — en esa
+       banda no había ninguna forma visible de crear una transacción desde
+       Mi mes. Se extiende el FAB (flotante, no depende del layout del
+       header) hasta que el botón de escritorio realmente aparece, en vez de
+       adelantar .mm-anotar-btn a un ancho donde el header de Mi mes todavía
+       usa su layout mobile. */
+    .fab { display: none; }
   }
 
   /* ─── ACCESIBILIDAD: REDUCED MOTION ─────────────────────── */
@@ -2874,7 +2889,7 @@
         </div>
 
         <!-- Gráficos + Top gastos (3 columnas desktop) -->
-        <div class="charts-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="charts-grid" id="resumen-charts-grid">
           <div class="chart-card">
             <div class="chart-title">Gastos por categoría</div>
             <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
