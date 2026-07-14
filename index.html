@@ -3,7 +3,7 @@
 <html lang="es" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://eutarjfnlkcehhigqqxr.supabase.co wss://eutarjfnlkcehhigqqxr.supabase.co https://dolarapi.com https://api.coinbase.com https://accounts.google.com; img-src 'self' data:; worker-src blob: https://cdnjs.cloudflare.com;">
 <title>💰 Finanzas Personales</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1317,6 +1317,16 @@
     padding: 0 1.25rem; height: 58px;
     align-items: center; justify-content: space-between;
   }
+  /* Con viewport-fit=cover el header (fixed, top:0) queda por debajo del
+     notch/status bar salvo que le sumemos el inset: crece hacia arriba en
+     vez de que su contenido quede tapado. env() es 0px en dispositivos sin
+     safe-area, así que en esos casos esto es un no-op. */
+  @supports (padding: max(0px)) {
+    .mobile-header {
+      height: calc(58px + env(safe-area-inset-top, 0px));
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+  }
   .mobile-logo {
     font-size: 1rem; font-weight: 800; letter-spacing: -.025em;
     color: var(--accent);
@@ -1610,7 +1620,7 @@
     .mobile-header { display: flex; }
 
     /* Contenido ocupa todo el ancho */
-    .main { margin-left: 0; padding: 4.8rem 1.1rem 7.5rem; }
+    .main { margin-left: 0; padding: calc(4.8rem + env(safe-area-inset-top, 0px)) 1.1rem 7.5rem; }
 
     /* Bottom nav */
     .bottom-nav { display: block; }
@@ -1709,7 +1719,7 @@
     .col-hide-xs { display: none !important; }
     .kpi-card { padding: .55rem .65rem; }
     .kpi-hero { padding: .8rem .9rem; }
-    .main { padding: 4.2rem .6rem 1.5rem; }
+    .main { padding: calc(4.2rem + env(safe-area-inset-top, 0px)) .6rem 7.5rem; }
     .kpi-grid { gap: .5rem; }
     tbody td, thead th { padding: .42rem .45rem; font-size: .79rem; }
   }
@@ -2094,7 +2104,10 @@
     padding: 2rem 2.5rem 5rem;
     flex: 1; min-width: 0; overflow-x: hidden;
   }
-  @media (max-width: 768px) { .main { padding: 1rem 1rem 5rem; } }
+  /* El padding mobile real vive en los @media de más arriba (max-width:768px
+     y max-width:440px) — no duplicar acá: una regla posterior con la misma
+     especificidad les ganaba en el cascade y dejaba el contenido tapado
+     bajo el mobile-header/bottom-nav fijos en todas las páginas. */
 
   /* ─── RADIO BUTTONS RESPONSABILIDAD ──────────────── */
   .resp-toggle-header {
@@ -2712,7 +2725,7 @@
 </nav>
 
 <!-- Bottom nav mobile (NavCalida pill) -->
-<nav class="bottom-nav" id="bottom-nav">
+<nav class="bottom-nav" id="bottom-nav" style="display:none;">
   <div class="bn-pill">
     <button class="bn-item" id="bn-presupuesto" onclick="navegarA('presupuesto')">
       <i data-lucide="home" width="21" height="21"></i>
@@ -4447,6 +4460,7 @@ async function volverConfig() {
   localStorage.removeItem(_cacheKeyCateg(_uidSaliente));
   document.getElementById("app").style.display = "none";
   document.getElementById("mobile-header").style.display = "none";
+  document.getElementById("bottom-nav").style.display = "none";
   closeSidebar();
   mostrarLogin();
   document.getElementById("setup-screen").style.display = "flex";
@@ -4826,6 +4840,10 @@ async function iniciarApp() {
   if (window.innerWidth <= 768) {
     document.getElementById("mobile-header").style.display = "flex";
   }
+  // El bottom-nav vive fuera de #setup-screen/#app, así que su display:none
+  // inicial (inline) es lo único que lo esconde durante el login — a partir
+  // de acá el @media (max-width:768px) hace su trabajo normal.
+  document.getElementById("bottom-nav").style.display = "";
 
   if (!USUARIO) {
     document.getElementById("modal-nombre").style.display = "flex";
