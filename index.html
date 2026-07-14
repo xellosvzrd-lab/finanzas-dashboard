@@ -3,7 +3,7 @@
 <html lang="es" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://eutarjfnlkcehhigqqxr.supabase.co wss://eutarjfnlkcehhigqqxr.supabase.co https://dolarapi.com https://api.coinbase.com https://accounts.google.com; img-src 'self' data:; worker-src blob: https://cdnjs.cloudflare.com;">
 <title>💰 Finanzas Personales</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,6 +53,12 @@
     /* easing */
     --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+    /* Altura real del .mobile-header fijo (58px + notch/status bar). Único
+       lugar donde vive este número — .main usa esta misma variable (+ un
+       margen) para su padding-top, así nunca pueden desincronizarse y
+       volver a tapar contenido bajo el header, como pasó antes. */
+    --mh-h: calc(58px + env(safe-area-inset-top, 0px));
   }
 
   /* ─── TEMA ÚNICO — Liquid Glass índigo (unifica Daniel/Ama) ── */
@@ -887,13 +893,17 @@
     border-radius: .25rem; vertical-align: middle;
     font-weight: 600; letter-spacing: .02em; flex-shrink: 0;
   }
+  /* Sin borde propio a propósito: con borde se veía como una píldora chica
+     separada dentro de la píldora grande de .cfg-item (fila de Medios de
+     pago). El resalte al hover/foco alcanza para que se note que es
+     clickeable, sin romper la unidad visual de la fila. */
   .cfg-reclasif-btn {
-    background: none; border: 1px solid var(--border);
+    background: none; border: 1px solid transparent;
     cursor: pointer; color: var(--text-muted); font-size: .75rem;
     padding: .15rem .4rem; border-radius: 5px; flex-shrink: 0;
-    transition: color .15s, border-color .15s;
+    transition: color .15s, background .15s;
   }
-  .cfg-reclasif-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .cfg-reclasif-btn:hover { color: var(--accent); background: var(--surface-2); }
   .cfg-confirm-inline {
     font-size: .8rem; padding: .4rem .5rem; margin-top: .25rem;
     background: var(--bg2); border: 1px solid var(--border);
@@ -1321,7 +1331,7 @@
     display: none;
     position: fixed; top: 0; left: 0; right: 0; z-index: 200;
     background: var(--card); border-bottom: 1px solid var(--border);
-    padding: 0 1.25rem; height: 58px;
+    padding: 0 1.25rem; height: var(--mh-h);
     align-items: center; justify-content: space-between;
   }
   /* Con viewport-fit=cover el header (fixed, top:0) queda por debajo del
@@ -1330,7 +1340,6 @@
      safe-area, así que en esos casos esto es un no-op. */
   @supports (padding: max(0px)) {
     .mobile-header {
-      height: calc(58px + env(safe-area-inset-top, 0px));
       padding-top: env(safe-area-inset-top, 0px);
     }
   }
@@ -1381,14 +1390,13 @@
     -webkit-backdrop-filter: blur(3px);
   }
   .sidebar-overlay.open { display: block; }
-  /* Con el drawer abierto, el bottom-nav y el FAB (z-index:200, por encima
-     del scrim en 150) quedaban visibles sin atenuar y seguían tocables
-     debajo del overlay. Los bajamos por debajo del scrim/drawer solo
-     mientras el drawer está abierto (selector de hermanos: ambos vienen
-     después de .mobile-drawer en el DOM). El mobile-header no se toca a
-     propósito: el botón ✕ que cierra el drawer vive ahí. */
-  .mobile-drawer.open ~ .bottom-nav,
-  .mobile-drawer.open ~ #app .fab {
+  /* Con el drawer abierto, el bottom-nav (z-index:200, por encima del scrim
+     en 150) quedaba visible sin atenuar y seguía tocable debajo del overlay.
+     Lo bajamos por debajo del scrim/drawer solo mientras el drawer está
+     abierto (selector de hermanos: viene después de .mobile-drawer en el
+     DOM). El mobile-header no se toca a propósito: el botón ✕ que cierra
+     el drawer vive ahí. */
+  .mobile-drawer.open ~ .bottom-nav {
     z-index: 140;
   }
 
@@ -1649,8 +1657,10 @@
     /* Mostrar header mobile, ocultar sidebar por default */
     .mobile-header { display: flex; }
 
-    /* Contenido ocupa todo el ancho */
-    .main { margin-left: 0; padding: calc(4.8rem + env(safe-area-inset-top, 0px)) 1.1rem 7.5rem; }
+    /* Contenido ocupa todo el ancho. padding-top = altura real del header
+       fijo (var(--mh-h), la misma variable que usa .mobile-header) + 18px
+       de aire — nunca puede quedar por debajo de la altura del header. */
+    .main { margin-left: 0; padding: calc(var(--mh-h) + 18px) 1.1rem 7.5rem; }
 
     /* Bottom nav */
     .bottom-nav { display: block; }
@@ -1714,8 +1724,8 @@
     .reparto-control { width: 100%; }
     .reparto-input { width: 44px; }
 
-    /* Toast: centrado abajo, por encima del pill del bottom-nav (mismo
-       offset que el FAB — ver comentario en .fab) */
+    /* Toast: centrado abajo, por encima del pill del bottom-nav (~100px:
+       10px padding top + 70px alto del pill + 30px padding bottom) */
     .toast { left: 1rem; right: 1rem; bottom: calc(114px + env(safe-area-inset-bottom, 0px)); }
 
     /* Touch targets mínimos 44px */
@@ -1751,7 +1761,7 @@
     .col-hide-xs { display: none !important; }
     .kpi-card { padding: .55rem .65rem; }
     .kpi-hero { padding: .8rem .9rem; }
-    .main { padding: calc(4.2rem + env(safe-area-inset-top, 0px)) .6rem 7.5rem; }
+    .main { padding: calc(var(--mh-h) + 18px) .6rem 7.5rem; }
     .kpi-grid { gap: .5rem; }
     tbody td, thead th { padding: .42rem .45rem; font-size: .79rem; }
   }
@@ -2008,7 +2018,13 @@
     .layout    { display: flex; }
     .main { padding: 22px 30px 3rem; }
   }
-  @media (min-width: 769px) and (max-width: 859px) { .bottom-nav { display: none; } }
+  @media (min-width: 769px) and (max-width: 859px) {
+    .bottom-nav { display: none; }
+    /* Sin FAB ni bottom-nav en esta banda (iPad portrait), .mm-anotar-btn
+       se adelanta desde los 860px habituales para no dejarla sin forma de
+       crear una transacción desde Mi mes. */
+    .mm-anotar-btn { display: inline-flex; }
+  }
 
   /* ─── MI MES — DESGLOSE DEL SUELDO (desktop) ───────────────── */
   .mm-desglose   { padding: 18px 20px; }
@@ -2195,63 +2211,11 @@
     color: var(--text);
   }
 
-  /* ─── FAB — botón flotante agregar transacción ─── */
-  .fab {
-    position: fixed;
-    /* El pill del bottom-nav mide ~100px desde el borde inferior (10px padding
-       top + 70px alto del pill + 30px padding bottom), no 64px — con 64px el
-       FAB se solapaba con la esquina del pill. env() suma el safe-area en
-       dispositivos con home indicator, igual que el padding del propio nav. */
-    bottom: calc(114px + env(safe-area-inset-bottom, 0px));
-    right: 1.25rem;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--white);
-    border: none;
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(200,132,90,0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform .15s, box-shadow .15s;
-    z-index: 200;
-  }
-  .fab { animation: fabEntrada .45s var(--ease-out) both; }
-  .fab:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(200,132,90,0.55); }
-  .fab:active { transform: scale(0.95); }
-  .fab::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: fabPulse 3s ease-out 3s infinite;
-    z-index: -1;
-    pointer-events: none;
-  }
-  @keyframes fabPulse {
-    0%   { transform: scale(1);   opacity: .45; }
-    100% { transform: scale(2.2); opacity: 0;   }
-  }
-  @keyframes fabEntrada {
-    from { transform: scale(0.6); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
-  }
-  @media (min-width: 860px) {
-    /* En la banda 769-859px (ej. iPad portrait) el bottom-nav y el FAB ya
-       estaban ocultos, pero .mm-anotar-btn (el botón "+ Anotar" de escritorio
-       en el header de Mi mes) recién aparece a partir de 860px — en esa
-       banda no había ninguna forma visible de crear una transacción desde
-       Mi mes. Se extiende el FAB (flotante, no depende del layout del
-       header) hasta que el botón de escritorio realmente aparece, en vez de
-       adelantar .mm-anotar-btn a un ancho donde el header de Mi mes todavía
-       usa su layout mobile. */
-    .fab { display: none; }
-  }
+  /* El botón flotante (FAB) se eliminó — era redundante con el "+" central
+     del bottom-nav (.bn-cta) en mobile. En la banda tablet 769-859px, donde
+     el bottom-nav está oculto y el sidebar desktop todavía no aparece,
+     .mm-anotar-btn se adelanta a ese ancho (ver @media 769-859px más abajo)
+     para no dejar esa banda sin forma de crear una transacción. */
 
   /* ─── ACCESIBILIDAD: REDUCED MOTION ─────────────────────── */
   @media (prefers-reduced-motion: reduce) {
@@ -3899,9 +3863,6 @@
 
 
       </div><!-- /page-importar -->
-
-      <!-- FAB: visible en todas las pestañas excepto Nueva transacción -->
-      <button class="fab" id="btn-fab-nueva" onclick="navegarA('nueva')" title="Nueva transacción" aria-label="Nueva transacción">+</button>
 
     </main>
   </div>
@@ -7664,10 +7625,6 @@ function navegarA(pagina) {
   if (pagina === "config")       { renderizarConfig(); renderizarPanelWorkspace(); }
   if (pagina === "inversiones")  { inicializarDisclosureInversiones(); renderPlazos(); renderAcciones(); _iniciarAutoRefreshAcciones(); }
 
-  // Ocultar FAB en la página de nueva transacción (ya tiene su propio botón de guardar)
-  const fab = document.getElementById("btn-fab-nueva");
-  if (fab) fab.style.display = pagina === "nueva" ? "none" : "";
-
   // Re-renderizar íconos Lucide tras navegación (contenido dinámico puede contener data-lucide)
   if (window.lucide) lucide.createIcons();
 
@@ -8470,7 +8427,7 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   const heroAmt = $("mm-hero-amount");
   if (heroAmt) {
     heroAmt.textContent = (saldoReal < 0 ? "−" : "") + fmt(Math.abs(saldoReal));
-    heroAmt.style.color = saldoReal < 0 ? "var(--red)" : "";
+    heroAmt.style.color = saldoReal < 0 ? "var(--red)" : "var(--green)";
   }
   const heroSub = $("mm-hero-sub");
   if (heroSub) heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
