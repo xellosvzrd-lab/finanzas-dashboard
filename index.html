@@ -2031,8 +2031,10 @@
                              letter-spacing: .07em; color: var(--text-faint); padding: .2rem 0 .3rem; }
   .trans-mobile-day-card { overflow: hidden; }
   .trans-mobile-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px;
-                        border-top: 1px solid var(--line); }
+                        border-top: 1px solid var(--line); cursor: pointer; transition: background .12s; }
   .trans-mobile-item:first-child { border-top: none; }
+  .trans-mobile-item:active { background: var(--surface-2); }
+  .trans-mobile-del-btn { flex-shrink: 0; }
   .trans-mobile-icon { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
                         display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
   .trans-mobile-body { flex: 1; min-width: 0; }
@@ -5922,7 +5924,7 @@ function _renderMobileList(datos) {
           ? `<span class="trans-mobile-badge usd">USD</span>` : "";
         const subline = [t.descripcion, t.fuente].filter(Boolean).map(escapeHtml).join(" · ");
         const monto   = fmtMoneda(Math.abs(Number(t.monto)), mon);
-        return `<div class="trans-mobile-item">
+        return `<div class="trans-mobile-item" onclick="abrirEditorTransaccion('${t.id}')">
           <div class="trans-mobile-icon" style="background:${iconBg}">${emoji}</div>
           <div class="trans-mobile-body">
             <div class="trans-mobile-cat">${escapeHtml(t.categoria)}${respBadge}</div>
@@ -5932,6 +5934,7 @@ function _renderMobileList(datos) {
             <div class="trans-mobile-amount ${isPos ? "pos" : "neg"}">${isPos ? "+" : "−"}${monto}</div>
             ${usdBadge}
           </div>
+          <button class="delete-btn trans-mobile-del-btn" onclick="event.stopPropagation();eliminarTransaccion('${t.id}')" title="Eliminar" aria-label="Eliminar transacción">${IC_TRASH}</button>
         </div>`;
       }).join("");
       return `<div class="trans-mobile-day">
