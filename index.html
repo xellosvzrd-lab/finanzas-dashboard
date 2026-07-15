@@ -1343,6 +1343,19 @@
       padding-top: env(safe-area-inset-top, 0px);
     }
   }
+  /* PWA instalada en pantalla de inicio (standalone): a diferencia de
+     Safari en pestaña normal, ahí el status bar YA reserva su propio
+     espacio fuera del área de contenido — top:0 empieza debajo de él.
+     Sumar env(safe-area-inset-top) de nuevo compensa dos veces el mismo
+     espacio y empuja el logo/hamburger bien abajo del header (bug
+     reportado: "Finanzas" aparecía superpuesto con contenido de la
+     página, no pegado arriba). En standalone la altura es fija, sin
+     inset — --mh-h también se redefine acá porque .main usa la misma
+     variable para su padding-top. */
+  @media (display-mode: standalone) {
+    :root { --mh-h: 58px; }
+    .mobile-header { padding-top: 0; }
+  }
   .mobile-logo {
     font-size: 1rem; font-weight: 800; letter-spacing: -.025em;
     color: var(--accent);
