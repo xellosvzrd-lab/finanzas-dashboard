@@ -54,11 +54,10 @@
     --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
-    /* Altura real del .mobile-header fijo (58px + notch/status bar). Único
-       lugar donde vive este número — .main usa esta misma variable (+ un
-       margen) para su padding-top, así nunca pueden desincronizarse y
-       volver a tapar contenido bajo el header, como pasó antes. */
-    --mh-h: calc(58px + env(safe-area-inset-top, 0px));
+    /* Altura real del .mobile-header fijo (48px + notch/status bar) —
+       fallback antes de que corra _syncMobileHeaderHeight(), que mide y
+       aplica el valor real por JS (ver ese comentario para el porqué). */
+    --mh-h: calc(48px + env(safe-area-inset-top, 0px));
   }
 
   /* ─── TEMA ÚNICO — Liquid Glass índigo (unifica Daniel/Ama) ── */
@@ -7697,10 +7696,10 @@ function _syncMobileHeaderHeight() {
   probe.remove();
 
   mh.style.paddingTop = inset + "px";
-  mh.style.height = (58 + inset) + "px";
+  mh.style.height = (48 + inset) + "px";
 
   const h = mh.offsetHeight;
-  if (h > 0 && main) main.style.paddingTop = (h + 20) + "px";
+  if (h > 0 && main) main.style.paddingTop = (h + 14) + "px";
 }
 
 // Mostrar/ocultar header mobile al cambiar tamaño de ventana (ej: rotación)
