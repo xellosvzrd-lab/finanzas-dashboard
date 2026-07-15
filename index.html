@@ -1343,19 +1343,16 @@
       padding-top: env(safe-area-inset-top, 0px);
     }
   }
-  /* PWA instalada en pantalla de inicio (standalone): a diferencia de
-     Safari en pestaña normal, ahí el status bar YA reserva su propio
-     espacio fuera del área de contenido — top:0 empieza debajo de él.
-     Sumar env(safe-area-inset-top) de nuevo compensa dos veces el mismo
-     espacio y empuja el logo/hamburger bien abajo del header (bug
-     reportado: "Finanzas" aparecía superpuesto con contenido de la
-     página, no pegado arriba). En standalone la altura es fija, sin
-     inset — --mh-h también se redefine acá porque .main usa la misma
-     variable para su padding-top. */
-  @media (display-mode: standalone) {
-    :root { --mh-h: 58px; }
-    .mobile-header { padding-top: 0; }
-  }
+  /* Se probó (y se descartó, con captura + medición en píxeles de por
+     medio) forzar --mh-h/padding-top a un valor fijo en modo standalone
+     (PWA instalada) asumiendo que ahí no hacía falta compensar el notch:
+     la evidencia real mostró lo contrario — sin compensación el header
+     choca con el status bar. La compensación por JS de más abajo
+     (_syncMobileHeaderHeight) mide el inset real con una sonda en vez de
+     asumir un valor por CSS, y aplica el padding directo (sin pasar por
+     esta variable) tanto al header como a .main — ver esa función para
+     el mecanismo real que gana en runtime. Este bloque CSS con env()
+     queda solo como fallback antes de que corra el JS. */
   .mobile-logo {
     font-size: 1rem; font-weight: 800; letter-spacing: -.025em;
     color: var(--accent);
@@ -7677,19 +7674,33 @@ function closeSidebar() {
   if (wasOpen) btn?.focus();
 }
 
-// Altura real de .mobile-header medida en el navegador (offsetHeight), en vez
-// de confiar en que env(safe-area-inset-top) dé el mismo valor en el CSS de
-// .main que en el propio header. En PWA instalada en pantalla de inicio
-// (modo standalone), iOS calcula ese env() de forma inconsistente respecto
-// a Safari normal — con dos calc() separados, el header y el padding de
-// .main podían quedar desincronizados. Midiendo el offsetHeight real no
-// importa cuánto valga el inset en cada modo: .main siempre deja el espacio
-// exacto que el header realmente ocupa.
+// Posiciona el header mobile y el padding-top de .main con valores medidos
+// en runtime, sin pasar por variables CSS / calc(). Dos intentos previos
+// (var(--mh-h) + calc() compartido entre header y .main, primero con
+// env(safe-area-inset-top) fijo por CSS, después fijado por JS vía
+// setProperty en :root) no cambiaron nada visible pese a que los números
+// eran razonables — indicio de que el problema no era el valor sino el
+// mecanismo (el calc() de .main no reflejaba el cambio de la variable).
+// Acá se mide el inset real con una sonda (en vez de asumir que env() da
+// lo mismo en Safari normal y en la PWA instalada — probado que no: sin
+// compensación el header choca con el status bar) y se aplica como
+// padding-top directo, en píxeles, a cada elemento por separado.
 function _syncMobileHeaderHeight() {
   const mh = document.getElementById("mobile-header");
+  const main = document.querySelector(".main");
   if (!mh || mh.style.display === "none" || window.innerWidth > 768) return;
+
+  const probe = document.createElement("div");
+  probe.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;padding-top:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none;";
+  document.body.appendChild(probe);
+  const inset = parseFloat(getComputedStyle(probe).paddingTop) || 0;
+  probe.remove();
+
+  mh.style.paddingTop = inset + "px";
+  mh.style.height = (58 + inset) + "px";
+
   const h = mh.offsetHeight;
-  if (h > 0) document.documentElement.style.setProperty("--mh-h", h + "px");
+  if (h > 0 && main) main.style.paddingTop = (h + 20) + "px";
 }
 
 // Mostrar/ocultar header mobile al cambiar tamaño de ventana (ej: rotación)
