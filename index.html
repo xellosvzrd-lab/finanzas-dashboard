@@ -1625,6 +1625,7 @@
   .mm-hero-stat-val   { font-size: 1.2rem; font-weight: 700; margin-top: .15rem; font-family: var(--font-display); }
 
   .mm-quick-stats { display: flex; gap: 10px; margin-bottom: 14px; }
+  .mm-summary-row { display: none; }
   .mm-qs-card { flex: 1; padding: 12px 13px; }
   .mm-qs-label { font-size: .72rem; color: var(--text-faint); font-weight: 600; }
   .mm-qs-val { font-size: 1.05rem; font-weight: 700; margin-top: .2rem; font-family: var(--font-display); }
@@ -1677,7 +1678,9 @@
     .mm-hero-stat-3 { display: flex; flex-direction: column; }
     .mm-quick-stats         { display: none; }
     .mm-desglose            { display: flex; flex-direction: column; }
-    .mm-row2                { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .mm-summary-row         { display: flex; gap: 14px; margin-bottom: 18px; }
+    .mm-summary-row > .mm-sc { flex: 1; }
+    .mm-row2                { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
     /* Secciones mobile-only: ocultar en desktop */
     .cuotas-card         { display: none !important; }
     .mm-section-header   { display: none; }
@@ -3410,6 +3413,47 @@
           </button>
         </div>
 
+        <!-- Quick stat: Ahorro (Ingresos/Gastos se sacaron de acá — quedaban duplicados
+             con "Desglose del sueldo" de abajo, que ya muestra Sueldo y Gastado) -->
+        <div class="mm-quick-stats">
+          <div class="card mm-qs-card">
+            <div class="mm-qs-label">Ahorro</div>
+            <div class="mm-qs-val num" style="color:var(--save)" id="mm-qs-ahorro">—%</div>
+          </div>
+        </div>
+
+        <!-- Resumen Cuotas + Meta, reubicado debajo de los accesos rápidos (desktop) -->
+        <div class="mm-summary-row">
+          <div class="card mm-sc">
+            <div id="mm-sc-ahorro-default">
+              <div class="mm-sc-icon">🐷</div>
+              <div class="mm-sc-label">Ahorro acumulado</div>
+              <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
+              <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
+              <div class="mm-sc-meta-link" onclick="abrirModalMeta()">🎯 Definir meta de ahorro</div>
+            </div>
+            <div id="mm-sc-ahorro-meta" style="display:none">
+              <div class="mm-sc-meta-top">
+                <div class="mm-sc-icon">🎯</div>
+                <span class="mm-sc-meta-edit" onclick="abrirModalMeta()">✏️</span>
+              </div>
+              <div class="mm-sc-label" id="mm-sc-meta-nombre">—</div>
+              <div class="mm-sc-meta-bar-track">
+                <div class="mm-sc-meta-bar-fill" id="mm-sc-meta-bar"></div>
+              </div>
+              <div class="mm-sc-meta-pct" id="mm-sc-meta-pct">0%</div>
+              <div class="mm-sc-sub" id="mm-sc-meta-sub">—</div>
+              <div class="mm-sc-meta-badge" id="mm-sc-meta-badge" style="display:none">🤝 Compartida con <span id="mm-sc-meta-partner"></span></div>
+            </div>
+          </div>
+          <div class="card mm-sc mm-sc-clickable" onclick="verDetalleCuotasMes()" role="button" tabindex="0" aria-haspopup="dialog" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();verDetalleCuotasMes()}">
+            <div class="mm-sc-icon">📅</div>
+            <div class="mm-sc-label">Cuotas este mes</div>
+            <div class="mm-sc-val" id="mm-sc-cuotas-mes">—</div>
+            <div class="mm-sc-sub" id="mm-sc-cuotas-count">compras activas</div>
+          </div>
+        </div>
+
         <!-- Row 1: hero + quick stats (grid on desktop) -->
         <div class="mm-row1">
 
@@ -3429,15 +3473,6 @@
                 <div class="mm-hero-stat-label">Días restantes</div>
                 <div class="mm-hero-stat-val num" id="mm-stat-dias">—</div>
               </div>
-            </div>
-          </div>
-
-          <!-- Quick stat: Ahorro (Ingresos/Gastos se sacaron de acá — quedaban duplicados
-               con "Desglose del sueldo" de abajo, que ya muestra Sueldo y Gastado) -->
-          <div class="mm-quick-stats">
-            <div class="card mm-qs-card">
-              <div class="mm-qs-label">Ahorro</div>
-              <div class="mm-qs-val num" style="color:var(--save)" id="mm-qs-ahorro">—%</div>
             </div>
           </div>
 
@@ -3480,39 +3515,11 @@
 
         <!-- Row 2: 4 stat-cards (desktop) -->
         <div class="mm-row2">
-          <div class="card mm-sc">
-            <div id="mm-sc-ahorro-default">
-              <div class="mm-sc-icon">🐷</div>
-              <div class="mm-sc-label">Ahorro acumulado</div>
-              <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
-              <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
-              <div class="mm-sc-meta-link" onclick="abrirModalMeta()">🎯 Definir meta de ahorro</div>
-            </div>
-            <div id="mm-sc-ahorro-meta" style="display:none">
-              <div class="mm-sc-meta-top">
-                <div class="mm-sc-icon">🎯</div>
-                <span class="mm-sc-meta-edit" onclick="abrirModalMeta()">✏️</span>
-              </div>
-              <div class="mm-sc-label" id="mm-sc-meta-nombre">—</div>
-              <div class="mm-sc-meta-bar-track">
-                <div class="mm-sc-meta-bar-fill" id="mm-sc-meta-bar"></div>
-              </div>
-              <div class="mm-sc-meta-pct" id="mm-sc-meta-pct">0%</div>
-              <div class="mm-sc-sub" id="mm-sc-meta-sub">—</div>
-              <div class="mm-sc-meta-badge" id="mm-sc-meta-badge" style="display:none">🤝 Compartida con <span id="mm-sc-meta-partner"></span></div>
-            </div>
-          </div>
           <div class="card mm-sc" id="mm-sc-comp-card">
             <div class="mm-sc-icon">🤝</div>
             <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">tu pareja</span></div>
             <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
             <div class="mm-sc-sub" id="mm-sc-comp-label">balance del mes</div>
-          </div>
-          <div class="card mm-sc mm-sc-clickable" onclick="verDetalleCuotasMes()" role="button" tabindex="0" aria-haspopup="dialog" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();verDetalleCuotasMes()}">
-            <div class="mm-sc-icon">📅</div>
-            <div class="mm-sc-label">Cuotas este mes</div>
-            <div class="mm-sc-val" id="mm-sc-cuotas-mes">—</div>
-            <div class="mm-sc-sub" id="mm-sc-cuotas-count">compras activas</div>
           </div>
           <div class="card mm-sc">
             <div class="mm-sc-icon">📅</div>
