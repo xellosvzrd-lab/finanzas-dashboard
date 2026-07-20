@@ -8565,21 +8565,19 @@ function renderPresupuesto() {
 function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   const $ = id => document.getElementById(id);
   const heroAmt = $("mm-hero-amount");
-  if (heroAmt) {
-    heroAmt.textContent = (saldoReal < 0 ? "−" : "") + fmt(Math.abs(saldoReal));
-    heroAmt.style.color = saldoReal < 0 ? "var(--red)" : "var(--green)";
-  }
   const heroSub = $("mm-hero-sub");
-  if (heroSub) heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
+  const heroAmtLegacy = $("mm-hero-amount-legacy");
+  const heroSubLegacy = $("mm-hero-sub-legacy");
+  const saldoTxt = (saldoReal < 0 ? "−" : "") + fmt(Math.abs(saldoReal));
+  const saldoColor = saldoReal < 0 ? "var(--red)" : "var(--green)";
+  const subTxt = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
+  if (heroAmt) { heroAmt.dataset.valorReal = saldoTxt; heroAmt.style.color = saldoColor; }
+  if (heroSub) heroSub.textContent = subTxt;
   // Card "Te queda para gastar" (mm-hero, debajo del header MP-style) — mismo valor,
   // ids propios (*-legacy) para no duplicar id con el header nuevo (Tarea 3).
-  const heroAmtLegacy = $("mm-hero-amount-legacy");
-  if (heroAmtLegacy) {
-    heroAmtLegacy.textContent = (saldoReal < 0 ? "−" : "") + fmt(Math.abs(saldoReal));
-    heroAmtLegacy.style.color = saldoReal < 0 ? "var(--red)" : "var(--green)";
-  }
-  const heroSubLegacy = $("mm-hero-sub-legacy");
-  if (heroSubLegacy) heroSubLegacy.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
+  if (heroAmtLegacy) { heroAmtLegacy.dataset.valorReal = saldoTxt; heroAmtLegacy.style.color = saldoColor; }
+  if (heroSubLegacy) heroSubLegacy.textContent = subTxt;
+  _aplicarBalanceOculto();
 
   const hoy = new Date();
   const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
@@ -9636,24 +9634,23 @@ function toggleDesglose() {
   try { localStorage.setItem(USUARIO + "_disclosure_mimes", visible ? "0" : "1"); } catch(e) {}
 }
 
-function toggleBalanceOculto() {
-  const el = document.getElementById("mm-hero-amount");
+function _aplicarBalanceOculto() {
+  const oculto = localStorage.getItem(USUARIO + "_mm_balance_oculto") === "1";
+  ["mm-hero-amount", "mm-hero-amount-legacy"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.dataset.valorReal) return;
+    el.textContent = oculto ? "•••••" : el.dataset.valorReal;
+  });
   const icon = document.getElementById("mm-balance-eye-icon");
-  const key = USUARIO + "_mm_balance_oculto";
-  const oculto = el.dataset.oculto === "1";
-  if (oculto) {
-    el.textContent = el.dataset.valorReal || el.textContent;
-    el.dataset.oculto = "0";
-    localStorage.setItem(key, "0");
-    icon?.setAttribute("data-lucide", "eye");
-  } else {
-    el.dataset.valorReal = el.textContent;
-    el.textContent = "•••••";
-    el.dataset.oculto = "1";
-    localStorage.setItem(key, "1");
-    icon?.setAttribute("data-lucide", "eye-off");
-  }
+  if (icon) icon.setAttribute("data-lucide", oculto ? "eye-off" : "eye");
   if (typeof lucide !== "undefined") lucide.createIcons();
+}
+
+function toggleBalanceOculto() {
+  const key = USUARIO + "_mm_balance_oculto";
+  const oculto = localStorage.getItem(key) === "1";
+  localStorage.setItem(key, oculto ? "0" : "1");
+  _aplicarBalanceOculto();
 }
 
 // ─── TU MES EN NÚMEROS (cierre de mes) ────────────────────────
