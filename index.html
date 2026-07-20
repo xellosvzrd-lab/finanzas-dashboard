@@ -1533,6 +1533,21 @@
     display: flex; align-items: flex-start; justify-content: space-between;
     padding: 1rem 0 1.1rem;
   }
+  .mm-header.mp-head {
+    border-radius: 0 0 26px 26px; padding: 16px 18px 52px; margin: -18px -1.1rem 0;
+  }
+  @media (min-width: 860px) { .mm-header.mp-head { border-radius: 24px; margin: 0 0 -44px; padding: 22px 26px 60px; } }
+  .mm-head-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .mm-hero-eyebrow-mp { font-size: 12.5px; font-weight: 600; opacity: .85; margin-top: 14px; }
+  .mm-header.mp-head .mm-hero-amount { font-size: 42px; font-weight: 800; letter-spacing: -.03em; margin-top: 2px; }
+  .mm-header.mp-head .mm-hero-sub { font-size: 12px; opacity: .8; }
+  .mm-head-pills { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .mm-header.mp-head .mm-greeting { color: rgba(255,255,255,.85); }
+  .mm-quick-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin: -44px 1.1rem 18px; padding: 18px 12px; border-radius: 22px; position: relative; z-index: 2;
+  }
+  @media (min-width: 860px) { .mm-quick-grid { margin: -44px 0 22px; } }
   .mm-greeting { font-size: .82rem; color: var(--text-faint); font-weight: 600; margin-bottom: .4rem; }
   .mm-month-selects { display: flex; gap: .4rem; align-items: center; }
   .mm-month-selects select {
@@ -3346,10 +3361,9 @@
       <div id="page-presupuesto" class="page page-mimes">
 
         <!-- Header: saludo + selectores de mes -->
-        <div class="mm-header">
-          <div>
-            <div class="mm-page-title">Mi mes</div>
-            <div class="mm-greeting" id="mm-greeting">Hola 👋</div>
+        <div class="mm-header mp-head glassui">
+          <div class="mm-head-top">
+            <div class="mp-avatar" id="mm-head-avatar">D</div>
             <div class="mm-month-pill">
               <button type="button" onclick="cambiarMesPresupuesto(-1)" aria-label="Mes anterior">‹</button>
               <span id="mm-mes-label"></span>
@@ -3359,18 +3373,49 @@
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
+            <button class="mp-hbtn" id="mm-balance-toggle" onclick="toggleBalanceOculto()" aria-label="Mostrar/ocultar saldo" title="Mostrar/ocultar saldo">
+              <i data-lucide="eye" width="17" height="17" id="mm-balance-eye-icon"></i>
+            </button>
           </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <button class="btn btn-primary mm-anotar-btn" onclick="navegarA('nueva')">+ Anotar</button>
-            <button class="mm-bell" onclick="sugerirPresupuestoDesdeHistorial()"
+          <div class="mm-greeting" id="mm-greeting">Hola 👋</div>
+          <div class="mm-hero-eyebrow-mp" id="mm-hero-eyebrow-mp">Saldo de <span id="mm-hero-mes-label"></span></div>
+          <div class="mm-hero-amount num" id="mm-hero-amount">$0</div>
+          <div class="mm-hero-sub" id="mm-hero-sub">de tu sueldo, hasta fin de mes</div>
+          <div class="mm-head-pills">
+            <span class="mp-wpill" id="mm-pill-ingresos">↑ Ingresos —</span>
+            <span class="mp-wpill" id="mm-pill-gastos">↓ Gastos —</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+            <button class="mp-wbtn mm-anotar-btn" onclick="navegarA('nueva')">+ Anotar</button>
+            <button class="mp-hbtn" onclick="sugerirPresupuestoDesdeHistorial()"
                     title="Sugerir presupuesto (promedio 3 meses)" aria-label="Sugerir presupuesto">
-              <i data-lucide="bar-chart-2" width="18" height="18"></i>
+              <i data-lucide="bar-chart-2" width="16" height="16"></i>
             </button>
-            <button class="mm-bell" onclick="copiarPresupuestoMesAnterior()"
+            <button class="mp-hbtn" onclick="copiarPresupuestoMesAnterior()"
                     title="Copiar presupuesto del mes anterior" aria-label="Copiar presupuesto del mes anterior">
-              <i data-lucide="copy" width="18" height="18"></i>
+              <i data-lucide="copy" width="16" height="16"></i>
             </button>
           </div>
+        </div>
+
+        <!-- Accesos rápidos MP-style, superpuestos al header -->
+        <div class="card mm-quick-grid glassui">
+          <button class="mp-action" onclick="navegarA('nueva')">
+            <span class="ico"><i data-lucide="plus" width="22" height="22"></i></span>
+            Nueva
+          </button>
+          <button class="mp-action" onclick="navegarA('transacciones')">
+            <span class="ico"><i data-lucide="receipt" width="22" height="22"></i></span>
+            Gastos
+          </button>
+          <button class="mp-action" onclick="navegarA('compartidos')">
+            <span class="ico"><i data-lucide="users" width="22" height="22"></i></span>
+            Compartidos
+          </button>
+          <button class="mp-action" onclick="navegarA('config')">
+            <span class="ico"><i data-lucide="tag" width="22" height="22"></i></span>
+            Categorías
+          </button>
         </div>
 
         <!-- Row 1: hero + quick stats (grid on desktop) -->
@@ -3380,8 +3425,8 @@
           <div class="mm-hero">
             <div class="mm-hero-orb"></div>
             <div class="mm-hero-eyebrow">💸 Te queda para gastar</div>
-            <div class="mm-hero-amount num" id="mm-hero-amount">$0</div>
-            <div class="mm-hero-sub" id="mm-hero-sub">de tu sueldo, hasta fin de mes</div>
+            <div class="mm-hero-amount num" id="mm-hero-amount-legacy">$0</div>
+            <div class="mm-hero-sub" id="mm-hero-sub-legacy">de tu sueldo, hasta fin de mes</div>
             <div class="mm-hero-stats">
               <div class="mm-hero-stat">
                 <div class="mm-hero-stat-label">Por día</div>
@@ -4839,6 +4884,8 @@ function _actualizarStringsUsuario() {
   if (greeting) greeting.textContent = `Hola, ${USUARIO} 👋`;
   const sidebarAvatar = document.getElementById("sidebar-avatar");
   if (sidebarAvatar) sidebarAvatar.textContent = USUARIO.charAt(0).toUpperCase();
+  const mmHeadAvatar = document.getElementById("mm-head-avatar");
+  if (mmHeadAvatar) mmHeadAvatar.textContent = USUARIO.charAt(0).toUpperCase();
   const drawerName = document.getElementById("mobile-drawer-name");
   if (drawerName) drawerName.textContent = USUARIO;
   const topnavUser = document.getElementById("topnav-user");
@@ -8524,6 +8571,15 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   }
   const heroSub = $("mm-hero-sub");
   if (heroSub) heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
+  // Card "Te queda para gastar" (mm-hero, debajo del header MP-style) — mismo valor,
+  // ids propios (*-legacy) para no duplicar id con el header nuevo (Tarea 3).
+  const heroAmtLegacy = $("mm-hero-amount-legacy");
+  if (heroAmtLegacy) {
+    heroAmtLegacy.textContent = (saldoReal < 0 ? "−" : "") + fmt(Math.abs(saldoReal));
+    heroAmtLegacy.style.color = saldoReal < 0 ? "var(--red)" : "var(--green)";
+  }
+  const heroSubLegacy = $("mm-hero-sub-legacy");
+  if (heroSubLegacy) heroSubLegacy.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
 
   const hoy = new Date();
   const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
@@ -9578,6 +9634,26 @@ function toggleDesglose() {
   el.style.display = visible ? "none" : "";
   btn.textContent  = visible ? "Ver desglose ▾" : "Ocultar desglose ▴";
   try { localStorage.setItem(USUARIO + "_disclosure_mimes", visible ? "0" : "1"); } catch(e) {}
+}
+
+function toggleBalanceOculto() {
+  const el = document.getElementById("mm-hero-amount");
+  const icon = document.getElementById("mm-balance-eye-icon");
+  const key = USUARIO + "_mm_balance_oculto";
+  const oculto = el.dataset.oculto === "1";
+  if (oculto) {
+    el.textContent = el.dataset.valorReal || el.textContent;
+    el.dataset.oculto = "0";
+    localStorage.setItem(key, "0");
+    icon?.setAttribute("data-lucide", "eye");
+  } else {
+    el.dataset.valorReal = el.textContent;
+    el.textContent = "•••••";
+    el.dataset.oculto = "1";
+    localStorage.setItem(key, "1");
+    icon?.setAttribute("data-lucide", "eye-off");
+  }
+  if (typeof lucide !== "undefined") lucide.createIcons();
 }
 
 // ─── TU MES EN NÚMEROS (cierre de mes) ────────────────────────
