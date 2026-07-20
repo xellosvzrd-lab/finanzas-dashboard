@@ -3423,10 +3423,7 @@
 
           <!-- Hero: Lo que te queda -->
           <div class="mm-hero">
-            <div class="mm-hero-orb"></div>
-            <div class="mm-hero-eyebrow">💸 Te queda para gastar</div>
-            <div class="mm-hero-amount num" id="mm-hero-amount-legacy">$0</div>
-            <div class="mm-hero-sub" id="mm-hero-sub-legacy">de tu sueldo, hasta fin de mes</div>
+            <div class="mm-hero-eyebrow">Detalle del mes</div>
             <div class="mm-hero-stats">
               <div class="mm-hero-stat">
                 <div class="mm-hero-stat-label">Por día</div>
@@ -8566,17 +8563,11 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   const $ = id => document.getElementById(id);
   const heroAmt = $("mm-hero-amount");
   const heroSub = $("mm-hero-sub");
-  const heroAmtLegacy = $("mm-hero-amount-legacy");
-  const heroSubLegacy = $("mm-hero-sub-legacy");
   const saldoTxt = (saldoReal < 0 ? "−" : "") + fmt(Math.abs(saldoReal));
   const saldoColor = saldoReal < 0 ? "var(--red)" : "var(--green)";
   const subTxt = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
   if (heroAmt) { heroAmt.dataset.valorReal = saldoTxt; heroAmt.style.color = saldoColor; }
   if (heroSub) heroSub.textContent = subTxt;
-  // Card "Te queda para gastar" (mm-hero, debajo del header MP-style) — mismo valor,
-  // ids propios (*-legacy) para no duplicar id con el header nuevo (Tarea 3).
-  if (heroAmtLegacy) { heroAmtLegacy.dataset.valorReal = saldoTxt; heroAmtLegacy.style.color = saldoColor; }
-  if (heroSubLegacy) heroSubLegacy.textContent = subTxt;
   _aplicarBalanceOculto();
 
   const hoy = new Date();
@@ -9636,7 +9627,7 @@ function toggleDesglose() {
 
 function _aplicarBalanceOculto() {
   const oculto = localStorage.getItem(USUARIO + "_mm_balance_oculto") === "1";
-  ["mm-hero-amount", "mm-hero-amount-legacy"].forEach(id => {
+  ["mm-hero-amount"].forEach(id => {
     const el = document.getElementById(id);
     if (!el || !el.dataset.valorReal) return;
     el.textContent = oculto ? "•••••" : el.dataset.valorReal;
