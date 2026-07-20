@@ -1,6 +1,7 @@
 /* ───────────────────────────────────────────────────────────
-   Finanzas — sistema visual
-   Grotesca cálida · acento violeta · dark + light
+   Finanzas — sistema visual v2 "Warm"
+   Grotesca cálida · acento terracota/ámbar · claro (primario) + oscuro
+   Semánticos repensados: musgo (ingreso) · óxido (gasto) · añil (info) · salvia (ahorro)
    ─────────────────────────────────────────────────────────── */
 
 @import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
@@ -17,62 +18,62 @@
   --r-xl: 34px;
   --r-pill: 999px;
 
-  /* semantic accents — same L/C, varying hue (oklch) */
-  --pos:   oklch(0.74 0.15 152);   /* ingresos / verde */
-  --neg:   oklch(0.70 0.16 25);    /* gastos / coral   */
-  --info:  oklch(0.70 0.15 252);   /* azul             */
-  --save:  oklch(0.74 0.13 195);   /* ahorro / teal    */
-  --warn:  oklch(0.78 0.14 75);    /* amarillo cálido  */
+  /* semantic accents — repensados en familia cálida, misma L/C, hue distinto */
+  --pos:   oklch(0.62 0.11 135);   /* ingresos / musgo   */
+  --neg:   oklch(0.55 0.17 22);    /* gastos / óxido     */
+  --info:  oklch(0.60 0.09 240);   /* info / añil apagado */
+  --save:  oklch(0.66 0.09 170);   /* ahorro / salvia    */
+  --warn:  oklch(0.75 0.13 85);    /* alerta / mostaza   */
 }
 
-/* ── DARK (default) ───────────────────────────────────────── */
-:root[data-theme='dark'] {
-  --bg:        #141019;
-  --bg-grad:   radial-gradient(120% 80% at 80% -10%, #251c39 0%, #141019 55%);
-  --elev:      #1b1626;
-  --surface:   #221c30;
-  --surface-2: #2b2440;
-  --surface-3: #352c4d;
-  --line:        rgba(255,255,255,0.08);
-  --line-strong: rgba(255,255,255,0.15);
-  --text:      #f4f1fa;
-  --text-dim:  #b3aac6;
-  --text-faint:#7e7595;
-  --brand:     oklch(0.74 0.15 300);
-  --brand-2:   oklch(0.78 0.16 330);
-  --brand-ink: #fff;
-  --brand-soft: color-mix(in oklab, var(--brand) 16%, var(--surface));
-  --pos-soft:  color-mix(in oklab, var(--pos) 16%, var(--surface));
-  --neg-soft:  color-mix(in oklab, var(--neg) 16%, var(--surface));
-  --shadow-card: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 30px rgba(0,0,0,.45);
-  --shadow-pop:  0 18px 50px rgba(0,0,0,.55);
-}
-
-/* ── LIGHT ────────────────────────────────────────────────── */
+/* ── LIGHT (default / primario) ──────────────────────────────── */
 :root[data-theme='light'] {
-  --bg:        #f4f1fb;
-  --bg-grad:   radial-gradient(120% 80% at 80% -10%, #efe7ff 0%, #f4f1fb 55%);
-  --elev:      #ffffff;
-  --surface:   #ffffff;
-  --surface-2: #f3eefb;
-  --surface-3: #ece4f8;
-  --line:        rgba(28,18,48,0.09);
-  --line-strong: rgba(28,18,48,0.16);
-  --text:      #1a1426;
-  --text-dim:  #5b5370;
-  --text-faint:#8c84a0;
-  --brand:     oklch(0.58 0.18 300);
-  --brand-2:   oklch(0.60 0.19 330);
+  --bg:        #f7f1e8;
+  --bg-grad:   radial-gradient(120% 80% at 80% -10%, #fbe9d7 0%, #f7f1e8 55%);
+  --elev:      #fffdfa;
+  --surface:   #fffdfa;
+  --surface-2: #f3e9dc;
+  --surface-3: #ecdec9;
+  --line:        rgba(58,38,22,0.10);
+  --line-strong: rgba(58,38,22,0.18);
+  --text:      #241a12;
+  --text-dim:  #6b5a48;
+  --text-faint:#9c8770;
+  --brand:     oklch(0.66 0.14 45);
+  --brand-2:   oklch(0.72 0.14 65);
   --brand-ink: #fff;
-  --brand-soft: color-mix(in oklab, var(--brand) 12%, #fff);
-  --pos:   oklch(0.58 0.15 152);
-  --neg:   oklch(0.56 0.18 25);
-  --info:  oklch(0.55 0.16 252);
-  --save:  oklch(0.56 0.12 195);
+  --brand-soft: color-mix(in oklab, var(--brand) 14%, #fff);
+  --pos:   oklch(0.55 0.12 135);
+  --neg:   oklch(0.52 0.18 22);
+  --info:  oklch(0.53 0.09 240);
+  --save:  oklch(0.58 0.10 170);
   --pos-soft:  color-mix(in oklab, var(--pos) 12%, #fff);
   --neg-soft:  color-mix(in oklab, var(--neg) 12%, #fff);
-  --shadow-card: 0 1px 2px rgba(28,18,48,.05), 0 10px 30px rgba(60,40,110,.08);
-  --shadow-pop:  0 18px 50px rgba(60,40,110,.18);
+  --shadow-card: 0 1px 2px rgba(58,38,22,.05), 0 10px 30px rgba(120,70,30,.08);
+  --shadow-pop:  0 18px 50px rgba(120,70,30,.16);
+}
+
+/* ── DARK ─────────────────────────────────────────────────────── */
+:root[data-theme='dark'] {
+  --bg:        #17110d;
+  --bg-grad:   radial-gradient(120% 80% at 80% -10%, #2c1d12 0%, #17110d 55%);
+  --elev:      #201812;
+  --surface:   #291f17;
+  --surface-2: #33281e;
+  --surface-3: #3f3226;
+  --line:        rgba(255,239,222,0.08);
+  --line-strong: rgba(255,239,222,0.15);
+  --text:      #faf3ea;
+  --text-dim:  #c9b6a2;
+  --text-faint:#93816e;
+  --brand:     oklch(0.72 0.15 48);
+  --brand-2:   oklch(0.78 0.15 68);
+  --brand-ink: #1c1006;
+  --brand-soft: color-mix(in oklab, var(--brand) 18%, var(--surface));
+  --pos-soft:  color-mix(in oklab, var(--pos) 18%, var(--surface));
+  --neg-soft:  color-mix(in oklab, var(--neg) 18%, var(--surface));
+  --shadow-card: 0 1px 0 rgba(255,239,222,.04) inset, 0 8px 30px rgba(0,0,0,.45);
+  --shadow-pop:  0 18px 50px rgba(0,0,0,.55);
 }
 
 /* ── screen shell ─────────────────────────────────────────── */
@@ -128,5 +129,3 @@
 .btn-ghost:hover { background: var(--surface-3); }
 
 .divider { height: 1px; background: var(--line); border: 0; }
-
-/* scrollbars hidden inside artboards already handled by canvas */
