@@ -62,24 +62,28 @@
 
   /* ─── TEMA ÚNICO — Liquid Glass índigo (unifica Daniel/Ama) ── */
   :root[data-theme='dark'] {
-    --bg:          #10121f;
-    --bg-grad:     radial-gradient(120% 80% at 80% -10%, #1f2247 0%, #10121f 55%);
-    --elev:        #1b1d33;
-    --surface:     rgba(122,116,232,0.14);
-    --surface-2:   rgba(122,116,232,0.20);
-    --surface-3:   rgba(122,116,232,0.28);
-    --line:        rgba(255,255,255,0.15);
-    --line-strong: rgba(255,255,255,0.22);
-    --text:        #f4f1fa;
-    --text-dim:    #b3aac6;
-    --text-faint:  #7e7595;
-    --brand:       oklch(0.72 0.17 270);
-    --brand-2:     oklch(0.76 0.18 285);
-    --brand-ink:   #fff;
-    --brand-soft:  color-mix(in oklab, var(--brand) 16%, var(--surface));
-    --pos-soft:    color-mix(in oklab, var(--pos)   16%, var(--surface));
-    --neg-soft:    color-mix(in oklab, var(--neg)   16%, var(--surface));
-    --shadow-card: 0 8px 26px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.22);
+    --bg:          #0e1512;
+    --bg-grad:     radial-gradient(120% 80% at 80% -10%, #17251d 0%, #0e1512 55%);
+    --elev:        #131c16;
+    --surface:     #18241d;
+    --surface-2:   #1f2e25;
+    --surface-3:   #28392e;
+    --line:        rgba(226,244,233,0.08);
+    --line-strong: rgba(226,244,233,0.15);
+    --text:        #ecf5ef;
+    --text-dim:    #a8bfb1;
+    --text-faint:  #71887a;
+    --brand:       oklch(0.66 0.13 160);
+    --brand-2:     oklch(0.75 0.14 140);
+    --brand-ink:   #0a1710;
+    --brand-soft:  color-mix(in oklab, var(--brand) 18%, var(--surface));
+    --pos:         oklch(0.68 0.14 120);
+    --neg:         oklch(0.62 0.17 25);
+    --info:        oklch(0.62 0.09 245);
+    --save:        oklch(0.66 0.09 195);
+    --pos-soft:    color-mix(in oklab, var(--pos) 18%, var(--surface));
+    --neg-soft:    color-mix(in oklab, var(--neg) 18%, var(--surface));
+    --shadow-card: 0 1px 0 rgba(226,244,233,.04) inset, 0 8px 30px rgba(0,0,0,.45);
     --shadow-pop:  0 18px 50px rgba(0,0,0,.55);
 
     /* legacy aliases — componentes existentes sin cambios */
@@ -102,47 +106,46 @@
     --text-muted:  var(--text-dim);
     --radius:      var(--r-md);
     --shadow:      var(--shadow-card);
-    --glass:       rgba(255,255,255,0.07);
-    --glass-border:rgba(255,255,255,0.15);
+    --glass:       rgba(226,244,233,0.07);
+    --glass-border:rgba(226,244,233,0.15);
     --card-blur:   16px;
-    --modal-bg:    rgba(30,26,52,0.92);
+    --modal-bg:    rgba(19,28,22,0.92);
 
     /* RGB splits para rgba() */
-    --accent-rgb:     122, 116, 232;
-    --green-rgb:       78, 196, 118;
-    --red-rgb:        229, 110,  74;
-    --yellow-rgb:     210, 188,  58;
-    --text-rgb:       244, 241, 250;
-    --text-muted-rgb: 179, 170, 198;
-    --card-rgb:       122, 116, 232;
+    --accent-rgb:      95, 179, 138;
+    --green-rgb:       130, 209, 149;
+    --red-rgb:         214, 108,  87;
+    --yellow-rgb:      210, 188,  58;
+    --text-rgb:        236, 245, 239;
+    --text-muted-rgb:  168, 191, 177;
+    --card-rgb:         24,  36,  29;
   }
 
   /* ─── TEMA ÚNICO (alias) — el toggle Daniel/Ama ya no cambia look ── */
   :root[data-theme='light'] {
-    --bg:          #f5f1fb;
-    --bg-grad:     radial-gradient(120% 80% at 80% -10%, #e4defb 0%, #f5f1fb 55%);
-    --elev:        #ffffff;
-    --surface:     rgba(122,116,232,0.16);
-    --surface-2:   rgba(122,116,232,0.22);
-    --surface-3:   rgba(122,116,232,0.30);
-    --line:        rgba(60,50,140,0.14);
-    --line-strong: rgba(60,50,140,0.22);
-    --text:        #241f47;
-    --text-dim:    #4a4570;
-    --text-faint:  #7f76a0;
-    --brand:       oklch(0.58 0.18 270);
-    --brand-2:     oklch(0.62 0.19 285);
+    --bg:          #f1f6f2;
+    --bg-grad:     radial-gradient(120% 80% at 80% -10%, #e4f1e7 0%, #f1f6f2 55%);
+    --elev:        #fafdfb;
+    --surface:     #fafdfb;
+    --surface-2:   #e9f1ea;
+    --surface-3:   #dce9de;
+    --line:        rgba(20,32,26,0.10);
+    --line-strong: rgba(20,32,26,0.18);
+    --text:        #14201a;
+    --text-dim:    #4c5f54;
+    --text-faint:  #7c8f83;
+    --brand:       oklch(0.50 0.13 165);
+    --brand-2:     oklch(0.63 0.14 145);
     --brand-ink:   #fff;
     --brand-soft:  color-mix(in oklab, var(--brand) 12%, #fff);
-    --pos:         oklch(0.58 0.15 152);
-    --neg:         oklch(0.56 0.18 25);
-    --info:        oklch(0.55 0.16 252);
-    --save:        oklch(0.56 0.12 195);
-    --warn:        oklch(0.60 0.14 75);
+    --pos:         oklch(0.58 0.14 120);
+    --neg:         oklch(0.52 0.18 25);
+    --info:        oklch(0.53 0.09 245);
+    --save:        oklch(0.56 0.09 195);
     --pos-soft:    color-mix(in oklab, var(--pos) 12%, #fff);
     --neg-soft:    color-mix(in oklab, var(--neg) 12%, #fff);
-    --shadow-card: 0 8px 22px rgba(90,70,180,.12), inset 0 1px 0 rgba(255,255,255,.5);
-    --shadow-pop:  0 18px 50px rgba(90,70,180,.22);
+    --shadow-card: 0 1px 2px rgba(20,40,28,.05), 0 10px 30px rgba(20,70,45,.08);
+    --shadow-pop:  0 18px 50px rgba(20,70,45,.16);
 
     --bg2:         var(--surface-2);
     --bg3:         var(--surface-3);
@@ -153,7 +156,7 @@
     --accent-dim:  var(--brand-soft);
     --accent-glow: color-mix(in oklab, var(--brand) 24%, transparent);
     --white:       var(--brand-ink);
-    --overlay:     rgba(36,31,71,0.35);
+    --overlay:     rgba(20,32,26,0.35);
     --green:       var(--pos);
     --green-dim:   var(--pos-soft);
     --red:         var(--neg);
@@ -163,20 +166,47 @@
     --text-muted:  var(--text-dim);
     --radius:      var(--r-md);
     --shadow:      var(--shadow-card);
-    --glass:       rgba(60,50,140,0.06);
-    --glass-border:rgba(60,50,140,0.14);
+    --glass:       rgba(20,32,26,0.06);
+    --glass-border:rgba(20,32,26,0.14);
     --card-blur:   16px;
-    --modal-bg:    rgba(250,248,255,0.94);
+    --modal-bg:    rgba(250,253,251,0.94);
 
-    --accent-rgb:     92,  77, 214;
-    --green-rgb:       63, 159,  95;
-    --red-rgb:        200,  80,  58;
-    --yellow-rgb:     168, 134,  42;
-    --text-rgb:        36,  31,  71;
-    --text-muted-rgb:  74,  69, 112;
-    --card-rgb:       122, 116, 232;
+    --accent-rgb:      64, 128,  94;
+    --green-rgb:       102, 166, 100;
+    --red-rgb:         190,  76,  56;
+    --yellow-rgb:      168, 134,  42;
+    --text-rgb:         20,  32,  26;
+    --text-muted-rgb:   76,  95,  84;
+    --card-rgb:        250, 253, 251;
   }
 
+  :root[data-theme='light'] .glassui {
+    --g-text:#14201a; --g-text-2:rgba(20,32,26,0.64); --g-text-3:rgba(20,32,26,0.44);
+    --g-mat:rgba(250,253,251,0.55); --g-mat-strong:rgba(250,253,251,0.76); --g-mat-deep:rgba(250,253,251,0.32);
+    --g-border:rgba(246,252,248,0.8); --g-hair:rgba(20,32,26,0.07);
+    --g-shine:inset 1.2px 1.2px 0 rgba(255,255,255,0.92), inset -1px -1px 1px rgba(255,255,255,0.5);
+    --g-shadow:0 2px 10px rgba(20,70,45,0.08), 0 14px 40px rgba(20,70,45,0.14);
+  }
+  :root[data-theme='dark'] .glassui {
+    --g-text:#ecf5ef; --g-text-2:rgba(236,245,239,0.68); --g-text-3:rgba(236,245,239,0.42);
+    --g-mat:rgba(226,244,233,0.14); --g-mat-strong:rgba(226,244,233,0.22); --g-mat-deep:rgba(226,244,233,0.08);
+    --g-border:rgba(226,244,233,0.2); --g-hair:rgba(226,244,233,0.1);
+    --g-shine:inset 1.2px 1.2px 0 rgba(226,244,233,0.22), inset -1px -1px 1px rgba(226,244,233,0.06);
+    --g-shadow:0 2px 12px rgba(0,0,0,0.35), 0 18px 50px rgba(0,0,0,0.5);
+  }
+  .glassui { color: var(--g-text); }
+
+  /* MP-style header/quick-action primitives (usados por headers de Mi mes, Transacciones, Compartidos) */
+  .mp-head { position: relative; color: #fff; background: linear-gradient(150deg, oklch(0.42 0.12 172), oklch(0.55 0.135 148)); }
+  :root[data-theme='dark'] .mp-head { background: linear-gradient(150deg, oklch(0.34 0.10 172), oklch(0.45 0.11 150)); }
+  .mp-head::after { content:''; position:absolute; inset:0; background:radial-gradient(120% 90% at 85% -20%, rgba(255,255,255,0.16), transparent 60%); pointer-events:none; border-radius:inherit; }
+  .mp-head > * { position:relative; z-index:1; }
+  .mp-hbtn { width:36px; height:36px; border-radius:999px; background:rgba(255,255,255,0.16); display:flex; align-items:center; justify-content:center; color:#fff; border:0.5px solid rgba(255,255,255,0.28); flex:none; }
+  .mp-avatar { width:38px; height:38px; border-radius:999px; background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; flex:none; }
+  .mp-wpill { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:5px 12px; background:rgba(255,255,255,0.16); border:0.5px solid rgba(255,255,255,0.25); font-size:12px; font-weight:600; color:#fff; white-space:nowrap; }
+  .mp-wbtn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:999px; padding:11px 20px; background:#fff; color:oklch(0.44 0.13 165); font-weight:700; font-size:14px; box-shadow:0 6px 18px rgba(8,40,25,0.28); }
+  .mp-action { display:flex; flex-direction:column; align-items:center; gap:7px; font-size:11.5px; font-weight:600; color:var(--text-dim); text-align:center; background:none; border:none; cursor:pointer; font-family:inherit; }
+  .mp-action .ico { width:52px; height:52px; border-radius:999px; display:flex; align-items:center; justify-content:center; color:var(--brand); background:color-mix(in oklab, var(--brand) 11%, var(--surface)); border:0.5px solid var(--line); box-shadow: var(--shadow-card); }
 
   /* ─── CARD PRIMITIVE ────────────────────────────────────── */
   .card {
@@ -4240,30 +4270,30 @@ let chartEvolCombo = null;
 
 // ─── COLORES DE GRÁFICOS (tokens → constantes JS) ────────────
 const _C = {
-  muted:      "#b3aac6",   // var(--text-dim)
-  grid:       "rgba(255,255,255,0.08)",
-  accent:     "#7a74e8",   // var(--accent) índigo
-  green:      "#4ec476",   // var(--green)
-  greenA75:   "rgba(78,196,118,.75)",
-  greenA65:   "rgba(78,196,118,.65)",
-  greenA90:   "rgba(78,196,118,.9)",
-  red:        "#e56e4a",   // var(--red)
-  redA75:     "rgba(229,110,74,.75)",
-  redA65:     "rgba(229,110,74,.65)",
-  redA90:     "rgba(229,110,74,.9)",
-  accentA13:  "rgba(122,116,232,.16)",
-  greenChart: "rgba(78,196,118,0.7)",
-  redChart:   "rgba(229,110,74,0.7)",
+  muted:      "#a8bfb1",   // var(--text-dim) dark
+  grid:       "rgba(226,244,233,0.08)",
+  accent:     "#5fb38a",   // var(--accent) verde — oklch(0.66 0.13 160) approx
+  green:      "#82d195",   // var(--green) — oklch(0.68 0.14 120) approx
+  greenA75:   "rgba(130,209,149,.75)",
+  greenA65:   "rgba(130,209,149,.65)",
+  greenA90:   "rgba(130,209,149,.9)",
+  red:        "#d66c57",   // var(--red) — oklch(0.62 0.17 25) approx
+  redA75:     "rgba(214,108,87,.75)",
+  redA65:     "rgba(214,108,87,.65)",
+  redA90:     "rgba(214,108,87,.9)",
+  accentA13:  "rgba(95,179,138,.16)",
+  greenChart: "rgba(130,209,149,0.7)",
+  redChart:   "rgba(214,108,87,0.7)",
 };
 
 // ─── PALETA DE COLORES ────────────────────────────────────────
 const PALETTE = [
-  "#7A74E8",  // brand   — índigo
+  "#5FB38A",  // brand   — verde bosque (era índigo #7A74E8)
   "#6680DC",  // info    — azul índigo
   "#D97060",  // neg     — coral
   "#58C0B0",  // save    — teal
   "#C8BC45",  // warn    — ámbar
-  "#DE7EC5",  // brand-2 — rosa
+  "#82D195",  // brand-2 — verde claro (era rosa #DE7EC5)
   "#5ABB78",  // pos     — verde
   "#E09060",  // naranja cálido
   "#7BA8D4",  // celeste
