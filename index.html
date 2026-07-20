@@ -1538,7 +1538,12 @@
   }
   @media (min-width: 860px) { .mm-header.mp-head { border-radius: 24px; margin: 0 0 -44px; padding: 22px 26px 60px; } }
   .mm-head-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .mm-hero-eyebrow-mp { font-size: 12.5px; font-weight: 600; opacity: .85; margin-top: 14px; }
+  .mm-hero-eyebrow-mp { font-size: 12.5px; font-weight: 600; opacity: .85; margin-top: 14px; display: flex; align-items: center; gap: 6px; }
+  .mm-eye-inline {
+    background: none; border: none; padding: 2px; margin: 0; color: inherit; opacity: .85;
+    display: flex; align-items: center; cursor: pointer; min-width: 28px; min-height: 28px; justify-content: center;
+  }
+  .mm-eye-inline:hover { opacity: 1; }
   .mm-header.mp-head .mm-hero-amount { font-size: 42px; font-weight: 800; letter-spacing: -.03em; margin-top: 2px; }
   .mm-header.mp-head .mm-hero-sub { font-size: 12px; opacity: .8; }
   .mm-head-pills { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
@@ -1653,7 +1658,6 @@
 
   /* desktop-only Mi mes elements (hidden on mobile) */
   .mm-page-title  { display: none; font-size: 1.7rem; font-weight: 600; font-family: var(--font-display); letter-spacing: -.025em; color: var(--text); }
-  .mm-anotar-btn  { display: none; }
   .mm-hero-stat-3 { display: none; }
   .mm-row2        { display: none; }
   /* hero amount + glass stats: normal tabular-nums so period isn't narrow vs wide digits */
@@ -1665,7 +1669,6 @@
   @media (min-width: 860px) {
     .page-mimes { padding-top: 0; }
     .mm-page-title { display: block; margin-bottom: .2rem; }
-    .mm-anotar-btn { display: inline-flex; }
     .mm-header { padding: 0 0 18px; border-bottom: 1px solid var(--line); margin-bottom: 22px; align-items: flex-end; }
     .mm-greeting { font-size: .88rem; color: var(--text-dim); margin-bottom: 0; }
     .mm-bell { display: none; }
@@ -2084,10 +2087,6 @@
   }
   @media (min-width: 769px) and (max-width: 859px) {
     .bottom-nav { display: none; }
-    /* Sin FAB ni bottom-nav en esta banda (iPad portrait), .mm-anotar-btn
-       se adelanta desde los 860px habituales para no dejarla sin forma de
-       crear una transacción desde Mi mes. */
-    .mm-anotar-btn { display: inline-flex; }
   }
 
   /* ─── MI MES — DESGLOSE DEL SUELDO (desktop) ───────────────── */
@@ -2286,9 +2285,9 @@
 
   /* El botón flotante (FAB) se eliminó — era redundante con el "+" central
      del bottom-nav (.bn-cta) en mobile. En la banda tablet 769-859px, donde
-     el bottom-nav está oculto y el sidebar desktop todavía no aparece,
-     .mm-anotar-btn se adelanta a ese ancho (ver @media 769-859px más abajo)
-     para no dejar esa banda sin forma de crear una transacción. */
+     el bottom-nav está oculto y el sidebar desktop todavía no aparece, el
+     botón "Nueva" del grid de accesos rápidos (.mm-quick-grid, siempre
+     visible) cubre la creación de transacciones desde Mi mes. */
 
   /* ─── ACCESIBILIDAD: REDUCED MOTION ─────────────────────── */
   @media (prefers-reduced-motion: reduce) {
@@ -3364,6 +3363,9 @@
         <div class="mm-header mp-head glassui">
           <div class="mm-head-top">
             <div class="mp-avatar" id="mm-head-avatar">D</div>
+            <div style="flex:1;min-width:0">
+              <div class="mm-greeting" id="mm-greeting">Hola 👋</div>
+            </div>
             <div class="mm-month-pill">
               <button type="button" onclick="cambiarMesPresupuesto(-1)" aria-label="Mes anterior">‹</button>
               <span id="mm-mes-label"></span>
@@ -3373,28 +3375,18 @@
               <select id="pres-mes" onchange="cargarPresupuesto()"></select>
               <select id="pres-anio" onchange="cargarPresupuesto()"></select>
             </div>
-            <button class="mp-hbtn" id="mm-balance-toggle" onclick="toggleBalanceOculto()" aria-label="Mostrar/ocultar saldo" title="Mostrar/ocultar saldo">
-              <i data-lucide="eye" width="17" height="17" id="mm-balance-eye-icon"></i>
+          </div>
+          <div class="mm-hero-eyebrow-mp" id="mm-hero-eyebrow-mp">
+            Saldo de <span id="mm-hero-mes-label"></span>
+            <button class="mm-eye-inline" id="mm-balance-toggle" onclick="toggleBalanceOculto()" aria-label="Mostrar/ocultar saldo" title="Mostrar/ocultar saldo">
+              <i data-lucide="eye" width="15" height="15" id="mm-balance-eye-icon"></i>
             </button>
           </div>
-          <div class="mm-greeting" id="mm-greeting">Hola 👋</div>
-          <div class="mm-hero-eyebrow-mp" id="mm-hero-eyebrow-mp">Saldo de <span id="mm-hero-mes-label"></span></div>
           <div class="mm-hero-amount num" id="mm-hero-amount">$0</div>
           <div class="mm-hero-sub" id="mm-hero-sub">de tu sueldo, hasta fin de mes</div>
           <div class="mm-head-pills">
             <span class="mp-wpill" id="mm-pill-ingresos">↑ Ingresos —</span>
             <span class="mp-wpill" id="mm-pill-gastos">↓ Gastos —</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
-            <button class="mp-wbtn mm-anotar-btn" onclick="navegarA('nueva')">+ Anotar</button>
-            <button class="mp-hbtn" onclick="sugerirPresupuestoDesdeHistorial()"
-                    title="Sugerir presupuesto (promedio 3 meses)" aria-label="Sugerir presupuesto">
-              <i data-lucide="bar-chart-2" width="16" height="16"></i>
-            </button>
-            <button class="mp-hbtn" onclick="copiarPresupuestoMesAnterior()"
-                    title="Copiar presupuesto del mes anterior" aria-label="Copiar presupuesto del mes anterior">
-              <i data-lucide="copy" width="16" height="16"></i>
-            </button>
           </div>
         </div>
 
@@ -3605,7 +3597,17 @@
         <!-- Heatmap calendario -->
 
         <!-- Editar presupuesto -->
-        <div style="display:flex;justify-content:flex-end;margin:.75rem 0 .5rem">
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:.75rem 0 .5rem">
+          <button class="mp-hbtn" onclick="sugerirPresupuestoDesdeHistorial()"
+                  title="Sugerir presupuesto (promedio 3 meses)" aria-label="Sugerir presupuesto"
+                  style="width:32px;height:32px;background:var(--surface);border:1px solid var(--line);color:var(--text)">
+            <i data-lucide="bar-chart-2" width="15" height="15"></i>
+          </button>
+          <button class="mp-hbtn" onclick="copiarPresupuestoMesAnterior()"
+                  title="Copiar presupuesto del mes anterior" aria-label="Copiar presupuesto del mes anterior"
+                  style="width:32px;height:32px;background:var(--surface);border:1px solid var(--line);color:var(--text)">
+            <i data-lucide="copy" width="15" height="15"></i>
+          </button>
           <button id="btn-toggle-desglose" class="config-btn" onclick="toggleDesglose()" style="font-size:.83rem;">
             Editar presupuesto ▾
           </button>
