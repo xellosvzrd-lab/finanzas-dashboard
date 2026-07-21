@@ -196,11 +196,20 @@
     letter-spacing: -.01em;
   }
 
+  /* Títulos reales (título de página, encabezados de sección) van en la
+     serif itálica del mockup — ver docs/plans/2026-07-21-...-plan.md (U1):
+     "serif itálica para títulos y acentos destacados". Los valores
+     numéricos (kpi-value, saldos, montos) quedan en la sans de
+     --font-display, el mockup nunca usa serif para números. */
   h1, h2, h3,
-  .kpi-value, .kpi-label,
   .topnav-brand,
   .page-header h1, .setup-card h1,
-  .chart-title, .comp-title, .pres-title,
+  .chart-title, .comp-title, .pres-title {
+    font-family: var(--font-serif);
+    text-rendering: optimizeLegibility;
+  }
+
+  .kpi-value, .kpi-label,
   #sub-neto, .comp-balance-value,
   .donut-center-val, .donut-center-sub {
     font-family: var(--font-display);
@@ -310,15 +319,6 @@
     justify-content: space-between;
     margin-bottom: 2.4rem;
     padding-bottom: 1.2rem;
-    border-bottom: none;
-    position: relative;
-  }
-  .page-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(to right, var(--accent), transparent);
-    opacity: 0.35;
   }
   .page-header-left { display: flex; flex-direction: column; }
   .page-eyebrow {
@@ -1670,7 +1670,7 @@
   .mm-cat-bar-fill { height: 100%; border-radius: 999px; transition: width .4s var(--ease-out); }
 
   /* desktop-only Mi mes elements (hidden on mobile) */
-  .mm-page-title  { display: none; font-size: 1.7rem; font-weight: 600; font-family: var(--font-display); letter-spacing: -.025em; color: var(--text); }
+  .mm-page-title  { display: none; font-size: 1.7rem; font-weight: 600; font-family: var(--font-serif); letter-spacing: -.025em; color: var(--text); }
   .mm-anotar-btn  { display: none; }
   .mm-hero-stat-3 { display: none; }
   .mm-row2        { display: none; }
