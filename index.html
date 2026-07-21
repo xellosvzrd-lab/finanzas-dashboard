@@ -2999,14 +2999,34 @@
           <button class="btn-rafaga" onclick="abrirRafaga()" title="Cargar varias transacciones de una vez">Carga múltiple</button>
         </div>
         <div class="form-card">
-          <!-- Fila 1: Tipo + Moneda lado a lado -->
+          <!-- Fila 1: Tipo (ancho completo) — mismo orden que el modal de
+               desktop: toggle, después Fecha/Categoría. -->
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group full">
               <label id="lbl-tipo">Tipo</label>
               <div class="tipo-toggle" role="group" aria-labelledby="lbl-tipo">
                 <button class="tipo-btn active-expense" id="btn-gasto"  onclick="setTipo('Gasto')">Gasto</button>
                 <button class="tipo-btn"                id="btn-ingreso" onclick="setTipo('Ingreso')">Ingreso</button>
               </div>
+            </div>
+          </div>
+          <!-- Fila 2: Fecha + Categoría -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-fecha">Fecha</label>
+              <input type="date" id="f-fecha">
+            </div>
+            <div class="form-group">
+              <label for="f-categoria">Categoría</label>
+              <select id="f-categoria"></select>
+            </div>
+          </div>
+          <!-- Fila 3: Monto + Moneda -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-monto" id="f-monto-label">Monto (ARS $)</label>
+              <input type="text" inputmode="decimal" id="f-monto" placeholder="0,00"
+                     oninput="formatearMiles(this); if(typeof _modoCuotas !== 'undefined' && _modoCuotas && !_montoCuotaEditado) _recalcularMontoCuota()">
             </div>
             <div class="form-group">
               <label id="lbl-moneda">Moneda</label>
@@ -3016,30 +3036,15 @@
               </div>
             </div>
           </div>
-          <!-- Fila 2: Fecha + Monto -->
+          <!-- Fila 4: Responsabilidad (ancho completo) -->
           <div class="form-row">
-            <div class="form-group">
-              <label for="f-fecha">Fecha</label>
-              <input type="date" id="f-fecha">
-            </div>
-            <div class="form-group">
-              <label for="f-monto" id="f-monto-label">Monto (ARS $)</label>
-              <input type="text" inputmode="decimal" id="f-monto" placeholder="0,00"
-                     oninput="formatearMiles(this); if(typeof _modoCuotas !== 'undefined' && _modoCuotas && !_montoCuotaEditado) _recalcularMontoCuota()">
-            </div>
-          </div>
-          <!-- Fila 3: Categoría + Responsabilidad -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="f-categoria">Categoría</label>
-              <select id="f-categoria"></select>
-            </div>
-            <div class="form-group">
+            <div class="form-group full">
               <label for="f-responsabilidad">¿Cómo se divide?</label>
               <select id="f-responsabilidad"></select>
             </div>
           </div>
-          <!-- Fila 4: Fuente + Mes de liquidación (TC) -->
+          <!-- Fila 5: Fuente + Mes de liquidación (TC) — van juntas a
+               propósito, mes-liq depende de qué fuente se elige. -->
           <div class="form-row">
             <div class="form-group">
               <label for="f-fuente">Fuente / Medio de pago</label>
