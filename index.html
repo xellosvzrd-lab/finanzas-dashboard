@@ -1710,8 +1710,10 @@
     .mm-cat-row:first-child { border-top: 1px solid var(--line); }
   }
 
+  /* La lista de transacciones (antes solo mobile) ahora es el único formato,
+     en todos los anchos — reemplazó la tabla de columnas fijas. */
+  .trans-mobile-list { display: flex; flex-direction: column; gap: 8px; }
   /* elementos mobile-only: ocultos por defecto, activados en media query */
-  .trans-mobile-list { display: none; }
   .trans-chip         { display: none; }
 
   /* ─── MOBILE (≤ 768px) ─────────────────────────────────────── */
@@ -1777,12 +1779,8 @@
     /* Presupuesto: ocultar barra de progreso visual en móvil */
     .pres-bar-bg { display: none; }
 
-    /* Transacciones: ocultar tabla y filtros complejos; mostrar list-view */
-    /* La tabla completa (y su chart-card contenedor, ahora que el resumen
-       vive afuera en .tabla-subtotal) queda oculta en mobile — usa
-       .trans-mobile-list en su lugar. */
-    #page-transacciones .trans-desktop-grid > .chart-card { display: none; }
-    .trans-mobile-list { display: flex; }
+    /* Transacciones: filtros complejos ocultos en mobile (la lista de filas
+       ya es el formato universal, ver arriba). */
     .trans-chip         { display: inline-flex; }
     /* Categoría queda disponible en mobile como chip de filtro rápido (ver
        docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md) — tipo
@@ -2986,42 +2984,24 @@
           <button class="trans-chip"    id="chip-comp"    onclick="_setChipFiltro('Compartido')">Compartido</button>
         </div>
 
-        <!-- Desktop (≥860px): grid de 2 columnas, tabla + resumen lateral
-             (mismo patrón que la columna lateral de Mi mes). En mobile
-             .trans-desktop-grid no es grid (default block) y el resumen
-             sigue apareciendo antes que .trans-mobile-list en el DOM, así
-             que el orden visual mobile no cambia — ver comentario histórico
-             más abajo sobre por qué el resumen va primero ahí. -->
+        <!-- Desktop (≥860px): grid de 2 columnas, lista + resumen lateral
+             (mismo patrón que la columna lateral de Mi mes). La tabla con
+             columnas fijas y orden por header se sacó — pedido explícito de
+             Daniel tras revisar: en el mockup cada fila es una card fluida
+             (badge + categoría/descripción, fecha+responsabilidad, monto),
+             no una tabla rígida. Se reusa la misma lista que ya se usaba en
+             mobile (#trans-mobile-list / _renderMobileList()), ahora visible
+             en todos los anchos — ver CSS. El orden sigue siendo por fecha
+             (el más reciente primero), ya no se puede cambiar clickeando un
+             header porque no hay headers. -->
         <div class="trans-desktop-grid">
-          <div class="chart-card" style="padding:0; overflow:hidden">
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th class="sortable sort-active" id="sort-th-fecha" onclick="setSortCol('fecha')">Fecha <span class="sort-ind" id="sort-ind-fecha">▼</span></th>
-                    <th class="col-hide-xs sortable" id="sort-th-tipo" onclick="setSortCol('tipo')">Tipo <span class="sort-ind" id="sort-ind-tipo"></span></th>
-                    <th class="sortable" id="sort-th-categoria" onclick="setSortCol('categoria')">Categoría <span class="sort-ind" id="sort-ind-categoria"></span></th>
-                    <th class="col-hide-sm">Fuente</th>
-                    <th class="col-hide-sm">¿De quién es?</th>
-                    <th class="col-hide-sm">Descripción</th>
-                    <th class="sortable" id="sort-th-monto" onclick="setSortCol('monto')" style="text-align:right">Monto <span class="sort-ind" id="sort-ind-monto"></span></th>
-                    <th class="col-hide-xs">Moneda</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="tabla-body">
-                  <tr><td colspan="9"><div class="loading"><div class="spinner"></div> Cargando...</div></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <div class="trans-mobile-list" id="trans-mobile-list"></div>
 
-          <!-- El subtotal (#tabla-subtotal) va antes que la lista mobile a
-               propósito: con muchas transacciones, el resumen quedaba al
-               fondo de toda la lista — el usuario tenía que scrollear todo
-               para verlo. En desktop es la columna lateral (grid, segunda
-               posición visual real por CSS aunque en el DOM va después de
-               la tabla). -->
+          <!-- El subtotal (#tabla-subtotal) va primero en el DOM a propósito
+               (ver historial: con muchas transacciones, el resumen quedaba
+               al fondo de toda la lista en mobile). En desktop es la
+               columna lateral (grid, segunda posición visual real por CSS
+               aunque en el DOM va antes de la lista). -->
           <div class="tabla-subtotal card" id="tabla-subtotal">
             <div class="sub-neto-main">
               <span class="sub-neto-lbl">Neto del período</span>
@@ -3036,9 +3016,6 @@
             </div>
           </div>
         </div>
-
-        <!-- List-view mobile (oculto en desktop) -->
-        <div class="trans-mobile-list" id="trans-mobile-list"></div>
       </div>
 
       <!-- ── PÁGINA NUEVA TRANSACCIÓN ──────────────────── -->
@@ -5955,91 +5932,13 @@ function filtrarTabla() {
   netoEl.textContent = netoSigno + " " + fmt(Math.abs(netoARS)) + (hayUSDsub?` / ${fmtMoneda(Math.abs(netoUSD),"USD")}`:"");
   netoEl.className = netoARS >= 0 ? "sub-neto-pos" : "sub-neto-neg";
 
-  const tbody = _el("tabla-body");
-  if (!datos.length) {
-    // Distinguir "no hay ninguna transacción todavía" (usuario nuevo) de "el filtro no
-    // matchea nada" (sí hay datos, pero no con este filtro) — mismo mensaje para los dos
-    // casos confundía a un usuario nuevo, que no tiene ningún filtro que "ampliar".
-    const sinTransaccionesDelUsuario = !allTransac.some(t => (t.usuario || "Daniel") === USUARIO);
-    const msg = sinTransaccionesDelUsuario
-      ? "Todavía no cargaste ninguna transacción — tocá \"+ Anotar\" para empezar"
-      : "Nada con ese filtro — probá ampliando la búsqueda";
-    requestAnimationFrame(() => {
-      if (gen !== _filtroGen) return;
-      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">${msg}</div></td></tr>`;
-    });
-    return;
-  }
-
-  const respEmoji = {};
-  const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", ["De " + PARTNER]: "var(--accent)" };
-
-  const html = datos.map((t, i) => {
-    const r = t.responsabilidad || "Mío";
-    const mon = t.moneda || "ARS";
-    const monBadge = mon === "USD"
-      ? `<span class="badge-moneda usd">USD</span>`
-      : `<span class="badge-moneda ars">ARS</span>`;
-    // Sub-etiqueta de liquidación: mostrar si TC con mes distinto, o badge pendiente si TC sin mes
-    let fechaExtra = "";
-    if (_esFuenteTC(t.fuente || "")) {
-      if (t.mes_liquidacion && /^\d{4}-(0[1-9]|1[0-2])$/.test(t.mes_liquidacion)) {
-        const fechaD  = new Date(t.fecha + "T12:00:00");
-        const fechaYM = `${fechaD.getFullYear()}-${String(fechaD.getMonth()+1).padStart(2,"0")}`;
-        if (t.mes_liquidacion !== fechaYM) {
-          const [ly, lm] = t.mes_liquidacion.split("-").map(Number);
-          const mesAbrev = new Date(ly, lm-1, 1).toLocaleDateString("es-AR", { month: "short" });
-          fechaExtra = `<div class="fecha-liq-label">Liq. ${mesAbrev} ${ly}</div>`;
-        }
-      } else if (!t.mes_liquidacion) {
-        fechaExtra = `<div class="fecha-liq-pendiente">Liq. pendiente</div>`;
-      }
-    }
-    // Nombre estable por transacción — permite que View Transitions empareje
-    // la misma fila entre el render viejo y el nuevo y anime su reubicación
-    // (FLIP) en vez de solo hacer fade-out/fade-in al filtrar/ordenar.
-    const vtName = `tx-${String(t.id).replace(/[^a-zA-Z0-9_-]/g, "")}`;
-    return `
-    <tr style="--row-i:${Math.min(i, 16)};view-transition-name:${vtName}">
-      <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}${fechaExtra}</td>
-      <td class="col-hide-xs"><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
-      <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="font-size:1rem;width:22px;text-align:center;flex-shrink:0">${getCatEmoji(t.categoria)}</span>${escapeHtml(t.categoria)}</span></td>
-      <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${escapeHtml(t.fuente) || "—"}</td>
-      <td class="col-hide-sm"><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${escapeHtml(r)}</span></td>
-      <td class="col-hide-sm" style="color:var(--text-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(t.descripcion) || "—"}${t.cuota_nro && t.cuota_total
-          ? ` <span class="badge-cuota" role="button" tabindex="0"
-                    data-compra-id="${t.compra_id}"
-                    onclick="_abrirModalCuotas(this.dataset.compraId)"
-                    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_abrirModalCuotas(this.dataset.compraId)}"
-                    title="Ver cuotas">[${t.cuota_nro}/${t.cuota_total}]</span>`
-          : ""}</td>
-      <td style="text-align:right;font-weight:600;white-space:nowrap;color:${t.tipo==="Ingreso"?"var(--green)":"var(--red)"}">${fmtMoneda(t.monto, mon)}</td>
-      <td class="col-hide-xs">${monBadge}</td>
-      <td style="white-space:nowrap">
-        <button class="delete-btn" onclick="duplicarTransaccion('${t.id}')" title="Duplicar" aria-label="Duplicar transacción" style="margin-right:.2rem">${IC_COPY}</button>
-        <button class="delete-btn" onclick="abrirEditorTransaccion('${t.id}')" title="Editar" aria-label="Editar transacción" style="margin-right:.2rem">${IC_EDIT}</button>
-        <button class="delete-btn" onclick="eliminarTransaccion('${t.id}')" title="Eliminar" aria-label="Eliminar transacción">${IC_TRASH}</button>
-      </td>
-    </tr>`
-  }).join("");
+  // La tabla de columnas fijas se reemplazó por la lista de filas tipo card
+  // (_renderMobileList, antes solo mobile) — el estado vacío y el detalle de
+  // cada fila viven ahí ahora.
   requestAnimationFrame(() => {
     if (gen !== _filtroGen) return;
-    const aplicarSwap = () => {
-      tbody.innerHTML = html;
-      _renderMobileList(datos);
-      if (window.lucide) lucide.createIcons();
-    };
-    // View Transitions da el reordenamiento (FLIP) gratis emparejando filas por
-    // view-transition-name — se limita a listas chicas/medianas por costo, y se
-    // salta si el usuario prefiere menos movimiento (más allá del guard CSS).
-    const puedeTransicionar = typeof document.startViewTransition === "function"
-      && datos.length <= 60
-      && !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (puedeTransicionar) {
-      document.startViewTransition(aplicarSwap);
-    } else {
-      aplicarSwap();
-    }
+    _renderMobileList(datos);
+    if (window.lucide) lucide.createIcons();
   });
 }
 
