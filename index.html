@@ -1635,21 +1635,23 @@
     filter: blur(6px);
     pointer-events: none;
   }
-  .mm-hero-eyebrow { font-size: .875rem; font-weight: 600; color: var(--text-dim); position: relative; z-index: 1; }
+  .mm-hero-eyebrow { font-size: .875rem; font-weight: 500; color: var(--text-dim); position: relative; z-index: 1; }
+  .mm-hero-name { font-family: var(--font-serif); font-style: italic; color: var(--text); font-size: .95rem; }
   .mm-hero-amount {
     font-size: clamp(2.4rem, 10vw, 3.2rem); font-weight: 700;
     line-height: 1.05; margin-top: .35rem; position: relative; z-index: 1;
     font-family: var(--font-display); color: var(--text);
   }
-  .mm-hero-sub { font-size: .84rem; color: var(--text-faint); margin-top: .25rem; position: relative; z-index: 1; }
+  .mm-hero-sub { font-size: .84rem; color: var(--text-faint); margin-top: .3rem; position: relative; z-index: 1; }
   .mm-hero-sub strong { color: var(--text-dim); font-weight: 700; }
-  .mm-hero-stats { display: flex; gap: 10px; margin-top: 18px; position: relative; z-index: 1; }
-  .mm-hero-stat {
-    flex: 1; background: var(--surface-2); border: 1px solid var(--line); border-radius: 16px;
-    padding: 11px 14px;
+  .mm-hero-pills { display: flex; gap: 9px; margin-top: 18px; position: relative; z-index: 1; }
+  .mm-hero-pill {
+    font-size: .81rem; font-weight: 600; border-radius: var(--r-pill);
+    padding: 7px 14px; background: var(--surface-strong, var(--surface));
+    border: 1px solid var(--line);
   }
-  .mm-hero-stat-label { font-size: .72rem; color: var(--text-faint); font-weight: 600; }
-  .mm-hero-stat-val   { font-size: 1.2rem; font-weight: 700; margin-top: .15rem; font-family: var(--font-display); color: var(--text); }
+  .mm-hero-pill.pos { color: var(--pos); }
+  .mm-hero-pill.neg { color: var(--neg); }
 
   .mm-quick-stats { display: flex; gap: 10px; margin-bottom: 14px; }
   /* .mm-sidebar-col es el wrapper de columna lateral desktop (Compartidos,
@@ -1692,24 +1694,26 @@
   /* desktop-only Mi mes elements (hidden on mobile) */
   .mm-page-title  { display: none; font-size: 1.7rem; font-weight: 600; font-family: var(--font-serif); letter-spacing: -.025em; color: var(--text); }
   .mm-anotar-btn  { display: none; }
-  .mm-hero-stat-3 { display: none; }
   .mm-row2        { display: none; }
-  /* hero amount + glass stats: normal tabular-nums so period isn't narrow vs wide digits */
+  /* hero amount: normal tabular-nums so period isn't narrow vs wide digits */
   .mm-hero-amount   { font-variant-numeric: normal; letter-spacing: -0.025em; }
-  .mm-hero-stat-val { font-variant-numeric: normal; }
   /* desglose visible on mobile as full-width card below quick-stats */
   .mm-desglose { margin-bottom: 14px; }
 
   @media (min-width: 860px) {
     .page-mimes { padding-top: 0; }
-    .mm-page-title { display: block; margin-bottom: .2rem; }
+    .mm-page-title { display: block; margin-bottom: 0; }
     /* .mm-anotar-btn ya no se muestra acá — "Nueva" vive en el nav-row */
-    .mm-header { padding: 0 0 18px; border-bottom: 1px solid var(--line); margin-bottom: 22px; align-items: flex-end; }
-    .mm-greeting { font-size: .88rem; color: var(--text-dim); margin-bottom: 0; }
+    /* El mockup no tiene línea bajo el título — solo margin-bottom. El pill
+       de mes pasa a la derecha del título "Mi mes" en la misma fila; el
+       saludo (antes acá, apilado debajo del título) se movió adentro del
+       hero (ver _renderMMHero). */
+    .mm-header { padding: 0; border-bottom: none; margin-bottom: 18px; align-items: center; }
+    .mm-header-left { display: flex; align-items: center; justify-content: space-between; flex: 1; gap: 14px; }
+    .mm-greeting { display: none; }
     .mm-bell { display: none; }
     .mm-row1 { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: stretch; }
     .mm-hero { margin-bottom: 0; }
-    .mm-hero-stat-3 { display: flex; flex-direction: column; }
     .mm-quick-stats         { display: none; }
     .mm-desglose            { display: flex; flex-direction: column; }
     .mm-row2                { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
@@ -3343,7 +3347,7 @@
 
         <!-- Header: saludo + selectores de mes -->
         <div class="mm-header">
-          <div>
+          <div class="mm-header-left">
             <div class="mm-page-title">Mi mes</div>
             <div class="mm-greeting" id="mm-greeting">Hola 👋</div>
             <div class="mm-month-pill">
@@ -3372,25 +3376,17 @@
         <!-- Row 1: hero + quick stats (grid on desktop) -->
         <div class="mm-row1">
 
-          <!-- Hero: Lo que te queda -->
+          <!-- Hero: saldo del mes — clon del mockup (eyebrow con nombre,
+               monto, sub en texto con $/día + días restantes, pills de
+               Ingresos/Gastos). -->
           <div class="mm-hero">
             <div class="mm-hero-orb"></div>
-            <div class="mm-hero-eyebrow">💸 Te queda para gastar</div>
+            <div class="mm-hero-eyebrow">Hola, <span class="mm-hero-name" id="mm-hero-name">—</span> — tu saldo de <span id="mm-hero-mes">—</span></div>
             <div class="mm-hero-amount num" id="mm-hero-amount">$0</div>
-            <div class="mm-hero-sub" id="mm-hero-sub">de tu sueldo, hasta fin de mes</div>
-            <div class="mm-hero-stats">
-              <div class="mm-hero-stat">
-                <div class="mm-hero-stat-label">Por día</div>
-                <div class="mm-hero-stat-val num" id="mm-stat-diario">—</div>
-              </div>
-              <div class="mm-hero-stat">
-                <div class="mm-hero-stat-label">En USD</div>
-                <div class="mm-hero-stat-val num" id="mm-stat-usd">—</div>
-              </div>
-              <div class="mm-hero-stat mm-hero-stat-3">
-                <div class="mm-hero-stat-label">Días restantes</div>
-                <div class="mm-hero-stat-val num" id="mm-stat-dias">—</div>
-              </div>
+            <div class="mm-hero-sub" id="mm-hero-sub">—</div>
+            <div class="mm-hero-pills">
+              <span class="mm-hero-pill pos" id="mm-hero-pill-ingresos">↑ Ingresos —</span>
+              <span class="mm-hero-pill neg" id="mm-hero-pill-gastos">↓ Gastos —</span>
             </div>
           </div>
 
@@ -3399,14 +3395,12 @@
                (antes en mm-row2 / fuera de mm-row1), sin duplicar el hero. -->
           <div class="mm-sidebar-col">
             <div class="card mm-sc mm-sidebar-hide-mobile" id="mm-sc-comp-card">
-              <div class="mm-sc-icon">🤝</div>
               <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">tu pareja</span></div>
               <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
               <div class="mm-sc-sub" id="mm-sc-comp-label">balance del mes</div>
             </div>
             <div class="card mm-sc mm-sidebar-hide-mobile">
               <div id="mm-sc-ahorro-default">
-                <div class="mm-sc-icon">🐷</div>
                 <div class="mm-sc-label">Ahorro acumulado</div>
                 <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
                 <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
@@ -3414,8 +3408,7 @@
               </div>
               <div id="mm-sc-ahorro-meta" style="display:none">
                 <div class="mm-sc-meta-top">
-                  <div class="mm-sc-icon">🎯</div>
-                  <span class="mm-sc-meta-edit" onclick="abrirModalMeta()">✏️</span>
+                  <span class="mm-sc-meta-edit" onclick="abrirModalMeta()" style="margin-left:auto">✏️</span>
                 </div>
                 <div class="mm-sc-label" id="mm-sc-meta-nombre">—</div>
                 <div class="mm-sc-meta-bar-track">
@@ -8605,8 +8598,11 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
     heroAmt.textContent = (saldoReal < 0 ? "−" : "") + fmt(Math.abs(saldoReal));
     heroAmt.style.color = saldoReal < 0 ? "var(--red)" : "var(--green)";
   }
-  const heroSub = $("mm-hero-sub");
-  if (heroSub) heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
+
+  const heroName = $("mm-hero-name");
+  if (heroName) heroName.textContent = USUARIO;
+  const heroMes = $("mm-hero-mes");
+  if (heroMes) heroMes.textContent = (MESES_LARGO[mes - 1] || "").toLowerCase();
 
   const hoy = new Date();
   const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
@@ -8615,28 +8611,23 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
     ? Math.max(1, new Date(anio, mes, 0).getDate() - hoy.getDate() + 1)
     : 0;
 
-  const statDiario = $("mm-stat-diario");
-  if (statDiario) {
+  // Sub del hero: "$X/día disponible · N días más a este ritmo" — clon del
+  // mockup, reemplaza las 3 stat-cards (Por día/En USD/Días restantes) que
+  // no existían ahí (decisión de Daniel: clonar el mockup tal cual).
+  const heroSub = $("mm-hero-sub");
+  if (heroSub) {
     if (esEsteMes && saldoReal > 0) {
-      statDiario.textContent = fmt(Math.round(saldoReal / diasRestantes));
+      const porDia = Math.round(saldoReal / diasRestantes);
+      heroSub.innerHTML = `<strong class="num">${fmt(porDia)}</strong>/día disponible · ${diasRestantes} días más a este ritmo`;
     } else {
-      statDiario.textContent = "—";
+      heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
     }
   }
 
-  const statDias = $("mm-stat-dias");
-  if (statDias) {
-    statDias.textContent = esEsteMes ? diasRestantes + " días" : "—";
-  }
-
-  const statUSD = $("mm-stat-usd");
-  if (statUSD) {
-    if (tipoCambioMEP > 0 && saldoReal > 0) {
-      statUSD.textContent = "U$S " + Math.round(saldoReal / tipoCambioMEP).toLocaleString("es-AR");
-    } else {
-      statUSD.textContent = "—";
-    }
-  }
+  const pillIng = $("mm-hero-pill-ingresos");
+  if (pillIng) pillIng.textContent = `↑ Ingresos ${fmt(sueldoEfectivo)}`;
+  const pillGas = $("mm-hero-pill-gastos");
+  if (pillGas) pillGas.textContent = `↓ Gastos ${fmt(totalGasto)}`;
 
   const qsAho = $("mm-qs-ahorro");
   if (qsAho && sueldoEfectivo > 0) {
