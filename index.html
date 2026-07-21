@@ -500,12 +500,22 @@
   }
   .table-filters select, .table-filters input {
     background: var(--card); border: 1px solid var(--border);
-    color: var(--text); padding: .42rem .85rem; border-radius: 8px;
+    color: var(--text); padding: .42rem .85rem; border-radius: var(--r-pill);
     font-size: .84rem; font-family: inherit; transition: border-color .15s;
   }
   .table-filters select:focus, .table-filters input:focus {
     outline: none; border-color: var(--accent);
   }
+  /* Buscador de Transacciones: fila propia, antes de los filtros (mismo
+     orden que el mockup Marfil sereno) */
+  .fil-buscar-input {
+    display: block; width: 100%; margin-bottom: .75rem; box-sizing: border-box;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: .6rem .95rem; border-radius: var(--r-md);
+    font-size: .87rem; font-family: inherit; transition: border-color .15s;
+  }
+  .fil-buscar-input:focus { outline: none; border-color: var(--accent); }
+  .fil-buscar-input::placeholder { color: var(--text-faint); }
   /* ── Multi-select categorías ── */
   .multi-select-wrap { position: relative; }
   .multi-select-btn {
@@ -1618,8 +1628,8 @@
   }
 
   /* elementos mobile-only: ocultos por defecto, activados en media query */
-  .trans-mobile-list    { display: none; }
-  .trans-mobile-filters { display: none; }
+  .trans-mobile-list { display: none; }
+  .trans-chip         { display: none; }
 
   /* ─── MOBILE (≤ 768px) ─────────────────────────────────────── */
   @media (max-width: 768px) {
@@ -1693,7 +1703,7 @@
     /* Transacciones: ocultar tabla y filtros complejos; mostrar list-view */
     #page-transacciones .table-wrap { display: none; }
     .trans-mobile-list { display: flex; }
-    .trans-mobile-filters { display: flex; }
+    .trans-chip         { display: inline-flex; }
     /* Categoría queda disponible en mobile como chip de filtro rápido (ver
        docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md) — tipo
        y responsabilidad ya están cubiertos por los chips de abajo
@@ -2047,7 +2057,6 @@
   }
 
   /* ─── TRANSACCIONES MOBILE LIST ────────────────────────────── */
-  .trans-mobile-filters { gap: 7px; flex-wrap: wrap; padding: .5rem 0; }
   .trans-chip { font-size: 12.5px; font-weight: 600; padding: 9px 14px; border-radius: var(--r-pill);
                 background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--line);
                 cursor: pointer; font-family: inherit; transition: background .12s, color .12s; }
@@ -2852,6 +2861,10 @@
             <button class="btn btn-primary" onclick="navegarA('nueva')">+ Anotar</button>
           </div>
         </div>
+        <!-- Buscador: fila propia, primero (mismo orden que el mockup) -->
+        <input type="text" id="fil-buscar" class="fil-buscar-input" placeholder="Buscar transacción…"
+               oninput="clearTimeout(_filtroDebounce);_filtroDebounce=setTimeout(filtrarTabla,120)"
+               aria-label="Buscar transacciones">
         <div class="table-filters">
           <select id="fil-mes" onchange="_filFechaExacta=null;guardarSelFecha();filtrarTabla()"></select>
           <select id="fil-anio" onchange="_filFechaExacta=null;guardarSelFecha();filtrarTabla()"></select>
@@ -2883,10 +2896,9 @@
             <option value="Compartido">Compartido</option>
             <option value="De Ama" id="fil-resp-de-partner">De Ama</option>
           </select>
-          <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="clearTimeout(_filtroDebounce);_filtroDebounce=setTimeout(filtrarTabla,120)" aria-label="Buscar transacciones">
-        </div>
-        <!-- Chips filtro rápido (solo mobile) -->
-        <div class="trans-mobile-filters" id="trans-mobile-filters">
+          <!-- Chips rápidos (mobile): mismos filtros que fil-tipo/fil-resp de
+               arriba, en un formato que se puede tocar de un tap. Conviven en
+               la misma fila que mes/año/categoría, ver Marfil sereno plan. -->
           <button class="trans-chip on" id="chip-todos"   onclick="_setChipFiltro('')">Todos</button>
           <button class="trans-chip"    id="chip-ing"     onclick="_setChipFiltro('Ingreso')">Ingresos</button>
           <button class="trans-chip"    id="chip-gas"     onclick="_setChipFiltro('Gasto')">Gastos</button>
@@ -2907,9 +2919,9 @@
             <div class="sub-stats">
               <span id="sub-count">—</span>
               <span class="sub-stats-sep">·</span>
-              <span>↑ <strong id="sub-ingresos">—</strong></span>
+              <span><strong id="sub-ingresos">—</strong> ingresos</span>
               <span class="sub-stats-sep">·</span>
-              <span>↓ <strong id="sub-gastos">—</strong></span>
+              <span><strong id="sub-gastos">—</strong> gastos</span>
             </div>
           </div>
           <div class="table-wrap">
