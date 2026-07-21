@@ -6898,15 +6898,19 @@ function cargarCompartidos() {
       }
     }
     // Ocultar el resto del contenido de Compartidos mientras no haya pareja
-    // (liq-modal ya no vive acá — ver comentario en su nueva ubicación fuera de #app)
+    // (liq-modal ya no vive acá — ver comentario en su nueva ubicación fuera de #app).
+    // #topnav (el nav-row) se excluye a propósito: navegarA() lo reparenta como
+    // hijo directo de la página activa (Unidad 3 rediseño Marfil sereno), así
+    // que sin este exclude quedaba atrapado en el "ocultar todo" y desaparecía
+    // la fila de accesos completa cuando no había pareja invitada.
     Array.from(document.getElementById("page-compartidos")?.children || [])
-      .forEach(el => { if (el.id !== "comp-empty-state") el.style.display = "none"; });
+      .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "topnav") el.style.display = "none"; });
     return;
   }
   const existente = document.getElementById("comp-empty-state");
   if (existente) existente.remove();
   Array.from(document.getElementById("page-compartidos")?.children || [])
-    .forEach(el => { if (el.id !== "comp-empty-state") el.style.display = ""; });
+    .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "topnav") el.style.display = ""; });
 
   const avA = document.getElementById("comp-avatar-a");
   const avB = document.getElementById("comp-avatar-b");
