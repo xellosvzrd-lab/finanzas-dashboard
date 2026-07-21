@@ -1539,6 +1539,12 @@
   .mm-hero-stat-val   { font-size: 1.2rem; font-weight: 700; margin-top: .15rem; font-family: var(--font-display); color: var(--text); }
 
   .mm-quick-stats { display: flex; gap: 10px; margin-bottom: 14px; }
+  /* .mm-sidebar-col es el wrapper de columna lateral desktop (Compartidos,
+     Meta, Cuotas activas). En mobile no es un grid especial (fluye normal),
+     pero "Compartidos con Ama" y "Meta de ahorro" no están en el mockup
+     mobile — se ocultan puntualmente ahí; "Cuotas activas" sigue mostrándose
+     suelta según su propia lógica (_renderCuotasCard), como antes. */
+  .mm-sidebar-hide-mobile { display: none; }
   .mm-qs-card { flex: 1; padding: 12px 13px; }
   .mm-qs-label { font-size: .72rem; color: var(--text-faint); font-weight: 600; }
   .mm-qs-val { font-size: 1.05rem; font-weight: 700; margin-top: .2rem; font-family: var(--font-display); }
@@ -1584,7 +1590,7 @@
   @media (min-width: 860px) {
     .page-mimes { padding-top: 0; }
     .mm-page-title { display: block; margin-bottom: .2rem; }
-    .mm-anotar-btn { display: inline-flex; }
+    /* .mm-anotar-btn ya no se muestra acá — "Nueva" vive en el nav-row */
     .mm-header { padding: 0 0 18px; border-bottom: 1px solid var(--line); margin-bottom: 22px; align-items: flex-end; }
     .mm-greeting { font-size: .88rem; color: var(--text-dim); margin-bottom: 0; }
     .mm-bell { display: none; }
@@ -1593,9 +1599,10 @@
     .mm-hero-stat-3 { display: flex; flex-direction: column; }
     .mm-quick-stats         { display: none; }
     .mm-desglose            { display: flex; flex-direction: column; }
-    .mm-row2                { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .mm-row2                { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .mm-sidebar-col         { display: flex; flex-direction: column; gap: 14px; }
+    .mm-sidebar-hide-mobile { display: block; }
     /* Secciones mobile-only: ocultar en desktop */
-    .cuotas-card         { display: none !important; }
     .mm-section-header   { display: none; }
     .mm-cats-card        { display: none; }
     #btn-toggle-desglose { display: none; }
@@ -1911,65 +1918,60 @@
   #edit-msg { font-size: .82rem; padding: .3rem 0; min-height: 1.2rem; }
 
   /* ─── TOP NAV ────────────────────────────────────────── */
+  /* ─── NAV-ROW (desktop/tablet ≥ 769px) ──────────────────────
+     Reemplaza el topnav sticky de 6 pestañas fijas por una fila de accesos
+     que se regenera por página (navegarA()): Nueva + los otros destinos,
+     SIN repetir la página activa — ver
+     docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md (R5).
+     Se sigue reubicando dentro de cada .page vía JS (mismo mecanismo de
+     siempre), pero ya no es sticky: es contenido normal debajo del título. */
   .topnav {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0 1.8rem;
-    background: var(--card);
-    backdrop-filter: blur(var(--card-blur)) saturate(160%);
-    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-    border-bottom: 1px solid var(--border);
-    height: 62px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    margin-bottom: 18px;
+    gap: 10px;
+    padding: 0;
+    background: transparent;
+    border-bottom: none;
+    height: auto;
+    position: static;
+    margin: 0 0 22px;
   }
   .topnav-tabs {
-    display: flex;
-    gap: .25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 10px;
     flex: 1;
-    position: relative;
-  }
-  .topnav-indicator {
-    position: absolute;
-    bottom: -1px;
-    height: 2px;
-    background: var(--accent);
-    border-radius: 99px;
-    pointer-events: none;
-    transition: transform .22s var(--ease-out), width .22s var(--ease-out);
-    will-change: transform, width;
   }
   .topnav .nav-item {
-    background: none;
-    border: 1px solid transparent;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
     cursor: pointer;
-    padding: .5rem .95rem;
-    font-size: .9rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    transition: color .18s var(--ease-out), background .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+    padding: 12px 14px;
+    font-size: .87rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
     font-family: inherit;
-    border-radius: 999px;
-    display: flex; align-items: center; gap: .38rem;
+    border-radius: 16px;
+    display: flex; align-items: center; gap: 10px;
   }
-  .topnav .nav-item:hover { color: var(--text); background: var(--glass); border-color: var(--glass-border); }
-  .topnav .nav-item.active {
+  .topnav .nav-item .nav-item-ico {
+    width: 28px; height: 28px; border-radius: 50%; flex: none;
+    background: var(--accent-dim); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .topnav .nav-item:hover { border-color: var(--line-strong); }
+  .topnav .nav-item.primary {
     color: var(--white);
-    background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent), color-mix(in oklab, var(--brand-2) 20%, transparent));
-    border-color: var(--glass-border);
-    backdrop-filter: blur(10px) saturate(160%);
-    -webkit-backdrop-filter: blur(10px) saturate(160%);
-    box-shadow: 0 2px 12px color-mix(in oklab, var(--brand) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.3);
+    background: var(--accent);
+    border-color: transparent;
+    box-shadow: 0 10px 22px color-mix(in oklab, var(--brand) 30%, transparent);
   }
-  .topnav-indicator { display: none; }
-  .topnav .nav-item.active i, .topnav .nav-item.active svg { color: var(--white); }
+  .topnav .nav-item.primary .nav-item-ico { background: rgba(255,255,255,.2); color: var(--white); }
   @media (hover: hover) {
     .nav-item i, .bn-item i { transition: transform 0.15s var(--ease-out), color 0.15s; }
-    .nav-item:hover i, .nav-item:hover svg { transform: scale(1.12); color: var(--accent); }
-    .nav-item.active i, .nav-item.active svg { color: var(--accent); }
   }
   .topnav-logout {
     background: none;
@@ -1980,6 +1982,7 @@
     padding: .4rem .6rem;
     border-radius: 6px;
     font-family: inherit;
+    flex: none;
   }
   .topnav-logout:hover { color: var(--text); }
   @media (max-width: 768px) { .topnav { display: none; } }
@@ -1993,10 +1996,9 @@
   }
   @media (min-width: 769px) and (max-width: 859px) {
     .bottom-nav { display: none; }
-    /* Sin FAB ni bottom-nav en esta banda (iPad portrait), .mm-anotar-btn
-       se adelanta desde los 860px habituales para no dejarla sin forma de
-       crear una transacción desde Mi mes. */
-    .mm-anotar-btn { display: inline-flex; }
+    /* Sin FAB ni bottom-nav en esta banda (iPad portrait) — pero el nav-row
+       (antes .topnav) ya trae "Nueva" como primer botón desde los 769px,
+       así que no hace falta adelantar .mm-anotar-btn como antes. */
   }
 
   /* ─── MI MES — DESGLOSE DEL SUELDO (desktop) ───────────────── */
@@ -2683,18 +2685,12 @@
   <button class="mobile-drawer-logout" onclick="volverConfig()">🚪 Cerrar sesión</button>
 </div>
 
-<!-- Franja de título (desktop) — queda arriba de todo, el topnav debajo -->
-<!-- Top nav (desktop) — se reubica por JS debajo del header de cada página (ver navegarA) -->
+<!-- Nav-row (desktop/tablet ≥ 769px) — se reubica y regenera por JS debajo
+     del título de cada página (ver navegarA / _renderNavRow). Nueva + los
+     otros destinos, sin repetir la página activa. Resumen queda afuera por
+     ahora (decisión de producto, ver plan de rediseño Marfil sereno). -->
 <nav class="topnav" id="topnav">
-  <div class="topnav-tabs">
-    <button class="nav-item" onclick="navegarA('presupuesto')"><i data-lucide="calendar-days" width="14" height="14"></i>Mi mes</button>
-    <button class="nav-item" onclick="navegarA('transacciones')"><i data-lucide="receipt" width="14" height="14"></i>Transacciones</button>
-    <button class="nav-item" onclick="navegarA('compartidos')"><i data-lucide="users" width="14" height="14"></i>Compartidos</button>
-    <button class="nav-item" onclick="navegarA('config')"><i data-lucide="tag" width="14" height="14"></i>Categorías</button>
-    <button class="nav-item" onclick="navegarA('inversiones')"><i data-lucide="trending-up" width="14" height="14"></i>Inversiones</button>
-    <button class="nav-item" onclick="navegarA('resumen')"><i data-lucide="bar-chart-2" width="14" height="14"></i>Resumen</button>
-    <span class="topnav-indicator" id="topnav-indicator"></span>
-  </div>
+  <div class="topnav-tabs" id="topnav-tabs"></div>
   <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
   </button>
@@ -3298,6 +3294,68 @@
             </div>
           </div>
 
+          <!-- Columna lateral (desktop, U3 rediseño Marfil sereno): Compartidos,
+               Meta de ahorro, Cuotas activas — reusa cards reales que ya existían
+               (antes en mm-row2 / fuera de mm-row1), sin duplicar el hero. -->
+          <div class="mm-sidebar-col">
+            <div class="card mm-sc mm-sidebar-hide-mobile" id="mm-sc-comp-card">
+              <div class="mm-sc-icon">🤝</div>
+              <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">tu pareja</span></div>
+              <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
+              <div class="mm-sc-sub" id="mm-sc-comp-label">balance del mes</div>
+            </div>
+            <div class="card mm-sc mm-sidebar-hide-mobile">
+              <div id="mm-sc-ahorro-default">
+                <div class="mm-sc-icon">🐷</div>
+                <div class="mm-sc-label">Ahorro acumulado</div>
+                <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
+                <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
+                <div class="mm-sc-meta-link" onclick="abrirModalMeta()">🎯 Definir meta de ahorro</div>
+              </div>
+              <div id="mm-sc-ahorro-meta" style="display:none">
+                <div class="mm-sc-meta-top">
+                  <div class="mm-sc-icon">🎯</div>
+                  <span class="mm-sc-meta-edit" onclick="abrirModalMeta()">✏️</span>
+                </div>
+                <div class="mm-sc-label" id="mm-sc-meta-nombre">—</div>
+                <div class="mm-sc-meta-bar-track">
+                  <div class="mm-sc-meta-bar-fill" id="mm-sc-meta-bar"></div>
+                </div>
+                <div class="mm-sc-meta-pct" id="mm-sc-meta-pct">0%</div>
+                <div class="mm-sc-sub" id="mm-sc-meta-sub">—</div>
+                <div class="mm-sc-meta-badge" id="mm-sc-meta-badge" style="display:none">🤝 Compartida con <span id="mm-sc-meta-partner"></span></div>
+              </div>
+            </div>
+
+            <!-- Cuotas activas — reubicada acá desde su posición mobile-only original;
+                 ver_renderCuotasCard() la sigue llenando igual. -->
+            <div class="cuotas-card" id="cuotas-card" style="display:none">
+              <div class="cuotas-header" onclick="toggleCuotasCard()"
+                   role="button" tabindex="0" aria-expanded="true" aria-controls="cuotas-body-wrap"
+                   onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCuotasCard()}">
+                <div class="cuotas-header-left">
+                  <i data-lucide="credit-card" width="16" height="16" style="color:var(--yellow)"></i>
+                  Cuotas activas
+                  <span class="cuota-badge-comp" id="cuotas-count">0 compras</span>
+                </div>
+                <span class="cuotas-toggle-icon open" id="cuotas-toggle-icon">▾</span>
+              </div>
+              <div id="cuotas-body-wrap">
+                <div class="cuotas-summary">
+                  <span>Este mes: <strong id="cuotas-este-mes">$0</strong></span>
+                  <span>Comprometido futuro: <strong id="cuotas-futuro">$0</strong></span>
+                </div>
+                <div class="cuotas-body" id="cuotas-rows"></div>
+                <div class="cuotas-actions">
+                  <button class="btn btn-outline" style="font-size:.83rem"
+                          onclick="_setModoCuotasYNavegar()">+ Nueva compra en cuotas</button>
+                  <button class="btn btn-ghost" style="font-size:.83rem"
+                          onclick="_abrirModalCuotas(null)">Ver todas</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Quick stat: Ahorro (Ingresos/Gastos se sacaron de acá — quedaban duplicados
                con "Desglose del sueldo" de abajo, que ya muestra Sueldo y Gastado) -->
           <div class="mm-quick-stats">
@@ -3344,36 +3402,11 @@
 
         </div><!-- /mm-row1 -->
 
-        <!-- Row 2: 4 stat-cards (desktop) -->
+        <!-- Row 2: cards diferidas (fuera del alcance del mockup — ver
+             docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md).
+             Ahorro/Meta y Compartidos se movieron a .mm-sidebar-col arriba,
+             acá quedan solo las 2 que siguen sin ubicación definida. -->
         <div class="mm-row2">
-          <div class="card mm-sc">
-            <div id="mm-sc-ahorro-default">
-              <div class="mm-sc-icon">🐷</div>
-              <div class="mm-sc-label">Ahorro acumulado</div>
-              <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
-              <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
-              <div class="mm-sc-meta-link" onclick="abrirModalMeta()">🎯 Definir meta de ahorro</div>
-            </div>
-            <div id="mm-sc-ahorro-meta" style="display:none">
-              <div class="mm-sc-meta-top">
-                <div class="mm-sc-icon">🎯</div>
-                <span class="mm-sc-meta-edit" onclick="abrirModalMeta()">✏️</span>
-              </div>
-              <div class="mm-sc-label" id="mm-sc-meta-nombre">—</div>
-              <div class="mm-sc-meta-bar-track">
-                <div class="mm-sc-meta-bar-fill" id="mm-sc-meta-bar"></div>
-              </div>
-              <div class="mm-sc-meta-pct" id="mm-sc-meta-pct">0%</div>
-              <div class="mm-sc-sub" id="mm-sc-meta-sub">—</div>
-              <div class="mm-sc-meta-badge" id="mm-sc-meta-badge" style="display:none">🤝 Compartida con <span id="mm-sc-meta-partner"></span></div>
-            </div>
-          </div>
-          <div class="card mm-sc" id="mm-sc-comp-card">
-            <div class="mm-sc-icon">🤝</div>
-            <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">tu pareja</span></div>
-            <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
-            <div class="mm-sc-sub" id="mm-sc-comp-label">balance del mes</div>
-          </div>
           <div class="card mm-sc mm-sc-clickable" onclick="verDetalleCuotasMes()" role="button" tabindex="0" aria-haspopup="dialog" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();verDetalleCuotasMes()}">
             <div class="mm-sc-icon">📅</div>
             <div class="mm-sc-label">Cuotas este mes</div>
@@ -3404,37 +3437,9 @@
         </section>
         <!-- /RECURRENTES -->
 
-        <!-- Tarjeta cuotas activas -->
-        <div class="cuotas-card" id="cuotas-card" style="display:none">
-          <div class="cuotas-header" onclick="toggleCuotasCard()"
-               role="button" tabindex="0" aria-expanded="true" aria-controls="cuotas-body-wrap"
-               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCuotasCard()}">
-            <div class="cuotas-header-left">
-              <i data-lucide="credit-card" width="16" height="16" style="color:var(--yellow)"></i>
-              Cuotas activas
-              <span class="cuota-badge-comp" id="cuotas-count">0 compras</span>
-            </div>
-            <span class="cuotas-toggle-icon open" id="cuotas-toggle-icon">▾</span>
-          </div>
-          <div id="cuotas-body-wrap">
-            <div class="cuotas-summary">
-              <span>Este mes: <strong id="cuotas-este-mes">$0</strong></span>
-              <span>Comprometido futuro: <strong id="cuotas-futuro">$0</strong></span>
-              <span style="color:var(--text-muted);font-size:.78rem">· ver el calendario completo en Compromisos futuros ↓</span>
-            </div>
-            <div class="cuotas-body" id="cuotas-rows"></div>
-            <div class="cuotas-actions">
-              <button class="btn btn-outline" style="font-size:.83rem"
-                      onclick="_setModoCuotasYNavegar()">+ Nueva compra en cuotas</button>
-              <button class="btn btn-ghost" style="font-size:.83rem"
-                      onclick="_abrirModalCuotas(null)">Ver todas</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Calendario de compromisos futuros (cuotas + recurrentes, 12 meses) — visible en
-             mobile Y desktop (a diferencia de Cuotas activas, que es mobile-only) por eso NO
-             usa la clase .cuotas-card (tiene display:none!important en desktop). -->
+        <!-- Calendario de compromisos futuros (cuotas + recurrentes, 12 meses) — oculto
+             por ahora (fuera del alcance del mockup Marfil sereno), ver bloque
+             .mm-quick-stats/.mm-row2/#compromisos-card display:none!important más arriba. -->
         <div class="compromisos-card-box" id="compromisos-card" style="display:none">
           <div class="cuotas-header" onclick="toggleCompromisosCard()"
                role="button" tabindex="0" aria-expanded="true" aria-controls="compromisos-body-wrap"
@@ -7480,15 +7485,31 @@ function cargarAnual() {
 const _navOrder = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
 let   _paginaActual = "presupuesto";
 
-function _actualizarNavIndicator() {
-  const indicator = document.getElementById("topnav-indicator");
-  const active    = document.querySelector(".topnav .nav-item.active");
-  if (!indicator || !active) return;
-  const tabsEl = document.querySelector(".topnav-tabs");
-  const tabsRect   = tabsEl.getBoundingClientRect();
-  const activeRect = active.getBoundingClientRect();
-  indicator.style.width     = activeRect.width + "px";
-  indicator.style.transform = `translateX(${activeRect.left - tabsRect.left}px)`;
+// Nav-row (desktop/tablet ≥769px): Nueva + los otros destinos, SIN la página
+// activa. Resumen queda afuera por ahora (sin mockup ni ubicación definida —
+// ver docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md, Open
+// Questions). Se regenera en cada navegarA() porque el set de botones cambia
+// según la página activa.
+const NAV_ROW_DESTINOS = [
+  { pagina: "presupuesto",   label: "Mi mes",        icono: "calendar-days" },
+  { pagina: "transacciones", label: "Transacciones", icono: "receipt" },
+  { pagina: "compartidos",   label: "Compartir",     icono: "users" },
+  { pagina: "config",        label: "Categorías",    icono: "tag" },
+  { pagina: "inversiones",   label: "Inversiones",   icono: "trending-up" },
+];
+function _renderNavRow(paginaActiva) {
+  const tabsEl = document.getElementById("topnav-tabs");
+  if (!tabsEl) return;
+  const botones = [
+    { pagina: "nueva", label: "Nueva", icono: "plus", primary: true },
+    ...NAV_ROW_DESTINOS.filter(d => d.pagina !== paginaActiva),
+  ];
+  tabsEl.innerHTML = botones.map(b => `
+    <button class="nav-item${b.primary ? " primary" : ""}" onclick="navegarA('${b.pagina}')">
+      <span class="nav-item-ico"><i data-lucide="${b.icono}" width="15" height="15"></i></span>
+      ${escapeHtml(b.label)}
+    </button>`).join("");
+  if (window.lucide) lucide.createIcons();
 }
 
 // ─── SCROLL REVEAL ──────────────────────────────────────────
@@ -7537,7 +7558,7 @@ function navegarA(pagina) {
   if (page) {
     if (goingBack) page.classList.add("dir-back");
     page.classList.add("active");
-    // Reubicar el topnav debajo del encabezado propio de esta página (mismo elemento, se mueve)
+    // Reubicar el nav-row debajo del encabezado propio de esta página (mismo elemento, se mueve)
     const topnavEl = document.getElementById("topnav");
     if (topnavEl && window.innerWidth >= 769) {
       const header = page.firstElementChild;
@@ -7545,15 +7566,12 @@ function navegarA(pagina) {
     }
   }
 
-  // Top nav (desktop) — 4 tabs en orden: presupuesto, transacciones, compartidos, config
-  const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
-  document.querySelectorAll(".topnav .nav-item").forEach((n, i) => {
-    n.classList.toggle("active", i === navMap[pagina]);
-  });
+  _renderNavRow(pagina);
+
   document.querySelectorAll(".sidebar .nav-item").forEach((n, i) => {
+    const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
     n.classList.toggle("active", i === navMap[pagina]);
   });
-  requestAnimationFrame(_actualizarNavIndicator);
 
   // Bottom nav (mobile)
   ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config","bn-inversiones","bn-resumen"].forEach(id => {
@@ -7657,7 +7675,6 @@ window.addEventListener("resize", () => {
     if (window.innerWidth > 768) closeSidebar(); // cerrar drawer si amplían pantalla
   }
   _syncMobileHeaderHeight();
-  requestAnimationFrame(_actualizarNavIndicator);
 });
 
 // ─── PRESUPUESTO ──────────────────────────────────────────────
