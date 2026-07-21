@@ -993,13 +993,38 @@
   .pres-bar-pct  { font-size: .71rem; color: var(--text-muted); min-width: 38px; text-align: right; font-weight: 600; }
 
   /* ─── FILAS DE ESTADO ───────────────────────────────────────── */
-  .pres-row-zero td { opacity: .32; }
-  .pres-row-over td:first-child  { border-left: none; }
-  .pres-row-warn td:first-child  { border-left: none; }
-  .pres-row-ok   td:first-child  { border-left: none; }
+  .pres-row-zero { opacity: .32; }
   .pres-row-over { background: rgba(248,113,113,.04); }
   .pres-row-warn { background: rgba(251,191,36,.03); }
   .pres-status-dot { display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:.5rem;vertical-align:middle;flex-shrink:0; }
+
+  /* ─── PRESUPUESTO POR CATEGORÍA — filas tipo card (antes tabla) ─── */
+  .pres-cat-list { display: flex; flex-direction: column; }
+  .pres-cat-row {
+    padding: .7rem 1rem; border-top: 1px solid var(--line);
+  }
+  .pres-cat-list .pres-cat-row:first-child { border-top: none; }
+  .pres-cat-head {
+    display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .6rem;
+  }
+  .pres-cat-name {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-size: .89rem; font-weight: 600; flex: 1; min-width: 0;
+  }
+  .pres-cat-emoji { font-size: 1.05rem; width: 22px; text-align: center; flex-shrink: 0; }
+  .pres-cat-input-wrap {
+    display: flex; align-items: center; gap: .3rem; flex-shrink: 0; margin-left: auto;
+  }
+  .pres-cat-input-sym { color: var(--text-muted); font-size: .8rem; }
+  .pres-cat-input-wrap .pres-input { width: 100px; }
+  .pres-cat-body { margin-top: .5rem; }
+  .pres-cat-meta {
+    display: flex; flex-wrap: wrap; gap: .3rem 1rem;
+    font-size: .78rem; color: var(--text-muted); margin-top: .35rem;
+  }
+  .pres-cat-meta strong { color: var(--text); font-weight: 700; }
+  .pres-monto-live { color: var(--text-faint); }
+  .pres-total-row { background: var(--surface-2); }
 
   /* ─── ANILLO DE PROGRESO TOTAL ──────────────────────────────── */
   .pres-ring-card {
@@ -1026,11 +1051,6 @@
     border-radius: 8px; padding: .45rem .8rem; font-size: .8rem; color: var(--green); font-weight: 600;
   }
 
-  /* ─── TABLA FOOTER ───────────────────────────────────────────── */
-  .pres-tfoot-row td {
-    padding: .75rem 1rem !important; font-weight: 700; font-size: .9rem;
-    background: var(--bg2); border-top: 1px solid var(--border2) !important;
-  }
 
   .pres-note { font-size: .76rem; color: var(--text-muted); margin-top: .5rem; }
 
@@ -3554,29 +3574,15 @@
           </button>
         </div>
 
-        <!-- Tabla presupuesto vs ejecución -->
-        <div id="pres-desglose" class="chart-card" style="padding:0;overflow:hidden">
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Categoría</th>
-                  <th style="text-align:right">Presupuesto</th>
-                  <th style="text-align:right">Gastado</th>
-                  <th style="text-align:right">Restante</th>
-                  <th>Progreso</th>
-                </tr>
-              </thead>
-              <tbody id="pres-tbody">
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-              </tbody>
-              <tfoot id="pres-tfoot"></tfoot>
-            </table>
+        <!-- Presupuesto por categoría — filas tipo card (antes tabla de
+             columnas fijas), mismo formato que Transacciones desktop. -->
+        <div id="pres-desglose" class="card" style="padding:4px 0">
+          <div id="pres-tbody" class="pres-cat-list">
+            <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
+            <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
+            <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
           </div>
+          <div id="pres-tfoot"></div>
           <div style="display:flex;gap:.5rem;padding:.75rem 1rem;flex-wrap:wrap">
             <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPresupuesto()">Guardar presupuesto</button>
           </div>
@@ -8503,21 +8509,26 @@ function renderPresupuesto() {
         : "";
 
     const catEmoji = getCatEmoji(cat, '');
-    return `<tr class="${rowCls}">
-      <td><span style="display:inline-flex;align-items:center;gap:7px">${catEmoji ? `<span style="font-size:1.05rem;width:24px;text-align:center">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}<span>${escapeHtml(cat)}</span></span>${pacingHtml}</td>
-      <td style="text-align:right">
-        <div style="display:flex;align-items:center;justify-content:flex-end;gap:.3rem">
-          <span style="color:var(--text-muted);font-size:.8rem">$</span>
+    return `<div class="pres-cat-row ${rowCls}">
+      <div class="pres-cat-head">
+        <span class="pres-cat-name">${catEmoji ? `<span class="pres-cat-emoji">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}${escapeHtml(cat)}</span>
+        ${pacingHtml}
+        <div class="pres-cat-input-wrap">
+          <span class="pres-cat-input-sym">$</span>
           <input type="text" inputmode="decimal" class="pres-input" data-cat="${escapeHtml(cat)}"
                  value="${pres > 0 ? String(pres).replace('.', ',') : ''}" placeholder="—"
-                 style="max-width:88px" oninput="actualizarKpisPres()">
+                 oninput="actualizarKpisPres()">
         </div>
-        <span class="pres-monto-live" style="color:var(--text-muted);font-size:.71rem;display:block;text-align:right;margin-top:.1rem">${sueldo > 0 && pres > 0 ? pct_sueldo.toFixed(1).replace('.', ',') + '%' : ''}</span>
-      </td>
-      <td style="text-align:right">${gastoStr}</td>
-      <td style="text-align:right">${restStr}</td>
-      <td>${barHtml}</td>
-    </tr>`;
+      </div>
+      <div class="pres-cat-body">
+        ${barHtml}
+        <div class="pres-cat-meta">
+          <span>Gastado ${gastoStr}</span>
+          ${pres > 0 ? `<span>Restante ${restStr}</span>` : ""}
+          ${sueldo > 0 && pres > 0 ? `<span class="pres-monto-live">${pct_sueldo.toFixed(1).replace('.', ',')}% del sueldo</span>` : ""}
+        </div>
+      </div>
+    </div>`;
   }).join("");
 
   // Footer de totales
@@ -8525,13 +8536,19 @@ function renderPresupuesto() {
   if (tfoot) {
     const totalRest    = totalPresARS - totalGasto;
     const totalEjec    = totalPresARS > 0 ? (totalGasto / totalPresARS * 100).toFixed(0) : 0;
-    tfoot.innerHTML = `<tr class="pres-tfoot-row">
-      <td><strong>TOTAL</strong></td>
-      <td style="text-align:right"><strong>${fmt(totalPresARS)} <small style="color:var(--text-muted);font-weight:400">(${totalPctAsig.toFixed(0)}%)</small></strong></td>
-      <td style="text-align:right"><strong style="color:var(--red)">${fmt(totalGasto)}</strong></td>
-      <td style="text-align:right"><strong style="color:${totalRest>=0?"var(--green)":"var(--red)"}">${totalRest<0?"−":""}${fmt(Math.abs(totalRest))}</strong></td>
-      <td><strong style="color:var(--text-muted)">${totalEjec}% ejecutado</strong></td>
-    </tr>`;
+    tfoot.innerHTML = `<div class="pres-cat-row pres-total-row">
+      <div class="pres-cat-head">
+        <span class="pres-cat-name"><strong>TOTAL</strong></span>
+      </div>
+      <div class="pres-cat-body">
+        <div class="pres-cat-meta">
+          <span>Presupuesto <strong>${fmt(totalPresARS)}</strong> <small style="color:var(--text-muted);font-weight:400">(${totalPctAsig.toFixed(0)}%)</small></span>
+          <span>Gastado <strong style="color:var(--red)">${fmt(totalGasto)}</strong></span>
+          <span>Restante <strong style="color:${totalRest>=0?"var(--green)":"var(--red)"}">${totalRest<0?"−":""}${fmt(Math.abs(totalRest))}</strong></span>
+          <span>${totalEjec}% ejecutado</span>
+        </div>
+      </div>
+    </div>`;
   }
 
   // KPI: balance compartido
