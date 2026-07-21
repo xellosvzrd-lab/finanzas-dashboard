@@ -648,6 +648,14 @@
     background: linear-gradient(135deg, color-mix(in oklab, var(--save) 14%, var(--surface)) 0%, var(--surface) 65%);
     border-color: color-mix(in oklab, var(--save) 24%, var(--line));
   }
+  .comp-avatars { display: flex; }
+  .comp-avatar {
+    width: 32px; height: 32px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; border: 2px solid var(--bg);
+  }
+  .comp-avatar-a { background: var(--accent-dim); color: var(--accent); z-index: 2; }
+  .comp-avatar-b { background: color-mix(in oklab, var(--info) 14%, #fff); color: var(--info); margin-left: -10px; }
   .comp-balance-row { display: flex; align-items: center; gap: 1.5rem; }
   .comp-balance-info { flex: 1; min-width: 0; }
   .comp-balance-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: .4rem; }
@@ -3205,6 +3213,10 @@
 
           <!-- Balance final destacado -->
           <div id="comp-balance-card" class="comp-balance-card" style="margin-bottom:0">
+            <div class="comp-avatars">
+              <div class="comp-avatar comp-avatar-a" id="comp-avatar-a"></div>
+              <div class="comp-avatar comp-avatar-b" id="comp-avatar-b"></div>
+            </div>
             <div class="comp-balance-row">
               <div class="comp-balance-info">
                 <div class="comp-balance-label">Balance del mes</div>
@@ -6838,6 +6850,11 @@ function cargarCompartidos() {
   if (existente) existente.remove();
   Array.from(document.getElementById("page-compartidos")?.children || [])
     .forEach(el => { if (el.id !== "comp-empty-state") el.style.display = ""; });
+
+  const avA = document.getElementById("comp-avatar-a");
+  const avB = document.getElementById("comp-avatar-b");
+  if (avA) avA.textContent = USUARIO.charAt(0).toUpperCase();
+  if (avB) avB.textContent = PARTNER.charAt(0).toUpperCase();
 
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
