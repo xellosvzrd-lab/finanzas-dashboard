@@ -149,6 +149,14 @@
     to   { transform: translate(3%,4%) scale(1.08); }
   }
 
+  /* ─── U2: Mi mes — oculto temporalmente, fuera del alcance del mockup
+     Marfil sereno (docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md).
+     HTML/JS quedan intactos — es solo display:none, no se borró nada.
+     Reubicar en otra unidad cuando se decida dónde va cada cosa. ─── */
+  .mm-quick-stats, .mm-desglose, .mm-row2,
+  #pres-tendencias, #recurrentes-section, #compromisos-card {
+    display: none !important;
+  }
 
   /* ─── CARD PRIMITIVE ────────────────────────────────────── */
   .card {
@@ -1500,40 +1508,35 @@
 
   .mm-hero {
     border-radius: 28px; padding: 24px 22px;
-    position: relative; overflow: hidden; color: #fff;
-    background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent) 0%, color-mix(in oklab, var(--brand-2) 20%, transparent) 100%);
+    position: relative; overflow: hidden; color: var(--text);
+    background: var(--surface);
     backdrop-filter: blur(var(--card-blur)) saturate(160%);
     -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-    border: 1px solid rgba(255,255,255,0.18);
-    box-shadow: 0 18px 40px color-mix(in oklab, var(--brand) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.25);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
     margin-bottom: 12px;
   }
-  .mm-hero::before {
-    content: "";
-    position: absolute; top: 0; left: 6%; right: 6%; height: 36%;
-    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0));
-    border-radius: 28px 28px 60% 60%;
-    pointer-events: none;
-  }
   .mm-hero-orb {
-    position: absolute; width: 180px; height: 180px; border-radius: 999px;
-    right: -50px; top: -60px; background: rgba(255,255,255,.16);
+    position: absolute; width: 260px; height: 260px; border-radius: 999px;
+    right: -70px; top: -90px; background: radial-gradient(closest-side, rgba(183,203,192,.55), rgba(246,244,239,0) 72%);
+    filter: blur(6px);
     pointer-events: none;
   }
-  .mm-hero-eyebrow { font-size: .875rem; font-weight: 600; opacity: .9; position: relative; }
+  .mm-hero-eyebrow { font-size: .875rem; font-weight: 600; color: var(--text-dim); position: relative; z-index: 1; }
   .mm-hero-amount {
     font-size: clamp(2.4rem, 10vw, 3.2rem); font-weight: 700;
-    line-height: 1.05; margin-top: .35rem; position: relative;
-    font-family: var(--font-display);
+    line-height: 1.05; margin-top: .35rem; position: relative; z-index: 1;
+    font-family: var(--font-display); color: var(--text);
   }
-  .mm-hero-sub { font-size: .84rem; opacity: .9; margin-top: .25rem; position: relative; }
-  .mm-hero-stats { display: flex; gap: 10px; margin-top: 18px; position: relative; }
+  .mm-hero-sub { font-size: .84rem; color: var(--text-faint); margin-top: .25rem; position: relative; z-index: 1; }
+  .mm-hero-sub strong { color: var(--text-dim); font-weight: 700; }
+  .mm-hero-stats { display: flex; gap: 10px; margin-top: 18px; position: relative; z-index: 1; }
   .mm-hero-stat {
-    flex: 1; background: rgba(255,255,255,.16); border-radius: 16px;
-    padding: 11px 14px; backdrop-filter: blur(4px);
+    flex: 1; background: var(--surface-2); border: 1px solid var(--line); border-radius: 16px;
+    padding: 11px 14px;
   }
-  .mm-hero-stat-label { font-size: .72rem; opacity: .85; font-weight: 600; }
-  .mm-hero-stat-val   { font-size: 1.2rem; font-weight: 700; margin-top: .15rem; font-family: var(--font-display); }
+  .mm-hero-stat-label { font-size: .72rem; color: var(--text-faint); font-weight: 600; }
+  .mm-hero-stat-val   { font-size: 1.2rem; font-weight: 700; margin-top: .15rem; font-family: var(--font-display); color: var(--text); }
 
   .mm-quick-stats { display: flex; gap: 10px; margin-bottom: 14px; }
   .mm-qs-card { flex: 1; padding: 12px 13px; }
