@@ -735,6 +735,16 @@
   @media (min-width: 860px) {
     .comp-hero-row { flex-direction: row; align-items: stretch; }
     .comp-hero-row > * { flex: 1; }
+    /* Reparto pasa a verse como card acá (en mobile queda plano, arriba
+       del balance, sin fondo) — misma altura que Balance/Contribución. */
+    .comp-hero-row .reparto-control {
+      flex-wrap: wrap; align-content: flex-start;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r-md); box-shadow: var(--shadow-card);
+      backdrop-filter: blur(var(--card-blur)) saturate(160%);
+      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+      padding: 1.2rem 1.4rem; margin-bottom: 0 !important;
+    }
   }
   /* Contribución del mes card */
   .comp-contrib          { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
@@ -3195,21 +3205,22 @@
           <select id="comp-anio"></select>
         </div>
 
-        <!-- Reparto de gastos compartidos del mes -->
-        <div class="reparto-control" id="reparto-control" style="margin-bottom:1.5rem">
-          <span class="reparto-label">Reparto:</span>
-          <span class="reparto-nombre" id="reparto-nombre-a"></span>
-          <input type="text" inputmode="decimal" id="reparto-pct-a" class="reparto-input" value="50">
-          <span class="reparto-pct-sign">%</span>
-          <span class="reparto-sep">/</span>
-          <span class="reparto-nombre" id="reparto-nombre-b"></span>
-          <input type="text" inputmode="decimal" id="reparto-pct-b" class="reparto-input" value="50">
-          <span class="reparto-pct-sign">%</span>
-          <button class="reparto-guardar-btn" id="reparto-guardar-btn" onclick="_guardarReparto()" title="Guardar reparto del mes">💾</button>
-        </div>
-
-        <!-- Hero row: balance + contribución -->
+        <!-- Hero row: reparto + balance + contribución (3 cards iguales en
+             desktop ≥860px, apiladas en mobile — Unidad 10 rediseño). -->
         <div class="comp-hero-row">
+
+          <!-- Reparto de gastos compartidos del mes -->
+          <div class="reparto-control" id="reparto-control" style="margin-bottom:1.5rem">
+            <span class="reparto-label">Reparto:</span>
+            <span class="reparto-nombre" id="reparto-nombre-a"></span>
+            <input type="text" inputmode="decimal" id="reparto-pct-a" class="reparto-input" value="50">
+            <span class="reparto-pct-sign">%</span>
+            <span class="reparto-sep">/</span>
+            <span class="reparto-nombre" id="reparto-nombre-b"></span>
+            <input type="text" inputmode="decimal" id="reparto-pct-b" class="reparto-input" value="50">
+            <span class="reparto-pct-sign">%</span>
+            <button class="reparto-guardar-btn" id="reparto-guardar-btn" onclick="_guardarReparto()" title="Guardar reparto del mes">💾</button>
+          </div>
 
           <!-- Balance final destacado -->
           <div id="comp-balance-card" class="comp-balance-card" style="margin-bottom:0">
