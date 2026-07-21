@@ -6894,7 +6894,14 @@ function cargarCompartidos() {
             Compartidos se activa cuando hay dos personas en el mismo workspace.
           </p>
           <button class="btn btn-primary" onclick="navegarA('config')">Invitar a mi pareja</button>`;
-        cont.prepend(div);
+        // Insertar después del nav-row (si está reparentado acá) para que el
+        // cartel quede debajo de la fila de accesos, no arriba de todo.
+        const topnavAqui = document.getElementById("topnav");
+        if (topnavAqui && topnavAqui.parentElement === cont) {
+          cont.insertBefore(div, topnavAqui.nextElementSibling);
+        } else {
+          cont.prepend(div);
+        }
       }
     }
     // Ocultar el resto del contenido de Compartidos mientras no haya pareja
