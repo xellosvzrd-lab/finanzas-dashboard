@@ -546,10 +546,28 @@
   .multi-select-option:hover { background: var(--bg2); }
   .multi-select-option input, .multi-select-all input { cursor: pointer; accent-color: var(--accent); }
   /* ── Subtotales ── */
+  /* En mobile es una barra horizontal (arriba de .trans-mobile-list); en
+     desktop (≥860px, ver media query) pasa a card vertical de columna
+     lateral — mismo patrón que la columna lateral de Mi mes. */
   .tabla-subtotal {
     display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap;
     padding: .75rem 1.1rem; background: var(--bg2);
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .trans-desktop-grid { display: block; }
+  @media (min-width: 860px) {
+    .trans-desktop-grid { display: grid; grid-template-columns: 1fr 300px; gap: 22px; align-items: start; }
+    .tabla-subtotal {
+      flex-direction: column; align-items: flex-start; gap: 16px;
+      padding: 20px; margin-bottom: 0;
+      border-radius: var(--r-md); border: 1px solid var(--line);
+      backdrop-filter: blur(var(--card-blur)) saturate(160%);
+      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    }
+    .sub-neto-lbl { font-size: 11px; letter-spacing: .04em; }
+    #sub-neto { font-size: 1.9rem; }
+    .sub-stats { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .sub-stats-sep { display: none; }
   }
   .sub-neto-main { display: flex; flex-direction: column; gap: .05rem; min-width: 100px; }
   .sub-neto-lbl  { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); font-weight: 600; }
@@ -1699,7 +1717,10 @@
     .pres-bar-bg { display: none; }
 
     /* Transacciones: ocultar tabla y filtros complejos; mostrar list-view */
-    #page-transacciones .table-wrap { display: none; }
+    /* La tabla completa (y su chart-card contenedor, ahora que el resumen
+       vive afuera en .tabla-subtotal) queda oculta en mobile — usa
+       .trans-mobile-list en su lugar. */
+    #page-transacciones .trans-desktop-grid > .chart-card { display: none; }
     .trans-mobile-list { display: flex; }
     .trans-chip         { display: inline-flex; }
     /* Categoría queda disponible en mobile como chip de filtro rápido (ver
@@ -2913,13 +2934,43 @@
           <button class="trans-chip"    id="chip-comp"    onclick="_setChipFiltro('Compartido')">Compartido</button>
         </div>
 
-        <!-- El subtotal (#tabla-subtotal) va antes que la lista mobile a
-             propósito: con muchas transacciones, el resumen quedaba al
-             fondo de toda la lista — el usuario tenía que scrollear todo
-             para verlo. En desktop no cambia nada: .trans-mobile-list es
-             display:none ahí, así que reordenarla no mueve nada visible. -->
-        <div class="chart-card" style="padding:0; overflow:hidden">
-          <div class="tabla-subtotal" id="tabla-subtotal">
+        <!-- Desktop (≥860px): grid de 2 columnas, tabla + resumen lateral
+             (mismo patrón que la columna lateral de Mi mes). En mobile
+             .trans-desktop-grid no es grid (default block) y el resumen
+             sigue apareciendo antes que .trans-mobile-list en el DOM, así
+             que el orden visual mobile no cambia — ver comentario histórico
+             más abajo sobre por qué el resumen va primero ahí. -->
+        <div class="trans-desktop-grid">
+          <div class="chart-card" style="padding:0; overflow:hidden">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="sortable sort-active" id="sort-th-fecha" onclick="setSortCol('fecha')">Fecha <span class="sort-ind" id="sort-ind-fecha">▼</span></th>
+                    <th class="col-hide-xs sortable" id="sort-th-tipo" onclick="setSortCol('tipo')">Tipo <span class="sort-ind" id="sort-ind-tipo"></span></th>
+                    <th class="sortable" id="sort-th-categoria" onclick="setSortCol('categoria')">Categoría <span class="sort-ind" id="sort-ind-categoria"></span></th>
+                    <th class="col-hide-sm">Fuente</th>
+                    <th class="col-hide-sm">¿De quién es?</th>
+                    <th class="col-hide-sm">Descripción</th>
+                    <th class="sortable" id="sort-th-monto" onclick="setSortCol('monto')" style="text-align:right">Monto <span class="sort-ind" id="sort-ind-monto"></span></th>
+                    <th class="col-hide-xs">Moneda</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-body">
+                  <tr><td colspan="9"><div class="loading"><div class="spinner"></div> Cargando...</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- El subtotal (#tabla-subtotal) va antes que la lista mobile a
+               propósito: con muchas transacciones, el resumen quedaba al
+               fondo de toda la lista — el usuario tenía que scrollear todo
+               para verlo. En desktop es la columna lateral (grid, segunda
+               posición visual real por CSS aunque en el DOM va después de
+               la tabla). -->
+          <div class="tabla-subtotal card" id="tabla-subtotal">
             <div class="sub-neto-main">
               <span class="sub-neto-lbl">Neto del período</span>
               <strong id="sub-neto">—</strong>
@@ -2931,26 +2982,6 @@
               <span class="sub-stats-sep">·</span>
               <span><strong id="sub-gastos">—</strong> gastos</span>
             </div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th class="sortable sort-active" id="sort-th-fecha" onclick="setSortCol('fecha')">Fecha <span class="sort-ind" id="sort-ind-fecha">▼</span></th>
-                  <th class="col-hide-xs sortable" id="sort-th-tipo" onclick="setSortCol('tipo')">Tipo <span class="sort-ind" id="sort-ind-tipo"></span></th>
-                  <th class="sortable" id="sort-th-categoria" onclick="setSortCol('categoria')">Categoría <span class="sort-ind" id="sort-ind-categoria"></span></th>
-                  <th class="col-hide-sm">Fuente</th>
-                  <th class="col-hide-sm">¿De quién es?</th>
-                  <th class="col-hide-sm">Descripción</th>
-                  <th class="sortable" id="sort-th-monto" onclick="setSortCol('monto')" style="text-align:right">Monto <span class="sort-ind" id="sort-ind-monto"></span></th>
-                  <th class="col-hide-xs">Moneda</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="tabla-body">
-                <tr><td colspan="9"><div class="loading"><div class="spinner"></div> Cargando...</div></td></tr>
-              </tbody>
-            </table>
           </div>
         </div>
 
