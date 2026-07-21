@@ -510,7 +510,7 @@
   .multi-select-wrap { position: relative; }
   .multi-select-btn {
     background: var(--card); border: 1px solid var(--border);
-    color: var(--text); padding: .42rem .85rem; border-radius: 8px;
+    color: var(--text); padding: .42rem .85rem; border-radius: var(--r-pill);
     font-size: .84rem; font-family: inherit; cursor: pointer;
     display: flex; align-items: center; gap: .4rem; white-space: nowrap;
     transition: border-color .15s; user-select: none;
@@ -1694,8 +1694,11 @@
     #page-transacciones .table-wrap { display: none; }
     .trans-mobile-list { display: flex; }
     .trans-mobile-filters { display: flex; }
-    .table-filters select:not(#fil-mes):not(#fil-anio),
-    .table-filters .multi-select-wrap { display: none; }
+    /* Categoría queda disponible en mobile como chip de filtro rápido (ver
+       docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md) — tipo
+       y responsabilidad ya están cubiertos por los chips de abajo
+       (Todos/Ingresos/Gastos/Compartido), fuente sigue sin mostrarse. */
+    .table-filters select:not(#fil-mes):not(#fil-anio) { display: none; }
     .table-filters { flex-wrap: wrap; gap: .4rem; }
     #fil-buscar { width: 100% !important; }
     .pres-bar-wrap { min-width: auto; }
@@ -2072,7 +2075,6 @@
   .trans-mobile-amount.neg { color: var(--neg); }
   .trans-mobile-badge { font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 99px; }
   .trans-mobile-badge.comp { background: var(--brand-soft); color: var(--brand); }
-  .trans-mobile-badge.usd  { background: var(--surface-3); color: var(--text-dim); }
 
   /* ─── FRANJA SUPERIOR (top-strip, desktop/tablet ≥769px) ────
      Logo "Finanzas" + usuario/avatar + "Workspace con {PARTNER}" —
@@ -5878,8 +5880,6 @@ function _renderMobileList(datos) {
         const iconBg = `color-mix(in oklab, ${_catColor(t.categoria)} 18%, var(--surface-2))`;
         const respBadge = (resp === "Compartido")
           ? `<span class="trans-mobile-badge comp">÷ ${escapeHtml(PARTNER)}</span>` : "";
-        const usdBadge = mon === "USD"
-          ? `<span class="trans-mobile-badge usd">USD</span>` : "";
         const subline = [t.descripcion, t.fuente].filter(Boolean).map(escapeHtml).join(" · ");
         const monto   = fmtMoneda(Math.abs(Number(t.monto)), mon);
         return `<div class="trans-mobile-item" onclick="abrirEditorTransaccion('${t.id}')">
@@ -5890,7 +5890,6 @@ function _renderMobileList(datos) {
           </div>
           <div class="trans-mobile-right">
             <div class="trans-mobile-amount ${isPos ? "pos" : "neg"}">${isPos ? "+" : "−"}${monto}</div>
-            ${usdBadge}
           </div>
           <button class="delete-btn trans-mobile-del-btn" onclick="event.stopPropagation();eliminarTransaccion('${t.id}')" title="Eliminar" aria-label="Eliminar transacción">${IC_TRASH}</button>
         </div>`;
