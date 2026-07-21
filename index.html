@@ -1112,6 +1112,10 @@
     box-shadow: var(--shadow-card);
   }
   .form-card h2 { font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: 700; }
+  .f-hint-mep {
+    text-align: center; font-size: .78rem; color: var(--text-faint);
+    margin-top: .25rem; line-height: 1.5;
+  }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
   .form-group { display: flex; flex-direction: column; gap: .4rem; }
   .form-group.full { grid-column: 1 / -1; }
@@ -3014,7 +3018,7 @@
           <div class="form-row">
             <div class="form-group">
               <label for="f-fecha">Fecha</label>
-              <input type="date" id="f-fecha">
+              <input type="date" id="f-fecha" onchange="_actualizarHintMEP()">
             </div>
             <div class="form-group">
               <label for="f-categoria">Categoría</label>
@@ -3026,7 +3030,7 @@
             <div class="form-group">
               <label for="f-monto" id="f-monto-label">Monto (ARS $)</label>
               <input type="text" inputmode="decimal" id="f-monto" placeholder="0,00"
-                     oninput="formatearMiles(this); if(typeof _modoCuotas !== 'undefined' && _modoCuotas && !_montoCuotaEditado) _recalcularMontoCuota()">
+                     oninput="formatearMiles(this); if(typeof _modoCuotas !== 'undefined' && _modoCuotas && !_montoCuotaEditado) _recalcularMontoCuota(); _actualizarHintMEP()">
             </div>
             <div class="form-group">
               <label id="lbl-moneda">Moneda</label>
@@ -3040,7 +3044,7 @@
           <div class="form-row">
             <div class="form-group full">
               <label for="f-responsabilidad">¿Cómo se divide?</label>
-              <select id="f-responsabilidad"></select>
+              <select id="f-responsabilidad" onchange="_actualizarHintMEP()"></select>
             </div>
           </div>
           <!-- Fila 5: Fuente + Mes de liquidación (TC) — van juntas a
@@ -3111,6 +3115,7 @@
               <textarea id="f-descripcion" placeholder="¿En qué gastaste o de dónde vino?" style="min-height:56px"></textarea>
             </div>
           </div>
+          <div id="f-hint-mep" class="f-hint-mep" style="display:none"></div>
           <div style="display:flex; gap:.75rem; margin-top:.5rem">
             <button class="btn btn-primary" id="btn-guardar" onclick="guardarTransaccion()">
               Guardar
@@ -6224,6 +6229,33 @@ function setMoneda(m) {
   document.getElementById("btn-ars").className = "moneda-btn " + (m === "ARS" ? "active-ars" : "");
   document.getElementById("btn-usd").className = "moneda-btn " + (m === "USD" ? "active-usd" : "");
   document.getElementById("f-monto-label").textContent = m === "ARS" ? "Monto (ARS $)" : "Monto (USD U$S)";
+  _actualizarHintMEP();
+}
+
+// Hint debajo del form: equivalente en la otra moneda al MEP + nota de
+// reparto si es Compartido. Puramente informativo, no valida ni bloquea.
+function _actualizarHintMEP() {
+  const hintEl = document.getElementById("f-hint-mep");
+  if (!hintEl) return;
+  const partes = [];
+  const monto = parsearDecimal(document.getElementById("f-monto")?.value);
+  if (monto > 0 && tipoCambioMEP) {
+    partes.push(monedaActual === "USD"
+      ? `≈ ${fmt(monto * tipoCambioMEP)} al MEP`
+      : `≈ USD ${(monto / tipoCambioMEP).toFixed(2)} al MEP`);
+  }
+  const resp = document.getElementById("f-responsabilidad")?.value || "";
+  if (resp === "Compartido" && PARTNER) {
+    let pctPropio = 50;
+    const fechaVal = document.getElementById("f-fecha")?.value;
+    if (fechaVal) {
+      const [y, m] = fechaVal.split("-").map(Number);
+      pctPropio = Math.round(obtenerFactorCompartidoPropio(m, y) * 100);
+    }
+    partes.push(`se divide ${pctPropio}/${100 - pctPropio} con ${PARTNER}`);
+  }
+  hintEl.textContent = partes.join(" · ");
+  hintEl.style.display = partes.length ? "" : "none";
 }
 
 function setTipo(tipo) {
