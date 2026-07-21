@@ -869,6 +869,15 @@
   /* ─── HEALTH SCORE ──────────────────────────────────────── */
 
   /* ─── PÁGINA CATEGORÍAS Y FUENTES ───────────────────────── */
+  .cfg-page-grid { display: block; }
+  .cfg-side-col { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem; }
+  @media (min-width: 860px) {
+    .cfg-page-grid { display: grid; grid-template-columns: 1fr 320px; gap: 1.25rem; align-items: start; }
+    .cfg-side-col { margin-top: 0; }
+    /* Grid 2x2 fijo en desktop (en vez de auto-fit, que con esta columna
+       más angosta podía dar 3 columnas desparejas según el ancho) */
+    .cfg-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  }
   .cfg-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -3711,73 +3720,80 @@
           <div style="font-size:.85rem;color:var(--text-muted)">Tus categorías y fuentes de pago</div>
         </div>
 
-        <div class="cfg-grid">
+        <!-- Desktop (≥860px): grid 2x2 de los 4 grupos a la izquierda +
+             columna lateral (Cuenta y seguridad, Mi pareja) a la derecha.
+             En mobile es todo una columna, sin cambios (Unidad 12). -->
+        <div class="cfg-page-grid">
+          <div class="cfg-grid">
 
-          <!-- Categorías Gasto -->
-          <div class="chart-card">
-            <div class="chart-title">Categorías de Gasto</div>
-            <div id="cfg-lista-gasto" class="cfg-lista"></div>
-            <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-gasto" placeholder="Nueva categoría..." class="cfg-input">
-              <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('GASTO')">+ Agregar</button>
+            <!-- Categorías Gasto -->
+            <div class="chart-card">
+              <div class="chart-title">Categorías de Gasto</div>
+              <div id="cfg-lista-gasto" class="cfg-lista"></div>
+              <div class="cfg-add-row">
+                <input type="text" id="cfg-nueva-gasto" placeholder="Nueva categoría..." class="cfg-input">
+                <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('GASTO')">+ Agregar</button>
+              </div>
+              <div id="cfg-msg-gasto" class="cfg-msg"></div>
             </div>
-            <div id="cfg-msg-gasto" class="cfg-msg"></div>
-          </div>
 
-          <!-- Categorías Ingreso -->
-          <div class="chart-card">
-            <div class="chart-title">Categorías de Ingreso</div>
-            <div id="cfg-lista-ingreso" class="cfg-lista"></div>
-            <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-ingreso" placeholder="Nueva categoría..." class="cfg-input">
-              <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('INGRESO')">+ Agregar</button>
+            <!-- Categorías Ingreso -->
+            <div class="chart-card">
+              <div class="chart-title">Categorías de Ingreso</div>
+              <div id="cfg-lista-ingreso" class="cfg-lista"></div>
+              <div class="cfg-add-row">
+                <input type="text" id="cfg-nueva-ingreso" placeholder="Nueva categoría..." class="cfg-input">
+                <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('INGRESO')">+ Agregar</button>
+              </div>
+              <div id="cfg-msg-ingreso" class="cfg-msg"></div>
             </div>
-            <div id="cfg-msg-ingreso" class="cfg-msg"></div>
-          </div>
 
-          <!-- Fuentes -->
-          <div class="chart-card">
-            <div class="chart-title">Fuentes / Medios de pago</div>
-            <div id="cfg-lista-fuente" class="cfg-lista"></div>
-            <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-fuente" placeholder="Nueva fuente..." class="cfg-input">
-              <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('FUENTE')">+ Agregar</button>
+            <!-- Fuentes -->
+            <div class="chart-card">
+              <div class="chart-title">Fuentes / Medios de pago</div>
+              <div id="cfg-lista-fuente" class="cfg-lista"></div>
+              <div class="cfg-add-row">
+                <input type="text" id="cfg-nueva-fuente" placeholder="Nueva fuente..." class="cfg-input">
+                <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('FUENTE')">+ Agregar</button>
+              </div>
+              <div id="cfg-msg-fuente" class="cfg-msg"></div>
             </div>
-            <div id="cfg-msg-fuente" class="cfg-msg"></div>
-          </div>
 
-          <!-- Tarjetas de crédito -->
-          <div class="chart-card">
-            <div class="chart-title">Tarjetas de crédito <span class="tc-badge">TC</span></div>
-            <div id="cfg-lista-fuentetc" class="cfg-lista"></div>
-            <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-fuentetc" placeholder="Nueva tarjeta..." class="cfg-input">
-              <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('FUENTE_TC')">+ Agregar</button>
+            <!-- Tarjetas de crédito -->
+            <div class="chart-card">
+              <div class="chart-title">Tarjetas de crédito <span class="tc-badge">TC</span></div>
+              <div id="cfg-lista-fuentetc" class="cfg-lista"></div>
+              <div class="cfg-add-row">
+                <input type="text" id="cfg-nueva-fuentetc" placeholder="Nueva tarjeta..." class="cfg-input">
+                <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('FUENTE_TC')">+ Agregar</button>
+              </div>
+              <div id="cfg-msg-fuentetc" class="cfg-msg"></div>
             </div>
-            <div id="cfg-msg-fuentetc" class="cfg-msg"></div>
-          </div>
 
-        </div><!-- /cfg-grid -->
+          </div><!-- /cfg-grid -->
 
-        <!-- Cuenta y Seguridad -->
-        <div class="chart-card" style="margin-top:1.5rem">
-          <div class="chart-title">Cuenta y Seguridad</div>
-          <div id="cuenta-identities">
-            <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
-          </div>
-          <label style="display:flex;align-items:flex-start;gap:.6rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);cursor:pointer;font-size:.85rem;color:var(--text)">
-            <input type="checkbox" id="pref-usd-mep" onchange="guardarPrefUsdMep(this.checked)" style="margin-top:.15rem;flex-shrink:0">
-            <span>Cobro parte de mis ingresos en USD — convertir a ARS con dólar MEP en mi presupuesto</span>
-          </label>
-        </div>
+          <div class="cfg-side-col">
+            <!-- Cuenta y Seguridad -->
+            <div class="chart-card">
+              <div class="chart-title">Cuenta y Seguridad</div>
+              <div id="cuenta-identities">
+                <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
+              </div>
+              <label style="display:flex;align-items:flex-start;gap:.6rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);cursor:pointer;font-size:.85rem;color:var(--text)">
+                <input type="checkbox" id="pref-usd-mep" onchange="guardarPrefUsdMep(this.checked)" style="margin-top:.15rem;flex-shrink:0">
+                <span>Cobro parte de mis ingresos en USD — convertir a ARS con dólar MEP en mi presupuesto</span>
+              </label>
+            </div>
 
-        <!-- Mi pareja / Workspace -->
-        <div class="chart-card" style="margin-top:1.5rem">
-          <div class="chart-title">Mi pareja</div>
-          <div id="workspace-panel">
-            <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
+            <!-- Mi pareja / Workspace -->
+            <div class="chart-card">
+              <div class="chart-title">Mi pareja</div>
+              <div id="workspace-panel">
+                <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
+              </div>
+            </div>
           </div>
-        </div>
+        </div><!-- /cfg-page-grid -->
 
       </div><!-- /page-config -->
 
