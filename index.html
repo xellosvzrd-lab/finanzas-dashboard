@@ -1720,7 +1720,7 @@
        con font-size computado <16px — varios forms/modales del archivo usan
        .84rem/.9rem/.81rem/.8rem (13-14.4px). Un solo piso genérico en vez de
        tocar cada selector por separado (form-group, edit-field, modal-recur,
-       rafaga-table, reparto-input, y cualquier otro que exista hoy o se
+       rafaga-form-col, reparto-input, y cualquier otro que exista hoy o se
        agregue después). Excluye checkbox/radio: no disparan zoom y su tamaño
        visual puede depender de font-size en estilos custom. */
     input:not([type="checkbox"]):not([type="radio"]), select, textarea {
@@ -1921,8 +1921,9 @@
     background: var(--modal-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius); box-shadow: var(--shadow);
-    width: 100%; max-width: 1100px; margin: auto;
+    width: 100%; max-width: 900px; margin: auto;
     animation: fadeUp .22s ease-out;
+    max-height: calc(100vh - 2rem); overflow-y: auto;
   }
   .rafaga-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -1930,55 +1931,37 @@
     border-bottom: 1px solid var(--border);
   }
   .rafaga-header h3 { font-size: 1rem; font-weight: 700; margin: 0; }
-  .rafaga-body { padding: 1rem 1.2rem; overflow-x: auto; }
-  .rafaga-table {
-    width: 100%; border-collapse: collapse; font-size: .82rem; min-width: 820px;
+
+  /* ─── Carga rápida: form + lista de la sesión ─────────────── */
+  .rafaga-split { display: flex; flex-direction: column; }
+  .rafaga-form-col { flex: 1; min-width: 0; padding: 1.1rem 1.4rem 1.3rem; }
+  .rafaga-side-col {
+    flex: none; background: var(--surface-2); border-top: 1px solid var(--line);
+    display: flex; flex-direction: column; max-height: 260px;
   }
-  .rafaga-table th {
-    text-align: left; padding: .4rem .5rem;
-    color: var(--text-muted); font-weight: 600;
-    text-transform: uppercase; font-size: .68rem; letter-spacing: .05em;
-    border-bottom: 1px solid var(--border); white-space: nowrap;
+  @media (min-width: 640px) {
+    .rafaga-split { flex-direction: row; }
+    .rafaga-side-col { width: 260px; border-top: none; border-left: 1px solid var(--line); max-height: none; }
   }
-  .rafaga-table td {
-    padding: .32rem .38rem; vertical-align: middle;
-    border-bottom: 1px solid var(--border);
+  .rafaga-side-head { padding: 18px 16px 12px; border-bottom: 1px solid var(--line); flex: none; }
+  .rafaga-side-lbl { font-size: 10.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-faint); }
+  .rafaga-side-total { font-size: 21px; font-weight: 700; margin-top: 5px; color: var(--text); }
+  .rafaga-side-count { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+  .rafaga-side-list { flex: 1; overflow-y: auto; padding: 6px 10px; }
+  .rafaga-side-item { display: flex; align-items: center; gap: 8px; padding: 8px 6px; border-radius: 10px; }
+  .rafaga-side-item:hover { background: rgba(255,255,255,.5); }
+  .rafaga-side-badge {
+    width: 24px; height: 24px; border-radius: 7px; flex: none;
+    background: var(--red-dim); color: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800;
   }
-  .rafaga-table td input, .rafaga-table td select {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px; color: var(--text);
-    padding: .3rem .42rem; font-size: .81rem; width: 100%;
-    transition: border-color .15s;
-  }
-  .rafaga-table td input:focus, .rafaga-table td select:focus {
-    outline: none; border-color: var(--accent);
-  }
-  .rafaga-table td input[type="date"] { min-width: 112px; }
-  .rafaga-table td select { min-width: 88px; }
-  .rafaga-desc { min-width: 130px !important; }
-  .td-del { width: 2rem; text-align: center; }
-  .rafaga-del-btn {
-    background: none; border: none; color: var(--text-muted);
-    font-size: 1rem; cursor: pointer; padding: .15rem .35rem;
-    border-radius: 5px; transition: background .15s, color .15s; line-height: 1;
-  }
-  .rafaga-del-btn:hover { background: var(--red-dim); color: var(--red); }
-  .rafaga-footer {
-    padding: .85rem 1.2rem 1.1rem;
-    display: flex; gap: .6rem; align-items: center;
-    border-top: 1px solid var(--border); flex-wrap: wrap;
-  }
-  .rafaga-add-btn {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    color: var(--text); border-radius: 8px;
-    padding: .42rem .88rem; font-size: .83rem;
-    cursor: pointer; transition: background .15s;
-  }
-  .rafaga-add-btn:hover { background: var(--accent-dim); }
-  .rafaga-count { color: var(--text-muted); font-size: .78rem; }
-  .rafaga-row-err td { background: var(--red-dim); }
+  .rafaga-side-badge.i { background: var(--green-dim); color: var(--green); }
+  .rafaga-side-mid { flex: 1; min-width: 0; }
+  .rafaga-side-cat { font-size: 12px; font-weight: 700; }
+  .rafaga-side-sub { font-size: 10px; color: var(--text-faint); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rafaga-side-amt { font-size: 12px; font-weight: 700; flex: none; }
+  .rafaga-side-amt.pos { color: var(--green); }
   .btn-rafaga {
     background: var(--yellow); color: var(--text); border: none; border-radius: 9px;
     padding: .42rem .95rem; font-size: .82rem; font-weight: 700;
@@ -4035,42 +4018,89 @@
 </div>
 
 <!-- MODAL MODO RÁFAGA -->
+<!-- Carga rápida (antes "Modo Ráfaga"): formulario de una transacción a la
+     vez + "Agregar y cargar otra" + lista de lo cargado en la sesión —
+     reemplaza el spreadsheet de N filas por el flujo del mockup Marfil
+     sereno (pedido explícito, ver docs/plans/2026-07-21-...-plan.md U8). -->
 <div class="rafaga-overlay" id="rafaga-overlay" onclick="if(event.target===this)cerrarRafaga()">
-  <div class="rafaga-modal" role="dialog" aria-modal="true" aria-labelledby="rafaga-title">
+  <div class="rafaga-modal rafaga-modal-v2" role="dialog" aria-modal="true" aria-labelledby="rafaga-title">
     <div class="rafaga-header">
-      <h3 id="rafaga-title">Modo Ráfaga — Carga múltiple</h3>
+      <h3 id="rafaga-title">⚡ Carga rápida</h3>
       <button class="edit-close-btn" onclick="cerrarRafaga()" title="Cerrar">✕</button>
     </div>
-    <div class="rafaga-body">
-      <table class="rafaga-table" id="rafaga-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Fecha</th>
-            <th>Descripción</th>
-            <th>Moneda</th>
-            <th>Monto</th>
-            <th>Categoría</th>
-            <th>Tipo</th>
-            <th>Resp.</th>
-            <th>Fuente</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="rafaga-tbody"></tbody>
-      </table>
+    <div class="rafaga-split">
+      <div class="rafaga-form-col">
+        <div class="form-row">
+          <div class="form-group full">
+            <label id="rf2-lbl-tipo">Tipo</label>
+            <div class="tipo-toggle" role="group" aria-labelledby="rf2-lbl-tipo">
+              <button type="button" class="tipo-btn active-expense" id="rf2-btn-gasto" onclick="_rafagaSetTipo('Gasto')">Gasto</button>
+              <button type="button" class="tipo-btn" id="rf2-btn-ingreso" onclick="_rafagaSetTipo('Ingreso')">Ingreso</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rf2-fecha">Fecha</label>
+            <input type="date" id="rf2-fecha">
+          </div>
+          <div class="form-group">
+            <label for="rf2-categoria">Categoría</label>
+            <select id="rf2-categoria"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rf2-monto" id="rf2-monto-label">Monto (ARS $)</label>
+            <input type="text" inputmode="decimal" id="rf2-monto" placeholder="0,00" oninput="formatearMiles(this)">
+          </div>
+          <div class="form-group">
+            <label id="rf2-lbl-moneda">Moneda</label>
+            <div class="moneda-toggle" role="group" aria-labelledby="rf2-lbl-moneda">
+              <button type="button" class="moneda-btn active-ars" id="rf2-btn-ars" onclick="_rafagaSetMoneda('ARS')">🇦🇷 ARS</button>
+              <button type="button" class="moneda-btn" id="rf2-btn-usd" onclick="_rafagaSetMoneda('USD')">🇺🇸 USD</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full">
+            <label for="rf2-responsabilidad">¿Cómo se divide?</label>
+            <select id="rf2-responsabilidad"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rf2-fuente">Fuente / Medio de pago</label>
+            <select id="rf2-fuente" onchange="_rafagaActualizarMesLiq2(this.value)">
+              <option value="">— Sin especificar —</option>
+            </select>
+          </div>
+          <div class="form-group" id="rf2-mes-liq-row" style="display:none">
+            <label for="rf2-mes-liq">Mes de liquidación</label>
+            <input type="month" id="rf2-mes-liq">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full">
+            <label for="rf2-descripcion">Descripción (opcional)</label>
+            <input type="text" id="rf2-descripcion" placeholder="¿En qué gastaste o de dónde vino?">
+          </div>
+        </div>
+        <div id="rafaga-msg" style="font-size:.82rem; min-height:1.2em;"></div>
+        <div style="display:flex; gap:.75rem; margin-top:.5rem">
+          <button class="btn btn-primary" id="rafaga-add-btn" onclick="_rafagaAgregarYCargarOtra()">+ Agregar y cargar otra</button>
+          <button class="btn btn-outline" onclick="cerrarRafaga()">Listo</button>
+        </div>
+      </div>
+      <div class="rafaga-side-col">
+        <div class="rafaga-side-head">
+          <div class="rafaga-side-lbl">Cargado en esta sesión</div>
+          <div class="rafaga-side-total" id="rafaga-side-total">$0</div>
+          <div class="rafaga-side-count" id="rafaga-side-count">0 transacciones</div>
+        </div>
+        <div class="rafaga-side-list" id="rafaga-side-list"></div>
+      </div>
     </div>
-    <div class="rafaga-footer">
-      <input type="number" id="rafaga-cant-agregar" min="1" value="1" step="1"
-             style="width:3.2rem;text-align:center;padding:.4rem .3rem;border-radius:8px;
-                    border:1px solid var(--border);background:var(--bg2);color:var(--text)"
-             aria-label="Cantidad de filas a agregar">
-      <button class="rafaga-add-btn" onclick="agregarFilasRafaga()">+ Agregar fila</button>
-      <span class="rafaga-count" id="rafaga-count">3 filas</span>
-      <button class="btn btn-outline" onclick="cerrarRafaga()" style="margin-left:auto">Cancelar</button>
-      <button class="btn btn-primary" id="rafaga-guardar-btn" onclick="guardarRafaga()">Guardar todo (3)</button>
-    </div>
-    <div id="rafaga-msg" style="padding:.4rem 1.2rem .8rem; font-size:.82rem; min-height:1.2em;"></div>
   </div>
 </div>
 
@@ -6572,21 +6602,36 @@ async function guardarCompraEnCuotas() {
 }
 
 // ─── MODO RÁFAGA ──────────────────────────────────────────────
+// ─── CARGA RÁPIDA (antes "Modo Ráfaga") ─────────────────────────────────
+// Una transacción a la vez + "Agregar y cargar otra" (guarda de una, no
+// junta un lote) + lista de lo cargado en la sesión. Reemplaza el
+// spreadsheet de N filas — ver docs/plans/2026-07-21-...-plan.md (U8).
+let _rafagaTipo = "Gasto";
+let _rafagaMoneda = "ARS";
+let _rafagaSesion = []; // transacciones ya guardadas en esta apertura del modal
+
 function abrirRafaga() {
   document.getElementById("rafaga-overlay").classList.add("open");
   document.getElementById("rafaga-msg").innerHTML = "";
-  const tbody = document.getElementById("rafaga-tbody");
-  if (tbody.children.length === 0) {
-    agregarFilaRafaga();
-    agregarFilaRafaga();
-    agregarFilaRafaga();
-  }
+  _rafagaSesion = [];
+  _renderRafagaSesion();
+  _rafagaSetTipo("Gasto");
+  _rafagaSetMoneda("ARS");
+  const fFecha = document.getElementById("rf2-fecha");
+  if (fFecha) fFecha.valueAsDate = new Date();
+  const fFuente = document.getElementById("rf2-fuente");
+  if (fFuente) fFuente.innerHTML = _optsFuenteRafaga();
+  const fResp = document.getElementById("rf2-responsabilidad");
+  if (fResp) fResp.innerHTML = _optsRespRafaga();
+  const fDesc = document.getElementById("rf2-descripcion");
+  if (fDesc) fDesc.value = "";
+  const fMonto = document.getElementById("rf2-monto");
+  if (fMonto) fMonto.value = "";
+  _rafagaActualizarMesLiq2("");
 }
 
 function cerrarRafaga() {
   document.getElementById("rafaga-overlay").classList.remove("open");
-  const btn = document.getElementById("rafaga-guardar-btn");
-  if (btn) btn.disabled = false;
 }
 
 function _optsCategRafaga(tipo) {
@@ -6599,148 +6644,117 @@ function _optsFuenteRafaga() {
     [...categFuentes, ...categFuentesTC].map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
 }
 
-function _rafagaActualizarMesLiq(sel) {
-  const inp = sel.parentElement.querySelector(".rf-mes-liq");
-  if (!inp) return;
-  if (_esFuenteTC(sel.value)) {
-    inp.style.display = "";
-  } else {
-    inp.style.display = "none";
-    inp.value = "";
-  }
-}
-
 function _optsRespRafaga() {
   return categResponsabilidad.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join("");
 }
 
-function agregarFilaRafaga() {
-  const tbody = document.getElementById("rafaga-tbody");
-  const idx   = tbody.children.length + 1;
-  const tr    = document.createElement("tr");
-  tr.innerHTML = `
-    <td style="color:var(--text-muted);text-align:center;font-size:.73rem;padding:.3rem .2rem">${idx}</td>
-    <td><input type="date" class="rf-fecha" aria-label="Fecha fila ${idx}"></td>
-    <td><input type="text" class="rf-desc rafaga-desc" placeholder="Descripción opcional" aria-label="Descripción fila ${idx}"></td>
-    <td>
-      <select class="rf-moneda" aria-label="Moneda fila ${idx}">
-        <option value="ARS">🇦🇷 ARS</option>
-        <option value="USD">🇺🇸 USD</option>
-      </select>
-    </td>
-    <td><input type="text" inputmode="decimal" class="rf-monto" placeholder="0,00" aria-label="Monto fila ${idx}" oninput="formatearMiles(this)"></td>
-    <td><select class="rf-cat" aria-label="Categoría fila ${idx}">${_optsCategRafaga("Gasto")}</select></td>
-    <td>
-      <select class="rf-tipo" aria-label="Tipo fila ${idx}" onchange="this.closest('tr').querySelector('.rf-cat').innerHTML=_optsCategRafaga(this.value)">
-        <option value="Gasto">Gasto</option>
-        <option value="Ingreso">Ingreso</option>
-      </select>
-    </td>
-    <td><select class="rf-resp" aria-label="Responsabilidad fila ${idx}">${_optsRespRafaga()}</select></td>
-    <td>
-      <select class="rf-fuente" aria-label="Fuente fila ${idx}" onchange="_rafagaActualizarMesLiq(this)">${_optsFuenteRafaga()}</select>
-      <input type="month" class="rf-mes-liq" style="display:none;margin-top:.3rem;width:100%" aria-label="Mes de liquidación fila ${idx}">
-    </td>
-    <td class="td-del"><button class="rafaga-del-btn" onclick="eliminarFilaRafaga(this)" title="Eliminar fila">✕</button></td>
-  `;
-  tbody.appendChild(tr);
-  actualizarContadorRafaga();
+function _rafagaSetTipo(tipo) {
+  _rafagaTipo = tipo;
+  document.getElementById("rf2-btn-gasto").className   = "tipo-btn " + (tipo === "Gasto"   ? "active-expense" : "");
+  document.getElementById("rf2-btn-ingreso").className = "tipo-btn " + (tipo === "Ingreso" ? "active-income"  : "");
+  document.getElementById("rf2-categoria").innerHTML = _optsCategRafaga(tipo);
 }
 
-function agregarFilasRafaga() {
-  const input = document.getElementById("rafaga-cant-agregar");
-  const cantidad = Math.max(1, parseInt(input?.value, 10) || 1);
-  for (let i = 0; i < cantidad; i++) agregarFilaRafaga();
+function _rafagaSetMoneda(m) {
+  _rafagaMoneda = m;
+  document.getElementById("rf2-btn-ars").className = "moneda-btn " + (m === "ARS" ? "active-ars" : "");
+  document.getElementById("rf2-btn-usd").className = "moneda-btn " + (m === "USD" ? "active-usd" : "");
+  document.getElementById("rf2-monto-label").textContent = m === "ARS" ? "Monto (ARS $)" : "Monto (USD U$S)";
 }
 
-function eliminarFilaRafaga(btn) {
-  const tbody = document.getElementById("rafaga-tbody");
-  if (tbody.children.length <= 1) return;
-  btn.closest("tr").remove();
-  Array.from(tbody.children).forEach((tr, i) => { tr.cells[0].textContent = i + 1; });
-  actualizarContadorRafaga();
+function _rafagaActualizarMesLiq2(fuente) {
+  const row = document.getElementById("rf2-mes-liq-row");
+  const inp = document.getElementById("rf2-mes-liq");
+  if (!row) return;
+  if (_esFuenteTC(fuente)) {
+    row.style.display = "";
+  } else {
+    row.style.display = "none";
+    if (inp) inp.value = "";
+  }
 }
 
-function actualizarContadorRafaga() {
-  const n = document.getElementById("rafaga-tbody").children.length;
-  document.getElementById("rafaga-count").textContent = `${n} fila${n !== 1 ? "s" : ""}`;
-  document.getElementById("rafaga-guardar-btn").textContent = `Guardar todo (${n})`;
+function _renderRafagaSesion() {
+  const totalEl = document.getElementById("rafaga-side-total");
+  const countEl = document.getElementById("rafaga-side-count");
+  const listEl  = document.getElementById("rafaga-side-list");
+  if (!listEl) return;
+  const total = _rafagaSesion
+    .filter(t => (t.moneda || "ARS") === "ARS")
+    .reduce((s, t) => s + Number(t.monto), 0);
+  if (totalEl) totalEl.textContent = fmt(total);
+  if (countEl) countEl.textContent = `${_rafagaSesion.length} transacci${_rafagaSesion.length === 1 ? "ón" : "ones"}`;
+  listEl.innerHTML = _rafagaSesion.slice().reverse().map(t => `
+    <div class="rafaga-side-item">
+      <div class="rafaga-side-badge ${t.tipo === "Ingreso" ? "i" : "g"}">${t.tipo === "Ingreso" ? "I" : "G"}</div>
+      <div class="rafaga-side-mid">
+        <div class="rafaga-side-cat">${escapeHtml(t.categoria)}</div>
+        <div class="rafaga-side-sub">${escapeHtml(t.fuente || "—")} · ${escapeHtml(t.responsabilidad || "Mío")}</div>
+      </div>
+      <div class="rafaga-side-amt ${t.tipo === "Ingreso" ? "pos" : ""}">${fmtMoneda(Math.abs(Number(t.monto)), t.moneda || "ARS")}</div>
+    </div>`).join("");
 }
 
-async function guardarRafaga() {
-  const tbody = document.getElementById("rafaga-tbody");
-  const msg   = document.getElementById("rafaga-msg");
+async function _rafagaAgregarYCargarOtra() {
+  const msg = document.getElementById("rafaga-msg");
   msg.innerHTML = "";
 
-  const validas = [];
-  let errores = 0;
+  const fecha   = document.getElementById("rf2-fecha").value;
+  const cat     = document.getElementById("rf2-categoria").value;
+  const monto   = parsearDecimal(document.getElementById("rf2-monto").value);
+  const desc    = document.getElementById("rf2-descripcion").value.trim();
+  const resp    = document.getElementById("rf2-responsabilidad").value;
+  const fuente  = document.getElementById("rf2-fuente").value;
+  const mesLiqInp = document.getElementById("rf2-mes-liq");
+  const mesLiq  = _esFuenteTC(fuente) ? (mesLiqInp?.value || "") : "";
 
-  Array.from(tbody.children).forEach(tr => {
-    const fecha  = tr.querySelector(".rf-fecha").value;
-    const tipo   = tr.querySelector(".rf-tipo").value;
-    const cat    = tr.querySelector(".rf-cat").value;
-    const monto  = parsearDecimal(tr.querySelector(".rf-monto").value);
-    const moneda = tr.querySelector(".rf-moneda").value;
-    const desc   = tr.querySelector(".rf-desc").value.trim();
-    const resp   = tr.querySelector(".rf-resp").value;
-    const fuente = tr.querySelector(".rf-fuente").value;
-    const mesLiqInp = tr.querySelector(".rf-mes-liq");
-    const mesLiq = _esFuenteTC(fuente) ? (mesLiqInp?.value || "") : "";
-
-    tr.classList.remove("rafaga-row-err");
-    const err = [];
-    if (!fecha) err.push("fecha");
-    if (!cat)   err.push("categoría");
-    if (isNaN(monto) || monto <= 0) err.push("monto");
-    if (_esFuenteTC(fuente) && !mesLiq) err.push("mes liquidación");
-
-    if (err.length) {
-      errores++;
-      tr.classList.add("rafaga-row-err");
-    } else {
-      validas.push({ fecha, tipo, categoria: cat, monto, descripcion: desc,
-                     usuario: USUARIO, responsabilidad: resp, fuente, moneda,
-                     mes_liquidacion: mesLiq || null });
-    }
-  });
-
-  if (errores > 0) {
-    msg.innerHTML = `<span style="color:var(--red)">⚠ ${errores} fila(s) con errores (marcadas). Completá fecha, categoría y monto.</span>`;
+  if (!fecha || !cat || isNaN(monto) || monto <= 0) {
+    msg.innerHTML = '<span style="color:var(--red)">Completá fecha, categoría y monto.</span>';
     return;
   }
-  if (!validas.length) {
-    msg.innerHTML = `<span style="color:var(--red)">No hay filas para guardar.</span>`;
+  if (_esFuenteTC(fuente) && !mesLiq) {
+    msg.innerHTML = '<span style="color:var(--red)">Seleccioná el mes de liquidación.</span>';
     return;
   }
 
-  const btn = document.getElementById("rafaga-guardar-btn");
+  const btn = document.getElementById("rafaga-add-btn");
   btn.disabled = true;
-  btn.textContent = "⏳ Guardando...";
+  btn.textContent = "⏳ Agregando...";
 
   try {
     const { data: { session: freshSession } } = await supabaseClient.auth.getSession();
     if (!freshSession) throw new Error("Sesión expirada — volvé a iniciar sesión.");
     supabaseSession = freshSession;
 
-    const rows = validas.map(v => ({
-      id: crypto.randomUUID(), ...v,
-      categoria_id: _getCategoriaId(v.categoria, v.tipo),
-      cuenta_id:    _getCuentaId(v.fuente),
+    const row = {
+      id: crypto.randomUUID(), fecha, tipo: _rafagaTipo, categoria: cat, monto,
+      descripcion: desc, usuario: USUARIO, responsabilidad: resp, fuente, moneda: _rafagaMoneda,
+      mes_liquidacion: mesLiq || null,
+      categoria_id: _getCategoriaId(cat, _rafagaTipo),
+      cuenta_id:    _getCuentaId(fuente),
       user_id: supabaseSession.user.id,
       workspace_id: miWorkspaceId()
-    }));
-    const { error } = await supabaseClient.from('transacciones').insert(rows);
+    };
+    const { data, error } = await supabaseClient.from('transacciones').insert(row).select().single();
     if (error) throw error;
-    showToast(`✅ ${validas.length} transacciones guardadas`, "ok");
-    cerrarRafaga();
-    document.getElementById("rafaga-tbody").innerHTML = "";
-    await cargarTodasTransacciones();
-    _renderApp();
+
+    allTransac.push({ ...data, monto: parseFloat(data.monto) });
+    _rafagaSesion.push(data);
+    _renderRafagaSesion();
+    cargarResumenMes();
+    cargarEvolucion();
+    filtrarTabla();
+
+    document.getElementById("rf2-monto").value = "";
+    document.getElementById("rf2-descripcion").value = "";
+    showToast("✅ Agregado", "ok");
+    if (navigator.vibrate) navigator.vibrate(50);
   } catch(e) {
-    msg.innerHTML = `<span style="color:var(--red)">❌ Error de conexión: ${escapeHtml(e.message)}</span>`;
-    btn.disabled = false;
-    btn.textContent = `Guardar todo (${validas.length})`;
+    msg.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message || String(e))}</span>`;
   }
+
+  btn.disabled = false;
+  btn.textContent = "+ Agregar y cargar otra";
 }
 
 // ─── COMPARTIDOS ──────────────────────────────────────────────
