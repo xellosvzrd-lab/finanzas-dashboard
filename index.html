@@ -1898,8 +1898,11 @@
   .edit-modal-footer { padding: .9rem 1.5rem 1.3rem; display: flex; gap: .6rem; justify-content: flex-end; border-top: 1px solid var(--border); }
 
   /* ─── MODAL MODO RÁFAGA ──────────────────────────────────── */
+  /* z-index por encima de .modal-nueva-overlay (500): "Carga múltiple" se
+     abre desde adentro del modal de Nueva transacción y tiene que quedar
+     arriba, no detrás. */
   .rafaga-overlay {
-    display: none; position: fixed; inset: 0; z-index: 400;
+    display: none; position: fixed; inset: 0; z-index: 600;
     background: var(--overlay); backdrop-filter: blur(4px);
     align-items: flex-start; justify-content: center;
     padding: 1rem; animation: fadeIn .18s ease-out; overflow-y: auto;
