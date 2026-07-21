@@ -801,24 +801,19 @@
 
   /* ─── INVERSIONES REDESIGN ──────────────────────────────── */
   .inv-hero-row    { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
+  /* Vidrio claro (Marfil sereno) en vez del card de color con texto blanco
+     que tenía antes — mismo tratamiento que .mm-hero (ver Unidad 2). */
   .inv-hero-card   { position: relative; overflow: hidden; border-radius: var(--r-lg);
-                      padding: 24px 28px; color: #fff;
-                      background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent) 0%, color-mix(in oklab, var(--brand-2) 20%, transparent) 100%);
+                      padding: 24px 28px; color: var(--text);
+                      background: var(--surface);
                       backdrop-filter: blur(var(--card-blur)) saturate(160%);
                       -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-                      border: 1px solid rgba(255,255,255,0.18);
-                      box-shadow: 0 18px 44px color-mix(in oklab, var(--brand) 28%, transparent), inset 0 1px 0 rgba(255,255,255,.25); }
-  .inv-hero-card::before {
-    content: "";
-    position: absolute; top: 0; left: 6%; right: 6%; height: 36%;
-    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0));
-    border-radius: var(--r-lg) var(--r-lg) 60% 60%;
-    pointer-events: none;
-  }
-  .inv-hero-eyebrow { font-size: 14px; font-weight: 600; opacity: .9; position: relative; }
-  .inv-hero-total   { font-size: clamp(26px, 9vw, 38px); font-weight: 700; line-height: 1.05; margin-top: 6px; position: relative; }
-  .inv-hero-usd     { font-size: 14px; opacity: .8; margin-top: 3px; position: relative; }
-  .inv-hero-sub     { font-size: 12.5px; opacity: .75; margin-top: 6px; position: relative; }
+                      border: 1px solid var(--line);
+                      box-shadow: var(--shadow-card); }
+  .inv-hero-eyebrow { font-size: 14px; font-weight: 600; color: var(--text-dim); position: relative; z-index: 1; }
+  .inv-hero-total   { font-size: clamp(26px, 9vw, 38px); font-weight: 700; line-height: 1.05; margin-top: 6px; position: relative; z-index: 1; color: var(--text); }
+  .inv-hero-usd     { font-size: 14px; color: var(--text-faint); margin-top: 3px; position: relative; z-index: 1; }
+  .inv-hero-sub     { font-size: 12.5px; color: var(--text-faint); margin-top: 6px; position: relative; z-index: 1; }
   .inv-alloc-card   { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
   .inv-alloc-title  { font-size: 14.5px; font-weight: 700; font-family: var(--font-display); }
   .inv-alloc-row    { display: flex; flex-direction: column; gap: 5px; }
@@ -842,7 +837,7 @@
     .inv-hero-row   { flex-direction: row; align-items: stretch; }
     .inv-hero-card  { flex: 1.1; }
     .inv-alloc-card { flex: 0.9; }
-    .inv-content-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .inv-content-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   }
   .plazo-form { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: .75rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
   .plazo-form input { padding: .45rem .6rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .85rem; font-family: inherit; width: 100%; box-sizing: border-box; }
@@ -1495,11 +1490,9 @@
     .cuotas-mes-sheet, .cuotas-card,
     .compromisos-card-box,
     .liq-inner, #modal-nombre > div,
-    #modal-invitacion > div {
-      background: #F6F4EF;
-    }
+    #modal-invitacion > div,
     .mm-hero, .inv-hero-card {
-      background: linear-gradient(150deg, var(--brand) 0%, var(--brand-2) 100%);
+      background: #F6F4EF;
     }
   }
   .bn-item {
@@ -3814,7 +3807,7 @@
         <div class="inv-hero-row">
           <!-- Patrimonio hero -->
           <div class="inv-hero-card" id="inv-hero-card">
-            <div style="position:absolute;width:200px;height:200px;border-radius:999px;right:-60px;top:-80px;background:rgba(255,255,255,.14);pointer-events:none"></div>
+            <div style="position:absolute;width:260px;height:260px;border-radius:999px;right:-70px;top:-90px;background:radial-gradient(closest-side, rgba(183,203,192,.55), rgba(246,244,239,0) 72%);filter:blur(6px);pointer-events:none"></div>
             <div class="inv-hero-eyebrow">🌱 Patrimonio invertido</div>
             <div class="num inv-hero-total" id="inv-hero-total-ars">—</div>
             <div class="inv-hero-usd" id="inv-hero-total-usd" style="display:none">≈ <span id="inv-hero-usd-val">—</span> USD</div>
@@ -3837,7 +3830,11 @@
           </div>
         </div><!-- /inv-hero-row -->
 
-        <!-- Content row: plazos + acciones en 2 cols (desktop) -->
+        <!-- Content row: Plazos fijos, Cripto, Acciones — 3 secciones (2 en
+             desktop hasta 1099px, 3 desde 1100px, ver media query). Cripto
+             y Acciones son la misma tabla real "acciones" (no hay campo de
+             tipo en la BD); se separan en pantalla con _esCripto(), que ya
+             existía para elegir de qué API traer la cotización. -->
         <div class="inv-content-row">
 
           <!-- Plazos Fijos -->
@@ -3854,15 +3851,25 @@
             <div id="inv-interes-total" class="inv-interes-total"></div>
           </div>
 
-          <!-- Activos & Cripto -->
+          <!-- Cripto -->
           <div class="inv-section">
             <div class="inv-section-hdr">
-              <h2 class="inv-section-title">📈 Activos & cripto</h2>
+              <h2 class="inv-section-title">₿ Cripto</h2>
               <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia">+ Agregar</button>
             </div>
             <div id="accion-form-wrap" style="display:none"></div>
-            <div id="accion-lista">
+            <div id="accion-lista-cripto">
               <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-line" style="width:60%"></div><div class="skeleton skeleton-line" style="width:50%"></div></div>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="inv-section">
+            <div class="inv-section-hdr">
+              <h2 class="inv-section-title">📈 Acciones</h2>
+              <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia">+ Agregar</button>
+            </div>
+            <div id="accion-lista-stocks">
               <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:45%"></div></div>
             </div>
             <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
@@ -10753,28 +10760,11 @@ function _iniciarAutoRefreshAcciones() {
   }
 }
 
-async function renderAcciones() {
-  const lista = document.getElementById("accion-lista");
-  const totalEl = document.getElementById("accion-total");
-  if (!lista) return;
-  const acciones = await loadAcciones();
-
-  _renderTotalesInversiones(); // render inmediato con valores de plazos + última cotización conocida
-
-  if (!acciones.length) {
-    _accionesTotalCache = { usd: 0, ars: 0 };
-    _renderTotalesInversiones();
-    lista.innerHTML = `<div style="text-align:center;padding:2rem 1rem">
-      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
-      <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">Sin acciones ni cripto</div>
-      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Sumá tu cartera para ver cotizaciones en vivo.</div>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()">+ Agregar tenencia</button>
-    </div>`;
-    if (totalEl) totalEl.innerHTML = "";
-    return;
-  }
-
-  lista.innerHTML = acciones.map(a => `
+// Cripto y Acciones son la misma tabla real ("acciones", sin campo tipo) —
+// se separan en 2 secciones en pantalla con _esCripto() (ya existía para
+// elegir de qué API traer la cotización), ver Unidad 13 rediseño Marfil sereno.
+function _accionCardHtml(a) {
+  return `
     <div class="plazo-card" id="accion-card-${a.id}">
       <div class="plazo-header">
         <div>
@@ -10793,7 +10783,39 @@ async function renderAcciones() {
           <button class="cfg-del-btn" onclick="eliminarAccion('${a.id}')" title="Eliminar" aria-label="Eliminar tenencia">✕</button>
         </div>
       </div>
-    </div>`).join("");
+    </div>`;
+}
+function _accionEmptyHtml(msg) {
+  return `<div style="text-align:center;padding:2rem 1rem">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+    <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">${msg}</div>
+    <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Sumá tu cartera para ver cotizaciones en vivo.</div>
+    <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()">+ Agregar tenencia</button>
+  </div>`;
+}
+
+async function renderAcciones() {
+  const listaCripto = document.getElementById("accion-lista-cripto");
+  const listaStocks = document.getElementById("accion-lista-stocks");
+  const totalEl = document.getElementById("accion-total");
+  if (!listaCripto || !listaStocks) return;
+  const acciones = await loadAcciones();
+
+  _renderTotalesInversiones(); // render inmediato con valores de plazos + última cotización conocida
+
+  if (!acciones.length) {
+    _accionesTotalCache = { usd: 0, ars: 0 };
+    _renderTotalesInversiones();
+    listaCripto.innerHTML = _accionEmptyHtml("Sin cripto");
+    listaStocks.innerHTML = _accionEmptyHtml("Sin acciones");
+    if (totalEl) totalEl.innerHTML = "";
+    return;
+  }
+
+  const cripto = acciones.filter(a => _esCripto(a.simbolo));
+  const stocks = acciones.filter(a => !_esCripto(a.simbolo));
+  listaCripto.innerHTML = cripto.length ? cripto.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin cripto");
+  listaStocks.innerHTML = stocks.length ? stocks.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin acciones");
 
   let totalUSD = 0, totalARS = 0;
   await Promise.all(acciones.map(async a => {
