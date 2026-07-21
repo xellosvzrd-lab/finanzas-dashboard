@@ -26,10 +26,9 @@
 - Current working branch: `feature/voice-capture` (1 commit ahead of main as of 2026-07-02)
 
 ## UI/Design Preferences
-- Liquid glass palette — vidrio translúcido índigo (unificado, sin distinción Daniel/Ama)
-- Users: Daniel y Ama pueden usar cualquiera de los dos temas (dark/light) — no hay una asociación fija por usuario, cualquiera puede togglear
+- **"Marfil sereno" (2026-07-21 en adelante)** — reemplazó el liquid glass índigo dark/light. Un solo modo, claro: fondo hueso `#F6F4EF`, acento verde pino `#33544A`, superficies de vidrio (`--card-blur: 24px`, bordes sutiles). Sin distinción Daniel/Ama. Ver `docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md` para la fuente de verdad (12 mockups en Claude Artifacts) y las unidades de implementación.
+- **No hay tema oscuro.** El toggle de tema (`toggleTheme()`, `btn-theme-toggle`, `data-theme`, `localStorage['fin-theme']`) se eliminó — decisión de producto, el rediseño solo se validó en claro. Si se quiere un dark en el futuro es una decisión nueva y explícita (con su propio mockup), no una reconciliación de este cambio.
 - `PARTNER` variable is dynamic — use it for responsibility labels, never hardcode
-- `[data-theme="light"]` tiene su propia paleta clara (índigo pastel) — el toggle de tema (`toggleTheme()`) vuelve a cambiar el look real, disponible para cualquiera de los dos usuarios
 - Chart.js for all charts with animations enabled
 - Mobile responsiveness is critical — test for overflow and max-width constraints on every UI change
 
@@ -272,11 +271,14 @@ async function cargarTodasTransacciones() {
 
 ## 9. Patrones CSS importantes
 
-### Variables de tema (dark índigo + light índigo pastel)
+### Tokens de tema — "Marfil sereno" (un solo modo, sin `data-theme`)
 ```css
-:root[data-theme="dark"]  { /* tema oscuro por defecto */ }
-:root[data-theme="light"] { /* tema claro real, misma marca índigo */ }
+:root { /* --font-display, --font-text, --font-serif, radii, easing */ }
+:root { /* --bg, --surface, --line, --text, --brand (#33544A), --pos, --neg, ...
+           + alias legacy: --card, --accent, --green, --red, --yellow, etc.
+           Cambiar el look global = editar SOLO estos dos bloques. */ }
 ```
+Utilidades de vidrio reusables (agregar donde el mockup lo pida, no globalmente): `.glass-sheen` (brillo animado), `.glass-blob` (halo difuminado de fondo).
 
 ### Clases semánticas clave
 ```css
