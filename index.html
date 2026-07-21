@@ -1421,7 +1421,7 @@
   @supports not (backdrop-filter: blur(1px)) {
     .card, .chart-card, .kpi-card,
     .plazo-card, .comp-balance-card,
-    .topnav, .bn-pill, .sidebar,
+    .topnav, .bn-pill, .top-strip,
     .rafaga-modal, .cuotas-modal,
     .modal-recur, .edit-modal,
     .cuotas-mes-sheet, .cuotas-card,
@@ -1987,11 +1987,9 @@
   .topnav-logout:hover { color: var(--text); }
   @media (max-width: 768px) { .topnav { display: none; } }
 
-  /* ─── SIDEBAR (desktop ≥ 860px) ─────────────────────────── */
-  .sidebar { display: none; }
   @media (min-width: 860px) {
     .bottom-nav{ display: none !important; }
-    .layout    { display: flex; }
+    .layout    { display: flex; flex-direction: column; }
     .main { padding: 22px 30px 3rem; }
   }
   @media (min-width: 769px) and (max-width: 859px) {
@@ -2076,39 +2074,29 @@
   .trans-mobile-badge.comp { background: var(--brand-soft); color: var(--brand); }
   .trans-mobile-badge.usd  { background: var(--surface-3); color: var(--text-dim); }
 
+  /* ─── FRANJA SUPERIOR (top-strip, desktop/tablet ≥769px) ────
+     Logo "Finanzas" + usuario/avatar + "Workspace con {PARTNER}" —
+     chrome fijo de toda la app, no se relocaliza por página (a
+     diferencia del nav-row). Reemplaza al viejo sidebar (dormant,
+     resabio del MP Style revertido, eliminado). */
+  .top-strip { display: none; }
+  @media (min-width: 769px) {
+    .top-strip {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 30px; border-bottom: 1px solid var(--line);
+    }
+  }
   .sidebar-logo {
     display: flex; align-items: center; gap: 10px;
-    padding: 4px 10px 22px;
   }
   .sidebar-logo-icon {
     width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
     background: linear-gradient(150deg, var(--brand), var(--brand-2));
     display: flex; align-items: center; justify-content: center; font-size: 18px;
   }
-  .sidebar-logo-text { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--text); }
-  .sidebar-nav { display: flex; flex-direction: column; gap: 3px; }
-  .sidebar .nav-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px; border-radius: 12px;
-    background: none; border: 1px solid transparent; cursor: pointer;
-    color: var(--text-dim); font-weight: 600; font-size: 14.5px;
-    font-family: inherit; text-align: left; width: 100%;
-    transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
-  }
-  .sidebar .nav-item:hover { background: var(--glass); color: var(--text); border-color: var(--glass-border); }
-  .sidebar .nav-item.active {
-    color: var(--white); font-weight: 700;
-    background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent), color-mix(in oklab, var(--brand-2) 20%, transparent));
-    border-color: var(--glass-border);
-    backdrop-filter: blur(10px) saturate(160%);
-    -webkit-backdrop-filter: blur(10px) saturate(160%);
-    box-shadow: 0 2px 12px color-mix(in oklab, var(--brand) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.3);
-  }
-  .sidebar .nav-item.active i, .sidebar .nav-item.active svg { color: var(--white); }
-  .sidebar-spacer { flex: 1; }
-  .sidebar-footer {
+  .sidebar-logo-text { font-family: var(--font-serif); font-style: italic; font-weight: 700; font-size: 17px; color: var(--text); }
+  .top-strip-user {
     display: flex; align-items: center; gap: 10px;
-    padding: 10px 8px; border-top: 1px solid var(--line);
   }
   .sidebar-avatar {
     width: 34px; height: 34px; border-radius: 999px; flex-shrink: 0;
@@ -2726,24 +2714,16 @@
 <div id="app">
   <div class="layout">
 
-    <!-- Sidebar (desktop) -->
-    <aside class="sidebar" id="sidebar">
+    <!-- Franja superior (desktop/tablet ≥769px): logo + usuario, chrome de
+         toda la app — no se relocaliza por página, a diferencia del nav-row. -->
+    <div class="top-strip" id="top-strip">
       <div class="sidebar-logo">
         <div class="sidebar-logo-icon">💰</div>
         <span class="sidebar-logo-text">Finanzas</span>
       </div>
-      <nav class="sidebar-nav">
-        <button class="nav-item" onclick="navegarA('presupuesto')"><i data-lucide="home" width="19" height="19"></i><span>Mi mes</span></button>
-        <button class="nav-item" onclick="navegarA('transacciones')"><i data-lucide="receipt" width="19" height="19"></i><span>Transacciones</span></button>
-        <button class="nav-item" onclick="navegarA('compartidos')"><i data-lucide="users" width="19" height="19"></i><span>Compartidos</span></button>
-        <button class="nav-item" onclick="navegarA('config')"><i data-lucide="tag" width="19" height="19"></i><span>Categorías</span></button>
-        <button class="nav-item" onclick="navegarA('inversiones')"><i data-lucide="trending-up" width="19" height="19"></i><span>Inversiones</span></button>
-        <button class="nav-item" onclick="navegarA('resumen')"><i data-lucide="bar-chart-2" width="19" height="19"></i><span>Resumen</span></button>
-      </nav>
-      <div class="sidebar-spacer"></div>
-      <div class="sidebar-footer">
+      <div class="top-strip-user">
         <div class="sidebar-avatar" id="sidebar-avatar">D</div>
-        <div style="flex:1;min-width:0">
+        <div style="min-width:0">
           <div class="sidebar-username" id="sidebar-user"></div>
           <div class="sidebar-usersub" id="sidebar-usersub">Mi cuenta</div>
         </div>
@@ -2751,7 +2731,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
       </div>
-    </aside>
+    </div>
 
     <!-- MAIN -->
     <main class="main">
@@ -4732,6 +4712,8 @@ function _actualizarStringsUsuario() {
   if (noteP) noteP.textContent = PARTNER ? "De " + PARTNER : "De tu pareja";
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) sidebarUser.textContent = USUARIO;
+  const sidebarUsersub = document.getElementById("sidebar-usersub");
+  if (sidebarUsersub) sidebarUsersub.textContent = PARTNER ? `Workspace con ${PARTNER}` : "Sin pareja invitada";
   const greeting = document.getElementById("mm-greeting");
   if (greeting) greeting.textContent = `Hola, ${USUARIO} 👋`;
   const sidebarAvatar = document.getElementById("sidebar-avatar");
@@ -7567,11 +7549,6 @@ function navegarA(pagina) {
   }
 
   _renderNavRow(pagina);
-
-  document.querySelectorAll(".sidebar .nav-item").forEach((n, i) => {
-    const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
-    n.classList.toggle("active", i === navMap[pagina]);
-  });
 
   // Bottom nav (mobile)
   ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config","bn-inversiones","bn-resumen"].forEach(id => {
