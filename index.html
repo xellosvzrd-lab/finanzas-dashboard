@@ -1680,13 +1680,7 @@
     /* Celdas más compactas en móvil */
     tbody td, thead th { padding: .55rem .65rem; }
 
-    /* Filtros en columna para mejor uso del espacio táctil */
-    .table-filters { flex-direction: column; gap: .5rem; }
-    .table-filters > * { width: 100%; box-sizing: border-box; }
-    .table-filters select, .table-filters input { width: 100%; }
-    .multi-select-wrap { width: 100%; }
-    .multi-select-btn { width: 100%; justify-content: space-between; }
-    .multi-select-panel { width: 100%; min-width: unset; max-height: 240px; }
+    .multi-select-panel { width: 240px; min-width: unset; max-height: 240px; }
 
     /* Subtotal bar: más compacto */
     .tabla-subtotal { gap: .6rem; padding: .45rem .75rem; font-size: .8rem; }
@@ -1709,8 +1703,17 @@
        y responsabilidad ya están cubiertos por los chips de abajo
        (Todos/Ingresos/Gastos/Compartido), fuente sigue sin mostrarse. */
     .table-filters select:not(#fil-mes):not(#fil-anio) { display: none; }
-    .table-filters { flex-wrap: wrap; gap: .4rem; }
-    #fil-buscar { width: 100% !important; }
+    /* Barra deslizable horizontal (como el mockup) — nada de wrap, cada
+       filtro conserva su ancho de contenido y se scrollea en una fila. */
+    .table-filters {
+      flex-wrap: nowrap; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px; margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .table-filters::-webkit-scrollbar { display: none; }
+    .table-filters > * { flex: none; width: auto; }
+    .multi-select-wrap { flex: none; }
+    .fil-buscar-input { width: 100% !important; }
     .pres-bar-wrap { min-width: auto; }
     .pres-input { width: 88px; }
     .pres-note { font-size: .73rem; }
