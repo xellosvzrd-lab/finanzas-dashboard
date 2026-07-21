@@ -1949,7 +1949,7 @@
   .rafaga-side-total { font-size: 21px; font-weight: 700; margin-top: 5px; color: var(--text); }
   .rafaga-side-count { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
   .rafaga-side-list { flex: 1; overflow-y: auto; padding: 6px 10px; }
-  .rafaga-side-item { display: flex; align-items: center; gap: 8px; padding: 8px 6px; border-radius: 10px; }
+  .rafaga-side-item { display: flex; align-items: center; gap: 8px; padding: 8px 6px; border-radius: 10px; cursor: pointer; }
   .rafaga-side-item:hover { background: rgba(255,255,255,.5); }
   .rafaga-side-badge {
     width: 24px; height: 24px; border-radius: 7px; flex: none;
@@ -6235,6 +6235,16 @@ async function guardarEdicionTransaccion() {
             mes_liquidacion: mesLiq || null }
         : t
     );
+    // Si la transacción editada venía de Carga rápida (ya guardada en la
+    // sesión de _rafagaSesion), sincronizar ahí también — si no, el total
+    // y la lista lateral del modal quedan con el valor viejo.
+    _rafagaSesion = _rafagaSesion.map(t =>
+      t.id === editandoId
+        ? { ...t, fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda,
+            mes_liquidacion: mesLiq || null }
+        : t
+    );
+    _renderRafagaSesion();
     guardarCacheTransac();
     cerrarEditorTransaccion();
     filtrarTabla();
@@ -6587,7 +6597,7 @@ function _renderRafagaSesion() {
   if (totalEl) totalEl.textContent = fmt(total);
   if (countEl) countEl.textContent = `${_rafagaSesion.length} transacci${_rafagaSesion.length === 1 ? "ón" : "ones"}`;
   listEl.innerHTML = _rafagaSesion.slice().reverse().map(t => `
-    <div class="rafaga-side-item">
+    <div class="rafaga-side-item" onclick="abrirEditorTransaccion('${t.id}')" title="Editar esta transacción">
       <div class="rafaga-side-badge ${t.tipo === "Ingreso" ? "i" : "g"}">${t.tipo === "Ingreso" ? "I" : "G"}</div>
       <div class="rafaga-side-mid">
         <div class="rafaga-side-cat">${escapeHtml(t.categoria)}</div>
