@@ -10665,11 +10665,39 @@ function _renderModalInvBody() {
   form.innerHTML = _modalInvTipo === "plazo" ? _renderFormPlazo(null) : _renderFormAccion(null);
 }
 
+// Vencimiento calculado a partir de "Plazo (días)" + fecha de inicio, en vez
+// de un segundo date-picker manual — clon del mockup
+// agregar-inversion-desktop.html (campo "Plazo" + "Vencimiento" auto-
+// calculado). Sigue guardando fecha_vencimiento como fecha real, no cambia
+// el schema — solo cómo se completa en el form.
+function _calcVencPlazo(inicioStr, dias) {
+  if (!inicioStr || !dias || dias <= 0) return "";
+  const iniD = new Date(inicioStr + "T00:00:00");
+  const vencD = new Date(iniD.getTime() + dias * 86400000);
+  return `${vencD.getFullYear()}-${String(vencD.getMonth()+1).padStart(2,"0")}-${String(vencD.getDate()).padStart(2,"0")}`;
+}
+
+function _actualizarVencPlazo() {
+  const ini  = document.getElementById("pf-inicio")?.value;
+  const dias = parseInt(document.getElementById("pf-dias")?.value, 10);
+  const venc = _calcVencPlazo(ini, dias);
+  const vencInput = document.getElementById("pf-venc");
+  const txt = document.getElementById("pf-venc-txt");
+  if (vencInput) vencInput.value = venc;
+  if (txt) txt.textContent = venc ? fmtFecha(venc) : "—";
+}
+
 function _renderFormPlazo(p) {
   // Fecha local, no UTC — toISOString() muestra el día siguiente después de las 21hs ART
   const _hoyD = new Date();
   const hoy = `${_hoyD.getFullYear()}-${String(_hoyD.getMonth()+1).padStart(2,"0")}-${String(_hoyD.getDate()).padStart(2,"0")}`;
   const moneda = p?.moneda || "ARS";
+  const inicioVal = p?.fechaInicio || hoy;
+  // Al editar, "Plazo (días)" se calcula a partir de las 2 fechas guardadas
+  // (puede no coincidir con un valor redondo si se cargó a mano antes de
+  // este campo existir — sigue siendo editable).
+  const diasVal = p ? Math.round((new Date(p.fechaVencimiento + "T00:00:00") - new Date(p.fechaInicio + "T00:00:00")) / 86400000) : "";
+  const vencVal = p?.fechaVencimiento || _calcVencPlazo(inicioVal, diasVal);
   return `<div class="plazo-form">
     ${p ? `<input type="hidden" id="pf-id" value="${p.id}">` : ""}
     <input class="plazo-form-full" id="pf-desc" placeholder="Descripción (ej: Plazo Fijo Nación)" type="text" value="${escapeHtml(p?.descripcion || '')}">
@@ -10679,8 +10707,12 @@ function _renderFormPlazo(p) {
       <option value="USD"${moneda==="USD"?" selected":""}>USD</option>
     </select>
     <input id="pf-tna" placeholder="TNA %" type="text" inputmode="decimal" value="${p?.tna || ''}">
-    <input id="pf-inicio" type="date" value="${p?.fechaInicio || hoy}">
-    <input id="pf-venc" type="date" value="${p?.fechaVencimiento || ''}">
+    <input id="pf-dias" placeholder="Plazo (días)" type="text" inputmode="numeric" value="${diasVal}" oninput="_actualizarVencPlazo()">
+    <input id="pf-inicio" type="date" value="${inicioVal}" oninput="_actualizarVencPlazo()">
+    <input type="hidden" id="pf-venc" value="${vencVal}">
+    <div class="plazo-form-full" style="font-size:.78rem;color:var(--text-muted)">
+      Vencimiento: <strong id="pf-venc-txt">${vencVal ? fmtFecha(vencVal) : "—"}</strong> · calculado automáticamente a partir del plazo
+    </div>
     <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
       <button class="btn" style="font-size:.82rem" onclick="cerrarFormPlazo()">Cancelar</button>
       <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPlazo()">${p ? "Actualizar" : "Guardar"}</button>
