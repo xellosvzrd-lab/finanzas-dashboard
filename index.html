@@ -10662,7 +10662,7 @@ function _renderModalInvTypeRow() {
 function _renderModalInvBody() {
   const form = document.getElementById("modal-inv-form");
   if (!form) return;
-  form.innerHTML = _modalInvTipo === "plazo" ? _renderFormPlazo(null) : _renderFormAccion(null);
+  form.innerHTML = _modalInvTipo === "plazo" ? _renderFormPlazo(null) : _renderFormAccion(null, _modalInvTipo);
 }
 
 // Vencimiento calculado a partir de "Plazo (días)" + fecha de inicio, en vez
@@ -11023,17 +11023,26 @@ async function renderAcciones() {
   _renderTotalesInversiones();
 }
 
-function _renderFormAccion(a) {
-  const hint = `<div class="plazo-form-full" style="font-size:.72rem;color:var(--text-muted);padding:.1rem 0">
-    Acciones argentinas: ticker + <strong>.BA</strong> (ej: GGAL.BA) · Cripto: ticker + <strong>-USD</strong> (ej: BTC-USD)
-  </div>`;
+// tipo ('cripto'|'stocks') solo cambia el placeholder/hint del símbolo —
+// Cripto y Acciones son la misma tabla real sin campo de tipo propio
+// (_esCripto() clasifica por el formato del símbolo), así que no hay campos
+// distintos que mostrar, pero antes el form era idéntico sin importar qué
+// pestaña del modal "Agregar inversión" estuviera activa, lo cual no daba
+// ninguna pista del formato de ticker esperado para ese tipo.
+function _renderFormAccion(a, tipo) {
+  const esCripto = a ? _esCripto(a.simbolo) : tipo === "cripto";
+  const placeholder = esCripto ? "Símbolo (ej: BTC-USD, ETH-USD)" : "Símbolo (ej: AAPL, GGAL.BA)";
+  const hint = esCripto
+    ? `Ticker + <strong>-USD</strong> (ej: BTC-USD, ETH-USD)`
+    : `Ticker de EE.UU. (ej: AAPL) o argentino + <strong>.BA</strong> (ej: GGAL.BA)`;
+  const hintHtml = `<div class="plazo-form-full" style="font-size:.72rem;color:var(--text-muted);padding:.1rem 0">${hint}</div>`;
   return `<div class="plazo-form">
     ${a ? `<input type="hidden" id="af-id" value="${a.id}">` : ""}
-    <input id="af-simbolo" placeholder="Símbolo (ej: AAPL, BTC-USD, GGAL.BA)" type="text" class="plazo-form-full" style="text-transform:uppercase" value="${a?.simbolo || ''}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
+    <input id="af-simbolo" placeholder="${placeholder}" type="text" class="plazo-form-full" style="text-transform:uppercase" value="${a?.simbolo || ''}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
     <input id="af-cantidad" placeholder="Cantidad / tenencia" type="text" inputmode="decimal" value="${a?.cantidad || ''}">
     <input id="af-precio-compra" placeholder="Precio compra (opcional, para P&amp;L)" type="text" inputmode="decimal" value="${a?.precio_compra ?? ''}">
     <input id="af-nombre" placeholder="Nombre (opcional)" type="text" value="${escapeHtml(a?.nombre || '')}">
-    ${a ? "" : hint}
+    ${a ? "" : hintHtml}
     <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
       <button class="btn" style="font-size:.82rem" onclick="cerrarFormAccion()">Cancelar</button>
       <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarAccion()">${a ? "Actualizar" : "Guardar"}</button>
@@ -11055,7 +11064,7 @@ function abrirFormAccion(tipo) {
   const wrap = document.getElementById(_accionWrapId(tipo));
   if (!wrap) return;
   wrap.style.display = "";
-  wrap.innerHTML = _renderFormAccion(null);
+  wrap.innerHTML = _renderFormAccion(null, tipo);
 }
 
 function editarAccion(id) {
