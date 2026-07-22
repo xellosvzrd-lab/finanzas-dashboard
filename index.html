@@ -138,17 +138,6 @@
   @media (prefers-reduced-motion: reduce) {
     .glass-sheen::before { animation: none; opacity: .4; transform: translateX(160px) rotate(9deg); }
   }
-  .glass-blob {
-    position: absolute; inset: -40% -30% auto -30%; height: 420px; border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(183,203,192,.55), rgba(246,244,239,0) 72%);
-    filter: blur(6px); pointer-events: none;
-    animation: glass-drift 16s ease-in-out infinite alternate;
-  }
-  @keyframes glass-drift {
-    from { transform: translate(-2%,-2%) scale(1); }
-    to   { transform: translate(3%,4%) scale(1.08); }
-  }
-
   /* ─── U2: Mi mes — oculto temporalmente, fuera del alcance del mockup
      Marfil sereno (docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md).
      HTML/JS quedan intactos — es solo display:none, no se borró nada.
@@ -6120,15 +6109,26 @@ function _renderMobileList(datos) {
           ? `<span class="trans-mobile-badge comp">÷ ${escapeHtml(PARTNER)}</span>` : "";
         const subline = [t.descripcion, t.fuente].filter(Boolean).map(escapeHtml).join(" · ");
         const monto   = fmtMoneda(Math.abs(Number(t.monto)), mon);
+        // Badge de cuota — se había perdido al reemplazar la tabla vieja por
+        // esta lista (la tabla sí lo tenía); sin esto no había forma de ver
+        // desde Transacciones que una fila es parte de una compra en cuotas.
+        const cuotaBadge = (t.cuota_nro && t.cuota_total)
+          ? ` <span class="badge-cuota" role="button" tabindex="0"
+                  data-compra-id="${t.compra_id}"
+                  onclick="event.stopPropagation();_abrirModalCuotas(this.dataset.compraId)"
+                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();_abrirModalCuotas(this.dataset.compraId)}"
+                  title="Ver cuotas">[${t.cuota_nro}/${t.cuota_total}]</span>`
+          : "";
         return `<div class="trans-mobile-item" onclick="abrirEditorTransaccion('${t.id}')">
           <div class="trans-mobile-icon" style="background:${iconBg}">${emoji}</div>
           <div class="trans-mobile-body">
-            <div class="trans-mobile-cat">${escapeHtml(t.categoria)}${respBadge}</div>
+            <div class="trans-mobile-cat">${escapeHtml(t.categoria)}${respBadge}${cuotaBadge}</div>
             ${subline ? `<div class="trans-mobile-desc">${subline}</div>` : ""}
           </div>
           <div class="trans-mobile-right">
             <div class="trans-mobile-amount ${isPos ? "pos" : "neg"}">${isPos ? "+" : "−"}${monto}</div>
           </div>
+          <button class="delete-btn trans-mobile-del-btn" onclick="event.stopPropagation();duplicarTransaccion('${t.id}')" title="Duplicar" aria-label="Duplicar transacción">${IC_COPY}</button>
           <button class="delete-btn trans-mobile-del-btn" onclick="event.stopPropagation();eliminarTransaccion('${t.id}')" title="Eliminar" aria-label="Eliminar transacción">${IC_TRASH}</button>
         </div>`;
       }).join("");
@@ -6240,6 +6240,11 @@ function _cancelarDelete(id) {
 async function _ejecutarDelete(id) {
   if (_pendingDelete && _pendingDelete.id === id) _pendingDelete = null;
   allTransac = allTransac.filter(t => t.id !== id);
+  // Igual que guardarEdicionTransaccion(), sincronizar _rafagaSesion si la
+  // transacción borrada venía de esa sesión — si no, el total de Carga
+  // rápida queda contando una fila que ya no existe.
+  _rafagaSesion = _rafagaSesion.filter(t => t.id !== id);
+  _renderRafagaSesion();
   guardarCacheTransac();
   filtrarTabla();
   cargarResumenMes();
@@ -8761,6 +8766,9 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   const diasRestantes = esEsteMes
     ? Math.max(1, new Date(anio, mes, 0).getDate() - hoy.getDate() + 1)
     : 0;
+  // El último día del mes diasRestantes da exactamente 1 — singular real,
+  // no "1 días".
+  const diasTxt = `${diasRestantes} día${diasRestantes === 1 ? "" : "s"} más a este ritmo`;
 
   // Sub del hero: "$X/día disponible · N días más a este ritmo" — clon del
   // mockup, reemplaza las 3 stat-cards (Por día/En USD/Días restantes) que
@@ -8769,13 +8777,13 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   if (heroSub) {
     if (esEsteMes && saldoReal > 0) {
       const porDia = Math.round(saldoReal / diasRestantes);
-      heroSub.innerHTML = `<strong class="num">${fmt(porDia)}</strong>/día disponible · ${diasRestantes} días más a este ritmo`;
+      heroSub.innerHTML = `<strong class="num">${fmt(porDia)}</strong>/día disponible · ${diasTxt}`;
     } else if (esEsteMes) {
       // Sin saldo positivo (sueldo $0 o gasto que ya lo superó) — se sigue
       // mostrando la cuenta de días del mes en vez de caer al texto viejo
       // "Sueldo $0 − gastado $0", que al lado del "$0" grande de arriba
       // se leía como si repitiera el mismo número dos veces.
-      heroSub.textContent = `Sin saldo disponible este mes · ${diasRestantes} días más a este ritmo`;
+      heroSub.textContent = `Sin saldo disponible este mes · ${diasTxt}`;
     } else {
       heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
     }
@@ -10783,9 +10791,12 @@ function cerrarFormPlazo() {
   if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
   // Si el form se estaba mostrando dentro del modal "Agregar inversión"
   // (Cancelar o Guardar exitoso), cerrarlo también — abrirModalInversion()
-  // vuelve a abrirlo después si corresponde, no se pisan.
-  const overlay = document.getElementById("modal-inv-overlay");
-  if (overlay) overlay.classList.remove("open");
+  // vuelve a abrirlo después si corresponde, no se pisan. Iba directo a
+  // overlay.classList.remove("open") sin limpiar #modal-inv-form: dejaba
+  // un pf-monto/pf-desc/etc. fantasma ahí adentro (oculto por el overlay,
+  // pero seguía en el DOM con el mismo id que el form inline) hasta la
+  // próxima vez que se abriera el modal — cerrarModalInversion() sí limpia.
+  cerrarModalInversion();
 }
 
 async function guardarPlazo() {
@@ -11081,7 +11092,7 @@ function _renderFormAccion(a, tipo) {
     ${a ? `<input type="hidden" id="af-id" value="${a.id}">` : ""}
     <div class="pf-field plazo-form-full">
       <label for="af-simbolo">Símbolo</label>
-      <input id="af-simbolo" placeholder="${placeholder}" type="text" style="text-transform:uppercase" value="${a?.simbolo || ''}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
+      <input id="af-simbolo" placeholder="${placeholder}" type="text" style="text-transform:uppercase" value="${escapeHtml(a?.simbolo || '')}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
     </div>
     ${a ? "" : hintHtml}
     <div class="pf-field">
@@ -11128,10 +11139,9 @@ function cerrarFormAccion() {
     const wrap = document.getElementById(id);
     if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
   });
-  // Mismo motivo que en cerrarFormPlazo(): si el form estaba en el modal
-  // "Agregar inversión", cerrarlo también.
-  const overlay = document.getElementById("modal-inv-overlay");
-  if (overlay) overlay.classList.remove("open");
+  // Mismo motivo/mismo fix que en cerrarFormPlazo(): cerrarModalInversion()
+  // también limpia #modal-inv-form, no solo oculta el overlay.
+  cerrarModalInversion();
 }
 
 async function guardarAccion() {
