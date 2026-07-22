@@ -225,27 +225,51 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* ─── PANTALLA DE CONFIGURACIÓN ────────────────────────── */
+  /* ─── PANTALLA DE LOGIN — panel partido, corte diagonal (dirección "E"
+     de los mockups Marfil sereno) ──────────────────────────────────── */
   #setup-screen {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     min-height: 100vh;
-    padding: 2rem;
-    background: radial-gradient(ellipse at 50% 0%, rgba(200,132,90,0.14) 0%, var(--bg) 60%);
+    background: var(--bg);
   }
-  .setup-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--accent);
-    border-radius: var(--radius);
-    padding: 3rem 2.5rem 2.5rem;
-    width: 100%;
-    max-width: 480px;
-    box-shadow: var(--shadow), 0 24px 64px rgba(200,132,90,0.12), 0 0 0 1px rgba(200,132,90,0.06);
+  .login-brand-panel {
+    flex: 0 0 44%;
+    background: var(--brand);
+    color: var(--brand-ink);
+    position: relative;
+    overflow: hidden;
+    padding: 44px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
   }
-  .setup-card h1 { font-size: 2rem; margin-bottom: .35rem; font-weight: 800; letter-spacing: -.045em; line-height: 1.05; }
+  .login-brand-sheen {
+    position: absolute; top: -20%; left: -30%; width: 60%; height: 160%;
+    background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,.16) 50%, transparent 60%);
+    pointer-events: none;
+  }
+  .login-brand-mark {
+    font-family: var(--font-serif); font-style: italic; font-weight: 700;
+    font-size: 22px; position: relative; z-index: 1;
+  }
+  .login-brand-quote { position: relative; z-index: 1; }
+  .login-brand-quote .line {
+    font-family: var(--font-serif); font-style: italic; font-size: 22px;
+    line-height: 1.35; text-wrap: balance;
+  }
+  .login-brand-quote .sub { font-size: .78rem; color: rgba(255,255,255,.7); margin-top: .6rem; }
+
+  .login-form-panel {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 2rem 2rem 2rem 3rem; margin-left: -30px;
+  }
+  .setup-card { width: 100%; max-width: 380px; }
+  .login-eyebrow {
+    font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-faint); margin-bottom: .3rem;
+  }
+  .setup-card h1 { font-size: 1.7rem; margin-bottom: .35rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.1; }
   .setup-card p  { color: var(--text-muted); margin-bottom: 2rem; font-size: .9rem; line-height: 1.65; }
   .setup-card label {
     display: block; font-size: .72rem; color: var(--text-muted);
@@ -269,10 +293,18 @@
   #test-result { margin-top: .8rem; font-size: .88rem; min-height: 1.2em; }
   .ok   { color: var(--green); }
   .fail { color: var(--red); }
-  @media (max-width: 480px) {
-    #setup-screen { padding: 1rem; }
-    .setup-card { padding: 2rem 1.3rem 1.6rem; }
-    .setup-card h1 { font-size: 1.6rem; }
+  /* Mobile: apilado — panel de marca condensado arriba (sin corte
+     diagonal, no queda bien apilado angosto), form abajo con scroll. */
+  @media (max-width: 768px) {
+    #setup-screen { flex-direction: column; min-height: 100vh; }
+    .login-brand-panel {
+      flex: 0 0 auto; clip-path: none; padding: 2.75rem 1.5rem 1.75rem;
+    }
+    .login-brand-quote .line { font-size: 1.05rem; max-width: 85%; }
+    .login-brand-quote .sub  { display: none; }
+    .login-form-panel { flex: 1; margin-left: 0; padding: 1.75rem 1.3rem 2rem; align-items: flex-start; }
+    .setup-card { max-width: none; }
+    .setup-card h1 { font-size: 1.5rem; }
   }
 
   /* ─── APP ───────────────────────────────────────────────── */
@@ -2642,9 +2674,22 @@
      PANTALLA DE CONFIGURACIÓN INICIAL
 ════════════════════════════════════════════════════════ -->
 <div id="setup-screen">
+  <!-- Panel de marca (borde diagonal, Marfil sereno) — fijo, no se relocaliza
+       entre login/registro/reset/nueva contraseña, esos 4 cards viven en
+       .login-form-panel de al lado. -->
+  <div class="login-brand-panel">
+    <div class="login-brand-sheen"></div>
+    <div class="login-brand-mark">Finanzas</div>
+    <div class="login-brand-quote">
+      <div class="line">"Lo que te queda para gastar, siempre a la vista."</div>
+      <div class="sub">Workspace compartido con tu pareja — gastos, cuotas y presupuesto en un solo lugar.</div>
+    </div>
+  </div>
+  <div class="login-form-panel">
   <!-- ── Pantalla: login ───────────────────────────────── -->
   <div class="setup-card" id="card-login">
-    <h1>💰 Finanzas Personales</h1>
+    <p class="login-eyebrow">Bienvenido de nuevo</p>
+    <h1>Iniciá sesión</h1>
     <p>Ingresá tu email y contraseña para acceder.</p>
 
     <label for="sb-email">Email</label>
@@ -2685,7 +2730,7 @@
 
   <!-- ── Pantalla: crear cuenta (para invitados sin Google) ──── -->
   <div class="setup-card" id="card-registro" style="display:none;">
-    <h1>💰 Crear cuenta</h1>
+    <h1>Crear cuenta</h1>
     <p>Vas a unirte a un workspace compartido. Elegí tu email y contraseña.</p>
 
     <label for="reg-email">Email</label>
@@ -2717,7 +2762,7 @@
 
   <!-- ── Pantalla: recuperar contraseña ───────────────── -->
   <div class="setup-card" id="card-reset" style="display:none;">
-    <h1>💰 Recuperar contraseña</h1>
+    <h1>Recuperar contraseña</h1>
     <p>Ingresá tu email y te enviamos un link para resetearla.</p>
 
     <label for="reset-email">Email</label>
@@ -2734,7 +2779,7 @@
 
   <!-- ── Pantalla: nueva contraseña (después de link de email) -->
   <div class="setup-card" id="card-nueva-password" style="display:none;">
-    <h1>💰 Nueva contraseña</h1>
+    <h1>Nueva contraseña</h1>
     <p>Elegí una nueva contraseña para tu cuenta.</p>
 
     <label for="nueva-password">Nueva contraseña</label>
@@ -2750,6 +2795,7 @@
     </div>
     <div id="nueva-password-result"></div>
   </div>
+  </div><!-- /login-form-panel -->
 </div>
 
 <!-- ════════════════════════════════════════════════════════
