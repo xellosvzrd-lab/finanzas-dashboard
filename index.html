@@ -940,10 +940,35 @@
     .modal-inv-head, .modal-inv-body { padding-left: 1rem; padding-right: 1rem; }
   }
 
-  .plazo-form { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: .75rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-  .plazo-form input { padding: .45rem .6rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .85rem; font-family: inherit; width: 100%; box-sizing: border-box; }
-  .plazo-form input:focus { outline: none; border-color: var(--accent); }
+  /* Form de Plazo fijo / Cripto&Acciones — clon del mockup
+     agregar-inversion-desktop.html: campos con fondo hundido sin borde
+     visible, label arriba de cada campo, botones tipo píldora grandes.
+     Antes era una rejilla de inputs sin label con bordes finos (estilo
+     genérico viejo), tanto en el modal como en el form inline por sección. */
+  /* 1 columna inline por sección (las cards de Plazos/Cripto/Acciones son
+     angostas, sobre todo en el layout de 3 columnas) — 2 columnas solo
+     dentro del modal "Agregar inversión", que tiene 560px de ancho fijo. */
+  .plazo-form { background: transparent; border: none; padding: 0; margin-bottom: .75rem; display: grid; grid-template-columns: 1fr; gap: 16px 18px; }
+  #modal-inv-form .plazo-form { grid-template-columns: 1fr 1fr; }
   .plazo-form-full { grid-column: 1 / -1; }
+  .pf-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+  .pf-field label { font-size: .72rem; font-weight: 700; color: var(--text-faint); letter-spacing: .02em; }
+  .pf-label-opt { font-weight: 500; text-transform: none; letter-spacing: 0; }
+  .plazo-form input, .plazo-form select {
+    width: 100%; box-sizing: border-box; padding: .8rem .85rem; border-radius: var(--r-md);
+    border: 1px solid transparent; background: var(--surface-2); color: var(--text);
+    font-size: .92rem; font-weight: 600; font-family: inherit;
+  }
+  .plazo-form input:focus, .plazo-form select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .plazo-form input[readonly] { opacity: .6; }
+  .pf-row { display: flex; align-items: center; gap: 8px; }
+  .pf-row select { flex: 0 0 74px; }
+  .pf-row-suffix { font-size: .78rem; color: var(--text-faint); white-space: nowrap; }
+  .pf-venc-display { padding: .8rem .85rem; border-radius: var(--r-md); background: var(--surface-2); font-size: .92rem; font-weight: 600; }
+  .pf-venc-note { font-size: .72rem; color: var(--text-faint); margin-top: 6px; }
+  .plazo-form-actions { display: flex; gap: 10px; margin-top: 6px; }
+  .plazo-form-actions .btn { flex: 1; border-radius: var(--r-pill); padding: .85rem 0; font-size: .88rem; justify-content: center; }
+  .plazo-form-actions .btn-primary { flex: 2; }
 
   /* ─── LIQ-MODAL BOTTOM-SHEET MOBILE ─────────────────────── */
   @media (max-width: 768px) {
@@ -10707,22 +10732,41 @@ function _renderFormPlazo(p) {
   const vencVal = p?.fechaVencimiento || _calcVencPlazo(inicioVal, diasVal);
   return `<div class="plazo-form">
     ${p ? `<input type="hidden" id="pf-id" value="${p.id}">` : ""}
-    <input class="plazo-form-full" id="pf-desc" placeholder="Descripción (ej: Plazo Fijo Nación)" type="text" value="${escapeHtml(p?.descripcion || '')}">
-    <input id="pf-monto" placeholder="Monto" type="text" inputmode="decimal" value="${p?.monto || ''}">
-    <select id="pf-moneda" style="padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem">
-      <option value="ARS"${moneda==="ARS"?" selected":""}>ARS</option>
-      <option value="USD"${moneda==="USD"?" selected":""}>USD</option>
-    </select>
-    <input id="pf-tna" placeholder="TNA %" type="text" inputmode="decimal" value="${p?.tna || ''}">
-    <input id="pf-dias" placeholder="Plazo (días)" type="text" inputmode="numeric" value="${diasVal}" oninput="_actualizarVencPlazo()">
-    <input id="pf-inicio" type="date" value="${inicioVal}" oninput="_actualizarVencPlazo()">
-    <input type="hidden" id="pf-venc" value="${vencVal}">
-    <div class="plazo-form-full" style="font-size:.78rem;color:var(--text-muted)">
-      Vencimiento: <strong id="pf-venc-txt">${vencVal ? fmtFecha(vencVal) : "—"}</strong> · calculado automáticamente a partir del plazo
+    <div class="pf-field plazo-form-full">
+      <label for="pf-desc">Descripción</label>
+      <input id="pf-desc" placeholder="ej: Plazo Fijo Nación" type="text" value="${escapeHtml(p?.descripcion || '')}">
     </div>
-    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
-      <button class="btn" style="font-size:.82rem" onclick="cerrarFormPlazo()">Cancelar</button>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPlazo()">${p ? "Actualizar" : "Guardar"}</button>
+    <div class="pf-field">
+      <label for="pf-monto">Monto</label>
+      <div class="pf-row">
+        <input id="pf-monto" placeholder="0" type="text" inputmode="decimal" value="${p?.monto || ''}">
+        <select id="pf-moneda">
+          <option value="ARS"${moneda==="ARS"?" selected":""}>ARS</option>
+          <option value="USD"${moneda==="USD"?" selected":""}>USD</option>
+        </select>
+      </div>
+    </div>
+    <div class="pf-field">
+      <label for="pf-tna">TNA</label>
+      <div class="pf-row"><input id="pf-tna" placeholder="0" type="text" inputmode="decimal" value="${p?.tna || ''}"><span class="pf-row-suffix">% anual</span></div>
+    </div>
+    <div class="pf-field">
+      <label for="pf-dias">Plazo</label>
+      <div class="pf-row"><input id="pf-dias" placeholder="0" type="text" inputmode="numeric" value="${diasVal}" oninput="_actualizarVencPlazo()"><span class="pf-row-suffix">días</span></div>
+    </div>
+    <div class="pf-field">
+      <label for="pf-inicio">Fecha de inicio</label>
+      <input id="pf-inicio" type="date" value="${inicioVal}" oninput="_actualizarVencPlazo()">
+    </div>
+    <div class="pf-field plazo-form-full">
+      <label>Vencimiento</label>
+      <input type="hidden" id="pf-venc" value="${vencVal}">
+      <div class="pf-venc-display"><strong id="pf-venc-txt">${vencVal ? fmtFecha(vencVal) : "—"}</strong></div>
+      <div class="pf-venc-note">Calculado automáticamente a partir del plazo</div>
+    </div>
+    <div class="plazo-form-full plazo-form-actions">
+      <button class="btn" onclick="cerrarFormPlazo()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPlazo()">${p ? "Actualizar plazo fijo" : "Guardar plazo fijo"}</button>
     </div>
   </div>`;
 }
@@ -11042,17 +11086,29 @@ function _renderFormAccion(a, tipo) {
   const hint = esCripto
     ? `Ticker + <strong>-USD</strong> (ej: BTC-USD, ETH-USD)`
     : `Ticker de EE.UU. (ej: AAPL) o argentino + <strong>.BA</strong> (ej: GGAL.BA)`;
-  const hintHtml = `<div class="plazo-form-full" style="font-size:.72rem;color:var(--text-muted);padding:.1rem 0">${hint}</div>`;
+  const hintHtml = `<div class="plazo-form-full pf-venc-note" style="margin-top:-8px">${hint}</div>`;
   return `<div class="plazo-form">
     ${a ? `<input type="hidden" id="af-id" value="${a.id}">` : ""}
-    <input id="af-simbolo" placeholder="${placeholder}" type="text" class="plazo-form-full" style="text-transform:uppercase" value="${a?.simbolo || ''}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
-    <input id="af-cantidad" placeholder="Cantidad / tenencia" type="text" inputmode="decimal" value="${a?.cantidad || ''}">
-    <input id="af-precio-compra" placeholder="Precio compra (opcional, para P&amp;L)" type="text" inputmode="decimal" value="${a?.precio_compra ?? ''}">
-    <input id="af-nombre" placeholder="Nombre (opcional)" type="text" value="${escapeHtml(a?.nombre || '')}">
+    <div class="pf-field plazo-form-full">
+      <label for="af-simbolo">Símbolo</label>
+      <input id="af-simbolo" placeholder="${placeholder}" type="text" style="text-transform:uppercase" value="${a?.simbolo || ''}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
+    </div>
     ${a ? "" : hintHtml}
-    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
-      <button class="btn" style="font-size:.82rem" onclick="cerrarFormAccion()">Cancelar</button>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarAccion()">${a ? "Actualizar" : "Guardar"}</button>
+    <div class="pf-field">
+      <label for="af-cantidad">Cantidad / tenencia</label>
+      <input id="af-cantidad" placeholder="0" type="text" inputmode="decimal" value="${a?.cantidad || ''}">
+    </div>
+    <div class="pf-field">
+      <label for="af-precio-compra">Precio compra <span class="pf-label-opt">(opcional)</span></label>
+      <input id="af-precio-compra" placeholder="Para calcular P&amp;L" type="text" inputmode="decimal" value="${a?.precio_compra ?? ''}">
+    </div>
+    <div class="pf-field plazo-form-full">
+      <label for="af-nombre">Nombre <span class="pf-label-opt">(opcional)</span></label>
+      <input id="af-nombre" placeholder="ej: Bitcoin" type="text" value="${escapeHtml(a?.nombre || '')}">
+    </div>
+    <div class="plazo-form-full plazo-form-actions">
+      <button class="btn" onclick="cerrarFormAccion()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarAccion()">${a ? "Actualizar tenencia" : "Guardar tenencia"}</button>
     </div>
   </div>`;
 }
