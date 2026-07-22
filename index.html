@@ -809,8 +809,14 @@
   .comp-tfoot-total { font-size: .95rem; font-weight: 800 !important; }
 
   /* ─── PLAZOS FIJOS ──────────────────────────────────────────── */
-  .plazo-card { background: var(--card); backdrop-filter: blur(var(--card-blur)) saturate(160%); -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: .65rem; box-shadow: var(--shadow); transition: border-color .18s, box-shadow .18s; }
-  .plazo-card:hover { border-color: var(--border2); box-shadow: var(--shadow), 0 0 20px rgba(var(--accent-rgb),.12); }
+  /* Lista tipo mockup (.holdings/.holding): antes cada tenencia era su
+     propia card con borde+sombra+margin-bottom, ahora es una fila dentro
+     de .inv-holdings-list (un solo card contenedor, separador border-top
+     entre filas) — mismo patrón que Transacciones/Presupuesto. */
+  .inv-holdings-list { padding: 4px 0; overflow: hidden; }
+  .plazo-card { padding: .85rem 1.1rem; border-top: 1px solid var(--line); transition: background .15s; }
+  .inv-holdings-list > .plazo-card:first-child { border-top: none; }
+  .plazo-card:hover { background: var(--surface-2); }
   .plazo-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; }
   .plazo-desc { font-weight: 700; font-size: .93rem; line-height: 1.25; }
   .plazo-badge { font-size: .68rem; font-weight: 700; padding: .15rem .5rem; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
@@ -873,9 +879,63 @@
   .inv-section-title{ font-size: 15px; font-weight: 700; margin: 0; font-family: var(--font-serif); }
   .inv-interes-total{ font-size: 13px; color: var(--pos); margin-top: 8px; padding: 8px 12px;
                        border-top: 1px solid var(--line); font-weight: 600; }
+  /* Resumen fijo a la izquierda (300px) + contenido a la derecha — mismo
+     patrón que Transacciones. Con la sidebar restando ancho, 3 columnas de
+     tenencias recién entran cómodas desde 1100px; entre 860-1099px van 2. */
+  .inv-desktop-grid { display: block; }
   @media (min-width: 860px) {
-    .inv-content-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .inv-desktop-grid { display: grid; grid-template-columns: 300px 1fr; gap: 22px; align-items: start; }
+    .inv-content-row  { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
   }
+  @media (min-width: 1100px) {
+    .inv-content-row { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* ─── MODAL "Agregar inversión" — selector de tipo + form real ────── */
+  .modal-inv-overlay {
+    display: none; position: fixed; inset: 0; z-index: 700;
+    background: var(--overlay); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 1rem;
+    animation: fadeIn .18s ease-out;
+  }
+  .modal-inv-overlay.open { display: flex; }
+  .modal-inv-box {
+    width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+    background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-lg);
+    box-shadow: var(--shadow-pop);
+  }
+  .modal-inv-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.4rem .9rem; border-bottom: 1px solid var(--line);
+  }
+  .modal-inv-head h2 { font-size: 1.1rem; margin: 0; }
+  .modal-inv-close {
+    width: 30px; height: 30px; border-radius: 50%; flex: none;
+    background: var(--surface); border: 1px solid var(--line);
+    color: var(--text-dim); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-inv-close:hover { border-color: var(--line-strong); color: var(--text); }
+  .modal-inv-body { padding: 1.1rem 1.4rem 1.4rem; }
+  .modal-inv-type-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.1rem; }
+  .modal-inv-type-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+    padding: 14px 8px; border-radius: var(--r-md);
+    background: var(--surface-2); border: 1.5px solid transparent;
+    font-family: inherit; font-size: 12px; font-weight: 700; color: var(--text-dim);
+    cursor: pointer;
+  }
+  .modal-inv-type-btn .ico {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--surface-strong, var(--surface));
+    color: var(--text-dim); display: flex; align-items: center; justify-content: center;
+  }
+  .modal-inv-type-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .modal-inv-type-btn.active .ico { background: var(--accent); color: var(--brand-ink); }
+  @media (max-width: 480px) {
+    .modal-inv-box { max-width: none; }
+    .modal-inv-head, .modal-inv-body { padding-left: 1rem; padding-right: 1rem; }
+  }
+
   .plazo-form { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: .75rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
   .plazo-form input { padding: .45rem .6rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .85rem; font-family: inherit; width: 100%; box-sizing: border-box; }
   .plazo-form input:focus { outline: none; border-color: var(--accent); }
@@ -3805,79 +3865,104 @@
             <p style="font-size:.84rem;color:var(--text-dim);margin:.2rem 0 0">Plazos fijos · activos · dólar</p>
           </div>
           <div style="display:flex;gap:.5rem;align-items:center">
-            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Nueva inversión</button>
+            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirModalInversion()">+ Nueva inversión</button>
           </div>
         </div>
 
-        <!-- Resumen: valor total + split Cripto/Acciones/Plazos en una sola
-             card (antes 2 cards separadas: hero + "Asignación" con solo 2
-             categorías porque Activos&cripto quedaba junto — ahora
-             _esCripto() separa también los totales, no solo las listas). -->
-        <div class="inv-summary-card" id="inv-hero-card">
-          <div class="inv-hero-blob"></div>
-          <div class="inv-hero-eyebrow">Valor total de tu cartera</div>
-          <div class="num inv-hero-total" id="inv-hero-total-ars">—</div>
-          <div class="inv-hero-usd" id="inv-hero-total-usd" style="display:none">≈ <span id="inv-hero-usd-val">—</span> USD</div>
-          <div class="inv-hero-sub" id="inv-hero-sub">—</div>
-          <div class="inv-alloc-split">
-            <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--pos)"></span>Cripto</span><span class="num" id="inv-alloc-cripto-txt">—</span></div>
-            <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--info)"></span>Acciones</span><span class="num" id="inv-alloc-acciones-txt">—</span></div>
-            <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--warn)"></span>Plazos fijos</span><span class="num" id="inv-alloc-plazos-txt">—</span></div>
-          </div>
-          <div class="inv-alloc-total">Total invertido: <span class="num" id="inv-alloc-total">—</span></div>
-        </div><!-- /inv-summary-card -->
+        <!-- 2 columnas en desktop: resumen fijo a la izquierda (300px) +
+             contenido a la derecha — mismo patrón que Transacciones. -->
+        <div class="inv-desktop-grid">
 
-        <!-- Content row: Plazos fijos, Cripto, Acciones — 3 secciones (2 en
-             desktop hasta 1099px, 3 desde 1100px, ver media query). Cripto
-             y Acciones son la misma tabla real "acciones" (no hay campo de
-             tipo en la BD); se separan en pantalla con _esCripto(), que ya
-             existía para elegir de qué API traer la cotización. -->
-        <div class="inv-content-row">
+          <!-- Resumen: valor total + split Cripto/Acciones/Plazos en una
+               sola card (antes 2 cards separadas: hero + "Asignación" con
+               solo 2 categorías porque Activos&cripto quedaba junto — ahora
+               _esCripto() separa también los totales, no solo las listas). -->
+          <div class="inv-summary-card" id="inv-hero-card">
+            <div class="inv-hero-blob"></div>
+            <div class="inv-hero-eyebrow">Valor total de tu cartera</div>
+            <div class="num inv-hero-total" id="inv-hero-total-ars">—</div>
+            <div class="inv-hero-usd" id="inv-hero-total-usd" style="display:none">≈ <span id="inv-hero-usd-val">—</span> USD</div>
+            <div class="inv-hero-sub" id="inv-hero-sub">—</div>
+            <div class="inv-alloc-split">
+              <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--pos)"></span>Cripto</span><span class="num" id="inv-alloc-cripto-txt">—</span></div>
+              <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--info)"></span>Acciones</span><span class="num" id="inv-alloc-acciones-txt">—</span></div>
+              <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--warn)"></span>Plazos fijos</span><span class="num" id="inv-alloc-plazos-txt">—</span></div>
+            </div>
+            <div class="inv-alloc-total">Total invertido: <span class="num" id="inv-alloc-total">—</span></div>
+          </div><!-- /inv-summary-card -->
 
-          <!-- Plazos Fijos -->
-          <div class="inv-section">
-            <div class="inv-section-hdr">
-              <h2 class="inv-section-title">Plazos fijos</h2>
-              <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormPlazo()" aria-label="Agregar plazo fijo">+ Agregar</button>
-            </div>
-            <div id="plazo-form-wrap" style="display:none"></div>
-            <div id="plazo-lista">
-              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:30%"></div><div class="skeleton skeleton-line" style="width:70%"></div></div>
-              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:50%"></div><div class="skeleton skeleton-line" style="width:35%"></div><div class="skeleton skeleton-line" style="width:65%"></div></div>
-            </div>
-            <div id="inv-interes-total" class="inv-interes-total"></div>
-          </div>
+          <!-- Content row: Plazos fijos, Cripto, Acciones — 2 columnas de
+               860 a 1099px (con la sidebar ya restan ~860px, 3 columnas
+               quedarían muy angostas), 3 desde 1100px. Cripto y Acciones son
+               la misma tabla real "acciones" (no hay campo de tipo en la
+               BD); se separan en pantalla con _esCripto(), que ya existía
+               para elegir de qué API traer la cotización. -->
+          <div class="inv-content-row">
 
-          <!-- Cripto -->
-          <div class="inv-section">
-            <div class="inv-section-hdr">
-              <h2 class="inv-section-title">Cripto</h2>
-              <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia">+ Agregar</button>
+            <!-- Plazos Fijos -->
+            <div class="inv-section">
+              <div class="inv-section-hdr">
+                <h2 class="inv-section-title">Plazos fijos</h2>
+                <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormPlazo()" aria-label="Agregar plazo fijo">+ Agregar</button>
+              </div>
+              <div id="plazo-form-wrap" style="display:none"></div>
+              <div id="plazo-lista" class="card inv-holdings-list">
+                <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:30%"></div><div class="skeleton skeleton-line" style="width:70%"></div></div>
+                <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:50%"></div><div class="skeleton skeleton-line" style="width:35%"></div><div class="skeleton skeleton-line" style="width:65%"></div></div>
+              </div>
+              <div id="inv-interes-total" class="inv-interes-total"></div>
             </div>
-            <div id="accion-form-wrap" style="display:none"></div>
-            <div id="accion-lista-cripto">
-              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-line" style="width:60%"></div><div class="skeleton skeleton-line" style="width:50%"></div></div>
-            </div>
-          </div>
 
-          <!-- Acciones -->
-          <div class="inv-section">
-            <div class="inv-section-hdr">
-              <h2 class="inv-section-title">Acciones</h2>
-              <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia">+ Agregar</button>
+            <!-- Cripto -->
+            <div class="inv-section">
+              <div class="inv-section-hdr">
+                <h2 class="inv-section-title">Cripto</h2>
+                <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion('cripto')" aria-label="Agregar tenencia">+ Agregar</button>
+              </div>
+              <div id="accion-form-wrap-cripto" style="display:none"></div>
+              <div id="accion-lista-cripto" class="card inv-holdings-list">
+                <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-line" style="width:60%"></div><div class="skeleton skeleton-line" style="width:50%"></div></div>
+              </div>
             </div>
-            <div id="accion-lista-stocks">
-              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:45%"></div></div>
-            </div>
-            <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
-          </div>
 
-        </div><!-- /inv-content-row -->
+            <!-- Acciones -->
+            <div class="inv-section">
+              <div class="inv-section-hdr">
+                <h2 class="inv-section-title">Acciones</h2>
+                <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion('stocks')" aria-label="Agregar tenencia">+ Agregar</button>
+              </div>
+              <div id="accion-form-wrap-stocks" style="display:none"></div>
+              <div id="accion-lista-stocks" class="card inv-holdings-list">
+                <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:45%"></div></div>
+              </div>
+              <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
+            </div>
+
+          </div><!-- /inv-content-row -->
+        </div><!-- /inv-desktop-grid -->
 
         <!-- legacy: vacío pero JS lo usa -->
         <div id="inv-totales" style="display:none"></div>
 
       </div><!-- /page-inversiones -->
+
+      <!-- ── MODAL "Agregar inversión" — selector de tipo + form real
+           (Plazo fijo / Cripto / Acción) ─────────────────────── -->
+      <div class="modal-inv-overlay" id="modal-inv-overlay" role="dialog" aria-modal="true"
+           aria-labelledby="modal-inv-title" onclick="if(event.target===this)cerrarModalInversion()">
+        <div class="modal-inv-box">
+          <div class="modal-inv-head">
+            <h2 id="modal-inv-title">Agregar inversión</h2>
+            <button class="modal-inv-close" onclick="cerrarModalInversion()" aria-label="Cerrar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="modal-inv-body">
+            <div class="modal-inv-type-row" id="modal-inv-type-row"></div>
+            <div id="modal-inv-form"></div>
+          </div>
+        </div>
+      </div>
 
       <!-- ── PÁGINA IMPORTAR DATOS ──────────────────────── -->
       <div id="page-importar" class="page">
@@ -5885,6 +5970,7 @@ document.addEventListener("keydown", e => {
     ["edit-overlay", cerrarEditorTransaccion],
     ["cuotas-modal-overlay", _cerrarModalCuotas],
     ["mobile-drawer", closeSidebar],
+    ["modal-inv-overlay", cerrarModalInversion],
   ].forEach(([id, cerrar]) => {
     const el = document.getElementById(id);
     if (el && el.classList.contains("open")) cerrar();
@@ -10524,6 +10610,61 @@ async function renderPlazos() {
   }).join("");
 }
 
+// ─── MODAL "AGREGAR INVERSIÓN" — selector de tipo + form real ─────────
+// El mockup diseñaba un modal único con selector de tipo (Plazo fijo /
+// Cripto / Acción) arriba de todo; el form de cada tipo es el mismo real
+// que ya existía por sección (_renderFormPlazo/_renderFormAccion), no uno
+// nuevo — evita duplicar campos/validación.
+let _modalInvTipo = "plazo";
+const _MODAL_INV_TIPOS = [
+  { id: "plazo",  label: "Plazo fijo", icon: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>' },
+  { id: "cripto", label: "Cripto",     icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1 3 2.2c0 2.8-6 1.3-6 4.1 0 1.2 1.3 2.2 3 2.2s3-1.1 3-2.5"/>' },
+  { id: "stocks", label: "Acción",     icon: '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>' },
+];
+
+function abrirModalInversion(tipoInicial) {
+  // Un solo form editable a la vez en toda la página — si había uno abierto
+  // inline en alguna sección, se cierra para no terminar con 2 elementos
+  // con el mismo id (pf-monto, af-simbolo, etc.) a la vez.
+  cerrarFormPlazo();
+  cerrarFormAccion();
+  _modalInvTipo = tipoInicial || "plazo";
+  const overlay = document.getElementById("modal-inv-overlay");
+  if (!overlay) return;
+  overlay.classList.add("open");
+  _renderModalInvTypeRow();
+  _renderModalInvBody();
+}
+
+function cerrarModalInversion() {
+  const overlay = document.getElementById("modal-inv-overlay");
+  if (overlay) overlay.classList.remove("open");
+  const form = document.getElementById("modal-inv-form");
+  if (form) form.innerHTML = "";
+}
+
+function _setModalInvTipo(tipo) {
+  _modalInvTipo = tipo;
+  _renderModalInvTypeRow();
+  _renderModalInvBody();
+}
+
+function _renderModalInvTypeRow() {
+  const row = document.getElementById("modal-inv-type-row");
+  if (!row) return;
+  row.innerHTML = _MODAL_INV_TIPOS.map(t => `
+    <button type="button" class="modal-inv-type-btn ${t.id === _modalInvTipo ? "active" : ""}" onclick="_setModalInvTipo('${t.id}')">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t.icon}</svg></span>
+      <span>${t.label}</span>
+    </button>`).join("");
+}
+
+function _renderModalInvBody() {
+  const form = document.getElementById("modal-inv-form");
+  if (!form) return;
+  form.innerHTML = _modalInvTipo === "plazo" ? _renderFormPlazo(null) : _renderFormAccion(null);
+}
+
 function _renderFormPlazo(p) {
   // Fecha local, no UTC — toISOString() muestra el día siguiente después de las 21hs ART
   const _hoyD = new Date();
@@ -10567,6 +10708,11 @@ function editarPlazo(id) {
 function cerrarFormPlazo() {
   const wrap = document.getElementById("plazo-form-wrap");
   if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
+  // Si el form se estaba mostrando dentro del modal "Agregar inversión"
+  // (Cancelar o Guardar exitoso), cerrarlo también — abrirModalInversion()
+  // vuelve a abrirlo después si corresponde, no se pisan.
+  const overlay = document.getElementById("modal-inv-overlay");
+  if (overlay) overlay.classList.remove("open");
 }
 
 async function guardarPlazo() {
@@ -10769,12 +10915,12 @@ function _accionCardHtml(a) {
       </div>
     </div>`;
 }
-function _accionEmptyHtml(msg) {
+function _accionEmptyHtml(msg, tipo) {
   return `<div style="text-align:center;padding:2rem 1rem">
     <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
     <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">${msg}</div>
     <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Sumá tu cartera para ver cotizaciones en vivo.</div>
-    <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()">+ Agregar tenencia</button>
+    <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion('${tipo}')">+ Agregar tenencia</button>
   </div>`;
 }
 
@@ -10790,16 +10936,16 @@ async function renderAcciones() {
   if (!acciones.length) {
     _accionesTotalCache = { usd: 0, ars: 0, criptoUSD: 0, criptoARS: 0, stocksUSD: 0, stocksARS: 0 };
     _renderTotalesInversiones();
-    listaCripto.innerHTML = _accionEmptyHtml("Sin cripto");
-    listaStocks.innerHTML = _accionEmptyHtml("Sin acciones");
+    listaCripto.innerHTML = _accionEmptyHtml("Sin cripto", "cripto");
+    listaStocks.innerHTML = _accionEmptyHtml("Sin acciones", "stocks");
     if (totalEl) totalEl.innerHTML = "";
     return;
   }
 
   const cripto = acciones.filter(a => _esCripto(a.simbolo));
   const stocks = acciones.filter(a => !_esCripto(a.simbolo));
-  listaCripto.innerHTML = cripto.length ? cripto.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin cripto");
-  listaStocks.innerHTML = stocks.length ? stocks.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin acciones");
+  listaCripto.innerHTML = cripto.length ? cripto.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin cripto", "cripto");
+  listaStocks.innerHTML = stocks.length ? stocks.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin acciones", "stocks");
 
   // Totales separados por categoría (no solo ARS/USD) — antes solo se sumaba
   // un total combinado de "acciones", así que el resumen no podía mostrar
@@ -10863,8 +11009,18 @@ function _renderFormAccion(a) {
   </div>`;
 }
 
-function abrirFormAccion() {
-  const wrap = document.getElementById("accion-form-wrap");
+// Cripto y Acciones tienen cada una su propio wrap de formulario
+// (accion-form-wrap-cripto / accion-form-wrap-stocks) — antes había un solo
+// wrap compartido físicamente ubicado en la sección Cripto, así que tocar
+// "+ Agregar" desde Acciones abría el form ahí arriba, lejos del botón
+// clickeado, y parecía que el botón no hacía nada.
+function _accionWrapId(tipo) {
+  return tipo === "cripto" ? "accion-form-wrap-cripto" : "accion-form-wrap-stocks";
+}
+
+function abrirFormAccion(tipo) {
+  cerrarFormAccion();
+  const wrap = document.getElementById(_accionWrapId(tipo));
   if (!wrap) return;
   wrap.style.display = "";
   wrap.innerHTML = _renderFormAccion(null);
@@ -10873,7 +11029,8 @@ function abrirFormAccion() {
 function editarAccion(id) {
   const accion = _accionesCache.find(a => a.id === id);
   if (!accion) return;
-  const wrap = document.getElementById("accion-form-wrap");
+  cerrarFormAccion();
+  const wrap = document.getElementById(_accionWrapId(_esCripto(accion.simbolo) ? "cripto" : "stocks"));
   if (!wrap) return;
   wrap.style.display = "";
   wrap.innerHTML = _renderFormAccion(accion);
@@ -10881,8 +11038,14 @@ function editarAccion(id) {
 }
 
 function cerrarFormAccion() {
-  const wrap = document.getElementById("accion-form-wrap");
-  if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
+  ["accion-form-wrap-cripto", "accion-form-wrap-stocks"].forEach(id => {
+    const wrap = document.getElementById(id);
+    if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
+  });
+  // Mismo motivo que en cerrarFormPlazo(): si el form estaba en el modal
+  // "Agregar inversión", cerrarlo también.
+  const overlay = document.getElementById("modal-inv-overlay");
+  if (overlay) overlay.classList.remove("open");
 }
 
 async function guardarAccion() {
