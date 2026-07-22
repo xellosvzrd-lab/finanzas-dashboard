@@ -879,6 +879,10 @@
   .inv-section-title{ font-size: 15px; font-weight: 700; margin: 0; font-family: var(--font-serif); }
   .inv-interes-total{ font-size: 13px; color: var(--pos); margin-top: 8px; padding: 8px 12px;
                        border-top: 1px solid var(--line); font-weight: 600; }
+  /* CTA pill "Agregar inversión" — clon del .add-inv-btn del mockup, el
+     resto de los .btn-primary de la app quedan rectangulares (9px), este
+     es el único pill a propósito. */
+  .inv-add-btn { border-radius: var(--r-pill); padding: .6rem 1.2rem; }
   /* Resumen fijo a la izquierda (300px) + contenido a la derecha — mismo
      patrón que Transacciones. Con la sidebar restando ancho, 3 columnas de
      tenencias recién entran cómodas desde 1100px; entre 860-1099px van 2. */
@@ -3865,7 +3869,10 @@
             <p style="font-size:.84rem;color:var(--text-dim);margin:.2rem 0 0">Plazos fijos · activos · dólar</p>
           </div>
           <div style="display:flex;gap:.5rem;align-items:center">
-            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirModalInversion()">+ Nueva inversión</button>
+            <button class="btn btn-primary inv-add-btn" style="font-size:.82rem" onclick="abrirModalInversion()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              Agregar inversión
+            </button>
           </div>
         </div>
 
