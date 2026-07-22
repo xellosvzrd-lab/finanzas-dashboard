@@ -1,22 +1,18 @@
 <!-- ARCHIVO GENERADO — editar en src/js/*.js y ejecutar ./build.sh -->
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://eutarjfnlkcehhigqqxr.supabase.co wss://eutarjfnlkcehhigqqxr.supabase.co https://dolarapi.com https://api.coinbase.com https://accounts.google.com; img-src 'self' data:; worker-src blob: https://cdnjs.cloudflare.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://eutarjfnlkcehhigqqxr.supabase.co wss://eutarjfnlkcehhigqqxr.supabase.co https://dolarapi.com https://api.coinbase.com https://accounts.google.com; img-src 'self' data:; worker-src blob: https://cdnjs.cloudflare.com;">
 <title>💰 Finanzas Personales</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#141019">
+<meta name="theme-color" content="#F6F4EF">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Finanzas">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<script>(function(){var t=localStorage.getItem('fin-theme');if(t)document.documentElement.dataset.theme=t;})()</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.min.js" integrity="sha384-DjOvX/sJLsmbMrw4wTvf6l3kiGBjdxyOO6X2MTFwOOXGkjN/mE08BoDzrpaaIjil" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" integrity="sha384-Rv68Y7adOjMMJc1/xFMcdNvXre/HF51to4GZjBALmXr7ABnVl5V4UajJwBu7zbhN" crossorigin="anonymous"></script>
@@ -36,19 +32,13 @@
 
   /* ─── SHARED TOKENS ─────────────────────────────────────── */
   :root {
-    --font-display: 'Schibsted Grotesk', system-ui, sans-serif;
-    --font-text:    'Hanken Grotesk',    system-ui, sans-serif;
+    --font-display: -apple-system, 'Avenir Next', 'Century Gothic', system-ui, sans-serif;
+    --font-text:    -apple-system, 'Avenir Next', 'Century Gothic', system-ui, sans-serif;
+    --font-serif:   ui-serif, 'New York', 'Iowan Old Style', Georgia, serif;
 
     /* radii */
     --r-xs: 8px;  --r-sm: 12px; --r-md: 18px;
     --r-lg: 26px; --r-xl: 34px; --r-pill: 999px;
-
-    /* semantic accents — shared (overridden in light) */
-    --pos:  oklch(0.74 0.15 152);
-    --neg:  oklch(0.70 0.16 25);
-    --info: oklch(0.70 0.15 252);
-    --save: oklch(0.74 0.13 195);
-    --warn: oklch(0.78 0.14 75);
 
     /* easing */
     --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
@@ -60,27 +50,37 @@
     --mh-h: calc(48px + env(safe-area-inset-top, 0px));
   }
 
-  /* ─── TEMA ÚNICO — Liquid Glass índigo (unifica Daniel/Ama) ── */
-  :root[data-theme='dark'] {
-    --bg:          #10121f;
-    --bg-grad:     radial-gradient(120% 80% at 80% -10%, #1f2247 0%, #10121f 55%);
-    --elev:        #1b1d33;
-    --surface:     rgba(122,116,232,0.14);
-    --surface-2:   rgba(122,116,232,0.20);
-    --surface-3:   rgba(122,116,232,0.28);
-    --line:        rgba(255,255,255,0.15);
-    --line-strong: rgba(255,255,255,0.22);
-    --text:        #f4f1fa;
-    --text-dim:    #b3aac6;
-    --text-faint:  #7e7595;
-    --brand:       oklch(0.72 0.17 270);
-    --brand-2:     oklch(0.76 0.18 285);
+  /* ─── TEMA ÚNICO — "Marfil sereno" (claro, acento verde pino, vidrio) ─── */
+  /* Reemplaza el liquid-glass índigo dark/light anterior — ver
+     docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md.
+     Un solo modo: no hay variante oscura (decisión de producto — el rediseño
+     se validó solo en claro, se retira el toggle de tema en vez de improvisar
+     un dark sin mockup de referencia). */
+  :root {
+    --bg:          #F6F4EF;
+    --bg-grad:     radial-gradient(120% 80% at 25% -10%, rgba(183,203,192,.28) 0%, #F6F4EF 55%);
+    --elev:        #ffffff;
+    --surface:     rgba(255,255,255,0.62);
+    --surface-2:   rgba(255,255,255,0.75);
+    --surface-3:   rgba(255,255,255,0.85);
+    --line:        rgba(32,36,31,0.10);
+    --line-strong: rgba(32,36,31,0.18);
+    --text:        #20241F;
+    --text-dim:    #63695D;
+    --text-faint:  #9A9E8F;
+    --brand:       #33544A;
+    --brand-2:     #3F6358;
     --brand-ink:   #fff;
-    --brand-soft:  color-mix(in oklab, var(--brand) 16%, var(--surface));
-    --pos-soft:    color-mix(in oklab, var(--pos)   16%, var(--surface));
-    --neg-soft:    color-mix(in oklab, var(--neg)   16%, var(--surface));
-    --shadow-card: 0 8px 26px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.22);
-    --shadow-pop:  0 18px 50px rgba(0,0,0,.55);
+    --brand-soft:  color-mix(in oklab, var(--brand) 12%, #fff);
+    --pos:         #33544A;
+    --neg:         #A6452E;
+    --info:        #4B6C8C;
+    --save:        #2F6E68;
+    --warn:        #B08A3E;
+    --pos-soft:    color-mix(in oklab, var(--pos) 12%, #fff);
+    --neg-soft:    color-mix(in oklab, var(--neg) 12%, #fff);
+    --shadow-card: 0 8px 22px rgba(32,36,31,.10), inset 0 1px 0 rgba(255,255,255,.6);
+    --shadow-pop:  0 30px 70px -20px rgba(0,0,0,.35), 0 2px 0 rgba(255,255,255,.4) inset;
 
     /* legacy aliases — componentes existentes sin cambios */
     --bg2:         var(--surface-2);
@@ -90,93 +90,62 @@
     --border2:     var(--line-strong);
     --accent:      var(--brand);
     --accent-dim:  var(--brand-soft);
-    --accent-glow: color-mix(in oklab, var(--brand) 28%, transparent);
-    --white:       var(--brand-ink);
-    --overlay:     rgba(0,0,0,0.55);
-    --green:       var(--pos);
-    --green-dim:   var(--pos-soft);
-    --red:         var(--neg);
-    --red-dim:     var(--neg-soft);
-    --yellow:      var(--warn);
-    --yellow-dim:  color-mix(in oklab, var(--warn) 16%, var(--surface));
-    --text-muted:  var(--text-dim);
-    --radius:      var(--r-md);
-    --shadow:      var(--shadow-card);
-    --glass:       rgba(255,255,255,0.07);
-    --glass-border:rgba(255,255,255,0.15);
-    --card-blur:   16px;
-    --modal-bg:    rgba(30,26,52,0.92);
-
-    /* RGB splits para rgba() */
-    --accent-rgb:     122, 116, 232;
-    --green-rgb:       78, 196, 118;
-    --red-rgb:        229, 110,  74;
-    --yellow-rgb:     210, 188,  58;
-    --text-rgb:       244, 241, 250;
-    --text-muted-rgb: 179, 170, 198;
-    --card-rgb:       122, 116, 232;
-  }
-
-  /* ─── TEMA ÚNICO (alias) — el toggle Daniel/Ama ya no cambia look ── */
-  :root[data-theme='light'] {
-    --bg:          #f5f1fb;
-    --bg-grad:     radial-gradient(120% 80% at 80% -10%, #e4defb 0%, #f5f1fb 55%);
-    --elev:        #ffffff;
-    --surface:     rgba(122,116,232,0.16);
-    --surface-2:   rgba(122,116,232,0.22);
-    --surface-3:   rgba(122,116,232,0.30);
-    --line:        rgba(60,50,140,0.14);
-    --line-strong: rgba(60,50,140,0.22);
-    --text:        #241f47;
-    --text-dim:    #4a4570;
-    --text-faint:  #7f76a0;
-    --brand:       oklch(0.58 0.18 270);
-    --brand-2:     oklch(0.62 0.19 285);
-    --brand-ink:   #fff;
-    --brand-soft:  color-mix(in oklab, var(--brand) 12%, #fff);
-    --pos:         oklch(0.58 0.15 152);
-    --neg:         oklch(0.56 0.18 25);
-    --info:        oklch(0.55 0.16 252);
-    --save:        oklch(0.56 0.12 195);
-    --warn:        oklch(0.60 0.14 75);
-    --pos-soft:    color-mix(in oklab, var(--pos) 12%, #fff);
-    --neg-soft:    color-mix(in oklab, var(--neg) 12%, #fff);
-    --shadow-card: 0 8px 22px rgba(90,70,180,.12), inset 0 1px 0 rgba(255,255,255,.5);
-    --shadow-pop:  0 18px 50px rgba(90,70,180,.22);
-
-    --bg2:         var(--surface-2);
-    --bg3:         var(--surface-3);
-    --card:        var(--surface);
-    --border:      var(--line);
-    --border2:     var(--line-strong);
-    --accent:      var(--brand);
-    --accent-dim:  var(--brand-soft);
     --accent-glow: color-mix(in oklab, var(--brand) 24%, transparent);
     --white:       var(--brand-ink);
-    --overlay:     rgba(36,31,71,0.35);
+    --overlay:     rgba(32,36,31,0.32);
     --green:       var(--pos);
     --green-dim:   var(--pos-soft);
     --red:         var(--neg);
     --red-dim:     var(--neg-soft);
     --yellow:      var(--warn);
-    --yellow-dim:  color-mix(in oklab, var(--warn) 12%, #fff);
+    --yellow-dim:  color-mix(in oklab, var(--warn) 14%, #fff);
     --text-muted:  var(--text-dim);
     --radius:      var(--r-md);
     --shadow:      var(--shadow-card);
-    --glass:       rgba(60,50,140,0.06);
-    --glass-border:rgba(60,50,140,0.14);
-    --card-blur:   16px;
-    --modal-bg:    rgba(250,248,255,0.94);
+    --glass:       rgba(255,255,255,0.55);
+    --glass-border:rgba(32,36,31,0.12);
+    --card-blur:   24px;
+    --modal-bg:    rgba(246,244,239,0.94);
 
-    --accent-rgb:     92,  77, 214;
-    --green-rgb:       63, 159,  95;
-    --red-rgb:        200,  80,  58;
-    --yellow-rgb:     168, 134,  42;
-    --text-rgb:        36,  31,  71;
-    --text-muted-rgb:  74,  69, 112;
-    --card-rgb:       122, 116, 232;
+    /* RGB splits para rgba() */
+    --accent-rgb:     51,  84,  74;
+    --green-rgb:      51,  84,  74;
+    --red-rgb:        166, 69,  46;
+    --yellow-rgb:     176, 138, 62;
+    --text-rgb:       32,  36,  31;
+    --text-muted-rgb: 99,  105, 93;
+    --card-rgb:       255, 255, 255;
   }
 
+  /* ─── Utilidades de vidrio compartidas (U1) ───────────────
+     Disponibles para que las unidades por pantalla las apliquen
+     donde el mockup lo pide (no globalmente sobre .card). */
+  .glass-sheen { position: relative; overflow: hidden; }
+  .glass-sheen::before {
+    content: ''; position: absolute; top: -70%; left: -55%; width: 55%; height: 240%;
+    background: linear-gradient(102deg, transparent 42%, rgba(255,255,255,.55) 49%,
+      rgba(255,255,255,.75) 50.5%, rgba(255,255,255,.55) 52%, transparent 59%);
+    mix-blend-mode: soft-light; pointer-events: none;
+    animation: glass-sweep 9s cubic-bezier(.35,.05,.25,1) infinite;
+  }
+  @keyframes glass-sweep {
+    0%   { transform: translateX(0) rotate(9deg); opacity: 0; }
+    4%   { opacity: 1; }
+    30%  { opacity: 1; }
+    38%  { transform: translateX(430px) rotate(9deg); opacity: 0; }
+    100% { transform: translateX(430px) rotate(9deg); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glass-sheen::before { animation: none; opacity: .4; transform: translateX(160px) rotate(9deg); }
+  }
+  /* ─── U2: Mi mes — oculto temporalmente, fuera del alcance del mockup
+     Marfil sereno (docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md).
+     HTML/JS quedan intactos — es solo display:none, no se borró nada.
+     Reubicar en otra unidad cuando se decida dónde va cada cosa. ─── */
+  .mm-quick-stats, .mm-desglose, .mm-row2,
+  #pres-tendencias, #recurrentes-section, #compromisos-card {
+    display: none !important;
+  }
 
   /* ─── CARD PRIMITIVE ────────────────────────────────────── */
   .card {
@@ -216,11 +185,20 @@
     letter-spacing: -.01em;
   }
 
+  /* Títulos reales (título de página, encabezados de sección) van en la
+     serif itálica del mockup — ver docs/plans/2026-07-21-...-plan.md (U1):
+     "serif itálica para títulos y acentos destacados". Los valores
+     numéricos (kpi-value, saldos, montos) quedan en la sans de
+     --font-display, el mockup nunca usa serif para números. */
   h1, h2, h3,
-  .kpi-value, .kpi-label,
   .topnav-brand,
   .page-header h1, .setup-card h1,
-  .chart-title, .comp-title, .pres-title,
+  .chart-title, .comp-title, .pres-title {
+    font-family: var(--font-serif);
+    text-rendering: optimizeLegibility;
+  }
+
+  .kpi-value, .kpi-label,
   #sub-neto, .comp-balance-value,
   .donut-center-val, .donut-center-sub {
     font-family: var(--font-display);
@@ -236,27 +214,51 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* ─── PANTALLA DE CONFIGURACIÓN ────────────────────────── */
+  /* ─── PANTALLA DE LOGIN — panel partido, corte diagonal (dirección "E"
+     de los mockups Marfil sereno) ──────────────────────────────────── */
   #setup-screen {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     min-height: 100vh;
-    padding: 2rem;
-    background: radial-gradient(ellipse at 50% 0%, rgba(200,132,90,0.14) 0%, var(--bg) 60%);
+    background: var(--bg);
   }
-  .setup-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--accent);
-    border-radius: var(--radius);
-    padding: 3rem 2.5rem 2.5rem;
-    width: 100%;
-    max-width: 480px;
-    box-shadow: var(--shadow), 0 24px 64px rgba(200,132,90,0.12), 0 0 0 1px rgba(200,132,90,0.06);
+  .login-brand-panel {
+    flex: 0 0 44%;
+    background: var(--brand);
+    color: var(--brand-ink);
+    position: relative;
+    overflow: hidden;
+    padding: 44px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
   }
-  .setup-card h1 { font-size: 2rem; margin-bottom: .35rem; font-weight: 800; letter-spacing: -.045em; line-height: 1.05; }
+  .login-brand-sheen {
+    position: absolute; top: -20%; left: -30%; width: 60%; height: 160%;
+    background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,.16) 50%, transparent 60%);
+    pointer-events: none;
+  }
+  .login-brand-mark {
+    font-family: var(--font-serif); font-style: italic; font-weight: 700;
+    font-size: 22px; position: relative; z-index: 1;
+  }
+  .login-brand-quote { position: relative; z-index: 1; }
+  .login-brand-quote .line {
+    font-family: var(--font-serif); font-style: italic; font-size: 22px;
+    line-height: 1.35; text-wrap: balance;
+  }
+  .login-brand-quote .sub { font-size: .78rem; color: rgba(255,255,255,.7); margin-top: .6rem; }
+
+  .login-form-panel {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 2rem 2rem 2rem 3rem; margin-left: -30px;
+  }
+  .setup-card { width: 100%; max-width: 380px; }
+  .login-eyebrow {
+    font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-faint); margin-bottom: .3rem;
+  }
+  .setup-card h1 { font-size: 1.7rem; margin-bottom: .35rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.1; }
   .setup-card p  { color: var(--text-muted); margin-bottom: 2rem; font-size: .9rem; line-height: 1.65; }
   .setup-card label {
     display: block; font-size: .72rem; color: var(--text-muted);
@@ -280,10 +282,18 @@
   #test-result { margin-top: .8rem; font-size: .88rem; min-height: 1.2em; }
   .ok   { color: var(--green); }
   .fail { color: var(--red); }
-  @media (max-width: 480px) {
-    #setup-screen { padding: 1rem; }
-    .setup-card { padding: 2rem 1.3rem 1.6rem; }
-    .setup-card h1 { font-size: 1.6rem; }
+  /* Mobile: apilado — panel de marca condensado arriba (sin corte
+     diagonal, no queda bien apilado angosto), form abajo con scroll. */
+  @media (max-width: 768px) {
+    #setup-screen { flex-direction: column; min-height: 100vh; }
+    .login-brand-panel {
+      flex: 0 0 auto; clip-path: none; padding: 2.75rem 1.5rem 1.75rem;
+    }
+    .login-brand-quote .line { font-size: 1.05rem; max-width: 85%; }
+    .login-brand-quote .sub  { display: none; }
+    .login-form-panel { flex: 1; margin-left: 0; padding: 1.75rem 1.3rem 2rem; align-items: flex-start; }
+    .setup-card { max-width: none; }
+    .setup-card h1 { font-size: 1.5rem; }
   }
 
   /* ─── APP ───────────────────────────────────────────────── */
@@ -330,15 +340,6 @@
     justify-content: space-between;
     margin-bottom: 2.4rem;
     padding-bottom: 1.2rem;
-    border-bottom: none;
-    position: relative;
-  }
-  .page-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(to right, var(--accent), transparent);
-    opacity: 0.35;
   }
   .page-header-left { display: flex; flex-direction: column; }
   .page-eyebrow {
@@ -520,17 +521,27 @@
   }
   .table-filters select, .table-filters input {
     background: var(--card); border: 1px solid var(--border);
-    color: var(--text); padding: .42rem .85rem; border-radius: 8px;
+    color: var(--text); padding: .42rem .85rem; border-radius: var(--r-pill);
     font-size: .84rem; font-family: inherit; transition: border-color .15s;
   }
   .table-filters select:focus, .table-filters input:focus {
     outline: none; border-color: var(--accent);
   }
+  /* Buscador de Transacciones: fila propia, antes de los filtros (mismo
+     orden que el mockup Marfil sereno) */
+  .fil-buscar-input {
+    display: block; width: 100%; margin-bottom: .75rem; box-sizing: border-box;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: .6rem .95rem; border-radius: var(--r-md);
+    font-size: .87rem; font-family: inherit; transition: border-color .15s;
+  }
+  .fil-buscar-input:focus { outline: none; border-color: var(--accent); }
+  .fil-buscar-input::placeholder { color: var(--text-faint); }
   /* ── Multi-select categorías ── */
   .multi-select-wrap { position: relative; }
   .multi-select-btn {
     background: var(--card); border: 1px solid var(--border);
-    color: var(--text); padding: .42rem .85rem; border-radius: 8px;
+    color: var(--text); padding: .42rem .85rem; border-radius: var(--r-pill);
     font-size: .84rem; font-family: inherit; cursor: pointer;
     display: flex; align-items: center; gap: .4rem; white-space: nowrap;
     transition: border-color .15s; user-select: none;
@@ -556,10 +567,28 @@
   .multi-select-option:hover { background: var(--bg2); }
   .multi-select-option input, .multi-select-all input { cursor: pointer; accent-color: var(--accent); }
   /* ── Subtotales ── */
+  /* En mobile es una barra horizontal (arriba de .trans-mobile-list); en
+     desktop (≥860px, ver media query) pasa a card vertical de columna
+     lateral — mismo patrón que la columna lateral de Mi mes. */
   .tabla-subtotal {
     display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap;
     padding: .75rem 1.1rem; background: var(--bg2);
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .trans-desktop-grid { display: block; }
+  @media (min-width: 860px) {
+    .trans-desktop-grid { display: grid; grid-template-columns: 1fr 300px; gap: 22px; align-items: start; }
+    .tabla-subtotal {
+      flex-direction: column; align-items: flex-start; gap: 16px;
+      padding: 20px; margin-bottom: 0;
+      border-radius: var(--r-md); border: 1px solid var(--line);
+      backdrop-filter: blur(var(--card-blur)) saturate(160%);
+      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    }
+    .sub-neto-lbl { font-size: 11px; letter-spacing: .04em; }
+    #sub-neto { font-size: 1.9rem; }
+    .sub-stats { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .sub-stats-sep { display: none; }
   }
   .sub-neto-main { display: flex; flex-direction: column; gap: .05rem; min-width: 100px; }
   .sub-neto-lbl  { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); font-weight: 600; }
@@ -640,6 +669,14 @@
     background: linear-gradient(135deg, color-mix(in oklab, var(--save) 14%, var(--surface)) 0%, var(--surface) 65%);
     border-color: color-mix(in oklab, var(--save) 24%, var(--line));
   }
+  .comp-avatars { display: flex; }
+  .comp-avatar {
+    width: 32px; height: 32px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; border: 2px solid var(--bg);
+  }
+  .comp-avatar-a { background: var(--accent-dim); color: var(--accent); z-index: 2; }
+  .comp-avatar-b { background: color-mix(in oklab, var(--info) 14%, #fff); color: var(--info); margin-left: -10px; }
   .comp-balance-row { display: flex; align-items: center; gap: 1.5rem; }
   .comp-balance-info { flex: 1; min-width: 0; }
   .comp-balance-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: .4rem; }
@@ -719,6 +756,16 @@
   @media (min-width: 860px) {
     .comp-hero-row { flex-direction: row; align-items: stretch; }
     .comp-hero-row > * { flex: 1; }
+    /* Reparto pasa a verse como card acá (en mobile queda plano, arriba
+       del balance, sin fondo) — misma altura que Balance/Contribución. */
+    .comp-hero-row .reparto-control {
+      flex-wrap: wrap; align-content: flex-start;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r-md); box-shadow: var(--shadow-card);
+      backdrop-filter: blur(var(--card-blur)) saturate(160%);
+      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+      padding: 1.2rem 1.4rem; margin-bottom: 0 !important;
+    }
   }
   /* Contribución del mes card */
   .comp-contrib          { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
@@ -751,8 +798,14 @@
   .comp-tfoot-total { font-size: .95rem; font-weight: 800 !important; }
 
   /* ─── PLAZOS FIJOS ──────────────────────────────────────────── */
-  .plazo-card { background: var(--card); backdrop-filter: blur(var(--card-blur)) saturate(160%); -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: .65rem; box-shadow: var(--shadow); transition: border-color .18s, box-shadow .18s; }
-  .plazo-card:hover { border-color: var(--border2); box-shadow: var(--shadow), 0 0 20px rgba(var(--accent-rgb),.12); }
+  /* Lista tipo mockup (.holdings/.holding): antes cada tenencia era su
+     propia card con borde+sombra+margin-bottom, ahora es una fila dentro
+     de .inv-holdings-list (un solo card contenedor, separador border-top
+     entre filas) — mismo patrón que Transacciones/Presupuesto. */
+  .inv-holdings-list { padding: 4px 0; overflow: hidden; }
+  .plazo-card { padding: .85rem 1.1rem; border-top: 1px solid var(--line); transition: background .15s; }
+  .inv-holdings-list > .plazo-card:first-child { border-top: none; }
+  .plazo-card:hover { background: var(--surface-2); }
   .plazo-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; }
   .plazo-desc { font-weight: 700; font-size: .93rem; line-height: 1.25; }
   .plazo-badge { font-size: .68rem; font-weight: 700; padding: .15rem .5rem; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
@@ -774,54 +827,137 @@
   .inv-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .85rem; margin-bottom: 2rem; }
 
   /* ─── INVERSIONES REDESIGN ──────────────────────────────── */
-  .inv-hero-row    { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
-  .inv-hero-card   { position: relative; overflow: hidden; border-radius: var(--r-lg);
-                      padding: 24px 28px; color: #fff;
-                      background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent) 0%, color-mix(in oklab, var(--brand-2) 20%, transparent) 100%);
-                      backdrop-filter: blur(var(--card-blur)) saturate(160%);
-                      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-                      border: 1px solid rgba(255,255,255,0.18);
-                      box-shadow: 0 18px 44px color-mix(in oklab, var(--brand) 28%, transparent), inset 0 1px 0 rgba(255,255,255,.25); }
-  .inv-hero-card::before {
-    content: "";
-    position: absolute; top: 0; left: 6%; right: 6%; height: 36%;
-    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0));
-    border-radius: var(--r-lg) var(--r-lg) 60% 60%;
-    pointer-events: none;
+  /* Card única de resumen (antes 2 cards: hero + "Asignación" con barras de
+     progreso de solo 2 categorías) — clon del .side-card del mockup: valor
+     total + split real de 3 categorías (Cripto/Acciones/Plazos) en pills
+     con punto de color, sin barra de progreso. */
+  .inv-summary-card {
+    position: relative; overflow: hidden; border-radius: var(--r-lg);
+    padding: 24px 28px; color: var(--text);
+    background: var(--surface);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 18px;
   }
-  .inv-hero-eyebrow { font-size: 14px; font-weight: 600; opacity: .9; position: relative; }
-  .inv-hero-total   { font-size: clamp(26px, 9vw, 38px); font-weight: 700; line-height: 1.05; margin-top: 6px; position: relative; }
-  .inv-hero-usd     { font-size: 14px; opacity: .8; margin-top: 3px; position: relative; }
-  .inv-hero-sub     { font-size: 12.5px; opacity: .75; margin-top: 6px; position: relative; }
-  .inv-alloc-card   { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
-  .inv-alloc-title  { font-size: 14.5px; font-weight: 700; font-family: var(--font-display); }
-  .inv-alloc-row    { display: flex; flex-direction: column; gap: 5px; }
-  .inv-alloc-top    { display: flex; justify-content: space-between; align-items: baseline; }
-  .inv-alloc-name   { font-size: 13.5px; font-weight: 600; }
-  .inv-alloc-val    { font-family: var(--font-display); font-size: 14px; font-weight: 700; font-variant-numeric: normal; }
-  .inv-alloc-pct    { font-size: 12px; color: var(--text-faint); }
-  .inv-alloc-bar-wrap    { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
-  .inv-alloc-bar         { height: 100%; border-radius: 99px; transition: width .5s var(--ease-out, ease); min-width: 4px; }
-  .inv-alloc-bar-plazos  { background: var(--save); }
-  .inv-alloc-bar-activos { background: var(--info); }
+  .inv-hero-blob {
+    position: absolute; width: 260px; height: 260px; border-radius: 999px;
+    right: -70px; top: -90px;
+    background: radial-gradient(closest-side, rgba(183,203,192,.55), rgba(246,244,239,0) 72%);
+    filter: blur(6px); pointer-events: none;
+  }
+  .inv-hero-eyebrow { font-size: 14px; font-weight: 600; color: var(--text-dim); position: relative; z-index: 1; }
+  .inv-hero-total   { font-size: clamp(26px, 9vw, 38px); font-weight: 700; line-height: 1.05; margin-top: 6px; position: relative; z-index: 1; color: var(--text); }
+  .inv-hero-usd     { font-size: 14px; color: var(--text-faint); margin-top: 3px; position: relative; z-index: 1; }
+  .inv-hero-sub     { font-size: 12.5px; color: var(--text-faint); margin-top: 6px; position: relative; z-index: 1; }
+  .inv-alloc-split  { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; position: relative; z-index: 1; }
+  .inv-alloc-pill   {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12.5px; font-weight: 600; padding: 9px 12px; border-radius: 12px;
+    background: var(--surface-2); border: 1px solid var(--line);
+  }
+  .inv-alloc-pill .l   { display: flex; align-items: center; gap: 7px; }
+  .inv-alloc-pill .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .inv-alloc-total  { font-size: 12.5px; color: var(--text-dim); border-top: 1px solid var(--line);
-                       padding-top: 10px; display: flex; justify-content: space-between; }
+                       padding-top: 14px; margin-top: 14px; display: flex; justify-content: space-between;
+                       position: relative; z-index: 1; }
   .inv-alloc-total .num { font-weight: 700; }
   .inv-content-row  { display: flex; flex-direction: column; gap: 18px; }
   .inv-section-hdr  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .inv-section-title{ font-size: 15px; font-weight: 700; margin: 0; font-family: var(--font-display); }
+  .inv-section-title{ font-size: 15px; font-weight: 700; margin: 0; font-family: var(--font-serif); }
   .inv-interes-total{ font-size: 13px; color: var(--pos); margin-top: 8px; padding: 8px 12px;
                        border-top: 1px solid var(--line); font-weight: 600; }
+  /* CTA pill "Agregar inversión" — clon del .add-inv-btn del mockup, el
+     resto de los .btn-primary de la app quedan rectangulares (9px), este
+     es el único pill a propósito. */
+  .inv-add-btn { border-radius: var(--r-pill); padding: .6rem 1.2rem; }
+  /* Resumen fijo a la izquierda (300px) + contenido a la derecha — mismo
+     patrón que Transacciones. Con la sidebar restando ancho, 3 columnas de
+     tenencias recién entran cómodas desde 1100px; entre 860-1099px van 2. */
+  .inv-desktop-grid { display: block; }
   @media (min-width: 860px) {
-    .inv-hero-row   { flex-direction: row; align-items: stretch; }
-    .inv-hero-card  { flex: 1.1; }
-    .inv-alloc-card { flex: 0.9; }
-    .inv-content-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .inv-desktop-grid { display: grid; grid-template-columns: 300px 1fr; gap: 22px; align-items: start; }
+    .inv-content-row  { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
   }
-  .plazo-form { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: .75rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-  .plazo-form input { padding: .45rem .6rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .85rem; font-family: inherit; width: 100%; box-sizing: border-box; }
-  .plazo-form input:focus { outline: none; border-color: var(--accent); }
+  @media (min-width: 1100px) {
+    .inv-content-row { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* ─── MODAL "Agregar inversión" — selector de tipo + form real ────── */
+  .modal-inv-overlay {
+    display: none; position: fixed; inset: 0; z-index: 700;
+    background: var(--overlay); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 1rem;
+    animation: fadeIn .18s ease-out;
+  }
+  .modal-inv-overlay.open { display: flex; }
+  .modal-inv-box {
+    width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+    background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-lg);
+    box-shadow: var(--shadow-pop);
+  }
+  .modal-inv-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.4rem .9rem; border-bottom: 1px solid var(--line);
+  }
+  .modal-inv-head h2 { font-size: 1.1rem; margin: 0; }
+  .modal-inv-close {
+    width: 30px; height: 30px; border-radius: 50%; flex: none;
+    background: var(--surface); border: 1px solid var(--line);
+    color: var(--text-dim); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-inv-close:hover { border-color: var(--line-strong); color: var(--text); }
+  .modal-inv-body { padding: 1.1rem 1.4rem 1.4rem; }
+  .modal-inv-type-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.1rem; }
+  .modal-inv-type-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+    padding: 14px 8px; border-radius: var(--r-md);
+    background: var(--surface-2); border: 1.5px solid transparent;
+    font-family: inherit; font-size: 12px; font-weight: 700; color: var(--text-dim);
+    cursor: pointer;
+  }
+  .modal-inv-type-btn .ico {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--surface-strong, var(--surface));
+    color: var(--text-dim); display: flex; align-items: center; justify-content: center;
+  }
+  .modal-inv-type-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .modal-inv-type-btn.active .ico { background: var(--accent); color: var(--brand-ink); }
+  @media (max-width: 480px) {
+    .modal-inv-box { max-width: none; }
+    .modal-inv-head, .modal-inv-body { padding-left: 1rem; padding-right: 1rem; }
+  }
+
+  /* Form de Plazo fijo / Cripto&Acciones — clon del mockup
+     agregar-inversion-desktop.html: campos con fondo hundido sin borde
+     visible, label arriba de cada campo, botones tipo píldora grandes.
+     Antes era una rejilla de inputs sin label con bordes finos (estilo
+     genérico viejo), tanto en el modal como en el form inline por sección. */
+  /* 1 columna inline por sección (las cards de Plazos/Cripto/Acciones son
+     angostas, sobre todo en el layout de 3 columnas) — 2 columnas solo
+     dentro del modal "Agregar inversión", que tiene 560px de ancho fijo. */
+  .plazo-form { background: transparent; border: none; padding: 0; margin-bottom: .75rem; display: grid; grid-template-columns: 1fr; gap: 16px 18px; }
+  #modal-inv-form .plazo-form { grid-template-columns: 1fr 1fr; }
   .plazo-form-full { grid-column: 1 / -1; }
+  .pf-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+  .pf-field label { font-size: .72rem; font-weight: 700; color: var(--text-faint); letter-spacing: .02em; }
+  .pf-label-opt { font-weight: 500; text-transform: none; letter-spacing: 0; }
+  .plazo-form input, .plazo-form select {
+    width: 100%; box-sizing: border-box; padding: .8rem .85rem; border-radius: var(--r-md);
+    border: 1px solid transparent; background: var(--surface-2); color: var(--text);
+    font-size: .92rem; font-weight: 600; font-family: inherit;
+  }
+  .plazo-form input:focus, .plazo-form select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .plazo-form input[readonly] { opacity: .6; }
+  .pf-row { display: flex; align-items: center; gap: 8px; }
+  .pf-row select { flex: 0 0 74px; }
+  .pf-row-suffix { font-size: .78rem; color: var(--text-faint); white-space: nowrap; }
+  .pf-venc-display { padding: .8rem .85rem; border-radius: var(--r-md); background: var(--surface-2); font-size: .92rem; font-weight: 600; }
+  .pf-venc-note { font-size: .72rem; color: var(--text-faint); margin-top: 6px; }
+  .plazo-form-actions { display: flex; gap: 10px; margin-top: 6px; }
+  .plazo-form-actions .btn { flex: 1; border-radius: var(--r-pill); padding: .85rem 0; font-size: .88rem; justify-content: center; }
+  .plazo-form-actions .btn-primary { flex: 2; }
 
   /* ─── LIQ-MODAL BOTTOM-SHEET MOBILE ─────────────────────── */
   @media (max-width: 768px) {
@@ -843,6 +979,15 @@
   /* ─── HEALTH SCORE ──────────────────────────────────────── */
 
   /* ─── PÁGINA CATEGORÍAS Y FUENTES ───────────────────────── */
+  .cfg-page-grid { display: block; }
+  .cfg-side-col { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem; }
+  @media (min-width: 860px) {
+    .cfg-page-grid { display: grid; grid-template-columns: 1fr 320px; gap: 1.25rem; align-items: start; }
+    .cfg-side-col { margin-top: 0; }
+    /* Grid 2x2 fijo en desktop (en vez de auto-fit, que con esta columna
+       más angosta podía dar 3 columnas desparejas según el ancho) */
+    .cfg-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  }
   .cfg-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -886,6 +1031,15 @@
   .cfg-input:focus { outline: none; border-color: var(--accent); }
   .cfg-add-btn { white-space: nowrap; padding: .5rem 1rem; font-size: .84rem; flex-shrink: 0; }
   .cfg-msg { font-size: .8rem; min-height: 1.2em; margin-top: .4rem; }
+  .cfg-pareja-row { display: flex; align-items: center; gap: 12px; }
+  .cfg-pareja-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex: none;
+    background: color-mix(in oklab, var(--info) 14%, #fff); color: var(--info);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13.5px;
+  }
+  .cfg-pareja-nombre { font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .cfg-pareja-status { font-size: 11.5px; color: var(--text-faint); margin-top: 1px; }
   .tc-badge {
     background: var(--accent); color: var(--white);
     font-size: .68rem; padding: .1rem .38rem;
@@ -954,13 +1108,38 @@
   .pres-bar-pct  { font-size: .71rem; color: var(--text-muted); min-width: 38px; text-align: right; font-weight: 600; }
 
   /* ─── FILAS DE ESTADO ───────────────────────────────────────── */
-  .pres-row-zero td { opacity: .32; }
-  .pres-row-over td:first-child  { border-left: none; }
-  .pres-row-warn td:first-child  { border-left: none; }
-  .pres-row-ok   td:first-child  { border-left: none; }
+  .pres-row-zero { opacity: .32; }
   .pres-row-over { background: rgba(248,113,113,.04); }
   .pres-row-warn { background: rgba(251,191,36,.03); }
   .pres-status-dot { display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:.5rem;vertical-align:middle;flex-shrink:0; }
+
+  /* ─── PRESUPUESTO POR CATEGORÍA — filas tipo card (antes tabla) ─── */
+  .pres-cat-list { display: flex; flex-direction: column; }
+  .pres-cat-row {
+    padding: .7rem 1rem; border-top: 1px solid var(--line);
+  }
+  .pres-cat-list .pres-cat-row:first-child { border-top: none; }
+  .pres-cat-head {
+    display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .6rem;
+  }
+  .pres-cat-name {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-size: .89rem; font-weight: 600; flex: 1; min-width: 0;
+  }
+  .pres-cat-emoji { font-size: 1.05rem; width: 22px; text-align: center; flex-shrink: 0; }
+  .pres-cat-input-wrap {
+    display: flex; align-items: center; gap: .3rem; flex-shrink: 0; margin-left: auto;
+  }
+  .pres-cat-input-sym { color: var(--text-muted); font-size: .8rem; }
+  .pres-cat-input-wrap .pres-input { width: 100px; }
+  .pres-cat-body { margin-top: .5rem; }
+  .pres-cat-meta {
+    display: flex; flex-wrap: wrap; gap: .3rem 1rem;
+    font-size: .78rem; color: var(--text-muted); margin-top: .35rem;
+  }
+  .pres-cat-meta strong { color: var(--text); font-weight: 700; }
+  .pres-monto-live { color: var(--text-faint); }
+  .pres-total-row { background: var(--surface-2); }
 
   /* ─── ANILLO DE PROGRESO TOTAL ──────────────────────────────── */
   .pres-ring-card {
@@ -987,11 +1166,6 @@
     border-radius: 8px; padding: .45rem .8rem; font-size: .8rem; color: var(--green); font-weight: 600;
   }
 
-  /* ─── TABLA FOOTER ───────────────────────────────────────────── */
-  .pres-tfoot-row td {
-    padding: .75rem 1rem !important; font-weight: 700; font-size: .9rem;
-    background: var(--bg2); border-top: 1px solid var(--border2) !important;
-  }
 
   .pres-note { font-size: .76rem; color: var(--text-muted); margin-top: .5rem; }
 
@@ -1104,6 +1278,10 @@
     box-shadow: var(--shadow-card);
   }
   .form-card h2 { font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: 700; }
+  .f-hint-mep {
+    text-align: center; font-size: .78rem; color: var(--text-faint);
+    margin-top: .25rem; line-height: 1.5;
+  }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
   .form-group { display: flex; flex-direction: column; gap: .4rem; }
   .form-group.full { grid-column: 1 / -1; }
@@ -1420,49 +1598,36 @@
   }
 
   /* ─── BOTTOM NAV (NavCalida pill) ─────────────────────────── */
+  /* Barra plana borde a borde (Dirección A validada en Artifacts) — mismo
+     tratamiento que .top-strip en desktop, no un pill flotante. Ver
+     docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md. */
   .bottom-nav {
     display: none;
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-    padding: 10px 18px calc(30px + env(safe-area-inset-bottom, 0px));
-    background: linear-gradient(0deg, var(--bg) 60%, transparent);
     pointer-events: none;
   }
   .bn-pill {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface); border: 1px solid var(--line);
+    display: flex; align-items: center;
+    background: var(--surface-2); border-top: 1px solid var(--line);
     backdrop-filter: blur(var(--card-blur)) saturate(160%);
     -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-    border-radius: 24px; padding: 10px 16px;
-    box-shadow: var(--shadow-card);
+    padding: 9px 8px calc(15px + env(safe-area-inset-bottom, 0px));
     pointer-events: all;
   }
 
   /* Fallback sin blur — el vidrio se vuelve panel semi-opaco sólido */
   @supports not (backdrop-filter: blur(1px)) {
-    :root[data-theme='dark'] .card, :root[data-theme='dark'] .chart-card, :root[data-theme='dark'] .kpi-card,
-    :root[data-theme='dark'] .plazo-card, :root[data-theme='dark'] .comp-balance-card,
-    :root[data-theme='dark'] .topnav, :root[data-theme='dark'] .bn-pill, :root[data-theme='dark'] .sidebar,
-    :root[data-theme='dark'] .rafaga-modal, :root[data-theme='dark'] .cuotas-modal,
-    :root[data-theme='dark'] .modal-recur, :root[data-theme='dark'] .edit-modal,
-    :root[data-theme='dark'] .cuotas-mes-sheet, :root[data-theme='dark'] .cuotas-card,
-    :root[data-theme='dark'] .compromisos-card-box,
-    :root[data-theme='dark'] .liq-inner, :root[data-theme='dark'] #modal-nombre > div,
-    :root[data-theme='dark'] #modal-invitacion > div {
-      background: #221c30;
-    }
-    :root[data-theme='light'] .card, :root[data-theme='light'] .chart-card, :root[data-theme='light'] .kpi-card,
-    :root[data-theme='light'] .plazo-card, :root[data-theme='light'] .comp-balance-card,
-    :root[data-theme='light'] .topnav, :root[data-theme='light'] .bn-pill, :root[data-theme='light'] .sidebar,
-    :root[data-theme='light'] .rafaga-modal, :root[data-theme='light'] .cuotas-modal,
-    :root[data-theme='light'] .modal-recur, :root[data-theme='light'] .edit-modal,
-    :root[data-theme='light'] .cuotas-mes-sheet, :root[data-theme='light'] .cuotas-card,
-    :root[data-theme='light'] .compromisos-card-box,
-    :root[data-theme='light'] .liq-inner, :root[data-theme='light'] #modal-nombre > div,
-    :root[data-theme='light'] #modal-invitacion > div {
-      background: #ece7f7;
-    }
-    .mm-hero, .inv-hero-card {
-      background: linear-gradient(150deg, var(--brand) 0%, var(--brand-2) 100%);
+    .card, .chart-card, .kpi-card,
+    .plazo-card, .comp-balance-card,
+    .topnav, .bn-pill, .top-strip,
+    .rafaga-modal, .cuotas-modal,
+    .modal-recur, .edit-modal,
+    .cuotas-mes-sheet, .cuotas-card,
+    .compromisos-card-box,
+    .liq-inner, #modal-nombre > div,
+    #modal-invitacion > div,
+    .mm-hero, .inv-summary-card {
+      background: #F6F4EF;
     }
   }
   .bn-item {
@@ -1476,6 +1641,10 @@
   }
   .bn-item:hover { color: var(--brand); }
   .bn-item.active { color: var(--brand); }
+  .bn-item.active::before {
+    content: ''; position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+    width: 22px; height: 3px; border-radius: 0 0 3px 3px; background: var(--brand);
+  }
   .bn-item:active { transform: scale(0.93); }
   @keyframes bnIconPop {
     0%   { transform: translateY(0)    scale(1); }
@@ -1485,16 +1654,44 @@
   }
   .bn-item.active i { animation: bnIconPop .34s var(--ease-out); }
   .bn-cta {
-    width: 50px; height: 50px; border-radius: 16px; flex-shrink: 0;
-    background: var(--brand); color: #fff; border: none;
+    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+    background: var(--brand); color: #fff; border: 4px solid var(--bg);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 8px 20px color-mix(in oklab, var(--brand) 45%, transparent);
+    box-shadow: 0 6px 16px rgba(32,36,31,.18);
     cursor: pointer;
     transition: transform .15s var(--ease-out), box-shadow .15s var(--ease-out);
-    margin-top: -2px;
+    margin: -18px 4px 0;
   }
-  .bn-cta:hover  { transform: scale(1.06); box-shadow: 0 10px 28px color-mix(in oklab, var(--brand) 50%, transparent); }
+  .bn-cta:hover  { transform: scale(1.06); }
   .bn-cta:active { transform: scale(0.94); }
+
+  /* ─── MODAL "NUEVA TRANSACCIÓN" (desktop/tablet ≥769px) ─────
+     #page-nueva se reparenta acá adentro por JS al abrir. No se muestra
+     en mobile — ahí navegarA('nueva') sigue siendo página completa. */
+  .modal-nueva-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(32,36,31,.32);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px 24px;
+  }
+  .modal-nueva-box {
+    width: 640px; max-width: 100%; max-height: 100%;
+    overflow-y: auto;
+    background: var(--bg); border-radius: var(--r-lg);
+    box-shadow: var(--shadow-pop);
+    padding: 30px 32px;
+  }
+  .modal-nueva-box .page-header { max-width: none !important; }
+  .modal-nueva-close {
+    width: 32px; height: 32px; border-radius: 50%; flex: none;
+    background: var(--surface); border: 1px solid var(--line);
+    color: var(--text-dim); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-nueva-close:hover { border-color: var(--line-strong); color: var(--text); }
+  @media (max-width: 768px) { .modal-nueva-overlay { display: none !important; } }
 
   /* ─── MI MES CÁLIDA ───────────────────────────────────────── */
   .page-mimes { padding-bottom: 1rem; }
@@ -1539,42 +1736,45 @@
 
   .mm-hero {
     border-radius: 28px; padding: 24px 22px;
-    position: relative; overflow: hidden; color: #fff;
-    background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent) 0%, color-mix(in oklab, var(--brand-2) 20%, transparent) 100%);
+    position: relative; overflow: hidden; color: var(--text);
+    background: var(--surface);
     backdrop-filter: blur(var(--card-blur)) saturate(160%);
     -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-    border: 1px solid rgba(255,255,255,0.18);
-    box-shadow: 0 18px 40px color-mix(in oklab, var(--brand) 30%, transparent), inset 0 1px 0 rgba(255,255,255,.25);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
     margin-bottom: 12px;
   }
-  .mm-hero::before {
-    content: "";
-    position: absolute; top: 0; left: 6%; right: 6%; height: 36%;
-    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0));
-    border-radius: 28px 28px 60% 60%;
-    pointer-events: none;
-  }
   .mm-hero-orb {
-    position: absolute; width: 180px; height: 180px; border-radius: 999px;
-    right: -50px; top: -60px; background: rgba(255,255,255,.16);
+    position: absolute; width: 260px; height: 260px; border-radius: 999px;
+    right: -70px; top: -90px; background: radial-gradient(closest-side, rgba(183,203,192,.55), rgba(246,244,239,0) 72%);
+    filter: blur(6px);
     pointer-events: none;
   }
-  .mm-hero-eyebrow { font-size: .875rem; font-weight: 600; opacity: .9; position: relative; }
+  .mm-hero-eyebrow { font-size: .875rem; font-weight: 500; color: var(--text-dim); position: relative; z-index: 1; }
+  .mm-hero-name { font-family: var(--font-serif); font-style: italic; color: var(--text); font-size: .95rem; }
   .mm-hero-amount {
     font-size: clamp(2.4rem, 10vw, 3.2rem); font-weight: 700;
-    line-height: 1.05; margin-top: .35rem; position: relative;
-    font-family: var(--font-display);
+    line-height: 1.05; margin-top: .35rem; position: relative; z-index: 1;
+    font-family: var(--font-display); color: var(--text);
   }
-  .mm-hero-sub { font-size: .84rem; opacity: .9; margin-top: .25rem; position: relative; }
-  .mm-hero-stats { display: flex; gap: 10px; margin-top: 18px; position: relative; }
-  .mm-hero-stat {
-    flex: 1; background: rgba(255,255,255,.16); border-radius: 16px;
-    padding: 11px 14px; backdrop-filter: blur(4px);
+  .mm-hero-sub { font-size: .84rem; color: var(--text-faint); margin-top: .3rem; position: relative; z-index: 1; }
+  .mm-hero-sub strong { color: var(--text-dim); font-weight: 700; }
+  .mm-hero-pills { display: flex; gap: 9px; margin-top: 18px; position: relative; z-index: 1; }
+  .mm-hero-pill {
+    font-size: .81rem; font-weight: 600; border-radius: var(--r-pill);
+    padding: 7px 14px; background: var(--surface-strong, var(--surface));
+    border: 1px solid var(--line);
   }
-  .mm-hero-stat-label { font-size: .72rem; opacity: .85; font-weight: 600; }
-  .mm-hero-stat-val   { font-size: 1.2rem; font-weight: 700; margin-top: .15rem; font-family: var(--font-display); }
+  .mm-hero-pill.pos { color: var(--pos); }
+  .mm-hero-pill.neg { color: var(--neg); }
 
   .mm-quick-stats { display: flex; gap: 10px; margin-bottom: 14px; }
+  /* .mm-sidebar-col es el wrapper de columna lateral desktop (Compartidos,
+     Meta, Cuotas activas). En mobile no es un grid especial (fluye normal),
+     pero "Compartidos con Ama" y "Meta de ahorro" no están en el mockup
+     mobile — se ocultan puntualmente ahí; "Cuotas activas" sigue mostrándose
+     suelta según su propia lógica (_renderCuotasCard), como antes. */
+  .mm-sidebar-hide-mobile { display: none; }
   .mm-qs-card { flex: 1; padding: 12px 13px; }
   .mm-qs-label { font-size: .72rem; color: var(--text-faint); font-weight: 600; }
   .mm-qs-val { font-size: 1.05rem; font-weight: 700; margin-top: .2rem; font-family: var(--font-display); }
@@ -1607,31 +1807,34 @@
   .mm-cat-bar-fill { height: 100%; border-radius: 999px; transition: width .4s var(--ease-out); }
 
   /* desktop-only Mi mes elements (hidden on mobile) */
-  .mm-page-title  { display: none; font-size: 1.7rem; font-weight: 600; font-family: var(--font-display); letter-spacing: -.025em; color: var(--text); }
+  .mm-page-title  { display: none; font-size: 1.7rem; font-weight: 600; font-family: var(--font-serif); letter-spacing: -.025em; color: var(--text); }
   .mm-anotar-btn  { display: none; }
-  .mm-hero-stat-3 { display: none; }
   .mm-row2        { display: none; }
-  /* hero amount + glass stats: normal tabular-nums so period isn't narrow vs wide digits */
+  /* hero amount: normal tabular-nums so period isn't narrow vs wide digits */
   .mm-hero-amount   { font-variant-numeric: normal; letter-spacing: -0.025em; }
-  .mm-hero-stat-val { font-variant-numeric: normal; }
   /* desglose visible on mobile as full-width card below quick-stats */
   .mm-desglose { margin-bottom: 14px; }
 
   @media (min-width: 860px) {
     .page-mimes { padding-top: 0; }
-    .mm-page-title { display: block; margin-bottom: .2rem; }
-    .mm-anotar-btn { display: inline-flex; }
-    .mm-header { padding: 0 0 18px; border-bottom: 1px solid var(--line); margin-bottom: 22px; align-items: flex-end; }
-    .mm-greeting { font-size: .88rem; color: var(--text-dim); margin-bottom: 0; }
+    .mm-page-title { display: block; margin-bottom: 0; }
+    /* .mm-anotar-btn ya no se muestra acá — "Nueva" vive en el nav-row */
+    /* El mockup no tiene línea bajo el título — solo margin-bottom. El pill
+       de mes pasa a la derecha del título "Mi mes" en la misma fila; el
+       saludo (antes acá, apilado debajo del título) se movió adentro del
+       hero (ver _renderMMHero). */
+    .mm-header { padding: 0; border-bottom: none; margin-bottom: 18px; align-items: center; }
+    .mm-header-left { display: flex; align-items: center; justify-content: space-between; flex: 1; gap: 14px; }
+    .mm-greeting { display: none; }
     .mm-bell { display: none; }
     .mm-row1 { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: stretch; }
     .mm-hero { margin-bottom: 0; }
-    .mm-hero-stat-3 { display: flex; flex-direction: column; }
     .mm-quick-stats         { display: none; }
     .mm-desglose            { display: flex; flex-direction: column; }
-    .mm-row2                { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .mm-row2                { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .mm-sidebar-col         { display: flex; flex-direction: column; gap: 14px; }
+    .mm-sidebar-hide-mobile { display: block; }
     /* Secciones mobile-only: ocultar en desktop */
-    .cuotas-card         { display: none !important; }
     .mm-section-header   { display: none; }
     .mm-cats-card        { display: none; }
     #btn-toggle-desglose { display: none; }
@@ -1646,9 +1849,11 @@
     .mm-cat-row:first-child { border-top: 1px solid var(--line); }
   }
 
+  /* La lista de transacciones (antes solo mobile) ahora es el único formato,
+     en todos los anchos — reemplazó la tabla de columnas fijas. */
+  .trans-mobile-list { display: flex; flex-direction: column; gap: 8px; }
   /* elementos mobile-only: ocultos por defecto, activados en media query */
-  .trans-mobile-list    { display: none; }
-  .trans-mobile-filters { display: none; }
+  .trans-chip         { display: none; }
 
   /* ─── MOBILE (≤ 768px) ─────────────────────────────────────── */
   @media (max-width: 768px) {
@@ -1656,7 +1861,7 @@
        con font-size computado <16px — varios forms/modales del archivo usan
        .84rem/.9rem/.81rem/.8rem (13-14.4px). Un solo piso genérico en vez de
        tocar cada selector por separado (form-group, edit-field, modal-recur,
-       rafaga-table, reparto-input, y cualquier otro que exista hoy o se
+       rafaga-form-col, reparto-input, y cualquier otro que exista hoy o se
        agregue después). Excluye checkbox/radio: no disparan zoom y su tamaño
        visual puede depender de font-size en estilos custom. */
     input:not([type="checkbox"]):not([type="radio"]), select, textarea {
@@ -1669,7 +1874,7 @@
     /* Contenido ocupa todo el ancho. padding-top = altura real del header
        fijo (var(--mh-h), la misma variable que usa .mobile-header) + 18px
        de aire — nunca puede quedar por debajo de la altura del header. */
-    .main { margin-left: 0; padding: calc(var(--mh-h) + 18px) 1.1rem 7.5rem; }
+    .main { margin-left: 0; padding: calc(var(--mh-h) + 18px) 1.1rem 5.6rem; }
 
     /* Bottom nav */
     .bottom-nav { display: block; }
@@ -1699,13 +1904,7 @@
     /* Celdas más compactas en móvil */
     tbody td, thead th { padding: .55rem .65rem; }
 
-    /* Filtros en columna para mejor uso del espacio táctil */
-    .table-filters { flex-direction: column; gap: .5rem; }
-    .table-filters > * { width: 100%; box-sizing: border-box; }
-    .table-filters select, .table-filters input { width: 100%; }
-    .multi-select-wrap { width: 100%; }
-    .multi-select-btn { width: 100%; justify-content: space-between; }
-    .multi-select-panel { width: 100%; min-width: unset; max-height: 240px; }
+    .multi-select-panel { width: 240px; min-width: unset; max-height: 240px; }
 
     /* Subtotal bar: más compacto */
     .tabla-subtotal { gap: .6rem; padding: .45rem .75rem; font-size: .8rem; }
@@ -1719,23 +1918,35 @@
     /* Presupuesto: ocultar barra de progreso visual en móvil */
     .pres-bar-bg { display: none; }
 
-    /* Transacciones: ocultar tabla y filtros complejos; mostrar list-view */
-    #page-transacciones .table-wrap { display: none; }
-    .trans-mobile-list { display: flex; }
-    .trans-mobile-filters { display: flex; }
-    .table-filters select:not(#fil-mes):not(#fil-anio),
-    .table-filters .multi-select-wrap { display: none; }
-    .table-filters { flex-wrap: wrap; gap: .4rem; }
-    #fil-buscar { width: 100% !important; }
+    /* Transacciones: filtros complejos ocultos en mobile (la lista de filas
+       ya es el formato universal, ver arriba). */
+    .trans-chip         { display: inline-flex; }
+    /* Categoría queda disponible en mobile como chip de filtro rápido (ver
+       docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md) — tipo
+       y responsabilidad ya están cubiertos por los chips de abajo
+       (Todos/Ingresos/Gastos/Compartido), fuente sigue sin mostrarse. */
+    .table-filters select:not(#fil-mes):not(#fil-anio) { display: none; }
+    /* Barra deslizable horizontal (como el mockup) — nada de wrap, cada
+       filtro conserva su ancho de contenido y se scrollea en una fila. */
+    .table-filters {
+      flex-wrap: nowrap; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px; margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .table-filters::-webkit-scrollbar { display: none; }
+    .table-filters > * { flex: none; width: auto; }
+    .multi-select-wrap { flex: none; }
+    .fil-buscar-input { width: 100% !important; }
     .pres-bar-wrap { min-width: auto; }
     .pres-input { width: 88px; }
     .pres-note { font-size: .73rem; }
     .reparto-control { width: 100%; }
     .reparto-input { width: 44px; }
 
-    /* Toast: centrado abajo, por encima del pill del bottom-nav (~100px:
-       10px padding top + 70px alto del pill + 30px padding bottom) */
-    .toast { left: 1rem; right: 1rem; bottom: calc(114px + env(safe-area-inset-bottom, 0px)); }
+    /* Toast: centrado abajo, por encima de la barra plana (~72px:
+       9px padding top + 44px alto de fila + 15px padding bottom;
+       la barra ya no tiene wrapper con padding propio, ver .bn-pill) */
+    .toast { left: 1rem; right: 1rem; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 
     /* Touch targets mínimos 44px */
     .btn { min-height: 44px; }
@@ -1770,7 +1981,7 @@
     .col-hide-xs { display: none !important; }
     .kpi-card { padding: .55rem .65rem; }
     .kpi-hero { padding: .8rem .9rem; }
-    .main { padding: calc(var(--mh-h) + 18px) .6rem 7.5rem; }
+    .main { padding: calc(var(--mh-h) + 18px) .6rem 5.6rem; }
     .kpi-grid { gap: .5rem; }
     tbody td, thead th { padding: .42rem .45rem; font-size: .79rem; }
   }
@@ -1826,8 +2037,11 @@
   .edit-modal-footer { padding: .9rem 1.5rem 1.3rem; display: flex; gap: .6rem; justify-content: flex-end; border-top: 1px solid var(--border); }
 
   /* ─── MODAL MODO RÁFAGA ──────────────────────────────────── */
+  /* z-index por encima de .modal-nueva-overlay (500): "Carga múltiple" se
+     abre desde adentro del modal de Nueva transacción y tiene que quedar
+     arriba, no detrás. */
   .rafaga-overlay {
-    display: none; position: fixed; inset: 0; z-index: 400;
+    display: none; position: fixed; inset: 0; z-index: 600;
     background: var(--overlay); backdrop-filter: blur(4px);
     align-items: flex-start; justify-content: center;
     padding: 1rem; animation: fadeIn .18s ease-out; overflow-y: auto;
@@ -1847,8 +2061,9 @@
     background: var(--modal-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius); box-shadow: var(--shadow);
-    width: 100%; max-width: 1100px; margin: auto;
+    width: 100%; max-width: 900px; margin: auto;
     animation: fadeUp .22s ease-out;
+    max-height: calc(100vh - 2rem); overflow-y: auto;
   }
   .rafaga-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -1856,55 +2071,37 @@
     border-bottom: 1px solid var(--border);
   }
   .rafaga-header h3 { font-size: 1rem; font-weight: 700; margin: 0; }
-  .rafaga-body { padding: 1rem 1.2rem; overflow-x: auto; }
-  .rafaga-table {
-    width: 100%; border-collapse: collapse; font-size: .82rem; min-width: 820px;
+
+  /* ─── Carga rápida: form + lista de la sesión ─────────────── */
+  .rafaga-split { display: flex; flex-direction: column; }
+  .rafaga-form-col { flex: 1; min-width: 0; padding: 1.1rem 1.4rem 1.3rem; }
+  .rafaga-side-col {
+    flex: none; background: var(--surface-2); border-top: 1px solid var(--line);
+    display: flex; flex-direction: column; max-height: 260px;
   }
-  .rafaga-table th {
-    text-align: left; padding: .4rem .5rem;
-    color: var(--text-muted); font-weight: 600;
-    text-transform: uppercase; font-size: .68rem; letter-spacing: .05em;
-    border-bottom: 1px solid var(--border); white-space: nowrap;
+  @media (min-width: 640px) {
+    .rafaga-split { flex-direction: row; }
+    .rafaga-side-col { width: 260px; border-top: none; border-left: 1px solid var(--line); max-height: none; }
   }
-  .rafaga-table td {
-    padding: .32rem .38rem; vertical-align: middle;
-    border-bottom: 1px solid var(--border);
+  .rafaga-side-head { padding: 18px 16px 12px; border-bottom: 1px solid var(--line); flex: none; }
+  .rafaga-side-lbl { font-size: 10.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-faint); }
+  .rafaga-side-total { font-size: 21px; font-weight: 700; margin-top: 5px; color: var(--text); }
+  .rafaga-side-count { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+  .rafaga-side-list { flex: 1; overflow-y: auto; padding: 6px 10px; }
+  .rafaga-side-item { display: flex; align-items: center; gap: 8px; padding: 8px 6px; border-radius: 10px; cursor: pointer; }
+  .rafaga-side-item:hover { background: rgba(255,255,255,.5); }
+  .rafaga-side-badge {
+    width: 24px; height: 24px; border-radius: 7px; flex: none;
+    background: var(--red-dim); color: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800;
   }
-  .rafaga-table td input, .rafaga-table td select {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px; color: var(--text);
-    padding: .3rem .42rem; font-size: .81rem; width: 100%;
-    transition: border-color .15s;
-  }
-  .rafaga-table td input:focus, .rafaga-table td select:focus {
-    outline: none; border-color: var(--accent);
-  }
-  .rafaga-table td input[type="date"] { min-width: 112px; }
-  .rafaga-table td select { min-width: 88px; }
-  .rafaga-desc { min-width: 130px !important; }
-  .td-del { width: 2rem; text-align: center; }
-  .rafaga-del-btn {
-    background: none; border: none; color: var(--text-muted);
-    font-size: 1rem; cursor: pointer; padding: .15rem .35rem;
-    border-radius: 5px; transition: background .15s, color .15s; line-height: 1;
-  }
-  .rafaga-del-btn:hover { background: var(--red-dim); color: var(--red); }
-  .rafaga-footer {
-    padding: .85rem 1.2rem 1.1rem;
-    display: flex; gap: .6rem; align-items: center;
-    border-top: 1px solid var(--border); flex-wrap: wrap;
-  }
-  .rafaga-add-btn {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    color: var(--text); border-radius: 8px;
-    padding: .42rem .88rem; font-size: .83rem;
-    cursor: pointer; transition: background .15s;
-  }
-  .rafaga-add-btn:hover { background: var(--accent-dim); }
-  .rafaga-count { color: var(--text-muted); font-size: .78rem; }
-  .rafaga-row-err td { background: rgba(220,50,50,0.07); }
+  .rafaga-side-badge.i { background: var(--green-dim); color: var(--green); }
+  .rafaga-side-mid { flex: 1; min-width: 0; }
+  .rafaga-side-cat { font-size: 12px; font-weight: 700; }
+  .rafaga-side-sub { font-size: 10px; color: var(--text-faint); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rafaga-side-amt { font-size: 12px; font-weight: 700; flex: none; }
+  .rafaga-side-amt.pos { color: var(--green); }
   .btn-rafaga {
     background: var(--yellow); color: var(--text); border: none; border-radius: 9px;
     padding: .42rem .95rem; font-size: .82rem; font-weight: 700;
@@ -1947,65 +2144,60 @@
   #edit-msg { font-size: .82rem; padding: .3rem 0; min-height: 1.2rem; }
 
   /* ─── TOP NAV ────────────────────────────────────────── */
+  /* ─── NAV-ROW (desktop/tablet ≥ 769px) ──────────────────────
+     Reemplaza el topnav sticky de 6 pestañas fijas por una fila de accesos
+     que se regenera por página (navegarA()): Nueva + los otros destinos,
+     SIN repetir la página activa — ver
+     docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md (R5).
+     Se sigue reubicando dentro de cada .page vía JS (mismo mecanismo de
+     siempre), pero ya no es sticky: es contenido normal debajo del título. */
   .topnav {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0 1.8rem;
-    background: var(--card);
-    backdrop-filter: blur(var(--card-blur)) saturate(160%);
-    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-    border-bottom: 1px solid var(--border);
-    height: 62px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    margin-bottom: 18px;
+    gap: 10px;
+    padding: 0;
+    background: transparent;
+    border-bottom: none;
+    height: auto;
+    position: static;
+    margin: 0 0 22px;
   }
   .topnav-tabs {
-    display: flex;
-    gap: .25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 10px;
     flex: 1;
-    position: relative;
-  }
-  .topnav-indicator {
-    position: absolute;
-    bottom: -1px;
-    height: 2px;
-    background: var(--accent);
-    border-radius: 99px;
-    pointer-events: none;
-    transition: transform .22s var(--ease-out), width .22s var(--ease-out);
-    will-change: transform, width;
   }
   .topnav .nav-item {
-    background: none;
-    border: 1px solid transparent;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
     cursor: pointer;
-    padding: .5rem .95rem;
-    font-size: .9rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    transition: color .18s var(--ease-out), background .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+    padding: 12px 14px;
+    font-size: .87rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
     font-family: inherit;
-    border-radius: 999px;
-    display: flex; align-items: center; gap: .38rem;
+    border-radius: 16px;
+    display: flex; align-items: center; gap: 10px;
   }
-  .topnav .nav-item:hover { color: var(--text); background: var(--glass); border-color: var(--glass-border); }
-  .topnav .nav-item.active {
+  .topnav .nav-item .nav-item-ico {
+    width: 28px; height: 28px; border-radius: 50%; flex: none;
+    background: var(--accent-dim); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .topnav .nav-item:hover { border-color: var(--line-strong); }
+  .topnav .nav-item.primary {
     color: var(--white);
-    background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent), color-mix(in oklab, var(--brand-2) 20%, transparent));
-    border-color: var(--glass-border);
-    backdrop-filter: blur(10px) saturate(160%);
-    -webkit-backdrop-filter: blur(10px) saturate(160%);
-    box-shadow: 0 2px 12px color-mix(in oklab, var(--brand) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.3);
+    background: var(--accent);
+    border-color: transparent;
+    box-shadow: 0 10px 22px color-mix(in oklab, var(--brand) 30%, transparent);
   }
-  .topnav-indicator { display: none; }
-  .topnav .nav-item.active i, .topnav .nav-item.active svg { color: var(--white); }
+  .topnav .nav-item.primary .nav-item-ico { background: rgba(255,255,255,.2); color: var(--white); }
   @media (hover: hover) {
     .nav-item i, .bn-item i { transition: transform 0.15s var(--ease-out), color 0.15s; }
-    .nav-item:hover i, .nav-item:hover svg { transform: scale(1.12); color: var(--accent); }
-    .nav-item.active i, .nav-item.active svg { color: var(--accent); }
   }
   .topnav-logout {
     background: none;
@@ -2016,23 +2208,21 @@
     padding: .4rem .6rem;
     border-radius: 6px;
     font-family: inherit;
+    flex: none;
   }
   .topnav-logout:hover { color: var(--text); }
   @media (max-width: 768px) { .topnav { display: none; } }
 
-  /* ─── SIDEBAR (desktop ≥ 860px) ─────────────────────────── */
-  .sidebar { display: none; }
   @media (min-width: 860px) {
     .bottom-nav{ display: none !important; }
-    .layout    { display: flex; }
+    .layout    { display: flex; flex-direction: column; }
     .main { padding: 22px 30px 3rem; }
   }
   @media (min-width: 769px) and (max-width: 859px) {
     .bottom-nav { display: none; }
-    /* Sin FAB ni bottom-nav en esta banda (iPad portrait), .mm-anotar-btn
-       se adelanta desde los 860px habituales para no dejarla sin forma de
-       crear una transacción desde Mi mes. */
-    .mm-anotar-btn { display: inline-flex; }
+    /* Sin FAB ni bottom-nav en esta banda (iPad portrait) — pero el nav-row
+       (antes .topnav) ya trae "Nueva" como primer botón desde los 769px,
+       así que no hace falta adelantar .mm-anotar-btn como antes. */
   }
 
   /* ─── MI MES — DESGLOSE DEL SUELDO (desktop) ───────────────── */
@@ -2080,7 +2270,6 @@
   }
 
   /* ─── TRANSACCIONES MOBILE LIST ────────────────────────────── */
-  .trans-mobile-filters { gap: 7px; flex-wrap: wrap; padding: .5rem 0; }
   .trans-chip { font-size: 12.5px; font-weight: 600; padding: 9px 14px; border-radius: var(--r-pill);
                 background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--line);
                 cursor: pointer; font-family: inherit; transition: background .12s, color .12s; }
@@ -2108,48 +2297,25 @@
   .trans-mobile-amount.neg { color: var(--neg); }
   .trans-mobile-badge { font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 99px; }
   .trans-mobile-badge.comp { background: var(--brand-soft); color: var(--brand); }
-  .trans-mobile-badge.usd  { background: var(--surface-3); color: var(--text-dim); }
 
-  /* ─── THEME TOGGLE ──────────────────────────────────────────── */
-  .btn-theme     { background: none; border: 1px solid var(--line); border-radius: var(--r-pill);
-                    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-                    cursor: pointer; color: var(--text-dim); flex-shrink: 0;
-                    transition: background .15s, color .15s; }
-  .btn-theme:hover { background: var(--brand-soft); color: var(--brand); }
-
+  /* ─── FRANJA SUPERIOR (top-strip, desktop/tablet ≥769px) ────
+     Logo "Finanzas" + usuario/avatar + "Workspace con {PARTNER}" —
+     chrome fijo de toda la app, no se relocaliza por página (a
+     diferencia del nav-row). Reemplaza al viejo sidebar (dormant,
+     resabio del MP Style revertido, eliminado). */
+  .top-strip { display: none; }
+  @media (min-width: 769px) {
+    .top-strip {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 30px; border-bottom: 1px solid var(--line);
+    }
+  }
   .sidebar-logo {
     display: flex; align-items: center; gap: 10px;
-    padding: 4px 10px 22px;
   }
-  .sidebar-logo-icon {
-    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
-    background: linear-gradient(150deg, var(--brand), var(--brand-2));
-    display: flex; align-items: center; justify-content: center; font-size: 18px;
-  }
-  .sidebar-logo-text { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--text); }
-  .sidebar-nav { display: flex; flex-direction: column; gap: 3px; }
-  .sidebar .nav-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px; border-radius: 12px;
-    background: none; border: 1px solid transparent; cursor: pointer;
-    color: var(--text-dim); font-weight: 600; font-size: 14.5px;
-    font-family: inherit; text-align: left; width: 100%;
-    transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
-  }
-  .sidebar .nav-item:hover { background: var(--glass); color: var(--text); border-color: var(--glass-border); }
-  .sidebar .nav-item.active {
-    color: var(--white); font-weight: 700;
-    background: linear-gradient(155deg, color-mix(in oklab, var(--brand) 45%, transparent), color-mix(in oklab, var(--brand-2) 20%, transparent));
-    border-color: var(--glass-border);
-    backdrop-filter: blur(10px) saturate(160%);
-    -webkit-backdrop-filter: blur(10px) saturate(160%);
-    box-shadow: 0 2px 12px color-mix(in oklab, var(--brand) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.3);
-  }
-  .sidebar .nav-item.active i, .sidebar .nav-item.active svg { color: var(--white); }
-  .sidebar-spacer { flex: 1; }
-  .sidebar-footer {
+  .sidebar-logo-text { font-family: var(--font-serif); font-style: italic; font-weight: 700; font-size: 17px; color: var(--text); }
+  .top-strip-user {
     display: flex; align-items: center; gap: 10px;
-    padding: 10px 8px; border-top: 1px solid var(--line);
   }
   .sidebar-avatar {
     width: 34px; height: 34px; border-radius: 999px; flex-shrink: 0;
@@ -2591,9 +2757,22 @@
      PANTALLA DE CONFIGURACIÓN INICIAL
 ════════════════════════════════════════════════════════ -->
 <div id="setup-screen">
+  <!-- Panel de marca (borde diagonal, Marfil sereno) — fijo, no se relocaliza
+       entre login/registro/reset/nueva contraseña, esos 4 cards viven en
+       .login-form-panel de al lado. -->
+  <div class="login-brand-panel">
+    <div class="login-brand-sheen"></div>
+    <div class="login-brand-mark">Finanzas</div>
+    <div class="login-brand-quote">
+      <div class="line">"Lo que te queda para gastar, siempre a la vista."</div>
+      <div class="sub">Workspace compartido con tu pareja — gastos, cuotas y presupuesto en un solo lugar.</div>
+    </div>
+  </div>
+  <div class="login-form-panel">
   <!-- ── Pantalla: login ───────────────────────────────── -->
   <div class="setup-card" id="card-login">
-    <h1>💰 Finanzas Personales</h1>
+    <p class="login-eyebrow">Bienvenido de nuevo</p>
+    <h1>Iniciá sesión</h1>
     <p>Ingresá tu email y contraseña para acceder.</p>
 
     <label for="sb-email">Email</label>
@@ -2634,7 +2813,7 @@
 
   <!-- ── Pantalla: crear cuenta (para invitados sin Google) ──── -->
   <div class="setup-card" id="card-registro" style="display:none;">
-    <h1>💰 Crear cuenta</h1>
+    <h1>Crear cuenta</h1>
     <p>Vas a unirte a un workspace compartido. Elegí tu email y contraseña.</p>
 
     <label for="reg-email">Email</label>
@@ -2666,7 +2845,7 @@
 
   <!-- ── Pantalla: recuperar contraseña ───────────────── -->
   <div class="setup-card" id="card-reset" style="display:none;">
-    <h1>💰 Recuperar contraseña</h1>
+    <h1>Recuperar contraseña</h1>
     <p>Ingresá tu email y te enviamos un link para resetearla.</p>
 
     <label for="reset-email">Email</label>
@@ -2683,7 +2862,7 @@
 
   <!-- ── Pantalla: nueva contraseña (después de link de email) -->
   <div class="setup-card" id="card-nueva-password" style="display:none;">
-    <h1>💰 Nueva contraseña</h1>
+    <h1>Nueva contraseña</h1>
     <p>Elegí una nueva contraseña para tu cuenta.</p>
 
     <label for="nueva-password">Nueva contraseña</label>
@@ -2699,6 +2878,7 @@
     </div>
     <div id="nueva-password-result"></div>
   </div>
+  </div><!-- /login-form-panel -->
 </div>
 
 <!-- ════════════════════════════════════════════════════════
@@ -2726,25 +2906,14 @@
   <button class="mobile-drawer-logout" onclick="volverConfig()">🚪 Cerrar sesión</button>
 </div>
 
-<!-- Franja de título (desktop) — queda arriba de todo, el topnav debajo -->
-<!-- Top nav (desktop) — se reubica por JS debajo del header de cada página (ver navegarA) -->
+<!-- Nav-row (desktop/tablet ≥ 769px) — se reubica y regenera por JS debajo
+     del título de cada página (ver navegarA / _renderNavRow). Nueva + los
+     otros destinos, sin repetir la página activa. Resumen queda afuera por
+     ahora (decisión de producto, ver plan de rediseño Marfil sereno). -->
+<!-- El logout ya vive en .top-strip (siempre visible, no se relocaliza) —
+     este nav-row no lleva uno propio para no duplicarlo en cada página. -->
 <nav class="topnav" id="topnav">
-  <div class="topnav-tabs">
-    <button class="nav-item" onclick="navegarA('presupuesto')"><i data-lucide="calendar-days" width="14" height="14"></i>Mi mes</button>
-    <button class="nav-item" onclick="navegarA('transacciones')"><i data-lucide="receipt" width="14" height="14"></i>Transacciones</button>
-    <button class="nav-item" onclick="navegarA('compartidos')"><i data-lucide="users" width="14" height="14"></i>Compartidos</button>
-    <button class="nav-item" onclick="navegarA('config')"><i data-lucide="tag" width="14" height="14"></i>Categorías</button>
-    <button class="nav-item" onclick="navegarA('inversiones')"><i data-lucide="trending-up" width="14" height="14"></i>Inversiones</button>
-    <button class="nav-item" onclick="navegarA('resumen')"><i data-lucide="bar-chart-2" width="14" height="14"></i>Resumen</button>
-    <span class="topnav-indicator" id="topnav-indicator"></span>
-  </div>
-  <button class="btn-theme" id="btn-theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
-    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-  </button>
-  <button class="topnav-logout" onclick="volverConfig()" title="Cerrar sesión">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-  </button>
+  <div class="topnav-tabs" id="topnav-tabs"></div>
 </nav>
 
 <!-- Bottom nav mobile (NavCalida pill) -->
@@ -2752,7 +2921,7 @@
   <div class="bn-pill">
     <button class="bn-item" id="bn-presupuesto" onclick="navegarA('presupuesto')">
       <i data-lucide="home" width="21" height="21"></i>
-      <span>Mi mes</span>
+      <span>Resumen</span>
     </button>
     <button class="bn-item" id="bn-transacciones" onclick="navegarA('transacciones')">
       <i data-lucide="receipt" width="21" height="21"></i>
@@ -2775,26 +2944,25 @@
 </nav>
 
 <div id="app">
+  <!-- Modal "Nueva transacción" (desktop/tablet ≥769px) — #page-nueva se
+       reparenta acá adentro al abrir (ver _abrirModalNueva) y vuelve a su
+       posición original al cerrar. En mobile nunca se usa: navegarA('nueva')
+       sigue siendo navegación de página completa ahí. -->
+  <div class="modal-nueva-overlay" id="modal-nueva-overlay" style="display:none" onclick="if(event.target===this)_cerrarModalNueva()">
+    <div class="modal-nueva-box" id="modal-nueva-box"></div>
+  </div>
+
   <div class="layout">
 
-    <!-- Sidebar (desktop) -->
-    <aside class="sidebar" id="sidebar">
+    <!-- Franja superior (desktop/tablet ≥769px): logo + usuario, chrome de
+         toda la app — no se relocaliza por página, a diferencia del nav-row. -->
+    <div class="top-strip" id="top-strip">
       <div class="sidebar-logo">
-        <div class="sidebar-logo-icon">💰</div>
         <span class="sidebar-logo-text">Finanzas</span>
       </div>
-      <nav class="sidebar-nav">
-        <button class="nav-item" onclick="navegarA('presupuesto')"><i data-lucide="home" width="19" height="19"></i><span>Mi mes</span></button>
-        <button class="nav-item" onclick="navegarA('transacciones')"><i data-lucide="receipt" width="19" height="19"></i><span>Transacciones</span></button>
-        <button class="nav-item" onclick="navegarA('compartidos')"><i data-lucide="users" width="19" height="19"></i><span>Compartidos</span></button>
-        <button class="nav-item" onclick="navegarA('config')"><i data-lucide="tag" width="19" height="19"></i><span>Categorías</span></button>
-        <button class="nav-item" onclick="navegarA('inversiones')"><i data-lucide="trending-up" width="19" height="19"></i><span>Inversiones</span></button>
-        <button class="nav-item" onclick="navegarA('resumen')"><i data-lucide="bar-chart-2" width="19" height="19"></i><span>Resumen</span></button>
-      </nav>
-      <div class="sidebar-spacer"></div>
-      <div class="sidebar-footer">
+      <div class="top-strip-user">
         <div class="sidebar-avatar" id="sidebar-avatar">D</div>
-        <div style="flex:1;min-width:0">
+        <div style="min-width:0">
           <div class="sidebar-username" id="sidebar-user"></div>
           <div class="sidebar-usersub" id="sidebar-usersub">Mi cuenta</div>
         </div>
@@ -2802,7 +2970,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
       </div>
-    </aside>
+    </div>
 
     <!-- MAIN -->
     <main class="main">
@@ -2921,6 +3089,10 @@
             <button class="btn btn-primary" onclick="navegarA('nueva')">+ Anotar</button>
           </div>
         </div>
+        <!-- Buscador: fila propia, primero (mismo orden que el mockup) -->
+        <input type="text" id="fil-buscar" class="fil-buscar-input" placeholder="Buscar transacción…"
+               oninput="clearTimeout(_filtroDebounce);_filtroDebounce=setTimeout(filtrarTabla,120)"
+               aria-label="Buscar transacciones">
         <div class="table-filters">
           <select id="fil-mes" onchange="_filFechaExacta=null;guardarSelFecha();filtrarTabla()"></select>
           <select id="fil-anio" onchange="_filFechaExacta=null;guardarSelFecha();filtrarTabla()"></select>
@@ -2952,23 +3124,34 @@
             <option value="Compartido">Compartido</option>
             <option value="De Ama" id="fil-resp-de-partner">De Ama</option>
           </select>
-          <input type="text" id="fil-buscar" placeholder="Buscar..." oninput="clearTimeout(_filtroDebounce);_filtroDebounce=setTimeout(filtrarTabla,120)" aria-label="Buscar transacciones">
-        </div>
-        <!-- Chips filtro rápido (solo mobile) -->
-        <div class="trans-mobile-filters" id="trans-mobile-filters">
+          <!-- Chips rápidos (mobile): mismos filtros que fil-tipo/fil-resp de
+               arriba, en un formato que se puede tocar de un tap. Conviven en
+               la misma fila que mes/año/categoría, ver Marfil sereno plan. -->
           <button class="trans-chip on" id="chip-todos"   onclick="_setChipFiltro('')">Todos</button>
           <button class="trans-chip"    id="chip-ing"     onclick="_setChipFiltro('Ingreso')">Ingresos</button>
           <button class="trans-chip"    id="chip-gas"     onclick="_setChipFiltro('Gasto')">Gastos</button>
           <button class="trans-chip"    id="chip-comp"    onclick="_setChipFiltro('Compartido')">Compartido</button>
         </div>
 
-        <!-- El subtotal (#tabla-subtotal) va antes que la lista mobile a
-             propósito: con muchas transacciones, el resumen quedaba al
-             fondo de toda la lista — el usuario tenía que scrollear todo
-             para verlo. En desktop no cambia nada: .trans-mobile-list es
-             display:none ahí, así que reordenarla no mueve nada visible. -->
-        <div class="chart-card" style="padding:0; overflow:hidden">
-          <div class="tabla-subtotal" id="tabla-subtotal">
+        <!-- Desktop (≥860px): grid de 2 columnas, lista + resumen lateral
+             (mismo patrón que la columna lateral de Mi mes). La tabla con
+             columnas fijas y orden por header se sacó — pedido explícito de
+             Daniel tras revisar: en el mockup cada fila es una card fluida
+             (badge + categoría/descripción, fecha+responsabilidad, monto),
+             no una tabla rígida. Se reusa la misma lista que ya se usaba en
+             mobile (#trans-mobile-list / _renderMobileList()), ahora visible
+             en todos los anchos — ver CSS. El orden sigue siendo por fecha
+             (el más reciente primero), ya no se puede cambiar clickeando un
+             header porque no hay headers. -->
+        <div class="trans-desktop-grid">
+          <div class="trans-mobile-list" id="trans-mobile-list"></div>
+
+          <!-- El subtotal (#tabla-subtotal) va primero en el DOM a propósito
+               (ver historial: con muchas transacciones, el resumen quedaba
+               al fondo de toda la lista en mobile). En desktop es la
+               columna lateral (grid, segunda posición visual real por CSS
+               aunque en el DOM va antes de la lista). -->
+          <div class="tabla-subtotal card" id="tabla-subtotal">
             <div class="sub-neto-main">
               <span class="sub-neto-lbl">Neto del período</span>
               <strong id="sub-neto">—</strong>
@@ -2976,35 +3159,12 @@
             <div class="sub-stats">
               <span id="sub-count">—</span>
               <span class="sub-stats-sep">·</span>
-              <span>↑ <strong id="sub-ingresos">—</strong></span>
+              <span><strong id="sub-ingresos">—</strong> ingresos</span>
               <span class="sub-stats-sep">·</span>
-              <span>↓ <strong id="sub-gastos">—</strong></span>
+              <span><strong id="sub-gastos">—</strong> gastos</span>
             </div>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th class="sortable sort-active" id="sort-th-fecha" onclick="setSortCol('fecha')">Fecha <span class="sort-ind" id="sort-ind-fecha">▼</span></th>
-                  <th class="col-hide-xs sortable" id="sort-th-tipo" onclick="setSortCol('tipo')">Tipo <span class="sort-ind" id="sort-ind-tipo"></span></th>
-                  <th class="sortable" id="sort-th-categoria" onclick="setSortCol('categoria')">Categoría <span class="sort-ind" id="sort-ind-categoria"></span></th>
-                  <th class="col-hide-sm">Fuente</th>
-                  <th class="col-hide-sm">¿De quién es?</th>
-                  <th class="col-hide-sm">Descripción</th>
-                  <th class="sortable" id="sort-th-monto" onclick="setSortCol('monto')" style="text-align:right">Monto <span class="sort-ind" id="sort-ind-monto"></span></th>
-                  <th class="col-hide-xs">Moneda</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="tabla-body">
-                <tr><td colspan="9"><div class="loading"><div class="spinner"></div> Cargando...</div></td></tr>
-              </tbody>
-            </table>
-          </div>
         </div>
-
-        <!-- List-view mobile (oculto en desktop) -->
-        <div class="trans-mobile-list" id="trans-mobile-list"></div>
       </div>
 
       <!-- ── PÁGINA NUEVA TRANSACCIÓN ──────────────────── -->
@@ -3014,17 +3174,42 @@
             <h1 style="margin:0">Nueva transacción</h1>
             <p style="font-size:.85rem;color:var(--text-dim);margin:.2rem 0 0">Anotá un gasto o ingreso · se divide según corresponda</p>
           </div>
-          <button class="btn-rafaga" onclick="abrirRafaga()" title="Cargar varias transacciones de una vez">Carga múltiple</button>
+          <div style="display:flex; align-items:center; gap:.5rem">
+            <button class="btn-rafaga" onclick="abrirRafaga()" title="Cargar varias transacciones de una vez">Carga múltiple</button>
+            <button class="modal-nueva-close" id="btn-cerrar-nueva" onclick="_cancelarNueva()" title="Cerrar" aria-label="Cerrar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
         </div>
         <div class="form-card">
-          <!-- Fila 1: Tipo + Moneda lado a lado -->
+          <!-- Fila 1: Tipo (ancho completo) — mismo orden que el modal de
+               desktop: toggle, después Fecha/Categoría. -->
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group full">
               <label id="lbl-tipo">Tipo</label>
               <div class="tipo-toggle" role="group" aria-labelledby="lbl-tipo">
                 <button class="tipo-btn active-expense" id="btn-gasto"  onclick="setTipo('Gasto')">Gasto</button>
                 <button class="tipo-btn"                id="btn-ingreso" onclick="setTipo('Ingreso')">Ingreso</button>
               </div>
+            </div>
+          </div>
+          <!-- Fila 2: Fecha + Categoría -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-fecha">Fecha</label>
+              <input type="date" id="f-fecha" onchange="_actualizarHintMEP()">
+            </div>
+            <div class="form-group">
+              <label for="f-categoria">Categoría</label>
+              <select id="f-categoria"></select>
+            </div>
+          </div>
+          <!-- Fila 3: Monto + Moneda -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-monto" id="f-monto-label">Monto (ARS $)</label>
+              <input type="text" inputmode="decimal" id="f-monto" placeholder="0,00"
+                     oninput="formatearMiles(this); if(typeof _modoCuotas !== 'undefined' && _modoCuotas && !_montoCuotaEditado) _recalcularMontoCuota(); _actualizarHintMEP()">
             </div>
             <div class="form-group">
               <label id="lbl-moneda">Moneda</label>
@@ -3034,30 +3219,15 @@
               </div>
             </div>
           </div>
-          <!-- Fila 2: Fecha + Monto -->
+          <!-- Fila 4: Responsabilidad (ancho completo) -->
           <div class="form-row">
-            <div class="form-group">
-              <label for="f-fecha">Fecha</label>
-              <input type="date" id="f-fecha">
-            </div>
-            <div class="form-group">
-              <label for="f-monto" id="f-monto-label">Monto (ARS $)</label>
-              <input type="text" inputmode="decimal" id="f-monto" placeholder="0,00"
-                     oninput="formatearMiles(this); if(typeof _modoCuotas !== 'undefined' && _modoCuotas && !_montoCuotaEditado) _recalcularMontoCuota()">
-            </div>
-          </div>
-          <!-- Fila 3: Categoría + Responsabilidad -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="f-categoria">Categoría</label>
-              <select id="f-categoria"></select>
-            </div>
-            <div class="form-group">
+            <div class="form-group full">
               <label for="f-responsabilidad">¿Cómo se divide?</label>
-              <select id="f-responsabilidad"></select>
+              <select id="f-responsabilidad" onchange="_actualizarHintMEP()"></select>
             </div>
           </div>
-          <!-- Fila 4: Fuente + Mes de liquidación (TC) -->
+          <!-- Fila 5: Fuente + Mes de liquidación (TC) — van juntas a
+               propósito, mes-liq depende de qué fuente se elige. -->
           <div class="form-row">
             <div class="form-group">
               <label for="f-fuente">Fuente / Medio de pago</label>
@@ -3124,11 +3294,12 @@
               <textarea id="f-descripcion" placeholder="¿En qué gastaste o de dónde vino?" style="min-height:56px"></textarea>
             </div>
           </div>
+          <div id="f-hint-mep" class="f-hint-mep" style="display:none"></div>
           <div style="display:flex; gap:.75rem; margin-top:.5rem">
             <button class="btn btn-primary" id="btn-guardar" onclick="guardarTransaccion()">
               Guardar
             </button>
-            <button class="btn btn-outline" onclick="navegarA('transacciones')">Cancelar</button>
+            <button class="btn btn-outline" onclick="_cancelarNueva()">Cancelar</button>
           </div>
           <div id="form-msg" style="margin-top:.75rem; font-size:.85rem; min-height:1.2em;"></div>
         </div>
@@ -3154,24 +3325,29 @@
           <select id="comp-anio"></select>
         </div>
 
-        <!-- Reparto de gastos compartidos del mes -->
-        <div class="reparto-control" id="reparto-control" style="margin-bottom:1.5rem">
-          <span class="reparto-label">Reparto:</span>
-          <span class="reparto-nombre" id="reparto-nombre-a"></span>
-          <input type="text" inputmode="decimal" id="reparto-pct-a" class="reparto-input" value="50">
-          <span class="reparto-pct-sign">%</span>
-          <span class="reparto-sep">/</span>
-          <span class="reparto-nombre" id="reparto-nombre-b"></span>
-          <input type="text" inputmode="decimal" id="reparto-pct-b" class="reparto-input" value="50">
-          <span class="reparto-pct-sign">%</span>
-          <button class="reparto-guardar-btn" id="reparto-guardar-btn" onclick="_guardarReparto()" title="Guardar reparto del mes">💾</button>
-        </div>
-
-        <!-- Hero row: balance + contribución -->
+        <!-- Hero row: reparto + balance + contribución (3 cards iguales en
+             desktop ≥860px, apiladas en mobile — Unidad 10 rediseño). -->
         <div class="comp-hero-row">
+
+          <!-- Reparto de gastos compartidos del mes -->
+          <div class="reparto-control" id="reparto-control" style="margin-bottom:1.5rem">
+            <span class="reparto-label">Reparto:</span>
+            <span class="reparto-nombre" id="reparto-nombre-a"></span>
+            <input type="text" inputmode="decimal" id="reparto-pct-a" class="reparto-input" value="50">
+            <span class="reparto-pct-sign">%</span>
+            <span class="reparto-sep">/</span>
+            <span class="reparto-nombre" id="reparto-nombre-b"></span>
+            <input type="text" inputmode="decimal" id="reparto-pct-b" class="reparto-input" value="50">
+            <span class="reparto-pct-sign">%</span>
+            <button class="reparto-guardar-btn" id="reparto-guardar-btn" onclick="_guardarReparto()" title="Guardar reparto del mes">💾</button>
+          </div>
 
           <!-- Balance final destacado -->
           <div id="comp-balance-card" class="comp-balance-card" style="margin-bottom:0">
+            <div class="comp-avatars">
+              <div class="comp-avatar comp-avatar-a" id="comp-avatar-a"></div>
+              <div class="comp-avatar comp-avatar-b" id="comp-avatar-b"></div>
+            </div>
             <div class="comp-balance-row">
               <div class="comp-balance-info">
                 <div class="comp-balance-label">Balance del mes</div>
@@ -3294,7 +3470,7 @@
 
         <!-- Header: saludo + selectores de mes -->
         <div class="mm-header">
-          <div>
+          <div class="mm-header-left">
             <div class="mm-page-title">Mi mes</div>
             <div class="mm-greeting" id="mm-greeting">Hola 👋</div>
             <div class="mm-month-pill">
@@ -3323,24 +3499,75 @@
         <!-- Row 1: hero + quick stats (grid on desktop) -->
         <div class="mm-row1">
 
-          <!-- Hero: Lo que te queda -->
+          <!-- Hero: saldo del mes — clon del mockup (eyebrow con nombre,
+               monto, sub en texto con $/día + días restantes, pills de
+               Ingresos/Gastos). -->
           <div class="mm-hero">
             <div class="mm-hero-orb"></div>
-            <div class="mm-hero-eyebrow">💸 Te queda para gastar</div>
+            <div class="mm-hero-eyebrow">Hola, <span class="mm-hero-name" id="mm-hero-name">—</span> — tu saldo de <span id="mm-hero-mes">—</span></div>
             <div class="mm-hero-amount num" id="mm-hero-amount">$0</div>
-            <div class="mm-hero-sub" id="mm-hero-sub">de tu sueldo, hasta fin de mes</div>
-            <div class="mm-hero-stats">
-              <div class="mm-hero-stat">
-                <div class="mm-hero-stat-label">Por día</div>
-                <div class="mm-hero-stat-val num" id="mm-stat-diario">—</div>
+            <div class="mm-hero-sub" id="mm-hero-sub">—</div>
+            <div class="mm-hero-pills">
+              <span class="mm-hero-pill pos" id="mm-hero-pill-ingresos">↑ Ingresos —</span>
+              <span class="mm-hero-pill neg" id="mm-hero-pill-gastos">↓ Gastos —</span>
+            </div>
+          </div>
+
+          <!-- Columna lateral (desktop, U3 rediseño Marfil sereno): Compartidos,
+               Meta de ahorro, Cuotas activas — reusa cards reales que ya existían
+               (antes en mm-row2 / fuera de mm-row1), sin duplicar el hero. -->
+          <div class="mm-sidebar-col">
+            <div class="card mm-sc mm-sidebar-hide-mobile" id="mm-sc-comp-card">
+              <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">tu pareja</span></div>
+              <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
+              <div class="mm-sc-sub" id="mm-sc-comp-label">balance del mes</div>
+            </div>
+            <div class="card mm-sc mm-sidebar-hide-mobile">
+              <div id="mm-sc-ahorro-default">
+                <div class="mm-sc-label">Ahorro acumulado</div>
+                <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
+                <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
+                <div class="mm-sc-meta-link" onclick="abrirModalMeta()">🎯 Definir meta de ahorro</div>
               </div>
-              <div class="mm-hero-stat">
-                <div class="mm-hero-stat-label">En USD</div>
-                <div class="mm-hero-stat-val num" id="mm-stat-usd">—</div>
+              <div id="mm-sc-ahorro-meta" style="display:none">
+                <div class="mm-sc-meta-top">
+                  <span class="mm-sc-meta-edit" onclick="abrirModalMeta()" style="margin-left:auto">✏️</span>
+                </div>
+                <div class="mm-sc-label" id="mm-sc-meta-nombre">—</div>
+                <div class="mm-sc-meta-bar-track">
+                  <div class="mm-sc-meta-bar-fill" id="mm-sc-meta-bar"></div>
+                </div>
+                <div class="mm-sc-meta-pct" id="mm-sc-meta-pct">0%</div>
+                <div class="mm-sc-sub" id="mm-sc-meta-sub">—</div>
+                <div class="mm-sc-meta-badge" id="mm-sc-meta-badge" style="display:none">🤝 Compartida con <span id="mm-sc-meta-partner"></span></div>
               </div>
-              <div class="mm-hero-stat mm-hero-stat-3">
-                <div class="mm-hero-stat-label">Días restantes</div>
-                <div class="mm-hero-stat-val num" id="mm-stat-dias">—</div>
+            </div>
+
+            <!-- Cuotas activas — reubicada acá desde su posición mobile-only original;
+                 ver_renderCuotasCard() la sigue llenando igual. -->
+            <div class="cuotas-card" id="cuotas-card" style="display:none">
+              <div class="cuotas-header" onclick="toggleCuotasCard()"
+                   role="button" tabindex="0" aria-expanded="true" aria-controls="cuotas-body-wrap"
+                   onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCuotasCard()}">
+                <div class="cuotas-header-left">
+                  <i data-lucide="credit-card" width="16" height="16" style="color:var(--yellow)"></i>
+                  Cuotas activas
+                  <span class="cuota-badge-comp" id="cuotas-count">0 compras</span>
+                </div>
+                <span class="cuotas-toggle-icon open" id="cuotas-toggle-icon">▾</span>
+              </div>
+              <div id="cuotas-body-wrap">
+                <div class="cuotas-summary">
+                  <span>Este mes: <strong id="cuotas-este-mes">$0</strong></span>
+                  <span>Comprometido futuro: <strong id="cuotas-futuro">$0</strong></span>
+                </div>
+                <div class="cuotas-body" id="cuotas-rows"></div>
+                <div class="cuotas-actions">
+                  <button class="btn btn-outline" style="font-size:.83rem"
+                          onclick="_setModoCuotasYNavegar()">+ Nueva compra en cuotas</button>
+                  <button class="btn btn-ghost" style="font-size:.83rem"
+                          onclick="_abrirModalCuotas(null)">Ver todas</button>
+                </div>
               </div>
             </div>
           </div>
@@ -3391,36 +3618,11 @@
 
         </div><!-- /mm-row1 -->
 
-        <!-- Row 2: 4 stat-cards (desktop) -->
+        <!-- Row 2: cards diferidas (fuera del alcance del mockup — ver
+             docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md).
+             Ahorro/Meta y Compartidos se movieron a .mm-sidebar-col arriba,
+             acá quedan solo las 2 que siguen sin ubicación definida. -->
         <div class="mm-row2">
-          <div class="card mm-sc">
-            <div id="mm-sc-ahorro-default">
-              <div class="mm-sc-icon">🐷</div>
-              <div class="mm-sc-label">Ahorro acumulado</div>
-              <div class="mm-sc-val" style="color:var(--pos)" id="mm-sc-ahorro">—</div>
-              <div class="mm-sc-sub" id="mm-sc-ahorro-sub">este mes</div>
-              <div class="mm-sc-meta-link" onclick="abrirModalMeta()">🎯 Definir meta de ahorro</div>
-            </div>
-            <div id="mm-sc-ahorro-meta" style="display:none">
-              <div class="mm-sc-meta-top">
-                <div class="mm-sc-icon">🎯</div>
-                <span class="mm-sc-meta-edit" onclick="abrirModalMeta()">✏️</span>
-              </div>
-              <div class="mm-sc-label" id="mm-sc-meta-nombre">—</div>
-              <div class="mm-sc-meta-bar-track">
-                <div class="mm-sc-meta-bar-fill" id="mm-sc-meta-bar"></div>
-              </div>
-              <div class="mm-sc-meta-pct" id="mm-sc-meta-pct">0%</div>
-              <div class="mm-sc-sub" id="mm-sc-meta-sub">—</div>
-              <div class="mm-sc-meta-badge" id="mm-sc-meta-badge" style="display:none">🤝 Compartida con <span id="mm-sc-meta-partner"></span></div>
-            </div>
-          </div>
-          <div class="card mm-sc" id="mm-sc-comp-card">
-            <div class="mm-sc-icon">🤝</div>
-            <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">tu pareja</span></div>
-            <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
-            <div class="mm-sc-sub" id="mm-sc-comp-label">balance del mes</div>
-          </div>
           <div class="card mm-sc mm-sc-clickable" onclick="verDetalleCuotasMes()" role="button" tabindex="0" aria-haspopup="dialog" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();verDetalleCuotasMes()}">
             <div class="mm-sc-icon">📅</div>
             <div class="mm-sc-label">Cuotas este mes</div>
@@ -3451,37 +3653,9 @@
         </section>
         <!-- /RECURRENTES -->
 
-        <!-- Tarjeta cuotas activas -->
-        <div class="cuotas-card" id="cuotas-card" style="display:none">
-          <div class="cuotas-header" onclick="toggleCuotasCard()"
-               role="button" tabindex="0" aria-expanded="true" aria-controls="cuotas-body-wrap"
-               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCuotasCard()}">
-            <div class="cuotas-header-left">
-              <i data-lucide="credit-card" width="16" height="16" style="color:var(--yellow)"></i>
-              Cuotas activas
-              <span class="cuota-badge-comp" id="cuotas-count">0 compras</span>
-            </div>
-            <span class="cuotas-toggle-icon open" id="cuotas-toggle-icon">▾</span>
-          </div>
-          <div id="cuotas-body-wrap">
-            <div class="cuotas-summary">
-              <span>Este mes: <strong id="cuotas-este-mes">$0</strong></span>
-              <span>Comprometido futuro: <strong id="cuotas-futuro">$0</strong></span>
-              <span style="color:var(--text-muted);font-size:.78rem">· ver el calendario completo en Compromisos futuros ↓</span>
-            </div>
-            <div class="cuotas-body" id="cuotas-rows"></div>
-            <div class="cuotas-actions">
-              <button class="btn btn-outline" style="font-size:.83rem"
-                      onclick="_setModoCuotasYNavegar()">+ Nueva compra en cuotas</button>
-              <button class="btn btn-ghost" style="font-size:.83rem"
-                      onclick="_abrirModalCuotas(null)">Ver todas</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Calendario de compromisos futuros (cuotas + recurrentes, 12 meses) — visible en
-             mobile Y desktop (a diferencia de Cuotas activas, que es mobile-only) por eso NO
-             usa la clase .cuotas-card (tiene display:none!important en desktop). -->
+        <!-- Calendario de compromisos futuros (cuotas + recurrentes, 12 meses) — oculto
+             por ahora (fuera del alcance del mockup Marfil sereno), ver bloque
+             .mm-quick-stats/.mm-row2/#compromisos-card display:none!important más arriba. -->
         <div class="compromisos-card-box" id="compromisos-card" style="display:none">
           <div class="cuotas-header" onclick="toggleCompromisosCard()"
                role="button" tabindex="0" aria-expanded="true" aria-controls="compromisos-body-wrap"
@@ -3516,29 +3690,15 @@
           </button>
         </div>
 
-        <!-- Tabla presupuesto vs ejecución -->
-        <div id="pres-desglose" class="chart-card" style="padding:0;overflow:hidden">
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Categoría</th>
-                  <th style="text-align:right">Presupuesto</th>
-                  <th style="text-align:right">Gastado</th>
-                  <th style="text-align:right">Restante</th>
-                  <th>Progreso</th>
-                </tr>
-              </thead>
-              <tbody id="pres-tbody">
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
-              </tbody>
-              <tfoot id="pres-tfoot"></tfoot>
-            </table>
+        <!-- Presupuesto por categoría — filas tipo card (antes tabla de
+             columnas fijas), mismo formato que Transacciones desktop. -->
+        <div id="pres-desglose" class="card" style="padding:4px 0">
+          <div id="pres-tbody" class="pres-cat-list">
+            <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
+            <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
+            <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
           </div>
+          <div id="pres-tfoot"></div>
           <div style="display:flex;gap:.5rem;padding:.75rem 1rem;flex-wrap:wrap">
             <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPresupuesto()">Guardar presupuesto</button>
           </div>
@@ -3637,73 +3797,80 @@
           <div style="font-size:.85rem;color:var(--text-muted)">Tus categorías y fuentes de pago</div>
         </div>
 
-        <div class="cfg-grid">
+        <!-- Desktop (≥860px): grid 2x2 de los 4 grupos a la izquierda +
+             columna lateral (Cuenta y seguridad, Mi pareja) a la derecha.
+             En mobile es todo una columna, sin cambios (Unidad 12). -->
+        <div class="cfg-page-grid">
+          <div class="cfg-grid">
 
-          <!-- Categorías Gasto -->
-          <div class="chart-card">
-            <div class="chart-title">Categorías de Gasto</div>
-            <div id="cfg-lista-gasto" class="cfg-lista"></div>
-            <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-gasto" placeholder="Nueva categoría..." class="cfg-input">
-              <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('GASTO')">+ Agregar</button>
+            <!-- Categorías Gasto -->
+            <div class="chart-card">
+              <div class="chart-title">Categorías de Gasto</div>
+              <div id="cfg-lista-gasto" class="cfg-lista"></div>
+              <div class="cfg-add-row">
+                <input type="text" id="cfg-nueva-gasto" placeholder="Nueva categoría..." class="cfg-input">
+                <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('GASTO')">+ Agregar</button>
+              </div>
+              <div id="cfg-msg-gasto" class="cfg-msg"></div>
             </div>
-            <div id="cfg-msg-gasto" class="cfg-msg"></div>
-          </div>
 
-          <!-- Categorías Ingreso -->
-          <div class="chart-card">
-            <div class="chart-title">Categorías de Ingreso</div>
-            <div id="cfg-lista-ingreso" class="cfg-lista"></div>
-            <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-ingreso" placeholder="Nueva categoría..." class="cfg-input">
-              <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('INGRESO')">+ Agregar</button>
+            <!-- Categorías Ingreso -->
+            <div class="chart-card">
+              <div class="chart-title">Categorías de Ingreso</div>
+              <div id="cfg-lista-ingreso" class="cfg-lista"></div>
+              <div class="cfg-add-row">
+                <input type="text" id="cfg-nueva-ingreso" placeholder="Nueva categoría..." class="cfg-input">
+                <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('INGRESO')">+ Agregar</button>
+              </div>
+              <div id="cfg-msg-ingreso" class="cfg-msg"></div>
             </div>
-            <div id="cfg-msg-ingreso" class="cfg-msg"></div>
-          </div>
 
-          <!-- Fuentes -->
-          <div class="chart-card">
-            <div class="chart-title">Fuentes / Medios de pago</div>
-            <div id="cfg-lista-fuente" class="cfg-lista"></div>
-            <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-fuente" placeholder="Nueva fuente..." class="cfg-input">
-              <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('FUENTE')">+ Agregar</button>
+            <!-- Fuentes -->
+            <div class="chart-card">
+              <div class="chart-title">Fuentes / Medios de pago</div>
+              <div id="cfg-lista-fuente" class="cfg-lista"></div>
+              <div class="cfg-add-row">
+                <input type="text" id="cfg-nueva-fuente" placeholder="Nueva fuente..." class="cfg-input">
+                <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('FUENTE')">+ Agregar</button>
+              </div>
+              <div id="cfg-msg-fuente" class="cfg-msg"></div>
             </div>
-            <div id="cfg-msg-fuente" class="cfg-msg"></div>
-          </div>
 
-          <!-- Tarjetas de crédito -->
-          <div class="chart-card">
-            <div class="chart-title">Tarjetas de crédito <span class="tc-badge">TC</span></div>
-            <div id="cfg-lista-fuentetc" class="cfg-lista"></div>
-            <div class="cfg-add-row">
-              <input type="text" id="cfg-nueva-fuentetc" placeholder="Nueva tarjeta..." class="cfg-input">
-              <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('FUENTE_TC')">+ Agregar</button>
+            <!-- Tarjetas de crédito -->
+            <div class="chart-card">
+              <div class="chart-title">Tarjetas de crédito <span class="tc-badge">TC</span></div>
+              <div id="cfg-lista-fuentetc" class="cfg-lista"></div>
+              <div class="cfg-add-row">
+                <input type="text" id="cfg-nueva-fuentetc" placeholder="Nueva tarjeta..." class="cfg-input">
+                <button class="btn btn-primary cfg-add-btn" onclick="agregarCategoria('FUENTE_TC')">+ Agregar</button>
+              </div>
+              <div id="cfg-msg-fuentetc" class="cfg-msg"></div>
             </div>
-            <div id="cfg-msg-fuentetc" class="cfg-msg"></div>
-          </div>
 
-        </div><!-- /cfg-grid -->
+          </div><!-- /cfg-grid -->
 
-        <!-- Cuenta y Seguridad -->
-        <div class="chart-card" style="margin-top:1.5rem">
-          <div class="chart-title">Cuenta y Seguridad</div>
-          <div id="cuenta-identities">
-            <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
-          </div>
-          <label style="display:flex;align-items:flex-start;gap:.6rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);cursor:pointer;font-size:.85rem;color:var(--text)">
-            <input type="checkbox" id="pref-usd-mep" onchange="guardarPrefUsdMep(this.checked)" style="margin-top:.15rem;flex-shrink:0">
-            <span>Cobro parte de mis ingresos en USD — convertir a ARS con dólar MEP en mi presupuesto</span>
-          </label>
-        </div>
+          <div class="cfg-side-col">
+            <!-- Cuenta y Seguridad -->
+            <div class="chart-card">
+              <div class="chart-title">Cuenta y Seguridad</div>
+              <div id="cuenta-identities">
+                <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
+              </div>
+              <label style="display:flex;align-items:flex-start;gap:.6rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);cursor:pointer;font-size:.85rem;color:var(--text)">
+                <input type="checkbox" id="pref-usd-mep" onchange="guardarPrefUsdMep(this.checked)" style="margin-top:.15rem;flex-shrink:0">
+                <span>Cobro parte de mis ingresos en USD — convertir a ARS con dólar MEP en mi presupuesto</span>
+              </label>
+            </div>
 
-        <!-- Mi pareja / Workspace -->
-        <div class="chart-card" style="margin-top:1.5rem">
-          <div class="chart-title">Mi pareja</div>
-          <div id="workspace-panel">
-            <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
+            <!-- Mi pareja / Workspace -->
+            <div class="chart-card">
+              <div class="chart-title">Mi pareja</div>
+              <div id="workspace-panel">
+                <div style="color:var(--text-muted);font-size:.85rem">Cargando…</div>
+              </div>
+            </div>
           </div>
-        </div>
+        </div><!-- /cfg-page-grid -->
 
       </div><!-- /page-config -->
 
@@ -3716,74 +3883,104 @@
             <p style="font-size:.84rem;color:var(--text-dim);margin:.2rem 0 0">Plazos fijos · activos · dólar</p>
           </div>
           <div style="display:flex;gap:.5rem;align-items:center">
-            <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Nueva inversión</button>
+            <button class="btn btn-primary inv-add-btn" style="font-size:.82rem" onclick="abrirModalInversion()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              Agregar inversión
+            </button>
           </div>
         </div>
 
-        <!-- Hero row: patrimonio + asignación -->
-        <div class="inv-hero-row">
-          <!-- Patrimonio hero -->
-          <div class="inv-hero-card" id="inv-hero-card">
-            <div style="position:absolute;width:200px;height:200px;border-radius:999px;right:-60px;top:-80px;background:rgba(255,255,255,.14);pointer-events:none"></div>
-            <div class="inv-hero-eyebrow">🌱 Patrimonio invertido</div>
+        <!-- 2 columnas en desktop: resumen fijo a la izquierda (300px) +
+             contenido a la derecha — mismo patrón que Transacciones. -->
+        <div class="inv-desktop-grid">
+
+          <!-- Resumen: valor total + split Cripto/Acciones/Plazos en una
+               sola card (antes 2 cards separadas: hero + "Asignación" con
+               solo 2 categorías porque Activos&cripto quedaba junto — ahora
+               _esCripto() separa también los totales, no solo las listas). -->
+          <div class="inv-summary-card" id="inv-hero-card">
+            <div class="inv-hero-blob"></div>
+            <div class="inv-hero-eyebrow">Valor total de tu cartera</div>
             <div class="num inv-hero-total" id="inv-hero-total-ars">—</div>
             <div class="inv-hero-usd" id="inv-hero-total-usd" style="display:none">≈ <span id="inv-hero-usd-val">—</span> USD</div>
             <div class="inv-hero-sub" id="inv-hero-sub">—</div>
-          </div>
-          <!-- Asignación -->
-          <div class="card inv-alloc-card">
-            <div class="inv-alloc-title">Asignación</div>
-            <div id="inv-alloc-rows" style="display:flex;flex-direction:column;gap:12px">
-              <div class="inv-alloc-row">
-                <div class="inv-alloc-top"><span class="inv-alloc-name">Plazos fijos</span><div style="display:flex;gap:6px;align-items:baseline"><span class="num inv-alloc-val" id="inv-alloc-plazos-val">—</span><span class="inv-alloc-pct" id="inv-alloc-plazos-pct">—</span></div></div>
-                <div class="inv-alloc-bar-wrap"><div class="inv-alloc-bar inv-alloc-bar-plazos" id="inv-alloc-bar-plazos" style="width:0%"></div></div>
-              </div>
-              <div class="inv-alloc-row">
-                <div class="inv-alloc-top"><span class="inv-alloc-name">Activos & cripto</span><div style="display:flex;gap:6px;align-items:baseline"><span class="num inv-alloc-val" id="inv-alloc-act-val">—</span><span class="inv-alloc-pct" id="inv-alloc-act-pct">—</span></div></div>
-                <div class="inv-alloc-bar-wrap"><div class="inv-alloc-bar inv-alloc-bar-activos" id="inv-alloc-bar-activos" style="width:0%"></div></div>
-              </div>
+            <div class="inv-alloc-split">
+              <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--pos)"></span>Cripto</span><span class="num" id="inv-alloc-cripto-txt">—</span></div>
+              <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--info)"></span>Acciones</span><span class="num" id="inv-alloc-acciones-txt">—</span></div>
+              <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--warn)"></span>Plazos fijos</span><span class="num" id="inv-alloc-plazos-txt">—</span></div>
             </div>
             <div class="inv-alloc-total">Total invertido: <span class="num" id="inv-alloc-total">—</span></div>
-          </div>
-        </div><!-- /inv-hero-row -->
+          </div><!-- /inv-summary-card -->
 
-        <!-- Content row: plazos + acciones en 2 cols (desktop) -->
-        <div class="inv-content-row">
+          <!-- Content row: Plazos fijos, Cripto, Acciones — 2 columnas de
+               860 a 1099px (con la sidebar ya restan ~860px, 3 columnas
+               quedarían muy angostas), 3 desde 1100px. Cripto y Acciones son
+               la misma tabla real "acciones" (no hay campo de tipo en la
+               BD); se separan en pantalla con _esCripto(), que ya existía
+               para elegir de qué API traer la cotización. -->
+          <div class="inv-content-row">
 
-          <!-- Plazos Fijos -->
-          <div class="inv-section">
-            <div class="inv-section-hdr">
-              <h2 class="inv-section-title">🔒 Plazos fijos activos</h2>
-              <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormPlazo()" aria-label="Agregar plazo fijo">+ Agregar</button>
+            <!-- Plazos Fijos -->
+            <div class="inv-section">
+              <div class="inv-section-hdr">
+                <h2 class="inv-section-title">Plazos fijos</h2>
+              </div>
+              <div id="plazo-form-wrap" style="display:none"></div>
+              <div id="plazo-lista" class="card inv-holdings-list">
+                <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:30%"></div><div class="skeleton skeleton-line" style="width:70%"></div></div>
+                <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:50%"></div><div class="skeleton skeleton-line" style="width:35%"></div><div class="skeleton skeleton-line" style="width:65%"></div></div>
+              </div>
+              <div id="inv-interes-total" class="inv-interes-total"></div>
             </div>
-            <div id="plazo-form-wrap" style="display:none"></div>
-            <div id="plazo-lista">
-              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:30%"></div><div class="skeleton skeleton-line" style="width:70%"></div></div>
-              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:50%"></div><div class="skeleton skeleton-line" style="width:35%"></div><div class="skeleton skeleton-line" style="width:65%"></div></div>
-            </div>
-            <div id="inv-interes-total" class="inv-interes-total"></div>
-          </div>
 
-          <!-- Activos & Cripto -->
-          <div class="inv-section">
-            <div class="inv-section-hdr">
-              <h2 class="inv-section-title">📈 Activos & cripto</h2>
-              <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia">+ Agregar</button>
+            <!-- Cripto -->
+            <div class="inv-section">
+              <div class="inv-section-hdr">
+                <h2 class="inv-section-title">Cripto</h2>
+              </div>
+              <div id="accion-form-wrap-cripto" style="display:none"></div>
+              <div id="accion-lista-cripto" class="card inv-holdings-list">
+                <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-line" style="width:60%"></div><div class="skeleton skeleton-line" style="width:50%"></div></div>
+              </div>
             </div>
-            <div id="accion-form-wrap" style="display:none"></div>
-            <div id="accion-lista">
-              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-line" style="width:60%"></div><div class="skeleton skeleton-line" style="width:50%"></div></div>
-              <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:45%"></div></div>
-            </div>
-            <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
-          </div>
 
-        </div><!-- /inv-content-row -->
+            <!-- Acciones -->
+            <div class="inv-section">
+              <div class="inv-section-hdr">
+                <h2 class="inv-section-title">Acciones</h2>
+              </div>
+              <div id="accion-form-wrap-stocks" style="display:none"></div>
+              <div id="accion-lista-stocks" class="card inv-holdings-list">
+                <div class="skeleton-card"><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:45%"></div></div>
+              </div>
+              <div id="accion-total" style="margin-top:.5rem;font-size:.84rem;color:var(--text-muted)"></div>
+            </div>
+
+          </div><!-- /inv-content-row -->
+        </div><!-- /inv-desktop-grid -->
 
         <!-- legacy: vacío pero JS lo usa -->
         <div id="inv-totales" style="display:none"></div>
 
       </div><!-- /page-inversiones -->
+
+      <!-- ── MODAL "Agregar inversión" — selector de tipo + form real
+           (Plazo fijo / Cripto / Acción) ─────────────────────── -->
+      <div class="modal-inv-overlay" id="modal-inv-overlay" role="dialog" aria-modal="true"
+           aria-labelledby="modal-inv-title" onclick="if(event.target===this)cerrarModalInversion()">
+        <div class="modal-inv-box">
+          <div class="modal-inv-head">
+            <h2 id="modal-inv-title">Agregar inversión</h2>
+            <button class="modal-inv-close" onclick="cerrarModalInversion()" aria-label="Cerrar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="modal-inv-body">
+            <div class="modal-inv-type-row" id="modal-inv-type-row"></div>
+            <div id="modal-inv-form"></div>
+          </div>
+        </div>
+      </div>
 
       <!-- ── PÁGINA IMPORTAR DATOS ──────────────────────── -->
       <div id="page-importar" class="page">
@@ -3938,42 +4135,89 @@
 </div>
 
 <!-- MODAL MODO RÁFAGA -->
+<!-- Carga rápida (antes "Modo Ráfaga"): formulario de una transacción a la
+     vez + "Agregar y cargar otra" + lista de lo cargado en la sesión —
+     reemplaza el spreadsheet de N filas por el flujo del mockup Marfil
+     sereno (pedido explícito, ver docs/plans/2026-07-21-...-plan.md U8). -->
 <div class="rafaga-overlay" id="rafaga-overlay" onclick="if(event.target===this)cerrarRafaga()">
-  <div class="rafaga-modal" role="dialog" aria-modal="true" aria-labelledby="rafaga-title">
+  <div class="rafaga-modal rafaga-modal-v2" role="dialog" aria-modal="true" aria-labelledby="rafaga-title">
     <div class="rafaga-header">
-      <h3 id="rafaga-title">Modo Ráfaga — Carga múltiple</h3>
+      <h3 id="rafaga-title">⚡ Carga rápida</h3>
       <button class="edit-close-btn" onclick="cerrarRafaga()" title="Cerrar">✕</button>
     </div>
-    <div class="rafaga-body">
-      <table class="rafaga-table" id="rafaga-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Fecha</th>
-            <th>Descripción</th>
-            <th>Moneda</th>
-            <th>Monto</th>
-            <th>Categoría</th>
-            <th>Tipo</th>
-            <th>Resp.</th>
-            <th>Fuente</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="rafaga-tbody"></tbody>
-      </table>
+    <div class="rafaga-split">
+      <div class="rafaga-form-col">
+        <div class="form-row">
+          <div class="form-group full">
+            <label id="rf2-lbl-tipo">Tipo</label>
+            <div class="tipo-toggle" role="group" aria-labelledby="rf2-lbl-tipo">
+              <button type="button" class="tipo-btn active-expense" id="rf2-btn-gasto" onclick="_rafagaSetTipo('Gasto')">Gasto</button>
+              <button type="button" class="tipo-btn" id="rf2-btn-ingreso" onclick="_rafagaSetTipo('Ingreso')">Ingreso</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rf2-fecha">Fecha</label>
+            <input type="date" id="rf2-fecha">
+          </div>
+          <div class="form-group">
+            <label for="rf2-categoria">Categoría</label>
+            <select id="rf2-categoria"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rf2-monto" id="rf2-monto-label">Monto (ARS $)</label>
+            <input type="text" inputmode="decimal" id="rf2-monto" placeholder="0,00" oninput="formatearMiles(this)">
+          </div>
+          <div class="form-group">
+            <label id="rf2-lbl-moneda">Moneda</label>
+            <div class="moneda-toggle" role="group" aria-labelledby="rf2-lbl-moneda">
+              <button type="button" class="moneda-btn active-ars" id="rf2-btn-ars" onclick="_rafagaSetMoneda('ARS')">🇦🇷 ARS</button>
+              <button type="button" class="moneda-btn" id="rf2-btn-usd" onclick="_rafagaSetMoneda('USD')">🇺🇸 USD</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full">
+            <label for="rf2-responsabilidad">¿Cómo se divide?</label>
+            <select id="rf2-responsabilidad"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rf2-fuente">Fuente / Medio de pago</label>
+            <select id="rf2-fuente" onchange="_rafagaActualizarMesLiq2(this.value)">
+              <option value="">— Sin especificar —</option>
+            </select>
+          </div>
+          <div class="form-group" id="rf2-mes-liq-row" style="display:none">
+            <label for="rf2-mes-liq">Mes de liquidación</label>
+            <input type="month" id="rf2-mes-liq">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full">
+            <label for="rf2-descripcion">Descripción (opcional)</label>
+            <input type="text" id="rf2-descripcion" placeholder="¿En qué gastaste o de dónde vino?">
+          </div>
+        </div>
+        <div id="rafaga-msg" style="font-size:.82rem; min-height:1.2em;"></div>
+        <div style="display:flex; gap:.75rem; margin-top:.5rem">
+          <button class="btn btn-primary" id="rafaga-add-btn" onclick="_rafagaAgregarYCargarOtra()">+ Agregar y cargar otra</button>
+          <button class="btn btn-outline" onclick="cerrarRafaga()">Listo</button>
+        </div>
+      </div>
+      <div class="rafaga-side-col">
+        <div class="rafaga-side-head">
+          <div class="rafaga-side-lbl">Cargado en esta sesión</div>
+          <div class="rafaga-side-total" id="rafaga-side-total">$0</div>
+          <div class="rafaga-side-count" id="rafaga-side-count">0 transacciones</div>
+        </div>
+        <div class="rafaga-side-list" id="rafaga-side-list"></div>
+      </div>
     </div>
-    <div class="rafaga-footer">
-      <input type="number" id="rafaga-cant-agregar" min="1" value="1" step="1"
-             style="width:3.2rem;text-align:center;padding:.4rem .3rem;border-radius:8px;
-                    border:1px solid var(--border);background:var(--bg2);color:var(--text)"
-             aria-label="Cantidad de filas a agregar">
-      <button class="rafaga-add-btn" onclick="agregarFilasRafaga()">+ Agregar fila</button>
-      <span class="rafaga-count" id="rafaga-count">3 filas</span>
-      <button class="btn btn-outline" onclick="cerrarRafaga()" style="margin-left:auto">Cancelar</button>
-      <button class="btn btn-primary" id="rafaga-guardar-btn" onclick="guardarRafaga()">Guardar todo (3)</button>
-    </div>
-    <div id="rafaga-msg" style="padding:.4rem 1.2rem .8rem; font-size:.82rem; min-height:1.2em;"></div>
   </div>
 </div>
 
@@ -4694,14 +4938,6 @@ function _setVariablesUsuario(nombre) {
     ? ["Sueldo", "Otros Ingresos", "Intereses"]
     : ["Sueldo", "Otros Ingresos"];
   categResponsabilidad = PARTNER ? ["Mío", "Compartido", "De " + PARTNER] : ["Mío"];
-  const _savedTheme = localStorage.getItem('fin-theme');
-  const _defaultTheme = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? "dark" : "light";
-  document.documentElement.dataset.theme = _savedTheme || _defaultTheme;
-  const _sun  = document.getElementById('theme-icon-sun');
-  const _moon = document.getElementById('theme-icon-moon');
-  const _activeTheme = _savedTheme || _defaultTheme;
-  if (_sun)  _sun.style.display  = _activeTheme === 'dark' ? '' : 'none';
-  if (_moon) _moon.style.display = _activeTheme === 'dark' ? 'none' : '';
 }
 
 function guardarPrefUsdMep(checked) {
@@ -4782,6 +5018,8 @@ function _actualizarStringsUsuario() {
   if (noteP) noteP.textContent = PARTNER ? "De " + PARTNER : "De tu pareja";
   const sidebarUser = document.getElementById("sidebar-user");
   if (sidebarUser) sidebarUser.textContent = USUARIO;
+  const sidebarUsersub = document.getElementById("sidebar-usersub");
+  if (sidebarUsersub) sidebarUsersub.textContent = PARTNER ? `Workspace con ${PARTNER}` : "Sin pareja invitada";
   const greeting = document.getElementById("mm-greeting");
   if (greeting) greeting.textContent = `Hola, ${USUARIO} 👋`;
   const sidebarAvatar = document.getElementById("sidebar-avatar");
@@ -5750,6 +5988,7 @@ document.addEventListener("keydown", e => {
     ["edit-overlay", cerrarEditorTransaccion],
     ["cuotas-modal-overlay", _cerrarModalCuotas],
     ["mobile-drawer", closeSidebar],
+    ["modal-inv-overlay", cerrarModalInversion],
   ].forEach(([id, cerrar]) => {
     const el = document.getElementById(id);
     if (el && el.classList.contains("open")) cerrar();
@@ -5834,91 +6073,13 @@ function filtrarTabla() {
   netoEl.textContent = netoSigno + " " + fmt(Math.abs(netoARS)) + (hayUSDsub?` / ${fmtMoneda(Math.abs(netoUSD),"USD")}`:"");
   netoEl.className = netoARS >= 0 ? "sub-neto-pos" : "sub-neto-neg";
 
-  const tbody = _el("tabla-body");
-  if (!datos.length) {
-    // Distinguir "no hay ninguna transacción todavía" (usuario nuevo) de "el filtro no
-    // matchea nada" (sí hay datos, pero no con este filtro) — mismo mensaje para los dos
-    // casos confundía a un usuario nuevo, que no tiene ningún filtro que "ampliar".
-    const sinTransaccionesDelUsuario = !allTransac.some(t => (t.usuario || "Daniel") === USUARIO);
-    const msg = sinTransaccionesDelUsuario
-      ? "Todavía no cargaste ninguna transacción — tocá \"+ Anotar\" para empezar"
-      : "Nada con ese filtro — probá ampliando la búsqueda";
-    requestAnimationFrame(() => {
-      if (gen !== _filtroGen) return;
-      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">${msg}</div></td></tr>`;
-    });
-    return;
-  }
-
-  const respEmoji = {};
-  const respColor = { "Mío": "var(--accent)", "Compartido": "var(--yellow)", ["De " + PARTNER]: "var(--accent)" };
-
-  const html = datos.map((t, i) => {
-    const r = t.responsabilidad || "Mío";
-    const mon = t.moneda || "ARS";
-    const monBadge = mon === "USD"
-      ? `<span class="badge-moneda usd">USD</span>`
-      : `<span class="badge-moneda ars">ARS</span>`;
-    // Sub-etiqueta de liquidación: mostrar si TC con mes distinto, o badge pendiente si TC sin mes
-    let fechaExtra = "";
-    if (_esFuenteTC(t.fuente || "")) {
-      if (t.mes_liquidacion && /^\d{4}-(0[1-9]|1[0-2])$/.test(t.mes_liquidacion)) {
-        const fechaD  = new Date(t.fecha + "T12:00:00");
-        const fechaYM = `${fechaD.getFullYear()}-${String(fechaD.getMonth()+1).padStart(2,"0")}`;
-        if (t.mes_liquidacion !== fechaYM) {
-          const [ly, lm] = t.mes_liquidacion.split("-").map(Number);
-          const mesAbrev = new Date(ly, lm-1, 1).toLocaleDateString("es-AR", { month: "short" });
-          fechaExtra = `<div class="fecha-liq-label">Liq. ${mesAbrev} ${ly}</div>`;
-        }
-      } else if (!t.mes_liquidacion) {
-        fechaExtra = `<div class="fecha-liq-pendiente">Liq. pendiente</div>`;
-      }
-    }
-    // Nombre estable por transacción — permite que View Transitions empareje
-    // la misma fila entre el render viejo y el nuevo y anime su reubicación
-    // (FLIP) en vez de solo hacer fade-out/fade-in al filtrar/ordenar.
-    const vtName = `tx-${String(t.id).replace(/[^a-zA-Z0-9_-]/g, "")}`;
-    return `
-    <tr style="--row-i:${Math.min(i, 16)};view-transition-name:${vtName}">
-      <td style="color:var(--text-muted);font-size:.83rem;white-space:nowrap">${fmtFecha(t.fecha)}${fechaExtra}</td>
-      <td class="col-hide-xs"><span class="badge badge-${t.tipo.toLowerCase()}">${t.tipo}</span></td>
-      <td><span style="display:inline-flex;align-items:center;gap:.35rem"><span style="font-size:1rem;width:22px;text-align:center;flex-shrink:0">${getCatEmoji(t.categoria)}</span>${escapeHtml(t.categoria)}</span></td>
-      <td class="col-hide-sm" style="color:var(--text-muted);font-size:.83rem">${escapeHtml(t.fuente) || "—"}</td>
-      <td class="col-hide-sm"><span style="color:${respColor[r]||'var(--text-muted)'};font-size:.85rem">${respEmoji[r]||""} ${escapeHtml(r)}</span></td>
-      <td class="col-hide-sm" style="color:var(--text-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(t.descripcion) || "—"}${t.cuota_nro && t.cuota_total
-          ? ` <span class="badge-cuota" role="button" tabindex="0"
-                    data-compra-id="${t.compra_id}"
-                    onclick="_abrirModalCuotas(this.dataset.compraId)"
-                    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_abrirModalCuotas(this.dataset.compraId)}"
-                    title="Ver cuotas">[${t.cuota_nro}/${t.cuota_total}]</span>`
-          : ""}</td>
-      <td style="text-align:right;font-weight:600;white-space:nowrap;color:${t.tipo==="Ingreso"?"var(--green)":"var(--red)"}">${fmtMoneda(t.monto, mon)}</td>
-      <td class="col-hide-xs">${monBadge}</td>
-      <td style="white-space:nowrap">
-        <button class="delete-btn" onclick="duplicarTransaccion('${t.id}')" title="Duplicar" aria-label="Duplicar transacción" style="margin-right:.2rem">${IC_COPY}</button>
-        <button class="delete-btn" onclick="abrirEditorTransaccion('${t.id}')" title="Editar" aria-label="Editar transacción" style="margin-right:.2rem">${IC_EDIT}</button>
-        <button class="delete-btn" onclick="eliminarTransaccion('${t.id}')" title="Eliminar" aria-label="Eliminar transacción">${IC_TRASH}</button>
-      </td>
-    </tr>`
-  }).join("");
+  // La tabla de columnas fijas se reemplazó por la lista de filas tipo card
+  // (_renderMobileList, antes solo mobile) — el estado vacío y el detalle de
+  // cada fila viven ahí ahora.
   requestAnimationFrame(() => {
     if (gen !== _filtroGen) return;
-    const aplicarSwap = () => {
-      tbody.innerHTML = html;
-      _renderMobileList(datos);
-      if (window.lucide) lucide.createIcons();
-    };
-    // View Transitions da el reordenamiento (FLIP) gratis emparejando filas por
-    // view-transition-name — se limita a listas chicas/medianas por costo, y se
-    // salta si el usuario prefiere menos movimiento (más allá del guard CSS).
-    const puedeTransicionar = typeof document.startViewTransition === "function"
-      && datos.length <= 60
-      && !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (puedeTransicionar) {
-      document.startViewTransition(aplicarSwap);
-    } else {
-      aplicarSwap();
-    }
+    _renderMobileList(datos);
+    if (window.lucide) lucide.createIcons();
   });
 }
 
@@ -5946,20 +6107,28 @@ function _renderMobileList(datos) {
         const iconBg = `color-mix(in oklab, ${_catColor(t.categoria)} 18%, var(--surface-2))`;
         const respBadge = (resp === "Compartido")
           ? `<span class="trans-mobile-badge comp">÷ ${escapeHtml(PARTNER)}</span>` : "";
-        const usdBadge = mon === "USD"
-          ? `<span class="trans-mobile-badge usd">USD</span>` : "";
         const subline = [t.descripcion, t.fuente].filter(Boolean).map(escapeHtml).join(" · ");
         const monto   = fmtMoneda(Math.abs(Number(t.monto)), mon);
+        // Badge de cuota — se había perdido al reemplazar la tabla vieja por
+        // esta lista (la tabla sí lo tenía); sin esto no había forma de ver
+        // desde Transacciones que una fila es parte de una compra en cuotas.
+        const cuotaBadge = (t.cuota_nro && t.cuota_total)
+          ? ` <span class="badge-cuota" role="button" tabindex="0"
+                  data-compra-id="${t.compra_id}"
+                  onclick="event.stopPropagation();_abrirModalCuotas(this.dataset.compraId)"
+                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();_abrirModalCuotas(this.dataset.compraId)}"
+                  title="Ver cuotas">[${t.cuota_nro}/${t.cuota_total}]</span>`
+          : "";
         return `<div class="trans-mobile-item" onclick="abrirEditorTransaccion('${t.id}')">
           <div class="trans-mobile-icon" style="background:${iconBg}">${emoji}</div>
           <div class="trans-mobile-body">
-            <div class="trans-mobile-cat">${escapeHtml(t.categoria)}${respBadge}</div>
+            <div class="trans-mobile-cat">${escapeHtml(t.categoria)}${respBadge}${cuotaBadge}</div>
             ${subline ? `<div class="trans-mobile-desc">${subline}</div>` : ""}
           </div>
           <div class="trans-mobile-right">
             <div class="trans-mobile-amount ${isPos ? "pos" : "neg"}">${isPos ? "+" : "−"}${monto}</div>
-            ${usdBadge}
           </div>
+          <button class="delete-btn trans-mobile-del-btn" onclick="event.stopPropagation();duplicarTransaccion('${t.id}')" title="Duplicar" aria-label="Duplicar transacción">${IC_COPY}</button>
           <button class="delete-btn trans-mobile-del-btn" onclick="event.stopPropagation();eliminarTransaccion('${t.id}')" title="Eliminar" aria-label="Eliminar transacción">${IC_TRASH}</button>
         </div>`;
       }).join("");
@@ -6071,6 +6240,11 @@ function _cancelarDelete(id) {
 async function _ejecutarDelete(id) {
   if (_pendingDelete && _pendingDelete.id === id) _pendingDelete = null;
   allTransac = allTransac.filter(t => t.id !== id);
+  // Igual que guardarEdicionTransaccion(), sincronizar _rafagaSesion si la
+  // transacción borrada venía de esa sesión — si no, el total de Carga
+  // rápida queda contando una fila que ya no existe.
+  _rafagaSesion = _rafagaSesion.filter(t => t.id !== id);
+  _renderRafagaSesion();
   guardarCacheTransac();
   filtrarTabla();
   cargarResumenMes();
@@ -6215,6 +6389,16 @@ async function guardarEdicionTransaccion() {
             mes_liquidacion: mesLiq || null }
         : t
     );
+    // Si la transacción editada venía de Carga rápida (ya guardada en la
+    // sesión de _rafagaSesion), sincronizar ahí también — si no, el total
+    // y la lista lateral del modal quedan con el valor viejo.
+    _rafagaSesion = _rafagaSesion.map(t =>
+      t.id === editandoId
+        ? { ...t, fecha, tipo, categoria: cat, monto, descripcion: desc, responsabilidad: resp, fuente, moneda,
+            mes_liquidacion: mesLiq || null }
+        : t
+    );
+    _renderRafagaSesion();
     guardarCacheTransac();
     cerrarEditorTransaccion();
     filtrarTabla();
@@ -6237,6 +6421,33 @@ function setMoneda(m) {
   document.getElementById("btn-ars").className = "moneda-btn " + (m === "ARS" ? "active-ars" : "");
   document.getElementById("btn-usd").className = "moneda-btn " + (m === "USD" ? "active-usd" : "");
   document.getElementById("f-monto-label").textContent = m === "ARS" ? "Monto (ARS $)" : "Monto (USD U$S)";
+  _actualizarHintMEP();
+}
+
+// Hint debajo del form: equivalente en la otra moneda al MEP + nota de
+// reparto si es Compartido. Puramente informativo, no valida ni bloquea.
+function _actualizarHintMEP() {
+  const hintEl = document.getElementById("f-hint-mep");
+  if (!hintEl) return;
+  const partes = [];
+  const monto = parsearDecimal(document.getElementById("f-monto")?.value);
+  if (monto > 0 && tipoCambioMEP) {
+    partes.push(monedaActual === "USD"
+      ? `≈ ${fmt(monto * tipoCambioMEP)} al MEP`
+      : `≈ USD ${(monto / tipoCambioMEP).toFixed(2)} al MEP`);
+  }
+  const resp = document.getElementById("f-responsabilidad")?.value || "";
+  if (resp === "Compartido" && PARTNER) {
+    let pctPropio = 50;
+    const fechaVal = document.getElementById("f-fecha")?.value;
+    if (fechaVal) {
+      const [y, m] = fechaVal.split("-").map(Number);
+      pctPropio = Math.round(obtenerFactorCompartidoPropio(m, y) * 100);
+    }
+    partes.push(`se divide ${pctPropio}/${100 - pctPropio} con ${PARTNER}`);
+  }
+  hintEl.textContent = partes.join(" · ");
+  hintEl.style.display = partes.length ? "" : "none";
 }
 
 function setTipo(tipo) {
@@ -6457,21 +6668,36 @@ async function guardarCompraEnCuotas() {
 }
 
 // ─── MODO RÁFAGA ──────────────────────────────────────────────
+// ─── CARGA RÁPIDA (antes "Modo Ráfaga") ─────────────────────────────────
+// Una transacción a la vez + "Agregar y cargar otra" (guarda de una, no
+// junta un lote) + lista de lo cargado en la sesión. Reemplaza el
+// spreadsheet de N filas — ver docs/plans/2026-07-21-...-plan.md (U8).
+let _rafagaTipo = "Gasto";
+let _rafagaMoneda = "ARS";
+let _rafagaSesion = []; // transacciones ya guardadas en esta apertura del modal
+
 function abrirRafaga() {
   document.getElementById("rafaga-overlay").classList.add("open");
   document.getElementById("rafaga-msg").innerHTML = "";
-  const tbody = document.getElementById("rafaga-tbody");
-  if (tbody.children.length === 0) {
-    agregarFilaRafaga();
-    agregarFilaRafaga();
-    agregarFilaRafaga();
-  }
+  _rafagaSesion = [];
+  _renderRafagaSesion();
+  _rafagaSetTipo("Gasto");
+  _rafagaSetMoneda("ARS");
+  const fFecha = document.getElementById("rf2-fecha");
+  if (fFecha) fFecha.valueAsDate = new Date();
+  const fFuente = document.getElementById("rf2-fuente");
+  if (fFuente) fFuente.innerHTML = _optsFuenteRafaga();
+  const fResp = document.getElementById("rf2-responsabilidad");
+  if (fResp) fResp.innerHTML = _optsRespRafaga();
+  const fDesc = document.getElementById("rf2-descripcion");
+  if (fDesc) fDesc.value = "";
+  const fMonto = document.getElementById("rf2-monto");
+  if (fMonto) fMonto.value = "";
+  _rafagaActualizarMesLiq2("");
 }
 
 function cerrarRafaga() {
   document.getElementById("rafaga-overlay").classList.remove("open");
-  const btn = document.getElementById("rafaga-guardar-btn");
-  if (btn) btn.disabled = false;
 }
 
 function _optsCategRafaga(tipo) {
@@ -6484,148 +6710,117 @@ function _optsFuenteRafaga() {
     [...categFuentes, ...categFuentesTC].map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
 }
 
-function _rafagaActualizarMesLiq(sel) {
-  const inp = sel.parentElement.querySelector(".rf-mes-liq");
-  if (!inp) return;
-  if (_esFuenteTC(sel.value)) {
-    inp.style.display = "";
-  } else {
-    inp.style.display = "none";
-    inp.value = "";
-  }
-}
-
 function _optsRespRafaga() {
   return categResponsabilidad.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join("");
 }
 
-function agregarFilaRafaga() {
-  const tbody = document.getElementById("rafaga-tbody");
-  const idx   = tbody.children.length + 1;
-  const tr    = document.createElement("tr");
-  tr.innerHTML = `
-    <td style="color:var(--text-muted);text-align:center;font-size:.73rem;padding:.3rem .2rem">${idx}</td>
-    <td><input type="date" class="rf-fecha" aria-label="Fecha fila ${idx}"></td>
-    <td><input type="text" class="rf-desc rafaga-desc" placeholder="Descripción opcional" aria-label="Descripción fila ${idx}"></td>
-    <td>
-      <select class="rf-moneda" aria-label="Moneda fila ${idx}">
-        <option value="ARS">🇦🇷 ARS</option>
-        <option value="USD">🇺🇸 USD</option>
-      </select>
-    </td>
-    <td><input type="text" inputmode="decimal" class="rf-monto" placeholder="0,00" aria-label="Monto fila ${idx}" oninput="formatearMiles(this)"></td>
-    <td><select class="rf-cat" aria-label="Categoría fila ${idx}">${_optsCategRafaga("Gasto")}</select></td>
-    <td>
-      <select class="rf-tipo" aria-label="Tipo fila ${idx}" onchange="this.closest('tr').querySelector('.rf-cat').innerHTML=_optsCategRafaga(this.value)">
-        <option value="Gasto">Gasto</option>
-        <option value="Ingreso">Ingreso</option>
-      </select>
-    </td>
-    <td><select class="rf-resp" aria-label="Responsabilidad fila ${idx}">${_optsRespRafaga()}</select></td>
-    <td>
-      <select class="rf-fuente" aria-label="Fuente fila ${idx}" onchange="_rafagaActualizarMesLiq(this)">${_optsFuenteRafaga()}</select>
-      <input type="month" class="rf-mes-liq" style="display:none;margin-top:.3rem;width:100%" aria-label="Mes de liquidación fila ${idx}">
-    </td>
-    <td class="td-del"><button class="rafaga-del-btn" onclick="eliminarFilaRafaga(this)" title="Eliminar fila">✕</button></td>
-  `;
-  tbody.appendChild(tr);
-  actualizarContadorRafaga();
+function _rafagaSetTipo(tipo) {
+  _rafagaTipo = tipo;
+  document.getElementById("rf2-btn-gasto").className   = "tipo-btn " + (tipo === "Gasto"   ? "active-expense" : "");
+  document.getElementById("rf2-btn-ingreso").className = "tipo-btn " + (tipo === "Ingreso" ? "active-income"  : "");
+  document.getElementById("rf2-categoria").innerHTML = _optsCategRafaga(tipo);
 }
 
-function agregarFilasRafaga() {
-  const input = document.getElementById("rafaga-cant-agregar");
-  const cantidad = Math.max(1, parseInt(input?.value, 10) || 1);
-  for (let i = 0; i < cantidad; i++) agregarFilaRafaga();
+function _rafagaSetMoneda(m) {
+  _rafagaMoneda = m;
+  document.getElementById("rf2-btn-ars").className = "moneda-btn " + (m === "ARS" ? "active-ars" : "");
+  document.getElementById("rf2-btn-usd").className = "moneda-btn " + (m === "USD" ? "active-usd" : "");
+  document.getElementById("rf2-monto-label").textContent = m === "ARS" ? "Monto (ARS $)" : "Monto (USD U$S)";
 }
 
-function eliminarFilaRafaga(btn) {
-  const tbody = document.getElementById("rafaga-tbody");
-  if (tbody.children.length <= 1) return;
-  btn.closest("tr").remove();
-  Array.from(tbody.children).forEach((tr, i) => { tr.cells[0].textContent = i + 1; });
-  actualizarContadorRafaga();
+function _rafagaActualizarMesLiq2(fuente) {
+  const row = document.getElementById("rf2-mes-liq-row");
+  const inp = document.getElementById("rf2-mes-liq");
+  if (!row) return;
+  if (_esFuenteTC(fuente)) {
+    row.style.display = "";
+  } else {
+    row.style.display = "none";
+    if (inp) inp.value = "";
+  }
 }
 
-function actualizarContadorRafaga() {
-  const n = document.getElementById("rafaga-tbody").children.length;
-  document.getElementById("rafaga-count").textContent = `${n} fila${n !== 1 ? "s" : ""}`;
-  document.getElementById("rafaga-guardar-btn").textContent = `Guardar todo (${n})`;
+function _renderRafagaSesion() {
+  const totalEl = document.getElementById("rafaga-side-total");
+  const countEl = document.getElementById("rafaga-side-count");
+  const listEl  = document.getElementById("rafaga-side-list");
+  if (!listEl) return;
+  const total = _rafagaSesion
+    .filter(t => (t.moneda || "ARS") === "ARS")
+    .reduce((s, t) => s + Number(t.monto), 0);
+  if (totalEl) totalEl.textContent = fmt(total);
+  if (countEl) countEl.textContent = `${_rafagaSesion.length} transacci${_rafagaSesion.length === 1 ? "ón" : "ones"}`;
+  listEl.innerHTML = _rafagaSesion.slice().reverse().map(t => `
+    <div class="rafaga-side-item" onclick="abrirEditorTransaccion('${t.id}')" title="Editar esta transacción">
+      <div class="rafaga-side-badge ${t.tipo === "Ingreso" ? "i" : "g"}">${t.tipo === "Ingreso" ? "I" : "G"}</div>
+      <div class="rafaga-side-mid">
+        <div class="rafaga-side-cat">${escapeHtml(t.categoria)}</div>
+        <div class="rafaga-side-sub">${escapeHtml(t.fuente || "—")} · ${escapeHtml(t.responsabilidad || "Mío")}</div>
+      </div>
+      <div class="rafaga-side-amt ${t.tipo === "Ingreso" ? "pos" : ""}">${fmtMoneda(Math.abs(Number(t.monto)), t.moneda || "ARS")}</div>
+    </div>`).join("");
 }
 
-async function guardarRafaga() {
-  const tbody = document.getElementById("rafaga-tbody");
-  const msg   = document.getElementById("rafaga-msg");
+async function _rafagaAgregarYCargarOtra() {
+  const msg = document.getElementById("rafaga-msg");
   msg.innerHTML = "";
 
-  const validas = [];
-  let errores = 0;
+  const fecha   = document.getElementById("rf2-fecha").value;
+  const cat     = document.getElementById("rf2-categoria").value;
+  const monto   = parsearDecimal(document.getElementById("rf2-monto").value);
+  const desc    = document.getElementById("rf2-descripcion").value.trim();
+  const resp    = document.getElementById("rf2-responsabilidad").value;
+  const fuente  = document.getElementById("rf2-fuente").value;
+  const mesLiqInp = document.getElementById("rf2-mes-liq");
+  const mesLiq  = _esFuenteTC(fuente) ? (mesLiqInp?.value || "") : "";
 
-  Array.from(tbody.children).forEach(tr => {
-    const fecha  = tr.querySelector(".rf-fecha").value;
-    const tipo   = tr.querySelector(".rf-tipo").value;
-    const cat    = tr.querySelector(".rf-cat").value;
-    const monto  = parsearDecimal(tr.querySelector(".rf-monto").value);
-    const moneda = tr.querySelector(".rf-moneda").value;
-    const desc   = tr.querySelector(".rf-desc").value.trim();
-    const resp   = tr.querySelector(".rf-resp").value;
-    const fuente = tr.querySelector(".rf-fuente").value;
-    const mesLiqInp = tr.querySelector(".rf-mes-liq");
-    const mesLiq = _esFuenteTC(fuente) ? (mesLiqInp?.value || "") : "";
-
-    tr.classList.remove("rafaga-row-err");
-    const err = [];
-    if (!fecha) err.push("fecha");
-    if (!cat)   err.push("categoría");
-    if (isNaN(monto) || monto <= 0) err.push("monto");
-    if (_esFuenteTC(fuente) && !mesLiq) err.push("mes liquidación");
-
-    if (err.length) {
-      errores++;
-      tr.classList.add("rafaga-row-err");
-    } else {
-      validas.push({ fecha, tipo, categoria: cat, monto, descripcion: desc,
-                     usuario: USUARIO, responsabilidad: resp, fuente, moneda,
-                     mes_liquidacion: mesLiq || null });
-    }
-  });
-
-  if (errores > 0) {
-    msg.innerHTML = `<span style="color:var(--red)">⚠ ${errores} fila(s) con errores (marcadas). Completá fecha, categoría y monto.</span>`;
+  if (!fecha || !cat || isNaN(monto) || monto <= 0) {
+    msg.innerHTML = '<span style="color:var(--red)">Completá fecha, categoría y monto.</span>';
     return;
   }
-  if (!validas.length) {
-    msg.innerHTML = `<span style="color:var(--red)">No hay filas para guardar.</span>`;
+  if (_esFuenteTC(fuente) && !mesLiq) {
+    msg.innerHTML = '<span style="color:var(--red)">Seleccioná el mes de liquidación.</span>';
     return;
   }
 
-  const btn = document.getElementById("rafaga-guardar-btn");
+  const btn = document.getElementById("rafaga-add-btn");
   btn.disabled = true;
-  btn.textContent = "⏳ Guardando...";
+  btn.textContent = "⏳ Agregando...";
 
   try {
     const { data: { session: freshSession } } = await supabaseClient.auth.getSession();
     if (!freshSession) throw new Error("Sesión expirada — volvé a iniciar sesión.");
     supabaseSession = freshSession;
 
-    const rows = validas.map(v => ({
-      id: crypto.randomUUID(), ...v,
-      categoria_id: _getCategoriaId(v.categoria, v.tipo),
-      cuenta_id:    _getCuentaId(v.fuente),
+    const row = {
+      id: crypto.randomUUID(), fecha, tipo: _rafagaTipo, categoria: cat, monto,
+      descripcion: desc, usuario: USUARIO, responsabilidad: resp, fuente, moneda: _rafagaMoneda,
+      mes_liquidacion: mesLiq || null,
+      categoria_id: _getCategoriaId(cat, _rafagaTipo),
+      cuenta_id:    _getCuentaId(fuente),
       user_id: supabaseSession.user.id,
       workspace_id: miWorkspaceId()
-    }));
-    const { error } = await supabaseClient.from('transacciones').insert(rows);
+    };
+    const { data, error } = await supabaseClient.from('transacciones').insert(row).select().single();
     if (error) throw error;
-    showToast(`✅ ${validas.length} transacciones guardadas`, "ok");
-    cerrarRafaga();
-    document.getElementById("rafaga-tbody").innerHTML = "";
-    await cargarTodasTransacciones();
-    _renderApp();
+
+    allTransac.push({ ...data, monto: parseFloat(data.monto) });
+    _rafagaSesion.push(data);
+    _renderRafagaSesion();
+    cargarResumenMes();
+    cargarEvolucion();
+    filtrarTabla();
+
+    document.getElementById("rf2-monto").value = "";
+    document.getElementById("rf2-descripcion").value = "";
+    showToast("✅ Agregado", "ok");
+    if (navigator.vibrate) navigator.vibrate(50);
   } catch(e) {
-    msg.innerHTML = `<span style="color:var(--red)">❌ Error de conexión: ${escapeHtml(e.message)}</span>`;
-    btn.disabled = false;
-    btn.textContent = `Guardar todo (${validas.length})`;
+    msg.innerHTML = `<span style="color:var(--red)">❌ ${escapeHtml(e.message || String(e))}</span>`;
   }
+
+  btn.disabled = false;
+  btn.textContent = "+ Agregar y cargar otra";
 }
 
 // ─── COMPARTIDOS ──────────────────────────────────────────────
@@ -6765,19 +6960,35 @@ function cargarCompartidos() {
             Compartidos se activa cuando hay dos personas en el mismo workspace.
           </p>
           <button class="btn btn-primary" onclick="navegarA('config')">Invitar a mi pareja</button>`;
-        cont.prepend(div);
+        // Insertar después del nav-row (si está reparentado acá) para que el
+        // cartel quede debajo de la fila de accesos, no arriba de todo.
+        const topnavAqui = document.getElementById("topnav");
+        if (topnavAqui && topnavAqui.parentElement === cont) {
+          cont.insertBefore(div, topnavAqui.nextElementSibling);
+        } else {
+          cont.prepend(div);
+        }
       }
     }
     // Ocultar el resto del contenido de Compartidos mientras no haya pareja
-    // (liq-modal ya no vive acá — ver comentario en su nueva ubicación fuera de #app)
+    // (liq-modal ya no vive acá — ver comentario en su nueva ubicación fuera de #app).
+    // #topnav (el nav-row) se excluye a propósito: navegarA() lo reparenta como
+    // hijo directo de la página activa (Unidad 3 rediseño Marfil sereno), así
+    // que sin este exclude quedaba atrapado en el "ocultar todo" y desaparecía
+    // la fila de accesos completa cuando no había pareja invitada.
     Array.from(document.getElementById("page-compartidos")?.children || [])
-      .forEach(el => { if (el.id !== "comp-empty-state") el.style.display = "none"; });
+      .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "topnav") el.style.display = "none"; });
     return;
   }
   const existente = document.getElementById("comp-empty-state");
   if (existente) existente.remove();
   Array.from(document.getElementById("page-compartidos")?.children || [])
-    .forEach(el => { if (el.id !== "comp-empty-state") el.style.display = ""; });
+    .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "topnav") el.style.display = ""; });
+
+  const avA = document.getElementById("comp-avatar-a");
+  const avB = document.getElementById("comp-avatar-b");
+  if (avA) avA.textContent = USUARIO.charAt(0).toUpperCase();
+  if (avB) avB.textContent = PARTNER.charAt(0).toUpperCase();
 
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
@@ -7535,15 +7746,31 @@ function cargarAnual() {
 const _navOrder = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
 let   _paginaActual = "presupuesto";
 
-function _actualizarNavIndicator() {
-  const indicator = document.getElementById("topnav-indicator");
-  const active    = document.querySelector(".topnav .nav-item.active");
-  if (!indicator || !active) return;
-  const tabsEl = document.querySelector(".topnav-tabs");
-  const tabsRect   = tabsEl.getBoundingClientRect();
-  const activeRect = active.getBoundingClientRect();
-  indicator.style.width     = activeRect.width + "px";
-  indicator.style.transform = `translateX(${activeRect.left - tabsRect.left}px)`;
+// Nav-row (desktop/tablet ≥769px): Nueva + los otros destinos, SIN la página
+// activa. Resumen queda afuera por ahora (sin mockup ni ubicación definida —
+// ver docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md, Open
+// Questions). Se regenera en cada navegarA() porque el set de botones cambia
+// según la página activa.
+const NAV_ROW_DESTINOS = [
+  { pagina: "presupuesto",   label: "Mi mes",        icono: "calendar-days" },
+  { pagina: "transacciones", label: "Transacciones", icono: "receipt" },
+  { pagina: "compartidos",   label: "Compartir",     icono: "users" },
+  { pagina: "config",        label: "Categorías",    icono: "tag" },
+  { pagina: "inversiones",   label: "Inversiones",   icono: "trending-up" },
+];
+function _renderNavRow(paginaActiva) {
+  const tabsEl = document.getElementById("topnav-tabs");
+  if (!tabsEl) return;
+  const botones = [
+    { pagina: "nueva", label: "Nueva", icono: "plus", primary: true },
+    ...NAV_ROW_DESTINOS.filter(d => d.pagina !== paginaActiva),
+  ];
+  tabsEl.innerHTML = botones.map(b => `
+    <button class="nav-item${b.primary ? " primary" : ""}" onclick="navegarA('${b.pagina}')">
+      <span class="nav-item-ico"><i data-lucide="${b.icono}" width="15" height="15"></i></span>
+      ${escapeHtml(b.label)}
+    </button>`).join("");
+  if (window.lucide) lucide.createIcons();
 }
 
 // ─── SCROLL REVEAL ──────────────────────────────────────────
@@ -7570,7 +7797,63 @@ function _initScrollReveal() {
   els.forEach(el => obs.observe(el));
 }
 
+// ─── MODAL "NUEVA TRANSACCIÓN" (desktop/tablet ≥769px) ─────────────────
+let _modalNuevaAbierta = false;
+let _pageNuevaParentOriginal = null;
+let _pageNuevaSiguienteOriginal = null;
+
+function _abrirModalNueva() {
+  if (typeof _modoCuotas !== "undefined" && _modoCuotas) {
+    _setModoCuotas("unico");
+    _montoCuotaEditado = false;
+  }
+  const overlay = document.getElementById("modal-nueva-overlay");
+  const box = document.getElementById("modal-nueva-box");
+  const page = document.getElementById("page-nueva");
+  if (!overlay || !box || !page) return;
+  if (!_pageNuevaParentOriginal) {
+    _pageNuevaParentOriginal = page.parentElement;
+    _pageNuevaSiguienteOriginal = page.nextElementSibling;
+  }
+  box.appendChild(page);
+  page.classList.add("active");
+  overlay.style.display = "flex";
+  _modalNuevaAbierta = true;
+  document.addEventListener("keydown", _escCerrarModalNueva);
+}
+
+function _cerrarModalNueva() {
+  const overlay = document.getElementById("modal-nueva-overlay");
+  const page = document.getElementById("page-nueva");
+  if (!overlay || !page) return;
+  overlay.style.display = "none";
+  page.classList.remove("active");
+  if (_pageNuevaParentOriginal) {
+    _pageNuevaParentOriginal.insertBefore(page, _pageNuevaSiguienteOriginal);
+  }
+  _modalNuevaAbierta = false;
+  document.removeEventListener("keydown", _escCerrarModalNueva);
+}
+
+function _escCerrarModalNueva(e) {
+  if (e.key === "Escape") _cerrarModalNueva();
+}
+
+// Cancelar/cerrar "Nueva transacción" — si está en modal (desktop) lo
+// cierra sin navegar; si es página completa (mobile) navega como siempre.
+function _cancelarNueva() {
+  if (_modalNuevaAbierta) { _cerrarModalNueva(); return; }
+  navegarA("transacciones");
+}
+
 function navegarA(pagina) {
+  // Desktop/tablet (≥769px): "Nueva transacción" se abre como modal sobre
+  // la página actual en vez de navegar — ver
+  // docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md (U7).
+  if (pagina === "nueva" && window.innerWidth >= 769) {
+    _abrirModalNueva();
+    return;
+  }
   // Reset cuotas mode when leaving Nueva page
   if (pagina !== "nueva" && typeof _modoCuotas !== "undefined" && _modoCuotas) {
     _setModoCuotas("unico");
@@ -7592,7 +7875,7 @@ function navegarA(pagina) {
   if (page) {
     if (goingBack) page.classList.add("dir-back");
     page.classList.add("active");
-    // Reubicar el topnav debajo del encabezado propio de esta página (mismo elemento, se mueve)
+    // Reubicar el nav-row debajo del encabezado propio de esta página (mismo elemento, se mueve)
     const topnavEl = document.getElementById("topnav");
     if (topnavEl && window.innerWidth >= 769) {
       const header = page.firstElementChild;
@@ -7600,15 +7883,7 @@ function navegarA(pagina) {
     }
   }
 
-  // Top nav (desktop) — 4 tabs en orden: presupuesto, transacciones, compartidos, config
-  const navMap = { presupuesto: 0, transacciones: 1, compartidos: 2, config: 3, inversiones: 4, resumen: 5 };
-  document.querySelectorAll(".topnav .nav-item").forEach((n, i) => {
-    n.classList.toggle("active", i === navMap[pagina]);
-  });
-  document.querySelectorAll(".sidebar .nav-item").forEach((n, i) => {
-    n.classList.toggle("active", i === navMap[pagina]);
-  });
-  requestAnimationFrame(_actualizarNavIndicator);
+  _renderNavRow(pagina);
 
   // Bottom nav (mobile)
   ["bn-presupuesto","bn-transacciones","bn-compartidos","bn-config","bn-inversiones","bn-resumen"].forEach(id => {
@@ -7712,7 +7987,6 @@ window.addEventListener("resize", () => {
     if (window.innerWidth > 768) closeSidebar(); // cerrar drawer si amplían pantalla
   }
   _syncMobileHeaderHeight();
-  requestAnimationFrame(_actualizarNavIndicator);
 });
 
 // ─── PRESUPUESTO ──────────────────────────────────────────────
@@ -8384,21 +8658,26 @@ function renderPresupuesto() {
         : "";
 
     const catEmoji = getCatEmoji(cat, '');
-    return `<tr class="${rowCls}">
-      <td><span style="display:inline-flex;align-items:center;gap:7px">${catEmoji ? `<span style="font-size:1.05rem;width:24px;text-align:center">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}<span>${escapeHtml(cat)}</span></span>${pacingHtml}</td>
-      <td style="text-align:right">
-        <div style="display:flex;align-items:center;justify-content:flex-end;gap:.3rem">
-          <span style="color:var(--text-muted);font-size:.8rem">$</span>
+    return `<div class="pres-cat-row ${rowCls}">
+      <div class="pres-cat-head">
+        <span class="pres-cat-name">${catEmoji ? `<span class="pres-cat-emoji">${catEmoji}</span>` : `<span class="pres-status-dot" style="background:${dotColor}"></span>`}${escapeHtml(cat)}</span>
+        ${pacingHtml}
+        <div class="pres-cat-input-wrap">
+          <span class="pres-cat-input-sym">$</span>
           <input type="text" inputmode="decimal" class="pres-input" data-cat="${escapeHtml(cat)}"
                  value="${pres > 0 ? String(pres).replace('.', ',') : ''}" placeholder="—"
-                 style="max-width:88px" oninput="actualizarKpisPres()">
+                 oninput="actualizarKpisPres()">
         </div>
-        <span class="pres-monto-live" style="color:var(--text-muted);font-size:.71rem;display:block;text-align:right;margin-top:.1rem">${sueldo > 0 && pres > 0 ? pct_sueldo.toFixed(1).replace('.', ',') + '%' : ''}</span>
-      </td>
-      <td style="text-align:right">${gastoStr}</td>
-      <td style="text-align:right">${restStr}</td>
-      <td>${barHtml}</td>
-    </tr>`;
+      </div>
+      <div class="pres-cat-body">
+        ${barHtml}
+        <div class="pres-cat-meta">
+          <span>Gastado ${gastoStr}</span>
+          ${pres > 0 ? `<span>Restante ${restStr}</span>` : ""}
+          ${sueldo > 0 && pres > 0 ? `<span class="pres-monto-live">${pct_sueldo.toFixed(1).replace('.', ',')}% del sueldo</span>` : ""}
+        </div>
+      </div>
+    </div>`;
   }).join("");
 
   // Footer de totales
@@ -8406,13 +8685,19 @@ function renderPresupuesto() {
   if (tfoot) {
     const totalRest    = totalPresARS - totalGasto;
     const totalEjec    = totalPresARS > 0 ? (totalGasto / totalPresARS * 100).toFixed(0) : 0;
-    tfoot.innerHTML = `<tr class="pres-tfoot-row">
-      <td><strong>TOTAL</strong></td>
-      <td style="text-align:right"><strong>${fmt(totalPresARS)} <small style="color:var(--text-muted);font-weight:400">(${totalPctAsig.toFixed(0)}%)</small></strong></td>
-      <td style="text-align:right"><strong style="color:var(--red)">${fmt(totalGasto)}</strong></td>
-      <td style="text-align:right"><strong style="color:${totalRest>=0?"var(--green)":"var(--red)"}">${totalRest<0?"−":""}${fmt(Math.abs(totalRest))}</strong></td>
-      <td><strong style="color:var(--text-muted)">${totalEjec}% ejecutado</strong></td>
-    </tr>`;
+    tfoot.innerHTML = `<div class="pres-cat-row pres-total-row">
+      <div class="pres-cat-head">
+        <span class="pres-cat-name"><strong>TOTAL</strong></span>
+      </div>
+      <div class="pres-cat-body">
+        <div class="pres-cat-meta">
+          <span>Presupuesto <strong>${fmt(totalPresARS)}</strong> <small style="color:var(--text-muted);font-weight:400">(${totalPctAsig.toFixed(0)}%)</small></span>
+          <span>Gastado <strong style="color:var(--red)">${fmt(totalGasto)}</strong></span>
+          <span>Restante <strong style="color:${totalRest>=0?"var(--green)":"var(--red)"}">${totalRest<0?"−":""}${fmt(Math.abs(totalRest))}</strong></span>
+          <span>${totalEjec}% ejecutado</span>
+        </div>
+      </div>
+    </div>`;
   }
 
   // KPI: balance compartido
@@ -8469,8 +8754,11 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
     heroAmt.textContent = (saldoReal < 0 ? "−" : "") + fmt(Math.abs(saldoReal));
     heroAmt.style.color = saldoReal < 0 ? "var(--red)" : "var(--green)";
   }
-  const heroSub = $("mm-hero-sub");
-  if (heroSub) heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
+
+  const heroName = $("mm-hero-name");
+  if (heroName) heroName.textContent = USUARIO;
+  const heroMes = $("mm-hero-mes");
+  if (heroMes) heroMes.textContent = (MESES_LARGO[mes - 1] || "").toLowerCase();
 
   const hoy = new Date();
   const esEsteMes = mes === hoy.getMonth() + 1 && anio === hoy.getFullYear();
@@ -8478,29 +8766,33 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
   const diasRestantes = esEsteMes
     ? Math.max(1, new Date(anio, mes, 0).getDate() - hoy.getDate() + 1)
     : 0;
+  // El último día del mes diasRestantes da exactamente 1 — singular real,
+  // no "1 días".
+  const diasTxt = `${diasRestantes} día${diasRestantes === 1 ? "" : "s"} más a este ritmo`;
 
-  const statDiario = $("mm-stat-diario");
-  if (statDiario) {
+  // Sub del hero: "$X/día disponible · N días más a este ritmo" — clon del
+  // mockup, reemplaza las 3 stat-cards (Por día/En USD/Días restantes) que
+  // no existían ahí (decisión de Daniel: clonar el mockup tal cual).
+  const heroSub = $("mm-hero-sub");
+  if (heroSub) {
     if (esEsteMes && saldoReal > 0) {
-      statDiario.textContent = fmt(Math.round(saldoReal / diasRestantes));
+      const porDia = Math.round(saldoReal / diasRestantes);
+      heroSub.innerHTML = `<strong class="num">${fmt(porDia)}</strong>/día disponible · ${diasTxt}`;
+    } else if (esEsteMes) {
+      // Sin saldo positivo (sueldo $0 o gasto que ya lo superó) — se sigue
+      // mostrando la cuenta de días del mes en vez de caer al texto viejo
+      // "Sueldo $0 − gastado $0", que al lado del "$0" grande de arriba
+      // se leía como si repitiera el mismo número dos veces.
+      heroSub.textContent = `Sin saldo disponible este mes · ${diasTxt}`;
     } else {
-      statDiario.textContent = "—";
+      heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
     }
   }
 
-  const statDias = $("mm-stat-dias");
-  if (statDias) {
-    statDias.textContent = esEsteMes ? diasRestantes + " días" : "—";
-  }
-
-  const statUSD = $("mm-stat-usd");
-  if (statUSD) {
-    if (tipoCambioMEP > 0 && saldoReal > 0) {
-      statUSD.textContent = "U$S " + Math.round(saldoReal / tipoCambioMEP).toLocaleString("es-AR");
-    } else {
-      statUSD.textContent = "—";
-    }
-  }
+  const pillIng = $("mm-hero-pill-ingresos");
+  if (pillIng) pillIng.textContent = `↑ Ingresos ${fmt(sueldoEfectivo)}`;
+  const pillGas = $("mm-hero-pill-gastos");
+  if (pillGas) pillGas.textContent = `↓ Gastos ${fmt(totalGasto)}`;
 
   const qsAho = $("mm-qs-ahorro");
   if (qsAho && sueldoEfectivo > 0) {
@@ -9215,18 +9507,6 @@ function descargarTemplateCSV() {
   const a    = document.createElement("a");
   a.href = url; a.download = `template-${anio}-${mes}.csv`; a.click();
   URL.revokeObjectURL(url);
-}
-
-// ─── THEME TOGGLE ─────────────────────────────────────────────
-function toggleTheme() {
-  const html = document.documentElement;
-  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
-  html.dataset.theme = next;
-  localStorage.setItem('fin-theme', next);
-  const sun  = document.getElementById('theme-icon-sun');
-  const moon = document.getElementById('theme-icon-moon');
-  if (sun)  sun.style.display  = next === 'dark' ? '' : 'none';
-  if (moon) moon.style.display = next === 'dark' ? 'none' : '';
 }
 
 // ─── TOAST ────────────────────────────────────────────────────
@@ -10303,7 +10583,7 @@ if ('serviceWorker' in navigator) {
 
 // ===== PLAZOS FIJOS =====
 let _plazosCache = [];
-let _accionesTotalCache = { usd: 0, ars: 0 };
+let _accionesTotalCache = { usd: 0, ars: 0, criptoUSD: 0, criptoARS: 0, stocksUSD: 0, stocksARS: 0 };
 
 function _normalizarPlazo(p) {
   return { ...p, fechaInicio: p.fecha_inicio || p.fechaInicio, fechaVencimiento: p.fecha_vencimiento || p.fechaVencimiento };
@@ -10328,7 +10608,7 @@ async function renderPlazos() {
       <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/><circle cx="12" cy="13" r="2"/></svg>
       <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">Sin plazos registrados</div>
       <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Registrá tus plazos fijos y mirá el rendimiento estimado.</div>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Agregar plazo fijo</button>
+      <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirModalInversion('plazo')">+ Agregar plazo fijo</button>
     </div>`;
     return;
   }
@@ -10367,34 +10647,133 @@ async function renderPlazos() {
   }).join("");
 }
 
+// ─── MODAL "AGREGAR INVERSIÓN" — selector de tipo + form real ─────────
+// El mockup diseñaba un modal único con selector de tipo (Plazo fijo /
+// Cripto / Acción) arriba de todo; el form de cada tipo es el mismo real
+// que ya existía por sección (_renderFormPlazo/_renderFormAccion), no uno
+// nuevo — evita duplicar campos/validación.
+let _modalInvTipo = "plazo";
+const _MODAL_INV_TIPOS = [
+  { id: "plazo",  label: "Plazo fijo", icon: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>' },
+  { id: "cripto", label: "Cripto",     icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1 3 2.2c0 2.8-6 1.3-6 4.1 0 1.2 1.3 2.2 3 2.2s3-1.1 3-2.5"/>' },
+  { id: "stocks", label: "Acción",     icon: '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>' },
+];
+
+function abrirModalInversion(tipoInicial) {
+  // Un solo form editable a la vez en toda la página — si había uno abierto
+  // inline en alguna sección, se cierra para no terminar con 2 elementos
+  // con el mismo id (pf-monto, af-simbolo, etc.) a la vez.
+  cerrarFormPlazo();
+  cerrarFormAccion();
+  _modalInvTipo = tipoInicial || "plazo";
+  const overlay = document.getElementById("modal-inv-overlay");
+  if (!overlay) return;
+  overlay.classList.add("open");
+  _renderModalInvTypeRow();
+  _renderModalInvBody();
+}
+
+function cerrarModalInversion() {
+  const overlay = document.getElementById("modal-inv-overlay");
+  if (overlay) overlay.classList.remove("open");
+  const form = document.getElementById("modal-inv-form");
+  if (form) form.innerHTML = "";
+}
+
+function _setModalInvTipo(tipo) {
+  _modalInvTipo = tipo;
+  _renderModalInvTypeRow();
+  _renderModalInvBody();
+}
+
+function _renderModalInvTypeRow() {
+  const row = document.getElementById("modal-inv-type-row");
+  if (!row) return;
+  row.innerHTML = _MODAL_INV_TIPOS.map(t => `
+    <button type="button" class="modal-inv-type-btn ${t.id === _modalInvTipo ? "active" : ""}" onclick="_setModalInvTipo('${t.id}')">
+      <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t.icon}</svg></span>
+      <span>${t.label}</span>
+    </button>`).join("");
+}
+
+function _renderModalInvBody() {
+  const form = document.getElementById("modal-inv-form");
+  if (!form) return;
+  form.innerHTML = _modalInvTipo === "plazo" ? _renderFormPlazo(null) : _renderFormAccion(null, _modalInvTipo);
+}
+
+// Vencimiento calculado a partir de "Plazo (días)" + fecha de inicio, en vez
+// de un segundo date-picker manual — clon del mockup
+// agregar-inversion-desktop.html (campo "Plazo" + "Vencimiento" auto-
+// calculado). Sigue guardando fecha_vencimiento como fecha real, no cambia
+// el schema — solo cómo se completa en el form.
+function _calcVencPlazo(inicioStr, dias) {
+  if (!inicioStr || !dias || dias <= 0) return "";
+  const iniD = new Date(inicioStr + "T00:00:00");
+  const vencD = new Date(iniD.getTime() + dias * 86400000);
+  return `${vencD.getFullYear()}-${String(vencD.getMonth()+1).padStart(2,"0")}-${String(vencD.getDate()).padStart(2,"0")}`;
+}
+
+function _actualizarVencPlazo() {
+  const ini  = document.getElementById("pf-inicio")?.value;
+  const dias = parseInt(document.getElementById("pf-dias")?.value, 10);
+  const venc = _calcVencPlazo(ini, dias);
+  const vencInput = document.getElementById("pf-venc");
+  const txt = document.getElementById("pf-venc-txt");
+  if (vencInput) vencInput.value = venc;
+  if (txt) txt.textContent = venc ? fmtFecha(venc) : "—";
+}
+
 function _renderFormPlazo(p) {
   // Fecha local, no UTC — toISOString() muestra el día siguiente después de las 21hs ART
   const _hoyD = new Date();
   const hoy = `${_hoyD.getFullYear()}-${String(_hoyD.getMonth()+1).padStart(2,"0")}-${String(_hoyD.getDate()).padStart(2,"0")}`;
   const moneda = p?.moneda || "ARS";
+  const inicioVal = p?.fechaInicio || hoy;
+  // Al editar, "Plazo (días)" se calcula a partir de las 2 fechas guardadas
+  // (puede no coincidir con un valor redondo si se cargó a mano antes de
+  // este campo existir — sigue siendo editable).
+  const diasVal = p ? Math.round((new Date(p.fechaVencimiento + "T00:00:00") - new Date(p.fechaInicio + "T00:00:00")) / 86400000) : "";
+  const vencVal = p?.fechaVencimiento || _calcVencPlazo(inicioVal, diasVal);
   return `<div class="plazo-form">
     ${p ? `<input type="hidden" id="pf-id" value="${p.id}">` : ""}
-    <input class="plazo-form-full" id="pf-desc" placeholder="Descripción (ej: Plazo Fijo Nación)" type="text" value="${escapeHtml(p?.descripcion || '')}">
-    <input id="pf-monto" placeholder="Monto" type="text" inputmode="decimal" value="${p?.monto || ''}">
-    <select id="pf-moneda" style="padding:.45rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85rem">
-      <option value="ARS"${moneda==="ARS"?" selected":""}>ARS</option>
-      <option value="USD"${moneda==="USD"?" selected":""}>USD</option>
-    </select>
-    <input id="pf-tna" placeholder="TNA %" type="text" inputmode="decimal" value="${p?.tna || ''}">
-    <input id="pf-inicio" type="date" value="${p?.fechaInicio || hoy}">
-    <input id="pf-venc" type="date" value="${p?.fechaVencimiento || ''}">
-    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
-      <button class="btn" style="font-size:.82rem" onclick="cerrarFormPlazo()">Cancelar</button>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPlazo()">${p ? "Actualizar" : "Guardar"}</button>
+    <div class="pf-field plazo-form-full">
+      <label for="pf-desc">Descripción</label>
+      <input id="pf-desc" placeholder="ej: Plazo Fijo Nación" type="text" value="${escapeHtml(p?.descripcion || '')}">
+    </div>
+    <div class="pf-field">
+      <label for="pf-monto">Monto</label>
+      <div class="pf-row">
+        <input id="pf-monto" placeholder="0" type="text" inputmode="decimal" value="${p?.monto || ''}">
+        <select id="pf-moneda">
+          <option value="ARS"${moneda==="ARS"?" selected":""}>ARS</option>
+          <option value="USD"${moneda==="USD"?" selected":""}>USD</option>
+        </select>
+      </div>
+    </div>
+    <div class="pf-field">
+      <label for="pf-tna">TNA</label>
+      <div class="pf-row"><input id="pf-tna" placeholder="0" type="text" inputmode="decimal" value="${p?.tna || ''}"><span class="pf-row-suffix">% anual</span></div>
+    </div>
+    <div class="pf-field">
+      <label for="pf-dias">Plazo</label>
+      <div class="pf-row"><input id="pf-dias" placeholder="0" type="text" inputmode="numeric" value="${diasVal}" oninput="_actualizarVencPlazo()"><span class="pf-row-suffix">días</span></div>
+    </div>
+    <div class="pf-field">
+      <label for="pf-inicio">Fecha de inicio</label>
+      <input id="pf-inicio" type="date" value="${inicioVal}" oninput="_actualizarVencPlazo()">
+    </div>
+    <div class="pf-field plazo-form-full">
+      <label>Vencimiento</label>
+      <input type="hidden" id="pf-venc" value="${vencVal}">
+      <div class="pf-venc-display"><strong id="pf-venc-txt">${vencVal ? fmtFecha(vencVal) : "—"}</strong></div>
+      <div class="pf-venc-note">Calculado automáticamente a partir del plazo</div>
+    </div>
+    <div class="plazo-form-full plazo-form-actions">
+      <button class="btn" onclick="cerrarFormPlazo()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPlazo()">${p ? "Actualizar plazo fijo" : "Guardar plazo fijo"}</button>
     </div>
   </div>`;
-}
-
-function abrirFormPlazo() {
-  const wrap = document.getElementById("plazo-form-wrap");
-  if (!wrap) return;
-  wrap.style.display = "";
-  wrap.innerHTML = _renderFormPlazo(null);
 }
 
 function editarPlazo(id) {
@@ -10410,6 +10789,14 @@ function editarPlazo(id) {
 function cerrarFormPlazo() {
   const wrap = document.getElementById("plazo-form-wrap");
   if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
+  // Si el form se estaba mostrando dentro del modal "Agregar inversión"
+  // (Cancelar o Guardar exitoso), cerrarlo también — abrirModalInversion()
+  // vuelve a abrirlo después si corresponde, no se pisan. Iba directo a
+  // overlay.classList.remove("open") sin limpiar #modal-inv-form: dejaba
+  // un pf-monto/pf-desc/etc. fantasma ahí adentro (oculto por el overlay,
+  // pero seguía en el DOM con el mismo id que el form inline) hasta la
+  // próxima vez que se abriera el modal — cerrarModalInversion() sí limpia.
+  cerrarModalInversion();
 }
 
 async function guardarPlazo() {
@@ -10511,7 +10898,7 @@ async function _fetchPrecio(simbolo) {
 
 function _renderTotalesInversiones() {
   const plazos    = _plazosCache;
-  const { usd: accionesUSD, ars: accionesARS } = _accionesTotalCache;
+  const { usd: accionesUSD, ars: accionesARS, criptoUSD = 0, criptoARS = 0, stocksUSD = 0, stocksARS = 0 } = _accionesTotalCache;
   const plazosARS = plazos.filter(p => (p.moneda || "ARS") === "ARS").reduce((s,p) => s + p.monto, 0);
   const plazosUSD = plazos.filter(p => p.moneda === "USD").reduce((s,p) => s + p.monto, 0);
   const totalARS  = plazosARS + accionesARS;
@@ -10531,22 +10918,20 @@ function _renderTotalesInversiones() {
     ? `${plazos.length} plazo${plazos.length !== 1 ? "s" : ""} fijo${plazos.length !== 1 ? "s" : ""} · cartera activos`
     : "Sumá tus inversiones para ver el total";
 
-  // Allocation bars
+  // Split real de 3 categorías (Cripto/Acciones/Plazos) — clon del mockup,
+  // antes solo había 2 categorías (Plazos vs. "Activos&cripto" combinado)
+  // porque el total de acciones no distinguía cripto de acciones reales.
   const grandTotal = totalARS + (totalUSD * (tipoCambioMEP || 1));
   const _pct = n => grandTotal > 0 ? Math.round(n / grandTotal * 100) : 0;
-  const plazosTotal   = plazosARS + plazosUSD * (tipoCambioMEP || 1);
-  const activosTotal  = accionesARS + accionesUSD * (tipoCambioMEP || 1);
-  const pctPlazos  = _pct(plazosTotal);
-  const pctActivos = _pct(activosTotal);
+  const plazosTotal  = plazosARS  + plazosUSD  * (tipoCambioMEP || 1);
+  const criptoTotal  = criptoARS  + criptoUSD  * (tipoCambioMEP || 1);
+  const stocksTotal  = stocksARS  + stocksUSD  * (tipoCambioMEP || 1);
   const _s = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
-  const _w = (id,p) => { const e=document.getElementById(id); if(e) e.style.width=p+"%"; };
-  _s("inv-alloc-plazos-val", plazosARS > 0 ? fmt(plazosARS) : "—");
-  _s("inv-alloc-plazos-pct", pctPlazos + "%");
-  _w("inv-alloc-bar-plazos", pctPlazos);
-  _s("inv-alloc-act-val",    accionesARS > 0 ? fmt(accionesARS) : "—");
-  _s("inv-alloc-act-pct",    pctActivos + "%");
-  _w("inv-alloc-bar-activos", pctActivos);
-  _s("inv-alloc-total",      grandTotal > 0 ? fmt(Math.round(grandTotal)) : "—");
+  const _pillTxt = (total) => total > 0 ? `${_pct(total)}% · ${fmt(Math.round(total))}` : "—";
+  _s("inv-alloc-cripto-txt",   _pillTxt(criptoTotal));
+  _s("inv-alloc-acciones-txt", _pillTxt(stocksTotal));
+  _s("inv-alloc-plazos-txt",   _pillTxt(plazosTotal));
+  _s("inv-alloc-total",        grandTotal > 0 ? fmt(Math.round(grandTotal)) : "—");
 
   // Interest total
   const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -10589,28 +10974,11 @@ function _iniciarAutoRefreshAcciones() {
   }
 }
 
-async function renderAcciones() {
-  const lista = document.getElementById("accion-lista");
-  const totalEl = document.getElementById("accion-total");
-  if (!lista) return;
-  const acciones = await loadAcciones();
-
-  _renderTotalesInversiones(); // render inmediato con valores de plazos + última cotización conocida
-
-  if (!acciones.length) {
-    _accionesTotalCache = { usd: 0, ars: 0 };
-    _renderTotalesInversiones();
-    lista.innerHTML = `<div style="text-align:center;padding:2rem 1rem">
-      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
-      <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">Sin acciones ni cripto</div>
-      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Sumá tu cartera para ver cotizaciones en vivo.</div>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion()">+ Agregar tenencia</button>
-    </div>`;
-    if (totalEl) totalEl.innerHTML = "";
-    return;
-  }
-
-  lista.innerHTML = acciones.map(a => `
+// Cripto y Acciones son la misma tabla real ("acciones", sin campo tipo) —
+// se separan en 2 secciones en pantalla con _esCripto() (ya existía para
+// elegir de qué API traer la cotización), ver Unidad 13 rediseño Marfil sereno.
+function _accionCardHtml(a) {
+  return `
     <div class="plazo-card" id="accion-card-${a.id}">
       <div class="plazo-header">
         <div>
@@ -10629,9 +10997,45 @@ async function renderAcciones() {
           <button class="cfg-del-btn" onclick="eliminarAccion('${a.id}')" title="Eliminar" aria-label="Eliminar tenencia">✕</button>
         </div>
       </div>
-    </div>`).join("");
+    </div>`;
+}
+function _accionEmptyHtml(msg, tipo) {
+  return `<div style="text-align:center;padding:2rem 1rem">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+    <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">${msg}</div>
+    <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Sumá tu cartera para ver cotizaciones en vivo.</div>
+    <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirModalInversion('${tipo}')">+ Agregar tenencia</button>
+  </div>`;
+}
 
+async function renderAcciones() {
+  const listaCripto = document.getElementById("accion-lista-cripto");
+  const listaStocks = document.getElementById("accion-lista-stocks");
+  const totalEl = document.getElementById("accion-total");
+  if (!listaCripto || !listaStocks) return;
+  const acciones = await loadAcciones();
+
+  _renderTotalesInversiones(); // render inmediato con valores de plazos + última cotización conocida
+
+  if (!acciones.length) {
+    _accionesTotalCache = { usd: 0, ars: 0, criptoUSD: 0, criptoARS: 0, stocksUSD: 0, stocksARS: 0 };
+    _renderTotalesInversiones();
+    listaCripto.innerHTML = _accionEmptyHtml("Sin cripto", "cripto");
+    listaStocks.innerHTML = _accionEmptyHtml("Sin acciones", "stocks");
+    if (totalEl) totalEl.innerHTML = "";
+    return;
+  }
+
+  const cripto = acciones.filter(a => _esCripto(a.simbolo));
+  const stocks = acciones.filter(a => !_esCripto(a.simbolo));
+  listaCripto.innerHTML = cripto.length ? cripto.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin cripto", "cripto");
+  listaStocks.innerHTML = stocks.length ? stocks.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin acciones", "stocks");
+
+  // Totales separados por categoría (no solo ARS/USD) — antes solo se sumaba
+  // un total combinado de "acciones", así que el resumen no podía mostrar
+  // Cripto vs Acciones por separado (ver .inv-alloc-split en el HTML).
   let totalUSD = 0, totalARS = 0;
+  let criptoUSD = 0, criptoARS = 0, stocksUSD = 0, stocksARS = 0;
   await Promise.all(acciones.map(async a => {
     const cotiz = await _fetchPrecio(a.simbolo);
     const precioEl = document.getElementById(`accion-precio-${a.id}`);
@@ -10648,6 +11052,8 @@ async function renderAcciones() {
     precioEl.innerHTML = `<span>Cotización</span><strong>${fmtV(precio)} <span style="font-size:.7rem;color:var(--text-muted)">${moneda}</span></strong>`;
     valorEl.innerHTML  = `<span class="accion-valor-num" style="color:var(--text);font-size:.88rem">${fmtV(valor)}</span>`;
     if (moneda === "ARS") totalARS += valor; else totalUSD += valor;
+    if (_esCripto(a.simbolo)) { if (moneda === "ARS") criptoARS += valor; else criptoUSD += valor; }
+    else                      { if (moneda === "ARS") stocksARS += valor; else stocksUSD += valor; }
     const pnlEl = document.getElementById(`accion-pnl-${a.id}`);
     if (pnlEl && a.precio_compra && a.precio_compra > 0) {
       const ganancia = (precio - a.precio_compra) * a.cantidad;
@@ -10665,39 +11071,63 @@ async function renderAcciones() {
   if (totalEl) {
     totalEl.innerHTML = `<span id="accion-ts" style="font-size:.7rem;color:var(--text-muted)">Actualizado ${_tiempoTranscurrido(_accionesUltimaActualizacion)}</span>`;
   }
-  _accionesTotalCache = { usd: totalUSD, ars: totalARS };
+  _accionesTotalCache = { usd: totalUSD, ars: totalARS, criptoUSD, criptoARS, stocksUSD, stocksARS };
   _renderTotalesInversiones();
 }
 
-function _renderFormAccion(a) {
-  const hint = `<div class="plazo-form-full" style="font-size:.72rem;color:var(--text-muted);padding:.1rem 0">
-    Acciones argentinas: ticker + <strong>.BA</strong> (ej: GGAL.BA) · Cripto: ticker + <strong>-USD</strong> (ej: BTC-USD)
-  </div>`;
+// tipo ('cripto'|'stocks') solo cambia el placeholder/hint del símbolo —
+// Cripto y Acciones son la misma tabla real sin campo de tipo propio
+// (_esCripto() clasifica por el formato del símbolo), así que no hay campos
+// distintos que mostrar, pero antes el form era idéntico sin importar qué
+// pestaña del modal "Agregar inversión" estuviera activa, lo cual no daba
+// ninguna pista del formato de ticker esperado para ese tipo.
+function _renderFormAccion(a, tipo) {
+  const esCripto = a ? _esCripto(a.simbolo) : tipo === "cripto";
+  const placeholder = esCripto ? "Símbolo (ej: BTC-USD, ETH-USD)" : "Símbolo (ej: AAPL, GGAL.BA)";
+  const hint = esCripto
+    ? `Ticker + <strong>-USD</strong> (ej: BTC-USD, ETH-USD)`
+    : `Ticker de EE.UU. (ej: AAPL) o argentino + <strong>.BA</strong> (ej: GGAL.BA)`;
+  const hintHtml = `<div class="plazo-form-full pf-venc-note" style="margin-top:-8px">${hint}</div>`;
   return `<div class="plazo-form">
     ${a ? `<input type="hidden" id="af-id" value="${a.id}">` : ""}
-    <input id="af-simbolo" placeholder="Símbolo (ej: AAPL, BTC-USD, GGAL.BA)" type="text" class="plazo-form-full" style="text-transform:uppercase" value="${a?.simbolo || ''}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
-    <input id="af-cantidad" placeholder="Cantidad / tenencia" type="text" inputmode="decimal" value="${a?.cantidad || ''}">
-    <input id="af-precio-compra" placeholder="Precio compra (opcional, para P&amp;L)" type="text" inputmode="decimal" value="${a?.precio_compra ?? ''}">
-    <input id="af-nombre" placeholder="Nombre (opcional)" type="text" value="${escapeHtml(a?.nombre || '')}">
-    ${a ? "" : hint}
-    <div class="plazo-form-full" style="display:flex;gap:.5rem;justify-content:flex-end">
-      <button class="btn" style="font-size:.82rem" onclick="cerrarFormAccion()">Cancelar</button>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarAccion()">${a ? "Actualizar" : "Guardar"}</button>
+    <div class="pf-field plazo-form-full">
+      <label for="af-simbolo">Símbolo</label>
+      <input id="af-simbolo" placeholder="${placeholder}" type="text" style="text-transform:uppercase" value="${escapeHtml(a?.simbolo || '')}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
+    </div>
+    ${a ? "" : hintHtml}
+    <div class="pf-field">
+      <label for="af-cantidad">Cantidad / tenencia</label>
+      <input id="af-cantidad" placeholder="0" type="text" inputmode="decimal" value="${a?.cantidad || ''}">
+    </div>
+    <div class="pf-field">
+      <label for="af-precio-compra">Precio compra <span class="pf-label-opt">(opcional)</span></label>
+      <input id="af-precio-compra" placeholder="Para calcular P&amp;L" type="text" inputmode="decimal" value="${a?.precio_compra ?? ''}">
+    </div>
+    <div class="pf-field plazo-form-full">
+      <label for="af-nombre">Nombre <span class="pf-label-opt">(opcional)</span></label>
+      <input id="af-nombre" placeholder="ej: Bitcoin" type="text" value="${escapeHtml(a?.nombre || '')}">
+    </div>
+    <div class="plazo-form-full plazo-form-actions">
+      <button class="btn" onclick="cerrarFormAccion()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarAccion()">${a ? "Actualizar tenencia" : "Guardar tenencia"}</button>
     </div>
   </div>`;
 }
 
-function abrirFormAccion() {
-  const wrap = document.getElementById("accion-form-wrap");
-  if (!wrap) return;
-  wrap.style.display = "";
-  wrap.innerHTML = _renderFormAccion(null);
+// Cripto y Acciones tienen cada una su propio wrap de formulario
+// (accion-form-wrap-cripto / accion-form-wrap-stocks) — usado por
+// editarAccion() para mostrar el form de edición en la sección correcta
+// (agregar ahora es siempre por el modal "Agregar inversión", ver
+// abrirModalInversion()).
+function _accionWrapId(tipo) {
+  return tipo === "cripto" ? "accion-form-wrap-cripto" : "accion-form-wrap-stocks";
 }
 
 function editarAccion(id) {
   const accion = _accionesCache.find(a => a.id === id);
   if (!accion) return;
-  const wrap = document.getElementById("accion-form-wrap");
+  cerrarFormAccion();
+  const wrap = document.getElementById(_accionWrapId(_esCripto(accion.simbolo) ? "cripto" : "stocks"));
   if (!wrap) return;
   wrap.style.display = "";
   wrap.innerHTML = _renderFormAccion(accion);
@@ -10705,8 +11135,13 @@ function editarAccion(id) {
 }
 
 function cerrarFormAccion() {
-  const wrap = document.getElementById("accion-form-wrap");
-  if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
+  ["accion-form-wrap-cripto", "accion-form-wrap-stocks"].forEach(id => {
+    const wrap = document.getElementById(id);
+    if (wrap) { wrap.style.display = "none"; wrap.innerHTML = ""; }
+  });
+  // Mismo motivo/mismo fix que en cerrarFormPlazo(): cerrarModalInversion()
+  // también limpia #modal-inv-form, no solo oculta el overlay.
+  cerrarModalInversion();
 }
 
 async function guardarAccion() {
@@ -11396,9 +11831,12 @@ async function renderizarPanelWorkspace() {
   const partnerNombre = resolverPartnerNombre();
   if (partnerNombre) {
     cont.innerHTML = `
-      <div style="display:flex;align-items:center;gap:.6rem;color:var(--text)">
-        <span style="font-size:1.3rem">🤝</span>
-        <span>Compartís este workspace con <strong>${escapeHtml(partnerNombre)}</strong>.</span>
+      <div class="cfg-pareja-row">
+        <div class="cfg-pareja-avatar">${escapeHtml(partnerNombre.charAt(0).toUpperCase())}</div>
+        <div style="flex:1;min-width:0">
+          <div class="cfg-pareja-nombre">${escapeHtml(partnerNombre)}</div>
+          <div class="cfg-pareja-status">Compartiendo este workspace</div>
+        </div>
       </div>`;
     return;
   }
