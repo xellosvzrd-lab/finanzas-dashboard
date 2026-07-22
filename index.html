@@ -8659,6 +8659,12 @@ function _renderMMHero(saldoReal, sueldoEfectivo, totalGasto, mes, anio) {
     if (esEsteMes && saldoReal > 0) {
       const porDia = Math.round(saldoReal / diasRestantes);
       heroSub.innerHTML = `<strong class="num">${fmt(porDia)}</strong>/día disponible · ${diasRestantes} días más a este ritmo`;
+    } else if (esEsteMes) {
+      // Sin saldo positivo (sueldo $0 o gasto que ya lo superó) — se sigue
+      // mostrando la cuenta de días del mes en vez de caer al texto viejo
+      // "Sueldo $0 − gastado $0", que al lado del "$0" grande de arriba
+      // se leía como si repitiera el mismo número dos veces.
+      heroSub.textContent = `Sin saldo disponible este mes · ${diasRestantes} días más a este ritmo`;
     } else {
       heroSub.textContent = `Sueldo ${fmt(sueldoEfectivo)} − gastado real ${fmt(totalGasto)}`;
     }
