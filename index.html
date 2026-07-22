@@ -3935,7 +3935,6 @@
             <div class="inv-section">
               <div class="inv-section-hdr">
                 <h2 class="inv-section-title">Plazos fijos</h2>
-                <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormPlazo()" aria-label="Agregar plazo fijo">+ Agregar</button>
               </div>
               <div id="plazo-form-wrap" style="display:none"></div>
               <div id="plazo-lista" class="card inv-holdings-list">
@@ -3949,7 +3948,6 @@
             <div class="inv-section">
               <div class="inv-section-hdr">
                 <h2 class="inv-section-title">Cripto</h2>
-                <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion('cripto')" aria-label="Agregar tenencia">+ Agregar</button>
               </div>
               <div id="accion-form-wrap-cripto" style="display:none"></div>
               <div id="accion-lista-cripto" class="card inv-holdings-list">
@@ -3961,7 +3959,6 @@
             <div class="inv-section">
               <div class="inv-section-hdr">
                 <h2 class="inv-section-title">Acciones</h2>
-                <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion('stocks')" aria-label="Agregar tenencia">+ Agregar</button>
               </div>
               <div id="accion-form-wrap-stocks" style="display:none"></div>
               <div id="accion-lista-stocks" class="card inv-holdings-list">
@@ -10603,7 +10600,7 @@ async function renderPlazos() {
       <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/><circle cx="12" cy="13" r="2"/></svg>
       <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">Sin plazos registrados</div>
       <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Registrá tus plazos fijos y mirá el rendimiento estimado.</div>
-      <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormPlazo()">+ Agregar plazo fijo</button>
+      <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirModalInversion('plazo')">+ Agregar plazo fijo</button>
     </div>`;
     return;
   }
@@ -10769,13 +10766,6 @@ function _renderFormPlazo(p) {
       <button class="btn btn-primary" onclick="guardarPlazo()">${p ? "Actualizar plazo fijo" : "Guardar plazo fijo"}</button>
     </div>
   </div>`;
-}
-
-function abrirFormPlazo() {
-  const wrap = document.getElementById("plazo-form-wrap");
-  if (!wrap) return;
-  wrap.style.display = "";
-  wrap.innerHTML = _renderFormPlazo(null);
 }
 
 function editarPlazo(id) {
@@ -11003,7 +10993,7 @@ function _accionEmptyHtml(msg, tipo) {
     <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.75;margin-bottom:.6rem"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
     <div style="font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.25rem">${msg}</div>
     <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem">Sumá tu cartera para ver cotizaciones en vivo.</div>
-    <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirFormAccion('${tipo}')">+ Agregar tenencia</button>
+    <button class="btn btn-primary" style="font-size:.82rem" onclick="abrirModalInversion('${tipo}')">+ Agregar tenencia</button>
   </div>`;
 }
 
@@ -11114,20 +11104,12 @@ function _renderFormAccion(a, tipo) {
 }
 
 // Cripto y Acciones tienen cada una su propio wrap de formulario
-// (accion-form-wrap-cripto / accion-form-wrap-stocks) — antes había un solo
-// wrap compartido físicamente ubicado en la sección Cripto, así que tocar
-// "+ Agregar" desde Acciones abría el form ahí arriba, lejos del botón
-// clickeado, y parecía que el botón no hacía nada.
+// (accion-form-wrap-cripto / accion-form-wrap-stocks) — usado por
+// editarAccion() para mostrar el form de edición en la sección correcta
+// (agregar ahora es siempre por el modal "Agregar inversión", ver
+// abrirModalInversion()).
 function _accionWrapId(tipo) {
   return tipo === "cripto" ? "accion-form-wrap-cripto" : "accion-form-wrap-stocks";
-}
-
-function abrirFormAccion(tipo) {
-  cerrarFormAccion();
-  const wrap = document.getElementById(_accionWrapId(tipo));
-  if (!wrap) return;
-  wrap.style.display = "";
-  wrap.innerHTML = _renderFormAccion(null, tipo);
 }
 
 function editarAccion(id) {
