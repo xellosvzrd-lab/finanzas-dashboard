@@ -832,43 +832,48 @@
   .inv-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .85rem; margin-bottom: 2rem; }
 
   /* ─── INVERSIONES REDESIGN ──────────────────────────────── */
-  .inv-hero-row    { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
-  /* Vidrio claro (Marfil sereno) en vez del card de color con texto blanco
-     que tenía antes — mismo tratamiento que .mm-hero (ver Unidad 2). */
-  .inv-hero-card   { position: relative; overflow: hidden; border-radius: var(--r-lg);
-                      padding: 24px 28px; color: var(--text);
-                      background: var(--surface);
-                      backdrop-filter: blur(var(--card-blur)) saturate(160%);
-                      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-                      border: 1px solid var(--line);
-                      box-shadow: var(--shadow-card); }
+  /* Card única de resumen (antes 2 cards: hero + "Asignación" con barras de
+     progreso de solo 2 categorías) — clon del .side-card del mockup: valor
+     total + split real de 3 categorías (Cripto/Acciones/Plazos) en pills
+     con punto de color, sin barra de progreso. */
+  .inv-summary-card {
+    position: relative; overflow: hidden; border-radius: var(--r-lg);
+    padding: 24px 28px; color: var(--text);
+    background: var(--surface);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 18px;
+  }
+  .inv-hero-blob {
+    position: absolute; width: 260px; height: 260px; border-radius: 999px;
+    right: -70px; top: -90px;
+    background: radial-gradient(closest-side, rgba(183,203,192,.55), rgba(246,244,239,0) 72%);
+    filter: blur(6px); pointer-events: none;
+  }
   .inv-hero-eyebrow { font-size: 14px; font-weight: 600; color: var(--text-dim); position: relative; z-index: 1; }
   .inv-hero-total   { font-size: clamp(26px, 9vw, 38px); font-weight: 700; line-height: 1.05; margin-top: 6px; position: relative; z-index: 1; color: var(--text); }
   .inv-hero-usd     { font-size: 14px; color: var(--text-faint); margin-top: 3px; position: relative; z-index: 1; }
   .inv-hero-sub     { font-size: 12.5px; color: var(--text-faint); margin-top: 6px; position: relative; z-index: 1; }
-  .inv-alloc-card   { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
-  .inv-alloc-title  { font-size: 14.5px; font-weight: 700; font-family: var(--font-display); }
-  .inv-alloc-row    { display: flex; flex-direction: column; gap: 5px; }
-  .inv-alloc-top    { display: flex; justify-content: space-between; align-items: baseline; }
-  .inv-alloc-name   { font-size: 13.5px; font-weight: 600; }
-  .inv-alloc-val    { font-family: var(--font-display); font-size: 14px; font-weight: 700; font-variant-numeric: normal; }
-  .inv-alloc-pct    { font-size: 12px; color: var(--text-faint); }
-  .inv-alloc-bar-wrap    { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
-  .inv-alloc-bar         { height: 100%; border-radius: 99px; transition: width .5s var(--ease-out, ease); min-width: 4px; }
-  .inv-alloc-bar-plazos  { background: var(--save); }
-  .inv-alloc-bar-activos { background: var(--info); }
+  .inv-alloc-split  { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; position: relative; z-index: 1; }
+  .inv-alloc-pill   {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12.5px; font-weight: 600; padding: 9px 12px; border-radius: 12px;
+    background: var(--surface-2); border: 1px solid var(--line);
+  }
+  .inv-alloc-pill .l   { display: flex; align-items: center; gap: 7px; }
+  .inv-alloc-pill .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .inv-alloc-total  { font-size: 12.5px; color: var(--text-dim); border-top: 1px solid var(--line);
-                       padding-top: 10px; display: flex; justify-content: space-between; }
+                       padding-top: 14px; margin-top: 14px; display: flex; justify-content: space-between;
+                       position: relative; z-index: 1; }
   .inv-alloc-total .num { font-weight: 700; }
   .inv-content-row  { display: flex; flex-direction: column; gap: 18px; }
   .inv-section-hdr  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .inv-section-title{ font-size: 15px; font-weight: 700; margin: 0; font-family: var(--font-display); }
+  .inv-section-title{ font-size: 15px; font-weight: 700; margin: 0; font-family: var(--font-serif); }
   .inv-interes-total{ font-size: 13px; color: var(--pos); margin-top: 8px; padding: 8px 12px;
                        border-top: 1px solid var(--line); font-weight: 600; }
   @media (min-width: 860px) {
-    .inv-hero-row   { flex-direction: row; align-items: stretch; }
-    .inv-hero-card  { flex: 1.1; }
-    .inv-alloc-card { flex: 0.9; }
     .inv-content-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   }
   .plazo-form { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: .75rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
@@ -1543,7 +1548,7 @@
     .compromisos-card-box,
     .liq-inner, #modal-nombre > div,
     #modal-invitacion > div,
-    .mm-hero, .inv-hero-card {
+    .mm-hero, .inv-summary-card {
       background: #F6F4EF;
     }
   }
@@ -3804,32 +3809,23 @@
           </div>
         </div>
 
-        <!-- Hero row: patrimonio + asignación -->
-        <div class="inv-hero-row">
-          <!-- Patrimonio hero -->
-          <div class="inv-hero-card" id="inv-hero-card">
-            <div style="position:absolute;width:260px;height:260px;border-radius:999px;right:-70px;top:-90px;background:radial-gradient(closest-side, rgba(183,203,192,.55), rgba(246,244,239,0) 72%);filter:blur(6px);pointer-events:none"></div>
-            <div class="inv-hero-eyebrow">🌱 Patrimonio invertido</div>
-            <div class="num inv-hero-total" id="inv-hero-total-ars">—</div>
-            <div class="inv-hero-usd" id="inv-hero-total-usd" style="display:none">≈ <span id="inv-hero-usd-val">—</span> USD</div>
-            <div class="inv-hero-sub" id="inv-hero-sub">—</div>
+        <!-- Resumen: valor total + split Cripto/Acciones/Plazos en una sola
+             card (antes 2 cards separadas: hero + "Asignación" con solo 2
+             categorías porque Activos&cripto quedaba junto — ahora
+             _esCripto() separa también los totales, no solo las listas). -->
+        <div class="inv-summary-card" id="inv-hero-card">
+          <div class="inv-hero-blob"></div>
+          <div class="inv-hero-eyebrow">Valor total de tu cartera</div>
+          <div class="num inv-hero-total" id="inv-hero-total-ars">—</div>
+          <div class="inv-hero-usd" id="inv-hero-total-usd" style="display:none">≈ <span id="inv-hero-usd-val">—</span> USD</div>
+          <div class="inv-hero-sub" id="inv-hero-sub">—</div>
+          <div class="inv-alloc-split">
+            <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--pos)"></span>Cripto</span><span class="num" id="inv-alloc-cripto-txt">—</span></div>
+            <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--info)"></span>Acciones</span><span class="num" id="inv-alloc-acciones-txt">—</span></div>
+            <div class="inv-alloc-pill"><span class="l"><span class="dot" style="background:var(--warn)"></span>Plazos fijos</span><span class="num" id="inv-alloc-plazos-txt">—</span></div>
           </div>
-          <!-- Asignación -->
-          <div class="card inv-alloc-card">
-            <div class="inv-alloc-title">Asignación</div>
-            <div id="inv-alloc-rows" style="display:flex;flex-direction:column;gap:12px">
-              <div class="inv-alloc-row">
-                <div class="inv-alloc-top"><span class="inv-alloc-name">Plazos fijos</span><div style="display:flex;gap:6px;align-items:baseline"><span class="num inv-alloc-val" id="inv-alloc-plazos-val">—</span><span class="inv-alloc-pct" id="inv-alloc-plazos-pct">—</span></div></div>
-                <div class="inv-alloc-bar-wrap"><div class="inv-alloc-bar inv-alloc-bar-plazos" id="inv-alloc-bar-plazos" style="width:0%"></div></div>
-              </div>
-              <div class="inv-alloc-row">
-                <div class="inv-alloc-top"><span class="inv-alloc-name">Activos & cripto</span><div style="display:flex;gap:6px;align-items:baseline"><span class="num inv-alloc-val" id="inv-alloc-act-val">—</span><span class="inv-alloc-pct" id="inv-alloc-act-pct">—</span></div></div>
-                <div class="inv-alloc-bar-wrap"><div class="inv-alloc-bar inv-alloc-bar-activos" id="inv-alloc-bar-activos" style="width:0%"></div></div>
-              </div>
-            </div>
-            <div class="inv-alloc-total">Total invertido: <span class="num" id="inv-alloc-total">—</span></div>
-          </div>
-        </div><!-- /inv-hero-row -->
+          <div class="inv-alloc-total">Total invertido: <span class="num" id="inv-alloc-total">—</span></div>
+        </div><!-- /inv-summary-card -->
 
         <!-- Content row: Plazos fijos, Cripto, Acciones — 3 secciones (2 en
              desktop hasta 1099px, 3 desde 1100px, ver media query). Cripto
@@ -3841,7 +3837,7 @@
           <!-- Plazos Fijos -->
           <div class="inv-section">
             <div class="inv-section-hdr">
-              <h2 class="inv-section-title">🔒 Plazos fijos activos</h2>
+              <h2 class="inv-section-title">Plazos fijos</h2>
               <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormPlazo()" aria-label="Agregar plazo fijo">+ Agregar</button>
             </div>
             <div id="plazo-form-wrap" style="display:none"></div>
@@ -3855,7 +3851,7 @@
           <!-- Cripto -->
           <div class="inv-section">
             <div class="inv-section-hdr">
-              <h2 class="inv-section-title">₿ Cripto</h2>
+              <h2 class="inv-section-title">Cripto</h2>
               <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia">+ Agregar</button>
             </div>
             <div id="accion-form-wrap" style="display:none"></div>
@@ -3867,7 +3863,7 @@
           <!-- Acciones -->
           <div class="inv-section">
             <div class="inv-section-hdr">
-              <h2 class="inv-section-title">📈 Acciones</h2>
+              <h2 class="inv-section-title">Acciones</h2>
               <button class="btn btn-ghost" style="font-size:.8rem" onclick="abrirFormAccion()" aria-label="Agregar tenencia">+ Agregar</button>
             </div>
             <div id="accion-lista-stocks">
@@ -10464,7 +10460,7 @@ if ('serviceWorker' in navigator) {
 
 // ===== PLAZOS FIJOS =====
 let _plazosCache = [];
-let _accionesTotalCache = { usd: 0, ars: 0 };
+let _accionesTotalCache = { usd: 0, ars: 0, criptoUSD: 0, criptoARS: 0, stocksUSD: 0, stocksARS: 0 };
 
 function _normalizarPlazo(p) {
   return { ...p, fechaInicio: p.fecha_inicio || p.fechaInicio, fechaVencimiento: p.fecha_vencimiento || p.fechaVencimiento };
@@ -10672,7 +10668,7 @@ async function _fetchPrecio(simbolo) {
 
 function _renderTotalesInversiones() {
   const plazos    = _plazosCache;
-  const { usd: accionesUSD, ars: accionesARS } = _accionesTotalCache;
+  const { usd: accionesUSD, ars: accionesARS, criptoUSD = 0, criptoARS = 0, stocksUSD = 0, stocksARS = 0 } = _accionesTotalCache;
   const plazosARS = plazos.filter(p => (p.moneda || "ARS") === "ARS").reduce((s,p) => s + p.monto, 0);
   const plazosUSD = plazos.filter(p => p.moneda === "USD").reduce((s,p) => s + p.monto, 0);
   const totalARS  = plazosARS + accionesARS;
@@ -10692,22 +10688,20 @@ function _renderTotalesInversiones() {
     ? `${plazos.length} plazo${plazos.length !== 1 ? "s" : ""} fijo${plazos.length !== 1 ? "s" : ""} · cartera activos`
     : "Sumá tus inversiones para ver el total";
 
-  // Allocation bars
+  // Split real de 3 categorías (Cripto/Acciones/Plazos) — clon del mockup,
+  // antes solo había 2 categorías (Plazos vs. "Activos&cripto" combinado)
+  // porque el total de acciones no distinguía cripto de acciones reales.
   const grandTotal = totalARS + (totalUSD * (tipoCambioMEP || 1));
   const _pct = n => grandTotal > 0 ? Math.round(n / grandTotal * 100) : 0;
-  const plazosTotal   = plazosARS + plazosUSD * (tipoCambioMEP || 1);
-  const activosTotal  = accionesARS + accionesUSD * (tipoCambioMEP || 1);
-  const pctPlazos  = _pct(plazosTotal);
-  const pctActivos = _pct(activosTotal);
+  const plazosTotal  = plazosARS  + plazosUSD  * (tipoCambioMEP || 1);
+  const criptoTotal  = criptoARS  + criptoUSD  * (tipoCambioMEP || 1);
+  const stocksTotal  = stocksARS  + stocksUSD  * (tipoCambioMEP || 1);
   const _s = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
-  const _w = (id,p) => { const e=document.getElementById(id); if(e) e.style.width=p+"%"; };
-  _s("inv-alloc-plazos-val", plazosARS > 0 ? fmt(plazosARS) : "—");
-  _s("inv-alloc-plazos-pct", pctPlazos + "%");
-  _w("inv-alloc-bar-plazos", pctPlazos);
-  _s("inv-alloc-act-val",    accionesARS > 0 ? fmt(accionesARS) : "—");
-  _s("inv-alloc-act-pct",    pctActivos + "%");
-  _w("inv-alloc-bar-activos", pctActivos);
-  _s("inv-alloc-total",      grandTotal > 0 ? fmt(Math.round(grandTotal)) : "—");
+  const _pillTxt = (total) => total > 0 ? `${_pct(total)}% · ${fmt(Math.round(total))}` : "—";
+  _s("inv-alloc-cripto-txt",   _pillTxt(criptoTotal));
+  _s("inv-alloc-acciones-txt", _pillTxt(stocksTotal));
+  _s("inv-alloc-plazos-txt",   _pillTxt(plazosTotal));
+  _s("inv-alloc-total",        grandTotal > 0 ? fmt(Math.round(grandTotal)) : "—");
 
   // Interest total
   const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -10794,7 +10788,7 @@ async function renderAcciones() {
   _renderTotalesInversiones(); // render inmediato con valores de plazos + última cotización conocida
 
   if (!acciones.length) {
-    _accionesTotalCache = { usd: 0, ars: 0 };
+    _accionesTotalCache = { usd: 0, ars: 0, criptoUSD: 0, criptoARS: 0, stocksUSD: 0, stocksARS: 0 };
     _renderTotalesInversiones();
     listaCripto.innerHTML = _accionEmptyHtml("Sin cripto");
     listaStocks.innerHTML = _accionEmptyHtml("Sin acciones");
@@ -10807,7 +10801,11 @@ async function renderAcciones() {
   listaCripto.innerHTML = cripto.length ? cripto.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin cripto");
   listaStocks.innerHTML = stocks.length ? stocks.map(_accionCardHtml).join("") : _accionEmptyHtml("Sin acciones");
 
+  // Totales separados por categoría (no solo ARS/USD) — antes solo se sumaba
+  // un total combinado de "acciones", así que el resumen no podía mostrar
+  // Cripto vs Acciones por separado (ver .inv-alloc-split en el HTML).
   let totalUSD = 0, totalARS = 0;
+  let criptoUSD = 0, criptoARS = 0, stocksUSD = 0, stocksARS = 0;
   await Promise.all(acciones.map(async a => {
     const cotiz = await _fetchPrecio(a.simbolo);
     const precioEl = document.getElementById(`accion-precio-${a.id}`);
@@ -10824,6 +10822,8 @@ async function renderAcciones() {
     precioEl.innerHTML = `<span>Cotización</span><strong>${fmtV(precio)} <span style="font-size:.7rem;color:var(--text-muted)">${moneda}</span></strong>`;
     valorEl.innerHTML  = `<span class="accion-valor-num" style="color:var(--text);font-size:.88rem">${fmtV(valor)}</span>`;
     if (moneda === "ARS") totalARS += valor; else totalUSD += valor;
+    if (_esCripto(a.simbolo)) { if (moneda === "ARS") criptoARS += valor; else criptoUSD += valor; }
+    else                      { if (moneda === "ARS") stocksARS += valor; else stocksUSD += valor; }
     const pnlEl = document.getElementById(`accion-pnl-${a.id}`);
     if (pnlEl && a.precio_compra && a.precio_compra > 0) {
       const ganancia = (precio - a.precio_compra) * a.cantidad;
@@ -10841,7 +10841,7 @@ async function renderAcciones() {
   if (totalEl) {
     totalEl.innerHTML = `<span id="accion-ts" style="font-size:.7rem;color:var(--text-muted)">Actualizado ${_tiempoTranscurrido(_accionesUltimaActualizacion)}</span>`;
   }
-  _accionesTotalCache = { usd: totalUSD, ars: totalARS };
+  _accionesTotalCache = { usd: totalUSD, ars: totalARS, criptoUSD, criptoARS, stocksUSD, stocksARS };
   _renderTotalesInversiones();
 }
 
