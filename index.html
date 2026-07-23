@@ -1827,8 +1827,8 @@
     .mm-header-left { display: flex; align-items: center; justify-content: space-between; flex: 1; gap: 14px; }
     .mm-greeting { display: none; }
     .mm-bell { display: none; }
-    .mm-row1 { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: stretch; }
-    .mm-hero { margin-bottom: 0; }
+    .mm-row1 { display: grid; grid-template-columns: 1.55fr 1fr; gap: 18px; align-items: start; }
+    .mm-col-main { min-width: 0; }
     .mm-quick-stats         { display: none; }
     .mm-desglose            { display: flex; flex-direction: column; }
     .mm-row2                { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
@@ -3499,6 +3499,12 @@
         <!-- Row 1: hero + quick stats (grid on desktop) -->
         <div class="mm-row1">
 
+          <!-- Columna principal (desktop): hero + categorías + tabla de
+               presupuesto editable, comparten fila con .mm-sidebar-col
+               (antes quedaban a ancho completo debajo de todo — fix layout
+               vs. mockup, que muestra ambas columnas corriendo en paralelo). -->
+          <div class="mm-col-main">
+
           <!-- Hero: saldo del mes — clon del mockup (eyebrow con nombre,
                monto, sub en texto con $/día + días restantes, pills de
                Ingresos/Gastos). -->
@@ -3513,9 +3519,146 @@
             </div>
           </div>
 
+          <!-- Quick stat: Ahorro (Ingresos/Gastos se sacaron de acá — quedaban duplicados
+               con "Desglose del sueldo" de abajo, que ya muestra Sueldo y Gastado) -->
+          <div class="mm-quick-stats">
+            <div class="card mm-qs-card">
+              <div class="mm-qs-label">Ahorro</div>
+              <div class="mm-qs-val num" style="color:var(--save)" id="mm-qs-ahorro">—%</div>
+            </div>
+          </div>
+
+          <!-- Desglose del sueldo: columna derecha en desktop -->
+          <div class="card mm-desglose">
+            <div class="mm-dl-title">Desglose del sueldo</div>
+            <div class="mm-dl-rows">
+              <div class="mm-dl-row">
+                <div>
+                  <div class="mm-dl-label">Sueldo</div>
+                  <div class="mm-dl-sub" id="mm-dl-sueldo-sub">ingresos del mes</div>
+                </div>
+                <div class="mm-dl-val" id="mm-dl-sueldo">—</div>
+              </div>
+              <div class="mm-dl-row">
+                <div>
+                  <div class="mm-dl-label">Presupuestado</div>
+                  <div class="mm-dl-sub" id="mm-dl-presup-sub">% del sueldo asignado</div>
+                </div>
+                <div class="mm-dl-val" id="mm-dl-presup" style="color:var(--brand)">—</div>
+              </div>
+              <div class="mm-dl-row">
+                <div>
+                  <div class="mm-dl-label">Gastado</div>
+                  <div class="mm-dl-sub">incluye compartidos ÷2</div>
+                </div>
+                <div class="mm-dl-val" id="mm-dl-gastado" style="color:var(--neg)">—</div>
+              </div>
+              <div class="mm-dl-row">
+                <div>
+                  <div class="mm-dl-label">Margen planeado</div>
+                  <div class="mm-dl-sub">sueldo − presupuestado</div>
+                </div>
+                <div class="mm-dl-val" id="mm-dl-margen">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: cards diferidas (fuera del alcance del mockup — ver
+               docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md).
+               Ahorro/Meta y Compartidos se movieron a .mm-sidebar-col, acá
+               quedan solo las 2 que siguen sin ubicación definida. -->
+          <div class="mm-row2">
+            <div class="card mm-sc mm-sc-clickable" onclick="verDetalleCuotasMes()" role="button" tabindex="0" aria-haspopup="dialog" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();verDetalleCuotasMes()}">
+              <div class="mm-sc-icon">📅</div>
+              <div class="mm-sc-label">Cuotas este mes</div>
+              <div class="mm-sc-val" id="mm-sc-cuotas-mes">—</div>
+              <div class="mm-sc-sub" id="mm-sc-cuotas-count">compras activas</div>
+            </div>
+            <div class="card mm-sc">
+              <div class="mm-sc-icon">📅</div>
+              <div class="mm-sc-label">Comprometido futuro</div>
+              <div class="mm-sc-val" id="mm-sc-cuotas-fut">—</div>
+              <div class="mm-sc-sub">en próximos meses</div>
+            </div>
+          </div>
+
+          <!-- Alertas de tendencia -->
+          <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
+
+          <!-- RECURRENTES -->
+          <section id="recurrentes-section" class="recur-section" style="display:none">
+            <div class="recur-section-header">
+              <span class="recur-section-title">
+                📋 Recurrentes
+                <span id="recur-badge" class="recur-badge" style="display:none"></span>
+              </span>
+              <button class="recur-manage-btn" onclick="abrirModalRecurrentes()">⚙️ Gestionar</button>
+            </div>
+            <div id="recur-list" class="recur-list"></div>
+          </section>
+          <!-- /RECURRENTES -->
+
+          <!-- Calendario de compromisos futuros (cuotas + recurrentes, 12 meses) — oculto
+               por ahora (fuera del alcance del mockup Marfil sereno), ver bloque
+               .mm-quick-stats/.mm-row2/#compromisos-card display:none!important más arriba. -->
+          <div class="compromisos-card-box" id="compromisos-card" style="display:none">
+            <div class="cuotas-header" onclick="toggleCompromisosCard()"
+                 role="button" tabindex="0" aria-expanded="true" aria-controls="compromisos-body-wrap"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCompromisosCard()}">
+              <div class="cuotas-header-left">
+                <i data-lucide="calendar-clock" width="16" height="16" style="color:var(--yellow)"></i>
+                Compromisos futuros
+              </div>
+              <span class="cuotas-toggle-icon open" id="compromisos-toggle-icon">▾</span>
+            </div>
+            <div id="compromisos-body-wrap">
+              <div class="cuotas-summary">
+                <span id="compromisos-sub">Cuotas + recurrentes, próximos 12 meses</span>
+              </div>
+              <div class="cuotas-floor" id="compromisos-floor"></div>
+            </div>
+          </div>
+
+          <!-- Tus categorías -->
+          <div class="mm-section-header">
+            <span>Tus categorías</span>
+            <button class="mm-ver-todas" onclick="toggleDesglose()">Ver todas</button>
+          </div>
+          <div class="card mm-cats-card" id="mm-cats-card"></div>
+
+          <!-- Heatmap calendario -->
+
+          <!-- Editar presupuesto -->
+          <div style="display:flex;justify-content:flex-end;margin:.75rem 0 .5rem">
+            <button id="btn-toggle-desglose" class="config-btn" onclick="toggleDesglose()" style="font-size:.83rem;">
+              Editar presupuesto ▾
+            </button>
+          </div>
+
+          <!-- Presupuesto por categoría — filas tipo card (antes tabla de
+               columnas fijas), mismo formato que Transacciones desktop. -->
+          <div id="pres-desglose" class="card" style="padding:4px 0">
+            <div id="pres-tbody" class="pres-cat-list">
+              <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
+              <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
+              <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
+            </div>
+            <div id="pres-tfoot"></div>
+            <div style="display:flex;gap:.5rem;padding:.75rem 1rem;flex-wrap:wrap">
+              <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPresupuesto()">Guardar presupuesto</button>
+            </div>
+          </div>
+
+          <p class="pres-note">
+            💡 Los valores se ingresan en <strong>pesos ($)</strong> por categoría; el % del sueldo se calcula solo. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → <strong id="pres-note-comp-pct">50%</strong> · <strong id="pres-note-partner">De tu pareja</strong> → 0%.
+          </p>
+          <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
+
+          </div><!-- /mm-col-main -->
+
           <!-- Columna lateral (desktop, U3 rediseño Marfil sereno): Compartidos,
-               Meta de ahorro, Cuotas activas — reusa cards reales que ya existían
-               (antes en mm-row2 / fuera de mm-row1), sin duplicar el hero. -->
+               Meta de ahorro, Cuotas activas, Presupuesto restante — reusa cards reales
+               que ya existían (antes en mm-row2 / fuera de mm-row1), sin duplicar el hero. -->
           <div class="mm-sidebar-col">
             <div class="card mm-sc mm-sidebar-hide-mobile" id="mm-sc-comp-card">
               <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">tu pareja</span></div>
@@ -3570,144 +3713,21 @@
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Quick stat: Ahorro (Ingresos/Gastos se sacaron de acá — quedaban duplicados
-               con "Desglose del sueldo" de abajo, que ya muestra Sueldo y Gastado) -->
-          <div class="mm-quick-stats">
-            <div class="card mm-qs-card">
-              <div class="mm-qs-label">Ahorro</div>
-              <div class="mm-qs-val num" style="color:var(--save)" id="mm-qs-ahorro">—%</div>
-            </div>
-          </div>
-
-          <!-- Desglose del sueldo: columna derecha en desktop -->
-          <div class="card mm-desglose">
-            <div class="mm-dl-title">Desglose del sueldo</div>
-            <div class="mm-dl-rows">
-              <div class="mm-dl-row">
-                <div>
-                  <div class="mm-dl-label">Sueldo</div>
-                  <div class="mm-dl-sub" id="mm-dl-sueldo-sub">ingresos del mes</div>
-                </div>
-                <div class="mm-dl-val" id="mm-dl-sueldo">—</div>
+            <!-- Presupuesto restante — igual a la card del mockup desktop
+                 (side-card con barra + "Gastado $X de $Y"), llenada por
+                 renderPresupuesto() con los mismos totales del anillo de progreso. -->
+            <div class="card mm-sc mm-sidebar-hide-mobile" id="mm-sc-presup-card">
+              <div class="mm-sc-label">Presupuesto restante</div>
+              <div class="mm-sc-val" id="mm-sc-presup-val">—</div>
+              <div class="mm-sc-meta-bar-track">
+                <div class="mm-sc-meta-bar-fill" id="mm-sc-presup-bar" style="width:0%"></div>
               </div>
-              <div class="mm-dl-row">
-                <div>
-                  <div class="mm-dl-label">Presupuestado</div>
-                  <div class="mm-dl-sub" id="mm-dl-presup-sub">% del sueldo asignado</div>
-                </div>
-                <div class="mm-dl-val" id="mm-dl-presup" style="color:var(--brand)">—</div>
-              </div>
-              <div class="mm-dl-row">
-                <div>
-                  <div class="mm-dl-label">Gastado</div>
-                  <div class="mm-dl-sub">incluye compartidos ÷2</div>
-                </div>
-                <div class="mm-dl-val" id="mm-dl-gastado" style="color:var(--neg)">—</div>
-              </div>
-              <div class="mm-dl-row">
-                <div>
-                  <div class="mm-dl-label">Margen planeado</div>
-                  <div class="mm-dl-sub">sueldo − presupuestado</div>
-                </div>
-                <div class="mm-dl-val" id="mm-dl-margen">—</div>
-              </div>
+              <div class="mm-sc-sub" id="mm-sc-presup-sub">—</div>
             </div>
           </div>
 
         </div><!-- /mm-row1 -->
-
-        <!-- Row 2: cards diferidas (fuera del alcance del mockup — ver
-             docs/plans/2026-07-21-001-feat-marfil-sereno-redesign-plan.md).
-             Ahorro/Meta y Compartidos se movieron a .mm-sidebar-col arriba,
-             acá quedan solo las 2 que siguen sin ubicación definida. -->
-        <div class="mm-row2">
-          <div class="card mm-sc mm-sc-clickable" onclick="verDetalleCuotasMes()" role="button" tabindex="0" aria-haspopup="dialog" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();verDetalleCuotasMes()}">
-            <div class="mm-sc-icon">📅</div>
-            <div class="mm-sc-label">Cuotas este mes</div>
-            <div class="mm-sc-val" id="mm-sc-cuotas-mes">—</div>
-            <div class="mm-sc-sub" id="mm-sc-cuotas-count">compras activas</div>
-          </div>
-          <div class="card mm-sc">
-            <div class="mm-sc-icon">📅</div>
-            <div class="mm-sc-label">Comprometido futuro</div>
-            <div class="mm-sc-val" id="mm-sc-cuotas-fut">—</div>
-            <div class="mm-sc-sub">en próximos meses</div>
-          </div>
-        </div>
-
-        <!-- Alertas de tendencia -->
-        <div id="pres-tendencias" class="tendencias-wrap" style="display:none"></div>
-
-        <!-- RECURRENTES -->
-        <section id="recurrentes-section" class="recur-section" style="display:none">
-          <div class="recur-section-header">
-            <span class="recur-section-title">
-              📋 Recurrentes
-              <span id="recur-badge" class="recur-badge" style="display:none"></span>
-            </span>
-            <button class="recur-manage-btn" onclick="abrirModalRecurrentes()">⚙️ Gestionar</button>
-          </div>
-          <div id="recur-list" class="recur-list"></div>
-        </section>
-        <!-- /RECURRENTES -->
-
-        <!-- Calendario de compromisos futuros (cuotas + recurrentes, 12 meses) — oculto
-             por ahora (fuera del alcance del mockup Marfil sereno), ver bloque
-             .mm-quick-stats/.mm-row2/#compromisos-card display:none!important más arriba. -->
-        <div class="compromisos-card-box" id="compromisos-card" style="display:none">
-          <div class="cuotas-header" onclick="toggleCompromisosCard()"
-               role="button" tabindex="0" aria-expanded="true" aria-controls="compromisos-body-wrap"
-               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCompromisosCard()}">
-            <div class="cuotas-header-left">
-              <i data-lucide="calendar-clock" width="16" height="16" style="color:var(--yellow)"></i>
-              Compromisos futuros
-            </div>
-            <span class="cuotas-toggle-icon open" id="compromisos-toggle-icon">▾</span>
-          </div>
-          <div id="compromisos-body-wrap">
-            <div class="cuotas-summary">
-              <span id="compromisos-sub">Cuotas + recurrentes, próximos 12 meses</span>
-            </div>
-            <div class="cuotas-floor" id="compromisos-floor"></div>
-          </div>
-        </div>
-
-        <!-- Tus categorías -->
-        <div class="mm-section-header">
-          <span>Tus categorías</span>
-          <button class="mm-ver-todas" onclick="toggleDesglose()">Ver todas</button>
-        </div>
-        <div class="card mm-cats-card" id="mm-cats-card"></div>
-
-        <!-- Heatmap calendario -->
-
-        <!-- Editar presupuesto -->
-        <div style="display:flex;justify-content:flex-end;margin:.75rem 0 .5rem">
-          <button id="btn-toggle-desglose" class="config-btn" onclick="toggleDesglose()" style="font-size:.83rem;">
-            Editar presupuesto ▾
-          </button>
-        </div>
-
-        <!-- Presupuesto por categoría — filas tipo card (antes tabla de
-             columnas fijas), mismo formato que Transacciones desktop. -->
-        <div id="pres-desglose" class="card" style="padding:4px 0">
-          <div id="pres-tbody" class="pres-cat-list">
-            <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
-            <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
-            <div class="skeleton skeleton-row" style="margin:.6rem 1rem"></div>
-          </div>
-          <div id="pres-tfoot"></div>
-          <div style="display:flex;gap:.5rem;padding:.75rem 1rem;flex-wrap:wrap">
-            <button class="btn btn-primary" style="font-size:.82rem" onclick="guardarPresupuesto()">Guardar presupuesto</button>
-          </div>
-        </div>
-
-        <p class="pres-note">
-          💡 Los valores se ingresan en <strong>pesos ($)</strong> por categoría; el % del sueldo se calcula solo. Gastos <strong>Mío</strong> → 100% · <strong>Compartidos</strong> → <strong id="pres-note-comp-pct">50%</strong> · <strong id="pres-note-partner">De tu pareja</strong> → 0%.
-        </p>
-        <div id="pres-msg" style="margin-top:.5rem;font-size:.85rem;min-height:1.2em"></div>
 
         <!-- IDs legacy usados por JS — ocultos -->
         <div style="display:none" aria-hidden="true">
@@ -8594,6 +8614,21 @@ function renderPresupuesto() {
     const partnerEl = document.getElementById('mm-sc-comp-partner');
     if (partnerEl) partnerEl.textContent = PARTNER || "tu pareja";
     renderMetaAhorro();
+
+    // Presupuesto restante (sidebar) — mismos totales del anillo de progreso
+    const presupValEl = document.getElementById('mm-sc-presup-val');
+    if (presupValEl) {
+      const restanteTotal = totalPresARS - totalGasto;
+      const usedPct = totalPresARS > 0 ? Math.min(totalGasto / totalPresARS, 1) : 0;
+      presupValEl.textContent = (restanteTotal < 0 ? '−' : '') + fmt(Math.abs(restanteTotal));
+      const barEl = document.getElementById('mm-sc-presup-bar');
+      if (barEl) {
+        barEl.style.width = Math.round(usedPct * 100) + '%';
+        barEl.style.background = usedPct >= 1 ? 'var(--neg)' : usedPct >= 0.8 ? 'var(--warn)' : 'var(--brand)';
+      }
+      const presupSubEl = document.getElementById('mm-sc-presup-sub');
+      if (presupSubEl) presupSubEl.textContent = totalPresARS > 0 ? `Gastado ${fmt(totalGasto)} de ${fmt(totalPresARS)}` : 'Sin presupuesto cargado';
+    }
   })();
 
   const subTotal = document.getElementById("pres-kpi-total-sub");
