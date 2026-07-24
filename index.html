@@ -3343,13 +3343,19 @@
             <h1 id="comp-titulo">Compartidos</h1>
           </div>
           <div style="display:flex;align-items:center;gap:.75rem">
+            <div class="mm-month-pill">
+              <button type="button" onclick="cambiarMesCompartidos(-1)" aria-label="Mes anterior">‹</button>
+              <span id="comp-mes-label"></span>
+              <button type="button" onclick="cambiarMesCompartidos(1)" aria-label="Mes siguiente">›</button>
+            </div>
             <div class="comp-saldado-badge" id="comp-saldado-badge" style="display:none">✓ Mes saldado</div>
             <button class="comp-undo-btn" id="comp-undo-btn" onclick="deshacerLiquidacion()" style="display:none">↩ Deshacer</button>
           </div>
         </div>
 
-        <!-- Selector de mes -->
-        <div class="mes-selector" style="margin-bottom:1.5rem">
+        <!-- Selector de mes real (oculto — sigue siendo la fuente de verdad
+             que lee el resto del código; el pill de arriba solo lo mueve). -->
+        <div class="mm-month-selects" style="display:none">
           <select id="comp-mes"></select>
           <select id="comp-anio"></select>
         </div>
@@ -7013,6 +7019,7 @@ function cargarCompartidos() {
 
   const mes  = parseInt(document.getElementById("comp-mes").value);
   const anio = parseInt(document.getElementById("comp-anio").value);
+  _actualizarMesCompartidosLabel();
   const CATS = [...new Set([...categGasto, ...categIngreso])].sort();
 
   // ── Reparto del mes: resolver ratio vigente (con herencia) y pre-llenar UI ──
@@ -8043,6 +8050,33 @@ function _actualizarMesPresupuestoLabel() {
   const mes   = parseInt(document.getElementById("pres-mes")?.value);
   const anio  = document.getElementById("pres-anio")?.value;
   const label = document.getElementById("mm-mes-label");
+  if (label && mes && anio) label.textContent = `${MESES_LARGO[mes - 1]} ${anio}`;
+}
+
+// Mismo pill "‹ Mes Año ›" que Mi mes, para el selector de mes de Compartidos
+// (el mockup lo tiene junto al título, no como <select> aparte).
+function cambiarMesCompartidos(delta) {
+  const selMes  = document.getElementById("comp-mes");
+  const selAnio = document.getElementById("comp-anio");
+  let mes  = parseInt(selMes.value) + delta;
+  let anio = parseInt(selAnio.value);
+  if (mes < 1)       { mes = 12; anio--; }
+  else if (mes > 12) { mes = 1;  anio++; }
+
+  if (![...selAnio.options].some(o => parseInt(o.value) === anio)) {
+    const o = document.createElement("option");
+    o.value = anio; o.textContent = anio;
+    selAnio.appendChild(o);
+  }
+  selMes.value  = String(mes).padStart(2, "0");
+  selAnio.value = String(anio);
+  cargarCompartidos();
+}
+
+function _actualizarMesCompartidosLabel() {
+  const mes   = parseInt(document.getElementById("comp-mes")?.value);
+  const anio  = document.getElementById("comp-anio")?.value;
+  const label = document.getElementById("comp-mes-label");
   if (label && mes && anio) label.textContent = `${MESES_LARGO[mes - 1]} ${anio}`;
 }
 
