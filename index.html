@@ -3660,6 +3660,18 @@
                Meta de ahorro, Cuotas activas, Presupuesto restante — reusa cards reales
                que ya existían (antes en mm-row2 / fuera de mm-row1), sin duplicar el hero. -->
           <div class="mm-sidebar-col">
+            <!-- Presupuesto restante — igual a la card del mockup desktop
+                 (side-card con barra + "Gastado $X de $Y"), llenada por
+                 renderPresupuesto() con los mismos totales del anillo de progreso. -->
+            <div class="card mm-sc mm-sidebar-hide-mobile" id="mm-sc-presup-card">
+              <div class="mm-sc-label">Presupuesto restante</div>
+              <div class="mm-sc-val" id="mm-sc-presup-val">—</div>
+              <div class="mm-sc-meta-bar-track">
+                <div class="mm-sc-meta-bar-fill" id="mm-sc-presup-bar" style="width:0%"></div>
+              </div>
+              <div class="mm-sc-sub" id="mm-sc-presup-sub">—</div>
+            </div>
+
             <div class="card mm-sc mm-sidebar-hide-mobile" id="mm-sc-comp-card">
               <div class="mm-sc-label">Compartidos con <span id="mm-sc-comp-partner">tu pareja</span></div>
               <div class="mm-sc-val" id="mm-sc-comp-val">—</div>
@@ -3712,18 +3724,6 @@
                           onclick="_abrirModalCuotas(null)">Ver todas</button>
                 </div>
               </div>
-            </div>
-
-            <!-- Presupuesto restante — igual a la card del mockup desktop
-                 (side-card con barra + "Gastado $X de $Y"), llenada por
-                 renderPresupuesto() con los mismos totales del anillo de progreso. -->
-            <div class="card mm-sc mm-sidebar-hide-mobile" id="mm-sc-presup-card">
-              <div class="mm-sc-label">Presupuesto restante</div>
-              <div class="mm-sc-val" id="mm-sc-presup-val">—</div>
-              <div class="mm-sc-meta-bar-track">
-                <div class="mm-sc-meta-bar-fill" id="mm-sc-presup-bar" style="width:0%"></div>
-              </div>
-              <div class="mm-sc-sub" id="mm-sc-presup-sub">—</div>
             </div>
           </div>
 
