@@ -650,10 +650,15 @@
   }
   .comp-grid > * { min-width: 0; }
   /* Reembolsos va primero en el DOM (orden mobile del mockup) — en desktop
-     se reordena visualmente para que Categoría quede ancha a la izquierda. */
+     se reordena visualmente para que Categoría quede ancha a la izquierda.
+     El corte es 1100px (no 900px) para alinear con la banda TABLET
+     preexistente (769–1100px, ver más abajo) que ya colapsa .comp-grid a
+     una columna en ese rango — con un corte distinto, 900–1100px quedaba
+     en una columna pero con el orden de desktop (Categoría arriba en vez
+     de Reembolsos). */
   .comp-col-categoria  { order: 1; }
   .comp-col-reembolsos { order: 2; }
-  @media (max-width: 900px) {
+  @media (max-width: 1100px) {
     .comp-grid { grid-template-columns: 1fr; }
     .comp-col-categoria, .comp-col-reembolsos { order: 0; }
   }
@@ -1136,8 +1141,11 @@
   .comp-cat-row {
     display: flex; align-items: center; gap: .8rem;
     padding: .75rem 1.1rem; border-top: 1px solid var(--line);
-    cursor: pointer;
   }
+  /* Solo las filas de "Desglose por categoría" abren un drilldown al click —
+     Reembolsos y las filas de TOTAL reusan la misma clase pero no hacen nada
+     al clickear, así que no deben mostrar cursor de manito. */
+  .comp-cat-row-clickable { cursor: pointer; }
   .comp-cat-list .comp-cat-row:first-child { border-top: none; }
   .comp-cat-info { flex: 1; min-width: 0; }
   .comp-cat-name {
@@ -7155,12 +7163,12 @@ function cargarCompartidos() {
         : "";
       const _catEmo = getCatEmoji(r.cat);
       const whoStr = `${escapeHtml(USUARIO)} ${r.daniel !== 0 ? fmtMoneda(r.daniel, monedaFilter) : "—"} · ${escapeHtml(PARTNER)} ${r.ama !== 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}`;
-      return `<div class="comp-cat-row" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'block':'none'">
+      return `<div class="comp-cat-row comp-cat-row-clickable" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'block':'none'">
         <div class="comp-cat-info">
           <div class="comp-cat-name"><span class="comp-cat-emoji">${_catEmo}</span>${escapeHtml(r.cat)} <span class="comp-cat-count">(${txsAll.length} tx) ▾</span></div>
           <div class="comp-cat-who">${whoStr}</div>
         </div>
-        <div class="comp-cat-amt ${net>0?"neg":"pos"}">${fmtMoneda(Math.abs(net), monedaFilter)}${liqBtn}</div>
+        <div class="comp-cat-amt ${net>0?"pos":"neg"}">${fmtMoneda(Math.abs(net), monedaFilter)}${liqBtn}</div>
       </div>
       <div class="comp-cat-drill" id="${drillId}" style="display:none">${drillRows}</div>`;
     }).join("");
@@ -7225,7 +7233,7 @@ function cargarCompartidos() {
       const daniel = mapA[cat] || 0;
       const ama    = mapB[cat] || 0;
       const net    = daniel - ama;
-      const netCls = net > 0 ? "neg" : "pos";
+      const netCls = net > 0 ? "pos" : "neg";
       const _re = getCatEmoji(cat);
       const whoStr = `${escapeHtml(USUARIO)} pagó ${daniel!==0?fmtR(daniel,mon):"—"} · ${escapeHtml(PARTNER)} pagó ${ama!==0?fmtR(ama,mon):"—"}`;
       return `<div class="comp-cat-row">
@@ -9030,6 +9038,22 @@ function actualizarKpisPres() {
   }
   const totalGasto = categGasto.reduce((s, c) => s + (gastoPorCat[c] || 0), 0) + gastoUSDEnARSKpi;
   const disponible = sueldoEfectivo - totalPresARS;
+
+  // Presupuesto restante (sidebar) — en vivo mientras se tipea, mismo cálculo
+  // que renderPresupuesto() (que solo corre al cargar el mes o guardar).
+  const presupValEl = document.getElementById('mm-sc-presup-val');
+  if (presupValEl) {
+    const restanteTotal = totalPresARS - totalGasto;
+    const usedPct = totalPresARS > 0 ? Math.min(totalGasto / totalPresARS, 1) : 0;
+    presupValEl.textContent = (restanteTotal < 0 ? '−' : '') + fmt(Math.abs(restanteTotal));
+    const barEl = document.getElementById('mm-sc-presup-bar');
+    if (barEl) {
+      barEl.style.width = Math.round(usedPct * 100) + '%';
+      barEl.style.background = usedPct >= 1 ? 'var(--neg)' : usedPct >= 0.8 ? 'var(--warn)' : 'var(--brand)';
+    }
+    const presupSubEl = document.getElementById('mm-sc-presup-sub');
+    if (presupSubEl) presupSubEl.textContent = totalPresARS > 0 ? `Gastado ${fmt(totalGasto)} de ${fmt(totalPresARS)}` : 'Sin presupuesto cargado';
+  }
 
   const kpiTotal = document.getElementById("pres-kpi-total");
   kpiTotal.textContent = fmt(totalPresARS);
