@@ -642,7 +642,6 @@
   }
   .delete-btn:hover, .cfg-del-btn:hover { color: var(--red); background: var(--red-dim); }
   /* ─── COMPARTIDOS ────────────────────────────────── */
-  .comp-section-title { font-size: 1rem; font-weight: 700; margin: 0; }
   .comp-grid {
     display: grid;
     grid-template-columns: 1fr 340px;
@@ -1174,6 +1173,19 @@
     border-top: 1px solid var(--line);
   }
   .comp-cat-drill-row:first-child { border-top: none; }
+
+  /* Título afuera de la card + card de vidrio para la lista — mismo patrón
+     que .mm-section-header/.mm-cats-card en Mi mes y que .section-head/.cats
+     del mockup (antes el título vivía adentro de un .chart-card con su
+     propia línea divisoria, no coincidía con el mockup). */
+  .comp-section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: .75rem 0 .5rem;
+    font-size: 1rem; font-weight: 700; font-family: var(--font-display);
+  }
+  .comp-section-note { font-size: .74rem; color: var(--text-muted); font-weight: 400; }
+  .comp-cat-card { border-radius: 22px; padding: 4px 0; }
+  .comp-cat-note { padding: .6rem .3rem .5rem; font-size: .73rem; color: var(--text-muted); margin: 0; }
 
   /* ─── ANILLO DE PROGRESO TOTAL ──────────────────────────────── */
   .pres-ring-card {
@@ -3354,8 +3366,12 @@
         </div>
 
         <!-- Selector de mes real (oculto — sigue siendo la fuente de verdad
-             que lee el resto del código; el pill de arriba solo lo mueve). -->
-        <div class="mm-month-selects" style="display:none">
+             que lee el resto del código; el pill de arriba solo lo mueve).
+             Id explícito porque cargarCompartidos() resetea el display de
+             TODOS los hijos directos de #page-compartidos al entrar/salir
+             del estado "sin pareja" — sin excluirlo acá, ese reset pisaba
+             el display:none y el selector viejo volvía a verse. -->
+        <div class="mm-month-selects" id="comp-month-selects" style="display:none">
           <select id="comp-mes"></select>
           <select id="comp-anio"></select>
         </div>
@@ -3440,40 +3456,43 @@
 
         </div><!-- /comp-hero-row -->
 
-        <!-- Desglose por categoría (siempre visible) — filas tipo card (antes
-             tabla de columnas fijas), mismo patrón que Transacciones/Presupuesto.
-             Reembolsos va primero en el DOM (orden mobile del mockup); en
-             desktop .comp-col-categoria/.comp-col-reembolsos reordenan con
-             `order` para que Categoría quede ancha a la izquierda. -->
+        <!-- Desglose por categoría (siempre visible) — título afuera de la
+             card + lista en su propia card de vidrio, mismo patrón que "Tus
+             categorías" de Mi mes (.mm-section-header + .mm-cats-card) y que
+             el mockup (.section-head separado de .cats). Reembolsos va
+             primero en el DOM (orden mobile del mockup); en desktop
+             .comp-col-categoria/.comp-col-reembolsos reordenan con `order`
+             para que Categoría quede ancha a la izquierda. -->
         <div id="comp-detalle" class="comp-grid">
 
           <!-- Reembolsos -->
-          <div class="chart-card comp-col-reembolsos" style="padding:0;overflow:hidden">
-            <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 class="comp-section-title" style="color:var(--accent)">Reembolsos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos individuales cruzados)</span></h3>
+          <div class="comp-col-reembolsos">
+            <div class="comp-section-head">
+              <span>Reembolsos</span>
+              <span class="comp-section-note">pagos puntuales</span>
             </div>
-            <div class="comp-cat-list" id="comp-tabla-reembolsos">
-              <div class="loading" style="padding:1.5rem"><div class="spinner"></div> Calculando...</div>
+            <div class="card comp-cat-card">
+              <div class="comp-cat-list" id="comp-tabla-reembolsos">
+                <div class="loading" style="padding:1.5rem"><div class="spinner"></div> Calculando...</div>
+              </div>
+              <div class="comp-cat-list" id="comp-foot-reembolsos"></div>
             </div>
-            <div class="comp-cat-list" id="comp-foot-reembolsos"></div>
-            <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
-              <span id="comp-nota">* Neto por categoría: positivo = te deben · negativo = debés.</span>
-            </div>
+            <p class="comp-cat-note"><span id="comp-nota">* Neto por categoría: positivo = te deben · negativo = debés.</span></p>
           </div>
 
           <!-- Desglose por categoría -->
-          <div class="chart-card comp-col-categoria" style="padding:0;overflow:hidden">
-            <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;gap:.5rem">
-              <h3 class="comp-section-title">Desglose por categoría</h3>
-              <span style="font-size:.74rem;color:var(--text-muted)">ya repartido según el % del mes</span>
+          <div class="comp-col-categoria">
+            <div class="comp-section-head">
+              <span>Desglose por categoría</span>
+              <span class="comp-section-note">ya repartido según el % del mes</span>
             </div>
-            <div class="comp-cat-list" id="comp-tabla-compartidos">
-              <div class="loading" style="padding:1.5rem"><div class="spinner"></div> Calculando...</div>
+            <div class="card comp-cat-card">
+              <div class="comp-cat-list" id="comp-tabla-compartidos">
+                <div class="loading" style="padding:1.5rem"><div class="spinner"></div> Calculando...</div>
+              </div>
+              <div class="comp-cat-list" id="comp-foot-compartidos"></div>
             </div>
-            <div class="comp-cat-list" id="comp-foot-compartidos"></div>
-            <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
-              * Cada valor ya está repartido según el % de reparto configurado para ese mes — es la parte que le corresponde a cada uno.
-            </div>
+            <p class="comp-cat-note">* Cada valor ya está repartido según el % de reparto configurado para ese mes — es la parte que le corresponde a cada uno.</p>
           </div>
 
         </div><!-- /comp-grid -->
@@ -7010,7 +7029,7 @@ function cargarCompartidos() {
   const existente = document.getElementById("comp-empty-state");
   if (existente) existente.remove();
   Array.from(document.getElementById("page-compartidos")?.children || [])
-    .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "topnav") el.style.display = ""; });
+    .forEach(el => { if (el.id !== "comp-empty-state" && el.id !== "topnav" && el.id !== "comp-month-selects") el.style.display = ""; });
 
   const avA = document.getElementById("comp-avatar-a");
   const avB = document.getElementById("comp-avatar-b");
