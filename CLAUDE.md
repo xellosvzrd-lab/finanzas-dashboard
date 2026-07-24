@@ -46,7 +46,7 @@
 | Frontend | HTML único (single-file) | Hosted en Vercel |
 | Backend | Supabase | PostgreSQL + Auth + Row Level Security |
 | Base de datos | Supabase (PostgreSQL) | Tablas: ver sección 2b |
-| PDF parsing | pdf.js 3.11.174 (CDN) | Client-side, sin servidor |
+| Importar transacciones | Texto pegado (Tab/`;`) | Sin parser de PDF — ver sección 8 |
 | Gráficos | Chart.js 4.4.1 (CDN) | Bar, Doughnut, Line, Mixed |
 | Iconos | Lucide (CDN) | Inline SVGs via `lucide.createIcons()` |
 
@@ -260,12 +260,13 @@ async function cargarTodasTransacciones() {
 
 ---
 
-## 8. PDF Parser (importar datos)
+## 8. Importar datos (texto pegado)
 
-- Usa `pdf.js` client-side
-- **Formato Galicia VISA:** `DD-MM-YY` con guiones, 6 dígitos de comprobante como ancla estructural, dos columnas ARS/USD
-- `_parsearLinea()` tiene regex Galicia primero, luego fallback genérico `DD/MM`
-- La preview incluye columna de Responsabilidad (select editable)
+- **No hay parser de PDF** — se sacó del proyecto en algún momento; no confundir con un feature vigente.
+- `page-importar`: el usuario pega filas de texto (Tab o `;` como separador) en un `<textarea>`, parseadas por `parsearImport()`.
+- Columnas esperadas, en orden: Fecha (`DD/MM/YYYY` o `YYYY-MM-DD`) · Tipo (`Gasto`/`Ingreso`) · Categoría · Monto · Descripción · Responsabilidad · Fuente · Moneda (`ARS`/`USD`, default ARS) · Mes liquidación (`YYYY-MM`, solo para fuentes de tarjeta de crédito).
+- Preview con validación fila por fila antes de confirmar (`confirmarImport()`): fecha inválida o imposible (ej. `31/02`), tipo, categoría faltante, monto (rechaza negativos y `<=0`).
+- Botón "Template" (`descargarTemplateCSV()`) descarga un CSV de ejemplo con el formato esperado.
 
 ---
 
@@ -331,7 +332,6 @@ Usa **variables CSS** (`var(--card)`, `var(--border)`, `var(--bg2)`) para respet
 
 | Problema | Solución aplicada |
 |---|---|
-| PDF Galicia no parsea | regex `DD-MM-YY` con comprobante como ancla |
 | Categorías case-sensitive | `_normalizarCategorias()` normaliza al cargar |
 | `fuente`/`responsabilidad` case-sensitive | incluidos en `_normalizarCategorias()` |
 | Límite 1000 filas Supabase | Carga paginada en `cargarTodasTransacciones()` |
