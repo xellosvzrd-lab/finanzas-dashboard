@@ -368,31 +368,39 @@
   .mes-selector select:focus { outline: none; border-color: var(--accent); }
 
   /* ─── REPARTO DE COMPARTIDOS ────────────────────────────────── */
+  /* Card vertical (label + una fila por persona + botón ancho completo),
+     igual que el side-card "Reparto" del mockup desktop. */
   .reparto-control {
-    display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
+    display: flex; flex-direction: column; gap: .55rem;
     font-size: .82rem; color: var(--text-muted);
     background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
     backdrop-filter: blur(var(--card-blur)) saturate(160%);
     -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
     box-shadow: var(--shadow-card);
-    padding: .7rem .9rem;
+    padding: 1.1rem 1.3rem;
   }
-  .reparto-label  { font-weight: 600; color: var(--text); }
-  .reparto-nombre { color: var(--text); font-weight: 500; }
-  .reparto-sep    { color: var(--text-faint); }
+  .reparto-label  {
+    font-size: .72rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .reparto-row    { display: flex; align-items: center; gap: .55rem; }
+  .reparto-nombre { color: var(--text-dim); font-weight: 700; font-size: .8rem; flex: 1; }
   .reparto-input {
-    background: var(--card); border: 1px solid var(--border);
-    color: var(--text); border-radius: 7px; padding: .3rem .4rem;
-    width: 52px; text-align: right; font-family: inherit; font-size: .84rem;
-    transition: border-color .15s;
+    background: var(--surface-2); border: none;
+    color: var(--text); border-radius: 9px; padding: .35rem 0;
+    width: 44px; text-align: center; font-family: inherit; font-size: .88rem; font-weight: 700;
+    transition: box-shadow .15s;
   }
-  .reparto-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .reparto-input:focus { outline: none; box-shadow: 0 0 0 3px var(--accent-dim); }
+  .reparto-pct-sign { color: var(--text-faint); font-size: .78rem; }
   .reparto-guardar-btn {
-    background: var(--bg2); border: 1px solid var(--border); border-radius: 7px;
-    padding: .3rem .5rem; cursor: pointer; font-size: .9rem; line-height: 1;
-    transition: border-color .15s, background .15s;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+    width: 100%; margin-top: .2rem;
+    background: var(--accent-dim); color: var(--accent); border: none; border-radius: var(--r-pill);
+    padding: .6rem 0; cursor: pointer; font-size: .78rem; font-weight: 700;
+    font-family: inherit; transition: opacity .15s;
   }
-  .reparto-guardar-btn:hover { border-color: var(--accent); background: var(--bg3); }
+  .reparto-guardar-btn:hover { opacity: .85; }
 
   /* Sub-section header bars */
   .chart-title,
@@ -664,7 +672,7 @@
     padding: 1.2rem 1.6rem;
     margin-bottom: 1.25rem;
     box-shadow: var(--shadow-card);
-    display: flex; flex-direction: column; gap: 1rem;
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: .25rem;
     transition: background .25s, border-color .25s;
   }
   .comp-balance-card:has(.comp-balance-value.negativo) {
@@ -679,7 +687,7 @@
     background: linear-gradient(135deg, color-mix(in oklab, var(--save) 14%, var(--surface)) 0%, var(--surface) 65%);
     border-color: color-mix(in oklab, var(--save) 24%, var(--line));
   }
-  .comp-avatars { display: flex; }
+  .comp-avatars { display: flex; justify-content: center; margin-bottom: .3rem; }
   .comp-avatar {
     width: 32px; height: 32px; border-radius: 999px;
     display: flex; align-items: center; justify-content: center;
@@ -687,9 +695,6 @@
   }
   .comp-avatar-a { background: var(--accent-dim); color: var(--accent); z-index: 2; }
   .comp-avatar-b { background: color-mix(in oklab, var(--info) 14%, #fff); color: var(--info); margin-left: -10px; }
-  .comp-balance-row { display: flex; align-items: center; gap: 1.5rem; }
-  .comp-balance-info { flex: 1; min-width: 0; }
-  .comp-balance-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: .4rem; }
   .comp-balance-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
   .comp-balance-value { font-size: 2.6rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: normal; }
   .comp-balance-value.positivo { color: var(--green); }
@@ -720,10 +725,10 @@
   }
   .comp-saldar-btn:hover { opacity: .88; }
   .comp-registrar-btn {
-    display: inline-block; margin-top: 1rem;
-    padding: .6rem 1.3rem;
+    display: inline-block; margin-top: .6rem;
+    padding: .65rem 1.4rem;
     background: var(--brand); color: var(--brand-ink); border: 1.5px solid var(--glass-border);
-    border-radius: 10px; font-size: .88rem; font-weight: 700;
+    border-radius: var(--r-pill); font-size: .85rem; font-weight: 700;
     cursor: pointer; font-family: inherit;
     backdrop-filter: blur(4px);
     transition: background .15s; white-space: nowrap;
@@ -765,17 +770,7 @@
   .comp-hero-row { display: flex; flex-direction: column; gap: 14px; margin-bottom: 1.25rem; }
   @media (min-width: 860px) {
     .comp-hero-row { flex-direction: row; align-items: stretch; }
-    .comp-hero-row > * { flex: 1; }
-    /* Reparto pasa a verse como card acá (en mobile queda plano, arriba
-       del balance, sin fondo) — misma altura que Balance/Contribución. */
-    .comp-hero-row .reparto-control {
-      flex-wrap: wrap; align-content: flex-start;
-      background: var(--surface); border: 1px solid var(--line);
-      border-radius: var(--r-md); box-shadow: var(--shadow-card);
-      backdrop-filter: blur(var(--card-blur)) saturate(160%);
-      -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
-      padding: 1.2rem 1.4rem; margin-bottom: 0 !important;
-    }
+    .comp-hero-row > * { flex: 1; margin-bottom: 0 !important; }
   }
   /* Contribución del mes card */
   .comp-contrib          { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
@@ -1953,10 +1948,8 @@
     /* Subtotal bar: más compacto */
     .tabla-subtotal { gap: .6rem; padding: .45rem .75rem; font-size: .8rem; }
 
-    /* Balance de compartidos en columna */
+    /* Balance de compartidos: más compacto */
     .comp-balance-card { padding: 1rem 1.2rem; }
-    .comp-balance-row { flex-direction: column; align-items: flex-start; gap: .6rem; }
-    .comp-balance-actions { align-items: flex-start; }
     .comp-balance-value { font-size: 2rem; letter-spacing: -.04em; }
 
     /* Presupuesto: ocultar barra de progreso visual en móvil */
@@ -3373,39 +3366,39 @@
              desktop ≥860px, apiladas en mobile — Unidad 10 rediseño). -->
         <div class="comp-hero-row">
 
-          <!-- Reparto de gastos compartidos del mes -->
+          <!-- Reparto de gastos compartidos del mes — card vertical (label,
+               una fila por persona, botón "Guardar reparto" ancho completo),
+               igual que el mockup desktop en vez de una sola línea horizontal. -->
           <div class="reparto-control" id="reparto-control" style="margin-bottom:1.5rem">
-            <span class="reparto-label">Reparto:</span>
-            <span class="reparto-nombre" id="reparto-nombre-a"></span>
-            <input type="text" inputmode="decimal" id="reparto-pct-a" class="reparto-input" value="50">
-            <span class="reparto-pct-sign">%</span>
-            <span class="reparto-sep">/</span>
-            <span class="reparto-nombre" id="reparto-nombre-b"></span>
-            <input type="text" inputmode="decimal" id="reparto-pct-b" class="reparto-input" value="50">
-            <span class="reparto-pct-sign">%</span>
-            <button class="reparto-guardar-btn" id="reparto-guardar-btn" onclick="_guardarReparto()" title="Guardar reparto del mes">💾</button>
+            <span class="reparto-label">Reparto</span>
+            <div class="reparto-row">
+              <span class="reparto-nombre" id="reparto-nombre-a"></span>
+              <input type="text" inputmode="decimal" id="reparto-pct-a" class="reparto-input" value="50">
+              <span class="reparto-pct-sign">%</span>
+            </div>
+            <div class="reparto-row">
+              <span class="reparto-nombre" id="reparto-nombre-b"></span>
+              <input type="text" inputmode="decimal" id="reparto-pct-b" class="reparto-input" value="50">
+              <span class="reparto-pct-sign">%</span>
+            </div>
+            <button class="reparto-guardar-btn" id="reparto-guardar-btn" onclick="_guardarReparto()" title="Guardar reparto del mes">💾 Guardar reparto</button>
           </div>
 
-          <!-- Balance final destacado -->
+          <!-- Balance final destacado — centrado (avatares/valor/CTA apilados),
+               igual que el mockup, en vez de info a la izquierda + botón a la derecha. -->
           <div id="comp-balance-card" class="comp-balance-card" style="margin-bottom:0">
             <div class="comp-avatars">
               <div class="comp-avatar comp-avatar-a" id="comp-avatar-a"></div>
               <div class="comp-avatar comp-avatar-b" id="comp-avatar-b"></div>
             </div>
-            <div class="comp-balance-row">
-              <div class="comp-balance-info">
-                <div class="comp-balance-label">Balance del mes</div>
-                <div class="comp-balance-value" id="comp-balance-valor">$0</div>
-                <div class="comp-balance-usd-row" id="comp-balance-usd-row">
-                  <span class="comp-balance-usd-pill" id="comp-balance-usd-pill"></span>
-                  <span class="comp-balance-usd-label" id="comp-balance-usd-label"></span>
-                </div>
-                <div class="comp-balance-sub" id="comp-balance-sub">—</div>
-              </div>
-              <div class="comp-balance-actions">
-                <button class="comp-registrar-btn" id="comp-registrar-btn" onclick="abrirSaldarTodo()" style="display:none">Registrar pago →</button>
-              </div>
+            <div class="comp-balance-label">Balance del mes</div>
+            <div class="comp-balance-value" id="comp-balance-valor">$0</div>
+            <div class="comp-balance-usd-row" id="comp-balance-usd-row">
+              <span class="comp-balance-usd-pill" id="comp-balance-usd-pill"></span>
+              <span class="comp-balance-usd-label" id="comp-balance-usd-label"></span>
             </div>
+            <div class="comp-balance-sub" id="comp-balance-sub">—</div>
+            <button class="comp-registrar-btn" id="comp-registrar-btn" onclick="abrirSaldarTodo()" style="display:none">Registrar pago →</button>
           </div>
 
           <!-- Contribución del mes -->
