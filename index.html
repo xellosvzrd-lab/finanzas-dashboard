@@ -689,14 +689,14 @@
   }
   .comp-avatars { display: flex; justify-content: center; margin-bottom: .3rem; }
   .comp-avatar {
-    width: 32px; height: 32px; border-radius: 999px;
+    width: 36px; height: 36px; border-radius: 999px;
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 13px; border: 2px solid var(--bg);
   }
-  .comp-avatar-a { background: var(--accent-dim); color: var(--accent); z-index: 2; }
-  .comp-avatar-b { background: color-mix(in oklab, var(--info) 14%, #fff); color: var(--info); margin-left: -10px; }
-  .comp-balance-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
-  .comp-balance-value { font-size: 2.6rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: normal; }
+  .comp-avatar-a { background: rgba(var(--accent-rgb),.10); color: var(--accent); z-index: 2; }
+  .comp-avatar-b { background: color-mix(in oklab, var(--info) 14%, #fff); color: var(--info); margin-left: -11px; }
+  .comp-balance-label { font-size: .72rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: .03em; font-weight: 700; }
+  .comp-balance-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; line-height: 1; font-variant-numeric: normal; margin-top: .35rem; }
   .comp-balance-value.positivo { color: var(--green); }
   .comp-balance-value.negativo { color: var(--red); }
   .comp-balance-value.a-mano  { color: var(--green); }
@@ -711,7 +711,7 @@
     to   { transform: scale(1);   opacity: 1; }
   }
   .saldado-badge { animation: badgeEntrada 0.3s var(--ease-out); }
-  .comp-balance-sub  { font-size: .83rem; color: var(--text-muted); margin-top: .2rem; }
+  .comp-balance-sub  { font-size: .83rem; color: var(--text-dim); margin-top: .5rem; }
   .comp-balance-usd-row { display:none; align-items:center; gap:.5rem; margin-top:.5rem; }
   .comp-balance-usd-row.visible { display:flex; }
   .comp-balance-usd-pill { font-size:.85rem; font-weight:700; padding:.25rem .7rem; border-radius:99px; background:rgba(var(--accent-rgb),.12); color:var(--accent); }
@@ -725,12 +725,13 @@
   }
   .comp-saldar-btn:hover { opacity: .88; }
   .comp-registrar-btn {
-    display: inline-block; margin-top: .6rem;
-    padding: .65rem 1.4rem;
-    background: var(--brand); color: var(--brand-ink); border: 1.5px solid var(--glass-border);
-    border-radius: var(--r-pill); font-size: .85rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: .35rem;
+    margin-top: .85rem;
+    padding: .7rem 1.3rem;
+    background: var(--brand); color: var(--brand-ink); border: none;
+    border-radius: var(--r-pill); font-size: .8rem; font-weight: 700;
     cursor: pointer; font-family: inherit;
-    backdrop-filter: blur(4px);
+    box-shadow: 0 10px 22px rgba(var(--accent-rgb),.28);
     transition: background .15s; white-space: nowrap;
   }
   .comp-registrar-btn:hover { background: var(--brand-2); }
@@ -1950,7 +1951,7 @@
 
     /* Balance de compartidos: más compacto */
     .comp-balance-card { padding: 1rem 1.2rem; }
-    .comp-balance-value { font-size: 2rem; letter-spacing: -.04em; }
+    .comp-balance-value { font-size: 2rem; letter-spacing: -.02em; }
 
     /* Presupuesto: ocultar barra de progreso visual en móvil */
     .pres-bar-bg { display: none; }
