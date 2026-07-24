@@ -716,14 +716,6 @@
   .comp-balance-usd-row.visible { display:flex; }
   .comp-balance-usd-pill { font-size:.85rem; font-weight:700; padding:.25rem .7rem; border-radius:99px; background:rgba(var(--accent-rgb),.12); color:var(--accent); }
   .comp-balance-usd-label { font-size:.78rem; color:var(--text-muted); }
-  .comp-saldar-btn {
-    padding: .45rem 1.1rem;
-    background: var(--accent); color: var(--white); border: none;
-    border-radius: 8px; font-size: .83rem; font-weight: 700;
-    cursor: pointer; font-family: inherit;
-    transition: opacity .15s; white-space: nowrap;
-  }
-  .comp-saldar-btn:hover { opacity: .88; }
   .comp-registrar-btn {
     display: flex; align-items: center; justify-content: center; gap: .35rem;
     margin-top: .85rem;
@@ -3351,7 +3343,6 @@
             <h1 id="comp-titulo">Compartidos</h1>
           </div>
           <div style="display:flex;align-items:center;gap:.75rem">
-            <button class="comp-saldar-btn" id="comp-saldar-btn" onclick="abrirSaldarTodo()" style="display:none">Saldar todo</button>
             <div class="comp-saldado-badge" id="comp-saldado-badge" style="display:none">✓ Mes saldado</div>
             <button class="comp-undo-btn" id="comp-undo-btn" onclick="deshacerLiquidacion()" style="display:none">↩ Deshacer</button>
           </div>
@@ -7363,12 +7354,10 @@ function cargarCompartidos() {
     (() => { const { year, month } = getMesLiquidacion(t); return month === mesComp && year === anioComp; })()
   );
 
-  const saldarBtn    = document.getElementById("comp-saldar-btn");
   const badgeEl      = document.getElementById("comp-saldado-badge");
   const undoBtn      = document.getElementById("comp-undo-btn");
   const registrarBtn = document.getElementById("comp-registrar-btn");
   const hayDeuda = !yaLiquidado && _settlementItems.length > 0;
-  if (saldarBtn)    saldarBtn.style.display    = hayDeuda ? "" : "none";
   if (registrarBtn) registrarBtn.style.display = hayDeuda ? "" : "none";
   if (badgeEl)      badgeEl.style.display      = yaLiquidado ? "" : "none";
   if (undoBtn)      undoBtn.style.display      = yaLiquidado ? "" : "none";
