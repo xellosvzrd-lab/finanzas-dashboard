@@ -371,6 +371,11 @@
   .reparto-control {
     display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
     font-size: .82rem; color: var(--text-muted);
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+    backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(160%);
+    box-shadow: var(--shadow-card);
+    padding: .7rem .9rem;
   }
   .reparto-label  { font-weight: 600; color: var(--text); }
   .reparto-nombre { color: var(--text); font-weight: 500; }
@@ -632,17 +637,22 @@
   .comp-section-title { font-size: 1rem; font-weight: 700; margin: 0; }
   .comp-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 340px;
     gap: 1.25rem;
     margin-top: 1.25rem;
   }
   .comp-grid > * { min-width: 0; }
-  @media (max-width: 900px) { .comp-grid { grid-template-columns: 1fr; } }
+  /* Reembolsos va primero en el DOM (orden mobile del mockup) — en desktop
+     se reordena visualmente para que Categoría quede ancha a la izquierda. */
+  .comp-col-categoria  { order: 1; }
+  .comp-col-reembolsos { order: 2; }
+  @media (max-width: 900px) {
+    .comp-grid { grid-template-columns: 1fr; }
+    .comp-col-categoria, .comp-col-reembolsos { order: 0; }
+  }
   @media (max-width: 768px) {
-    .comp-grid table { font-size: .8rem; }
-    .comp-grid thead th,
-    .comp-grid tbody td { padding: .4rem .5rem; white-space: nowrap; }
-    .comp-grid tbody td:first-child { white-space: normal; max-width: 90px; word-break: break-word; }
+    .comp-grid .comp-cat-row { padding: .65rem .9rem; font-size: .82rem; }
+    .comp-grid .comp-cat-name { font-size: .82rem; }
   }
 
   .comp-balance-card {
@@ -788,14 +798,6 @@
   .comp-contrib-total .num { font-weight: 700; }
   /* legacy compat */
   .comp-fairness { display: none !important; }
-
-  .comp-tfoot-row td {
-    padding: .7rem 1rem !important;
-    font-weight: 700;
-    background: var(--bg2);
-    border-top: 1px solid var(--border2) !important;
-  }
-  .comp-tfoot-total { font-size: .95rem; font-weight: 800 !important; }
 
   /* ─── PLAZOS FIJOS ──────────────────────────────────────────── */
   /* Lista tipo mockup (.holdings/.holding): antes cada tenencia era su
@@ -1140,6 +1142,50 @@
   .pres-cat-meta strong { color: var(--text); font-weight: 700; }
   .pres-monto-live { color: var(--text-faint); }
   .pres-total-row { background: var(--surface-2); }
+
+  /* ─── COMPARTIDOS: "Por categoría" y "Reembolsos" — filas tipo card
+       (antes tabla de columnas fijas), mismo patrón que Presupuesto. ─── */
+  .comp-cat-list { display: flex; flex-direction: column; }
+  .comp-cat-row {
+    display: flex; align-items: center; gap: .8rem;
+    padding: .75rem 1.1rem; border-top: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .comp-cat-list .comp-cat-row:first-child { border-top: none; }
+  .comp-cat-info { flex: 1; min-width: 0; }
+  .comp-cat-name {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-size: .875rem; font-weight: 700;
+  }
+  .comp-cat-emoji { font-size: 1rem; width: 22px; text-align: center; flex-shrink: 0; }
+  .comp-cat-count { color: var(--text-faint); font-size: .72rem; font-weight: 400; }
+  .comp-cat-who { font-size: .76rem; color: var(--text-faint); margin-top: 2px; }
+  .comp-cat-amt {
+    font-size: .875rem; font-weight: 700; text-align: right; white-space: nowrap;
+    flex-shrink: 0; display: flex; align-items: center; gap: .4rem;
+  }
+  .comp-cat-amt.pos { color: var(--green); }
+  .comp-cat-amt.neg { color: var(--yellow); }
+  .comp-cat-section-label {
+    padding: .45rem 1.1rem; font-size: .74rem; color: var(--text-muted);
+    font-weight: 600; letter-spacing: .05em; background: var(--bg2);
+  }
+  .comp-cat-total-row {
+    padding: .75rem 1.1rem; border-top: 1px solid var(--line); background: var(--surface-2);
+  }
+  .comp-cat-total-row .comp-cat-name { font-weight: 700; }
+  .comp-liq-btn {
+    padding: .15rem .5rem; font-size: .7rem; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--bg2); color: var(--text-muted);
+    cursor: pointer; font-family: inherit;
+  }
+  .comp-cat-drill { background: var(--bg1); }
+  .comp-cat-drill-row {
+    display: flex; justify-content: space-between; gap: .6rem;
+    padding: .35rem 1.1rem .35rem 2.5rem; font-size: .76rem; color: var(--text-muted);
+    border-top: 1px solid var(--line);
+  }
+  .comp-cat-drill-row:first-child { border-top: none; }
 
   /* ─── ANILLO DE PROGRESO TOTAL ──────────────────────────────── */
   .pres-ring-card {
@@ -3403,59 +3449,39 @@
 
         </div><!-- /comp-hero-row -->
 
-        <!-- Desglose por categoría (siempre visible) -->
+        <!-- Desglose por categoría (siempre visible) — filas tipo card (antes
+             tabla de columnas fijas), mismo patrón que Transacciones/Presupuesto.
+             Reembolsos va primero en el DOM (orden mobile del mockup); en
+             desktop .comp-col-categoria/.comp-col-reembolsos reordenan con
+             `order` para que Categoría quede ancha a la izquierda. -->
         <div id="comp-detalle" class="comp-grid">
 
-          <!-- Tabla izquierda: Compartidos -->
-          <div class="chart-card" style="padding:0;overflow:hidden">
+          <!-- Reembolsos -->
+          <div class="chart-card comp-col-reembolsos" style="padding:0;overflow:hidden">
+            <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
+              <h3 class="comp-section-title" style="color:var(--accent)">Reembolsos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos individuales cruzados)</span></h3>
+            </div>
+            <div class="comp-cat-list" id="comp-tabla-reembolsos">
+              <div class="loading" style="padding:1.5rem"><div class="spinner"></div> Calculando...</div>
+            </div>
+            <div class="comp-cat-list" id="comp-foot-reembolsos"></div>
+            <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
+              <span id="comp-nota">* Neto por categoría: positivo = te deben · negativo = debés.</span>
+            </div>
+          </div>
+
+          <!-- Desglose por categoría -->
+          <div class="chart-card comp-col-categoria" style="padding:0;overflow:hidden">
             <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;gap:.5rem">
               <h3 class="comp-section-title">Desglose por categoría</h3>
               <span style="font-size:.74rem;color:var(--text-muted)">ya repartido según el % del mes</span>
             </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Categoría</th>
-                    <th style="text-align:right" id="comp-th-usuario"></th>
-                    <th style="text-align:right" id="comp-th-partner"></th>
-                    <th style="text-align:right">Neto</th>
-                  </tr>
-                </thead>
-                <tbody id="comp-tabla-compartidos">
-                  <tr><td colspan="4"><div class="loading"><div class="spinner"></div> Calculando...</div></td></tr>
-                </tbody>
-                <tfoot id="comp-foot-compartidos"></tfoot>
-              </table>
+            <div class="comp-cat-list" id="comp-tabla-compartidos">
+              <div class="loading" style="padding:1.5rem"><div class="spinner"></div> Calculando...</div>
             </div>
+            <div class="comp-cat-list" id="comp-foot-compartidos"></div>
             <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
               * Cada valor ya está repartido según el % de reparto configurado para ese mes — es la parte que le corresponde a cada uno.
-            </div>
-          </div>
-
-          <!-- Tabla derecha: Reembolsos -->
-          <div class="chart-card" style="padding:0;overflow:hidden">
-            <div style="padding:1.1rem 1.4rem .6rem; border-bottom:1px solid var(--border)">
-              <h3 class="comp-section-title" style="color:var(--accent)">Reembolsos <span style="font-size:.78rem;color:var(--text-muted);font-weight:400">(gastos individuales cruzados)</span></h3>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Categoría</th>
-                    <th style="text-align:right" id="comp-reemb-th-usuario">Daniel pagó</th>
-                    <th style="text-align:right" id="comp-reemb-th-partner">Ama pagó</th>
-                    <th style="text-align:right">Neto</th>
-                  </tr>
-                </thead>
-                <tbody id="comp-tabla-reembolsos">
-                  <tr><td colspan="4"><div class="loading"><div class="spinner"></div> Calculando...</div></td></tr>
-                </tbody>
-                <tfoot id="comp-foot-reembolsos"></tfoot>
-              </table>
-            </div>
-            <div style="padding:.6rem 1.4rem .5rem;font-size:.73rem;color:var(--text-muted)">
-              <span id="comp-nota">* Neto por categoría: positivo = te deben · negativo = debés.</span>
             </div>
           </div>
 
@@ -5016,14 +5042,6 @@ function _actualizarStringsUsuario() {
   if (nota) nota.textContent = PARTNER
     ? `* Neto por categoría: positivo = ${PARTNER} te debe · negativo = vos le debés a ${PARTNER}.`
     : "* Neto por categoría: positivo = te deben · negativo = debés.";
-  const thU = document.getElementById("comp-th-usuario");
-  if (thU) thU.textContent = USUARIO;
-  const thP = document.getElementById("comp-th-partner");
-  if (thP) thP.textContent = PARTNER || "";
-  const thReembU = document.getElementById("comp-reemb-th-usuario");
-  if (thReembU) thReembU.textContent = `${USUARIO} pagó`;
-  const thReembP = document.getElementById("comp-reemb-th-partner");
-  if (thReembP) thReembP.textContent = `${PARTNER || ""} pagó`;
   if (PARTNER) {
     ["edit-resp-de-partner", "fil-resp-de-partner"].forEach(id => {
       const opt = document.getElementById(id);
@@ -7116,54 +7134,38 @@ function cargarCompartidos() {
         const signo     = esGasto ? "+" : "−";
         const color     = esGasto ? "var(--accent)" : "var(--green)";
         const tipoLabel = esGasto ? "Gasto" : "Ingreso";
-        return `<tr style="background:var(--bg1);">
-          <td colspan="2" style="padding:.2rem .8rem;font-size:.76rem;color:var(--text-muted);">
-            <span style="color:${color};font-size:.7rem;">[${tipoLabel}]</span> ${fmtFecha(t.fecha)} — ${escapeHtml(t.descripcion||"—")}
-          </td>
-          <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:var(--text-muted);">Bruto: ${fmtMoneda(m, monedaFilter)}</td>
-          <td style="padding:.2rem .8rem;font-size:.76rem;text-align:right;color:${color};">
-            ${signo}${fmtMoneda(share, monedaFilter)} ${pagoPartner ? "("+escapeHtml(PARTNER)+")" : "("+escapeHtml(USUARIO)+")"}
-          </td>
-        </tr>`;
+        return `<div class="comp-cat-drill-row">
+          <span><span style="color:${color};font-size:.7rem;">[${tipoLabel}]</span> ${fmtFecha(t.fecha)} — ${escapeHtml(t.descripcion||"—")}</span>
+          <span style="text-align:right;flex-shrink:0;white-space:nowrap">Bruto: ${fmtMoneda(m, monedaFilter)} · <span style="color:${color}">${signo}${fmtMoneda(share, monedaFilter)} ${pagoPartner ? "("+escapeHtml(PARTNER)+")" : "("+escapeHtml(USUARIO)+")"}</span></span>
+        </div>`;
       }).join("");
       const liqBtn = monedaFilter === "ARS" && net !== 0
-        ? `<button onclick="event.stopPropagation();abrirLiquidar('${escapeHtml(r.cat.replace(/\\/g,"\\\\").replace(/'/g,"\\'"))}',${Math.abs(net)},'${net>0?"Ingreso":"Gasto"}')"
-             style="margin-left:.5rem;padding:.15rem .5rem;font-size:.7rem;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text-muted);cursor:pointer;vertical-align:middle">Liquidar</button>`
+        ? `<button class="comp-liq-btn" onclick="event.stopPropagation();abrirLiquidar('${escapeHtml(r.cat.replace(/\\/g,"\\\\").replace(/'/g,"\\'"))}',${Math.abs(net)},'${net>0?"Ingreso":"Gasto"}')">Liquidar</button>`
         : "";
       const _catEmo = getCatEmoji(r.cat);
-      return `<tr style="cursor:pointer;" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'table-row':'none'">
-        <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_catEmo}</span>${escapeHtml(r.cat)}</span> <span style="color:var(--text-muted);font-size:.72rem;">(${txsAll.length} tx) ▾</span></td>
-        <td style="text-align:right;color:${r.daniel !== 0 ? 'var(--text)' : 'var(--text-muted)'}">${r.daniel !== 0 ? fmtMoneda(r.daniel, monedaFilter) : "—"}</td>
-        <td style="text-align:right;color:${r.ama !== 0 ? 'var(--text)' : 'var(--text-muted)'}">${r.ama !== 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}</td>
-        <td style="text-align:right;font-weight:700;color:${net>0?"var(--yellow)":"var(--green)"}">${fmtMoneda(Math.abs(net), monedaFilter)}${liqBtn}</td>
-      </tr>
-      <tr id="${drillId}" style="display:none;">
-        <td colspan="4" style="padding:0;">
-          <table style="width:100%;border-collapse:collapse;">
-            <thead><tr style="background:var(--bg2);">
-              <th colspan="2" style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:left;font-weight:400;">Fecha — Descripción</th>
-              <th style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:right;font-weight:400;">Monto bruto</th>
-              <th style="padding:.25rem .8rem;font-size:.72rem;color:var(--text-muted);text-align:right;font-weight:400;">Parte (%)</th>
-            </tr></thead>
-            <tbody>${drillRows}</tbody>
-          </table>
-        </td>
-      </tr>`;
+      const whoStr = `${escapeHtml(USUARIO)} ${r.daniel !== 0 ? fmtMoneda(r.daniel, monedaFilter) : "—"} · ${escapeHtml(PARTNER)} ${r.ama !== 0 ? fmtMoneda(r.ama, monedaFilter) : "—"}`;
+      return `<div class="comp-cat-row" onclick="const d=document.getElementById('${drillId}');d.style.display=d.style.display==='none'?'block':'none'">
+        <div class="comp-cat-info">
+          <div class="comp-cat-name"><span class="comp-cat-emoji">${_catEmo}</span>${escapeHtml(r.cat)} <span class="comp-cat-count">(${txsAll.length} tx) ▾</span></div>
+          <div class="comp-cat-who">${whoStr}</div>
+        </div>
+        <div class="comp-cat-amt ${net>0?"neg":"pos"}">${fmtMoneda(Math.abs(net), monedaFilter)}${liqBtn}</div>
+      </div>
+      <div class="comp-cat-drill" id="${drillId}" style="display:none">${drillRows}</div>`;
     }).join("");
   }
 
   const tbodyComp = document.getElementById("comp-tabla-compartidos");
   if (!filasCompARS.length && !filasCompUSD.length) {
-    tbodyComp.innerHTML = '<tr><td colspan="4"><div class="empty-state" style="padding:1.5rem">Sin gastos compartidos este mes ✓</div></td></tr>';
+    tbodyComp.innerHTML = '<div class="empty-state" style="padding:1.5rem">Sin gastos compartidos este mes ✓</div>';
   } else {
     let htmlComp = "";
     if (filasCompARS.length > 0) {
-      htmlComp += `<tr style="background:var(--bg2);"><td colspan="4" style="padding:.4rem .8rem;font-size:.74rem;color:var(--text-muted);font-weight:600;letter-spacing:.05em;">🇦🇷 PESOS (ARS)</td></tr>`;
+      htmlComp += `<div class="comp-cat-section-label">🇦🇷 PESOS (ARS)</div>`;
       htmlComp += buildCompRows(filasCompARS, "ARS");
     }
     if (filasCompUSD.length > 0) {
-      if (filasCompARS.length > 0) htmlComp += `<tr><td colspan="4" style="height:.4rem;background:var(--bg);padding:0;"></td></tr>`;
-      htmlComp += `<tr style="background:var(--bg2);"><td colspan="4" style="padding:.4rem .8rem;font-size:.74rem;color:var(--text-muted);font-weight:600;letter-spacing:.05em;">🇺🇸 DÓLARES (USD)</td></tr>`;
+      htmlComp += `<div class="comp-cat-section-label">🇺🇸 DÓLARES (USD)</div>`;
       htmlComp += buildCompRows(filasCompUSD, "USD");
     }
     tbodyComp.innerHTML = htmlComp;
@@ -7172,66 +7174,64 @@ function cargarCompartidos() {
   const tfootComp = document.getElementById("comp-foot-compartidos");
   let tfootHtml = "";
   if (filasCompARS.length > 0) {
-    tfootHtml += `<tr class="comp-tfoot-row">
-      <td><strong>TOTAL ARS</strong></td>
-      <td style="text-align:right">${fmt(totalCompDanielARS)}</td>
-      <td style="text-align:right">${totalCompAmaARS > 0 ? fmt(totalCompAmaARS) : "—"}</td>
-      <td style="text-align:right" class="comp-tfoot-total">${fmt(totalCompNetARS)}</td>
-    </tr>`;
+    tfootHtml += `<div class="comp-cat-row comp-cat-total-row">
+      <div class="comp-cat-info">
+        <div class="comp-cat-name">TOTAL ARS</div>
+        <div class="comp-cat-who">Pagado ${escapeHtml(USUARIO)} ${fmt(totalCompDanielARS)} · Pagado ${escapeHtml(PARTNER)} ${totalCompAmaARS > 0 ? fmt(totalCompAmaARS) : "—"}</div>
+      </div>
+      <div class="comp-cat-amt">${fmt(totalCompNetARS)}</div>
+    </div>`;
   }
   if (filasCompUSD.length > 0) {
-    tfootHtml += `<tr class="comp-tfoot-row">
-      <td><strong>TOTAL USD</strong></td>
-      <td style="text-align:right">${fmtMoneda(totalCompDanielUSD,"USD")}</td>
-      <td style="text-align:right">${totalCompAmaUSD > 0 ? fmtMoneda(totalCompAmaUSD,"USD") : "—"}</td>
-      <td style="text-align:right" class="comp-tfoot-total">${fmtMoneda(totalCompNetUSD,"USD")}</td>
-    </tr>`;
+    tfootHtml += `<div class="comp-cat-row comp-cat-total-row">
+      <div class="comp-cat-info">
+        <div class="comp-cat-name">TOTAL USD</div>
+        <div class="comp-cat-who">Pagado ${escapeHtml(USUARIO)} ${fmtMoneda(totalCompDanielUSD,"USD")} · Pagado ${escapeHtml(PARTNER)} ${totalCompAmaUSD > 0 ? fmtMoneda(totalCompAmaUSD,"USD") : "—"}</div>
+      </div>
+      <div class="comp-cat-amt">${fmtMoneda(totalCompNetUSD,"USD")}</div>
+    </div>`;
   }
-  tfootHtml += `<tr style="font-size:.73rem;color:var(--text-muted)">
-    <td colspan="2">Pagado ${escapeHtml(USUARIO)}</td>
-    <td>Pagado ${escapeHtml(PARTNER)}</td>
-    <td style="text-align:right">Total a cobrar</td>
-  </tr>`;
   tfootComp.innerHTML = tfootHtml;
 
-  // ── RENDERIZAR TABLA REEMBOLSOS ──────────────────────────────
+  // ── RENDERIZAR REEMBOLSOS ──────────────────────────────
   // Totales por moneda (usados también en el balance final)
   const totalA_ARS = Object.values(reembA_ARS).reduce((s,v)=>s+v,0);
   const totalA_USD = Object.values(reembA_USD).reduce((s,v)=>s+v,0);
   const totalB_ARS = Object.values(reembB_ARS).reduce((s,v)=>s+v,0);
   const totalB_USD = Object.values(reembB_USD).reduce((s,v)=>s+v,0);
 
-  // Unión de categorías por moneda (como la tabla de compartidos)
+  // Unión de categorías por moneda (como la lista de compartidos)
   const catsReembARS = [...new Set([...Object.keys(reembA_ARS), ...Object.keys(reembB_ARS)])];
   const catsReembUSD = [...new Set([...Object.keys(reembA_USD), ...Object.keys(reembB_USD)])];
 
   const tbodyReemb = document.getElementById("comp-tabla-reembolsos");
 
   if (!catsReembARS.length && !catsReembUSD.length) {
-    tbodyReemb.innerHTML = '<tr><td colspan="4"><div class="empty-state" style="padding:1.5rem">Sin reembolsos este mes</div></td></tr>';
+    tbodyReemb.innerHTML = '<div class="empty-state" style="padding:1.5rem">Sin reembolsos este mes</div>';
   } else {
     const fmtR = (v, mon) => mon === "USD" ? fmtMoneda(v,"USD") : fmt(v);
     const buildReembRows = (cats, mapA, mapB, mon) => cats.map(cat => {
       const daniel = mapA[cat] || 0;
       const ama    = mapB[cat] || 0;
       const net    = daniel - ama;
-      const netColor = net > 0 ? "var(--yellow)" : net < 0 ? "var(--green)" : "var(--text-muted)";
+      const netCls = net > 0 ? "neg" : "pos";
       const _re = getCatEmoji(cat);
-      return `<tr>
-        <td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="font-size:1rem;width:22px;text-align:center">${_re}</span>${escapeHtml(cat)}</span></td>
-        <td style="text-align:right;color:${daniel!==0?"var(--accent)":"var(--text-muted)"}">${daniel!==0?fmtR(Math.abs(daniel),mon):"—"}</td>
-        <td style="text-align:right;color:${ama!==0?"var(--yellow)":"var(--text-muted)"}">${ama!==0?fmtR(Math.abs(ama),mon):"—"}</td>
-        <td style="text-align:right;font-weight:700;color:${netColor}">${net!==0?fmtR(Math.abs(net),mon):"—"}</td>
-      </tr>`;
+      const whoStr = `${escapeHtml(USUARIO)} pagó ${daniel!==0?fmtR(daniel,mon):"—"} · ${escapeHtml(PARTNER)} pagó ${ama!==0?fmtR(ama,mon):"—"}`;
+      return `<div class="comp-cat-row">
+        <div class="comp-cat-info">
+          <div class="comp-cat-name"><span class="comp-cat-emoji">${_re}</span>${escapeHtml(cat)}</div>
+          <div class="comp-cat-who">${whoStr}</div>
+        </div>
+        <div class="comp-cat-amt ${netCls}">${net!==0?fmtR(Math.abs(net),mon):"—"}</div>
+      </div>`;
     }).join("");
     let htmlR = "";
     if (catsReembARS.length) {
-      if (catsReembUSD.length) htmlR += `<tr style="background:var(--bg2);"><td colspan="4" style="padding:.4rem .8rem;font-size:.74rem;color:var(--text-muted);font-weight:600;letter-spacing:.05em;">🇦🇷 PESOS (ARS)</td></tr>`;
+      htmlR += `<div class="comp-cat-section-label">🇦🇷 PESOS (ARS)</div>`;
       htmlR += buildReembRows(catsReembARS, reembA_ARS, reembB_ARS, "ARS");
     }
     if (catsReembUSD.length) {
-      if (catsReembARS.length) htmlR += `<tr><td colspan="4" style="height:.4rem;background:var(--bg);padding:0;"></td></tr>`;
-      htmlR += `<tr style="background:var(--bg2);"><td colspan="4" style="padding:.4rem .8rem;font-size:.74rem;color:var(--text-muted);font-weight:600;letter-spacing:.05em;">🇺🇸 DÓLARES (USD)</td></tr>`;
+      htmlR += `<div class="comp-cat-section-label">🇺🇸 DÓLARES (USD)</div>`;
       htmlR += buildReembRows(catsReembUSD, reembA_USD, reembB_USD, "USD");
     }
     tbodyReemb.innerHTML = htmlR;
@@ -7242,26 +7242,23 @@ function cargarCompartidos() {
   const netReembARS = totalA_ARS - totalB_ARS;
   const netReembUSD = totalA_USD - totalB_USD;
   if (catsReembARS.length) {
-    tfootR += `<tr class="comp-tfoot-row">
-      <td><strong>TOTAL ARS</strong></td>
-      <td style="text-align:right">${totalA_ARS>0?fmt(totalA_ARS):"—"}</td>
-      <td style="text-align:right">${totalB_ARS>0?fmt(totalB_ARS):"—"}</td>
-      <td style="text-align:right" class="comp-tfoot-total">${fmt(netReembARS)}</td>
-    </tr>`;
+    tfootR += `<div class="comp-cat-row comp-cat-total-row">
+      <div class="comp-cat-info">
+        <div class="comp-cat-name">TOTAL ARS</div>
+        <div class="comp-cat-who">${escapeHtml(USUARIO)} pagó por ${escapeHtml(PARTNER)} ${totalA_ARS>0?fmt(totalA_ARS):"—"} · ${escapeHtml(PARTNER)} pagó por ${escapeHtml(USUARIO)} ${totalB_ARS>0?fmt(totalB_ARS):"—"}</div>
+      </div>
+      <div class="comp-cat-amt">${fmt(netReembARS)}</div>
+    </div>`;
   }
   if (catsReembUSD.length) {
-    tfootR += `<tr class="comp-tfoot-row">
-      <td><strong>TOTAL USD</strong></td>
-      <td style="text-align:right">${totalA_USD>0?fmtMoneda(totalA_USD,"USD"):"—"}</td>
-      <td style="text-align:right">${totalB_USD>0?fmtMoneda(totalB_USD,"USD"):"—"}</td>
-      <td style="text-align:right" class="comp-tfoot-total">${fmtMoneda(netReembUSD,"USD")}</td>
-    </tr>`;
+    tfootR += `<div class="comp-cat-row comp-cat-total-row">
+      <div class="comp-cat-info">
+        <div class="comp-cat-name">TOTAL USD</div>
+        <div class="comp-cat-who">${escapeHtml(USUARIO)} pagó por ${escapeHtml(PARTNER)} ${totalA_USD>0?fmtMoneda(totalA_USD,"USD"):"—"} · ${escapeHtml(PARTNER)} pagó por ${escapeHtml(USUARIO)} ${totalB_USD>0?fmtMoneda(totalB_USD,"USD"):"—"}</div>
+      </div>
+      <div class="comp-cat-amt">${fmtMoneda(netReembUSD,"USD")}</div>
+    </div>`;
   }
-  tfootR += `<tr style="font-size:.73rem;color:var(--text-muted)">
-    <td colspan="2">${escapeHtml(USUARIO)} pagó por ${escapeHtml(PARTNER)}</td>
-    <td>${escapeHtml(PARTNER)} pagó por ${escapeHtml(USUARIO)}</td>
-    <td style="text-align:right">Saldo neto</td>
-  </tr>`;
   tfootReemb.innerHTML = tfootR;
 
   // ── BALANCE FINAL ────────────────────────────────────────────
