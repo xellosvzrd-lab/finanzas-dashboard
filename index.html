@@ -817,9 +817,6 @@
   .accion-pnl { font-size: .72rem; font-weight: 700; padding: .1rem .45rem; border-radius: 99px; margin-top: .15rem; display: inline-block; white-space: nowrap; }
   .accion-pnl.pos { background: var(--green-dim); color: var(--green); }
   .accion-pnl.neg { background: var(--red-dim);   color: var(--red); }
-  /* Inv totales — KPI grid */
-  .inv-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .85rem; margin-bottom: 2rem; }
-
   /* ─── INVERSIONES REDESIGN ──────────────────────────────── */
   /* Card única de resumen (antes 2 cards: hero + "Asignación" con barras de
      progreso de solo 2 categorías) — clon del .side-card del mockup: valor
@@ -965,10 +962,6 @@
     #liq-modal[style*="flex"] .liq-inner { transform: translateY(0); }
   }
 
-  /* ─── SWIPE EN TRANSACCIONES ─────────────────────────────── */
-  .swipe-row { transition: transform .2s ease, background .2s ease; position: relative; }
-  .swipe-row.swiping { will-change: transform; }
-  .swipe-row.swiping { transition: none; }
 
   /* ─── HEALTH SCORE ──────────────────────────────────────── */
 
@@ -1229,19 +1222,6 @@
   }
 
   /* ─── IMPORTAR DATOS ────────────────────────────────────── */
-  /* ─── TABS IMPORTAR ──────────────────────────────────── */
-  .imp-tabs { display: flex; gap: .4rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: .5rem; }
-  .imp-tab {
-    background: none; border: none; color: var(--text-muted);
-    padding: .45rem 1rem; border-radius: 8px 8px 0 0;
-    font-size: .85rem; font-weight: 600; cursor: pointer;
-    border-bottom: 2px solid transparent; margin-bottom: -1px;
-    transition: color .15s, border-color .15s;
-  }
-  .imp-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .imp-tab:hover:not(.active) { color: var(--text); }
-  .imp-tab-panel { display: none; }
-  .imp-tab-panel.active { display: block; }
 
 
   .imp-instrucciones {
@@ -2019,11 +1999,6 @@
     .pres-ring-stats { min-width: 0; width: 100%; }
   }
 
-  /* ─── OCULTAR COLUMNAS SECUNDARIAS (≤ 680px) ──────────────── */
-  /* Fuente, Responsabilidad, Descripción se ocultan en teléfonos */
-  @media (max-width: 680px) {
-    .col-hide-sm { display: none !important; }
-  }
 
   /* ─── OCULTAR COLUMNAS TERCIARIAS (≤ 440px) ───────────────── */
   /* Tipo y Moneda se ocultan en teléfonos muy pequeños */
@@ -2999,7 +2974,7 @@
        posición original al cerrar. En mobile nunca se usa: navegarA('nueva')
        sigue siendo navegación de página completa ahí. -->
   <div class="modal-nueva-overlay" id="modal-nueva-overlay" style="display:none" onclick="if(event.target===this)_cerrarModalNueva()">
-    <div class="modal-nueva-box" id="modal-nueva-box"></div>
+    <div class="modal-nueva-box" id="modal-nueva-box" role="dialog" aria-modal="true" aria-label="Nueva transacción"></div>
   </div>
 
   <div class="layout">
@@ -3135,7 +3110,7 @@
           </div>
           <div style="display:flex;gap:.5rem;align-items:center">
             <button class="btn btn-ghost" onclick="exportarCSV()" title="Descargar CSV con el filtro actual">CSV</button>
-            <button class="btn btn-ghost" onclick="navegarA('importar')" title="Importar desde archivo o PDF">Importar</button>
+            <button class="btn btn-ghost" onclick="navegarA('importar')" title="Importar transacciones pegando filas">Importar</button>
             <button class="btn btn-primary" onclick="navegarA('nueva')">+ Anotar</button>
           </div>
         </div>
@@ -4165,7 +4140,7 @@
     <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 1.25rem;">
       Lo usamos para separar tus gastos de los de tu pareja. Solo la primera vez.
     </p>
-    <input type="text" id="input-nombre" placeholder="Ej: Daniel o Ama"
+    <input type="text" id="input-nombre" placeholder="Ej: Daniel o Ama" aria-label="Tu nombre"
            style="width:100%;box-sizing:border-box;padding:.65rem .9rem;border-radius:8px;
                   border:1px solid var(--border);background:var(--bg2);color:var(--text);
                   font-size:1rem;margin-bottom:1rem;"
@@ -4653,6 +4628,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (session) { supabaseSession = session; if (await _configurarUsuario(session)) iniciarApp(); return; }
 
   // No hay sesión activa — mostrar pantalla de login
+  document.getElementById("sb-email")?.focus();
 });
 
 // ─── CONFIGURACIÓN ────────────────────────────────────────────
@@ -5291,16 +5267,11 @@ function _restaurarFiltros() {
     if (fuente) { const el = document.getElementById("fil-fuente"); if (el) el.value = fuente; }
     if (resp)   { const el = document.getElementById("fil-resp");   if (el) el.value = resp; }
     if (buscar) { const el = document.getElementById("fil-buscar"); if (el) el.value = buscar; }
+    _sincronizarChipFiltro();
   } catch(e) {}
 }
 
 // ─── SORT ─────────────────────────────────────────────────────
-function setSortCol(col) {
-  if (sortCol === col) { sortDir = -sortDir; }
-  else { sortCol = col; sortDir = (col === "monto") ? -1 : (col === "fecha" ? -1 : 1); }
-  filtrarTabla();
-}
-
 function _sortarDatos(datos) {
   return [...datos].sort((a, b) => {
     let va, vb;
@@ -5313,21 +5284,6 @@ function _sortarDatos(datos) {
     if (va < vb) return -sortDir;
     if (va > vb) return sortDir;
     return 0;
-  });
-}
-
-function _actualizarSortUI() {
-  ["fecha","tipo","categoria","monto"].forEach(col => {
-    const th  = document.getElementById("sort-th-" + col);
-    const ind = document.getElementById("sort-ind-" + col);
-    if (!th || !ind) return;
-    if (col === sortCol) {
-      th.classList.add("sort-active");
-      ind.textContent = sortDir === -1 ? "▼" : "▲";
-    } else {
-      th.classList.remove("sort-active");
-      ind.textContent = "";
-    }
   });
 }
 
@@ -6036,17 +5992,22 @@ document.addEventListener("keydown", e => {
   });
   // Ráfaga, el editor de transacción, el modal de cuotas y el drawer mobile usan
   // .classList("open") en vez de style.display — mecanismo de visibilidad distinto
-  // a los modales .modal-recur de arriba.
-  [
-    ["rafaga-overlay", cerrarRafaga],
+  // a los modales .modal-recur de arriba. Orden por z-index descendente (el
+  // editor puede abrirse ARRIBA de Carga rápida al click en un ítem de la lista
+  // lateral) y se corta en el primero que esté abierto — antes cerraba TODOS
+  // los que estuvieran abiertos con un solo Escape, así que abrir el editor
+  // desde Carga rápida y apretar Escape una vez cerraba las dos cosas juntas.
+  const overlaysAbiertos = [
     ["edit-overlay", cerrarEditorTransaccion],
+    ["modal-inv-overlay", cerrarModalInversion],
+    ["rafaga-overlay", cerrarRafaga],
     ["cuotas-modal-overlay", _cerrarModalCuotas],
     ["mobile-drawer", closeSidebar],
-    ["modal-inv-overlay", cerrarModalInversion],
-  ].forEach(([id, cerrar]) => {
+  ];
+  for (const [id, cerrar] of overlaysAbiertos) {
     const el = document.getElementById(id);
-    if (el && el.classList.contains("open")) cerrar();
-  });
+    if (el && el.classList.contains("open")) { cerrar(); break; }
+  }
 });
 document.addEventListener("click", e => {
   const wrap = e.target.closest(".multi-select-wrap");
@@ -6108,7 +6069,6 @@ function filtrarTabla() {
   });
 
   datos = _sortarDatos(datos);
-  _actualizarSortUI();
   _guardarFiltros();
 
   // ── Subtotales ──
@@ -6194,6 +6154,20 @@ function _renderMobileList(datos) {
   if (window.lucide) lucide.createIcons();
 }
 
+// Marca el chip mobile (Todos/Ingreso/Gasto/Compartido) según el valor real
+// de fil-tipo/fil-resp — se llama tanto al clickear un chip como al restaurar
+// filtros guardados, para que el chip resaltado nunca quede desincronizado
+// del filtro real aplicado (antes solo se actualizaba en el click del chip).
+function _sincronizarChipFiltro() {
+  const sel  = document.getElementById("fil-tipo");
+  const resp = document.getElementById("fil-resp");
+  const tipo = resp && resp.value === "Compartido" ? "Compartido" : (sel ? sel.value : "");
+  document.querySelectorAll(".trans-chip").forEach(c => c.classList.remove("on"));
+  const ids = { "": "chip-todos", "Ingreso": "chip-ing", "Gasto": "chip-gas", "Compartido": "chip-comp" };
+  const chip = document.getElementById(ids[tipo] || "chip-todos");
+  if (chip) chip.classList.add("on");
+}
+
 function _setChipFiltro(tipo) {
   const sel  = document.getElementById("fil-tipo");
   const resp = document.getElementById("fil-resp");
@@ -6205,10 +6179,7 @@ function _setChipFiltro(tipo) {
     if (resp) resp.value = "";
   }
   filtrarTabla();
-  document.querySelectorAll(".trans-chip").forEach(c => c.classList.remove("on"));
-  const ids = { "": "chip-todos", "Ingreso": "chip-ing", "Gasto": "chip-gas", "Compartido": "chip-comp" };
-  const chip = document.getElementById(ids[tipo] || "chip-todos");
-  if (chip) chip.classList.add("on");
+  _sincronizarChipFiltro();
 }
 
 // ─── EXPORTAR CSV ────────────────────────────────────────────
@@ -6313,7 +6284,7 @@ async function _ejecutarDelete(id) {
 
 function _showToastUndo(msg, onUndo) {
   const t = document.getElementById("toast");
-  t.innerHTML = `<span style="flex:1">${msg}</span><button class="toast-undo-btn">↩ Deshacer</button><div class="toast-undo-bar"></div>`;
+  t.innerHTML = `<span style="flex:1">${escapeHtml(msg)}</span><button class="toast-undo-btn">↩ Deshacer</button><div class="toast-undo-bar"></div>`;
   t.className = "toast toast-err show";
   const tid = setTimeout(() => { t.className = "toast"; }, 4900);
   t.querySelector(".toast-undo-btn").onclick = () => {
@@ -6337,7 +6308,7 @@ function duplicarTransaccion(id) {
     const selCat  = document.getElementById("f-categoria");
     const selFte  = document.getElementById("f-fuente");
     if (selCat)  selCat.value  = t.categoria;
-    if (selFte)  selFte.value  = t.fuente || "";
+    if (selFte)  { selFte.value = t.fuente || ""; _actualizarMesLiqField(selFte.value); }
     seleccionarResp(t.responsabilidad || "Mío");
     document.getElementById("f-monto").focus();
   }, 30);
@@ -7940,7 +7911,13 @@ function navegarA(pagina) {
   if (pagina === "anual")        cargarAnual();
   if (pagina === "resumen")      { cargarResumenMes(); cargarEvolucion(); _poblarSelectoresComparador(); }
   if (pagina === "config")       { renderizarConfig(); renderizarPanelWorkspace(); }
-  if (pagina === "inversiones")  { inicializarDisclosureInversiones(); renderPlazos(); renderAcciones(); _iniciarAutoRefreshAcciones(); }
+  if (pagina === "inversiones")  {
+    renderPlazos(); renderAcciones(); _iniciarAutoRefreshAcciones();
+    // fetchTipoCambioMEP() normalmente ya corrió desde Mi mes (landing post-login),
+    // pero si el usuario navega acá antes de que resuelva (red lenta), los totales
+    // en USD se contaban 1:1 en vez de convertir — se re-renderiza al resolver.
+    if (tipoCambioMEP == null) fetchTipoCambioMEP().then(() => { renderPlazos(); renderAcciones(); });
+  }
 
   // Re-renderizar íconos Lucide tras navegación (contenido dinámico puede contener data-lucide)
   if (window.lucide) lucide.createIcons();
@@ -9429,10 +9406,17 @@ function parsearImport() {
       if (isSlash) {
         const [d,m,y] = fechaRaw.split("/");
         const dNum = parseInt(d, 10), mNum = parseInt(m, 10);
-        if (dNum < 1 || dNum > 31 || mNum < 1 || mNum > 12) {
+        const year = y.length === 2 ? `20${y}` : (y.length === 4 ? y : "");
+        // Chequeo de rango no alcanza (31/02, 31/04 "pasan" pero no existen) —
+        // se valida con un Date real y se compara que no haya reajustado el
+        // día/mes solo, en vez de dejar que Postgres lo rechace recién al
+        // guardar (con un mensaje de "Error de conexión" engañoso, y tirando
+        // abajo el batch entero en vez de marcar solo esta fila).
+        const dTest = year ? new Date(Number(year), mNum - 1, dNum) : null;
+        const fechaImposible = !dTest || dTest.getFullYear() !== Number(year) || dTest.getMonth() !== mNum - 1 || dTest.getDate() !== dNum;
+        if (dNum < 1 || dNum > 31 || mNum < 1 || mNum > 12 || !year || fechaImposible) {
           errList.push("Fecha inválida");
         } else {
-          const year = y.length === 2 ? `20${y}` : y;
           fechaValida = `${year}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
         }
       } else if (isDash) {
@@ -9451,9 +9435,14 @@ function parsearImport() {
     // Validar categoría
     if (!categoria) errList.push("Falta categoría");
 
-    // Validar monto
+    // Validar monto — si viene con signo negativo se rechaza en vez de
+    // descartar el "-" en silencio (el regex de abajo solo deja dígitos/
+    // separadores, así que un monto negativo se importaba como positivo
+    // sin ningún aviso).
+    const montoEsNegativo = /^\s*-/.test(montoRaw);
     const monto = parsearDecimal(montoRaw.replace(/[^\d.,]/g, ""));
-    if (isNaN(monto) || monto <= 0) errList.push("Monto inválido");
+    if (montoEsNegativo) errList.push("Monto negativo no soportado — el signo lo determina Tipo (Gasto/Ingreso)");
+    else if (isNaN(monto) || monto <= 0) errList.push("Monto inválido");
 
     // Normalizar responsabilidad
     const respNorm = resp || "Mío";
@@ -10540,32 +10529,6 @@ function toggleDetalleCompartidos() {
   try { localStorage.setItem(USUARIO + "_disclosure_compartidos", visible ? "0" : "1"); } catch(e) {}
 }
 
-function toggleInvSection(seccion) {
-  const body = document.getElementById("inv-body-" + seccion);
-  const arrow = document.getElementById("inv-toggle-" + seccion);
-  if (!body) return;
-  const visible = body.style.display !== "none";
-  body.style.display = visible ? "none" : "";
-  if (arrow) arrow.textContent = visible ? "▾" : "▴";
-  try { localStorage.setItem(USUARIO + "_inv_" + seccion, visible ? "0" : "1"); } catch {}
-  const hdr = document.getElementById("inv-hdr-" + seccion);
-  if (hdr) hdr.setAttribute("aria-expanded", body.style.display !== "none" ? "true" : "false");
-}
-
-function inicializarDisclosureInversiones() {
-  ["plazos", "acciones"].forEach(sec => {
-    const body  = document.getElementById("inv-body-" + sec);
-    const arrow = document.getElementById("inv-toggle-" + sec);
-    if (!body) return;
-    const saved = localStorage.getItem(USUARIO + "_inv_" + sec);
-    const expanded = saved !== null ? saved === "1" : true;
-    body.style.display = expanded ? "" : "none";
-    if (arrow) arrow.textContent = expanded ? "▴" : "▾";
-    const hdr = document.getElementById("inv-hdr-" + sec);
-    if (hdr) hdr.setAttribute("aria-expanded", body.style.display !== "none" ? "true" : "false");
-  });
-}
-
 function inicializarDisclosureCompartidos() {
   const el  = document.getElementById("comp-detalle");
   const btn = document.getElementById("btn-toggle-compartidos");
@@ -10620,52 +10583,6 @@ function resetRespField() {
 
 // ===== HEALTH SCORE =====
 // ===== WALLETS / PATRIMONIO =====
-// ===== SWIPE EN TRANSACCIONES =====
-(function initSwipe() {
-  let startX = 0, startY = 0, activeRow = null, committed = false;
-  const THRESHOLD = 65, MAX = 90;
-
-  document.addEventListener("touchstart", e => {
-    const row = e.target.closest("#tbody-transacciones tr");
-    if (!row || e.target.closest("button") || e.target.closest("select")) return;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    activeRow = row;
-    committed = false;
-    row.classList.add("swipe-row");
-  }, { passive: true });
-
-  document.addEventListener("touchmove", e => {
-    if (!activeRow) return;
-    const dx = e.touches[0].clientX - startX;
-    const dy = e.touches[0].clientY - startY;
-    if (!committed && Math.abs(dy) > Math.abs(dx)) { activeRow = null; return; }
-    committed = true;
-    e.preventDefault();
-    activeRow.classList.add("swiping");
-    const clamped = Math.max(-MAX, Math.min(MAX, dx));
-    activeRow.style.transform = `translateX(${clamped}px)`;
-    activeRow.style.background = clamped < -20 ? "rgba(248,113,113,.08)" : clamped > 20 ? "rgba(52,211,153,.08)" : "";
-  }, { passive: false });
-
-  document.addEventListener("touchend", e => {
-    if (!activeRow) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    const row = activeRow;
-    activeRow = null;
-    row.classList.remove("swiping");
-    row.style.transform = "";
-    row.style.background = "";
-    if (!committed) return;
-    if (dx < -THRESHOLD) {
-      const id = row.dataset.id || row.querySelector("[onclick*='eliminarTransaccion']")?.getAttribute("onclick")?.match(/'([^']+)'/)?.[1];
-      if (id) eliminarTransaccion(id);
-    } else if (dx > THRESHOLD) {
-      const id = row.dataset.id || row.querySelector("[onclick*='abrirEditorTransaccion']")?.getAttribute("onclick")?.match(/'([^']+)'/)?.[1];
-      if (id) abrirEditorTransaccion(id);
-    }
-  }, { passive: true });
-})();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
@@ -10890,13 +10807,17 @@ function cerrarFormPlazo() {
 }
 
 async function guardarPlazo() {
-  const desc   = document.getElementById("pf-desc")?.value.trim();
-  const monto  = parsearDecimal(document.getElementById("pf-monto")?.value);
-  const moneda = document.getElementById("pf-moneda")?.value || "ARS";
-  const tna    = parsearDecimal(document.getElementById("pf-tna")?.value);
-  const ini    = document.getElementById("pf-inicio")?.value;
-  const venc   = document.getElementById("pf-venc")?.value;
-  if (!desc || !monto || !tna || !ini || !venc) { showToast("⚠️ Completá todos los campos", "error"); return; }
+  const desc     = document.getElementById("pf-desc")?.value.trim();
+  const montoRaw = document.getElementById("pf-monto")?.value.trim();
+  const monto    = parsearDecimal(montoRaw);
+  const moneda   = document.getElementById("pf-moneda")?.value || "ARS";
+  const tnaRaw   = document.getElementById("pf-tna")?.value.trim();
+  const tna      = parsearDecimal(tnaRaw);
+  const ini      = document.getElementById("pf-inicio")?.value;
+  const venc     = document.getElementById("pf-venc")?.value;
+  // Chequear el string crudo, no el número parseado — una TNA de 0 (promo 0%)
+  // es un valor legítimo, pero `!0` da true y lo rechazaba como "campo vacío".
+  if (!desc || !montoRaw || !monto || !tnaRaw || !ini || !venc) { showToast("⚠️ Completá todos los campos", "error"); return; }
   if (venc <= ini) { showToast("⚠️ Vencimiento debe ser posterior al inicio", "error"); return; }
   const editId = document.getElementById("pf-id")?.value;
   const row = { descripcion: desc, monto, moneda, tna, fecha_inicio: ini, fecha_vencimiento: venc, usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId() };
@@ -11026,11 +10947,14 @@ function _renderTotalesInversiones() {
   // Interest total
   const hoy = new Date(); hoy.setHours(0,0,0,0);
   const interesTotal = plazos.reduce((s,p) => {
-    if ((p.moneda || "ARS") !== "ARS") return s;
     const venc = new Date(p.fechaVencimiento + "T00:00:00");
     const inicio = new Date(p.fechaInicio + "T00:00:00");
     const dias = Math.round((venc - inicio) / 86400000);
-    return s + p.monto * (p.tna / 100) * (dias / 365);
+    const interes = p.monto * (p.tna / 100) * (dias / 365);
+    // Plazos en USD se convierten a ARS con el mismo tipo de cambio que ya usa
+    // el resto de esta función (totales combinados) — antes se descartaban del
+    // todo acá, así que una cartera solo en USD nunca mostraba esta línea.
+    return s + ((p.moneda || "ARS") === "ARS" ? interes : interes * (tipoCambioMEP || 1));
   }, 0);
   const interesEl = document.getElementById("inv-interes-total");
   if (interesEl) interesEl.textContent = interesTotal > 0 ? `Interés estimado al vencer: +${fmt(Math.round(interesTotal))}` : "";
@@ -11182,7 +11106,7 @@ function _renderFormAccion(a, tipo) {
     ${a ? `<input type="hidden" id="af-id" value="${a.id}">` : ""}
     <div class="pf-field plazo-form-full">
       <label for="af-simbolo">Símbolo</label>
-      <input id="af-simbolo" placeholder="${placeholder}" type="text" style="text-transform:uppercase" value="${escapeHtml(a?.simbolo || '')}" ${a ? 'readonly style="text-transform:uppercase;opacity:.6"' : ''}>
+      <input id="af-simbolo" placeholder="${placeholder}" type="text" style="text-transform:uppercase${a ? ';opacity:.6' : ''}" value="${escapeHtml(a?.simbolo || '')}" ${a ? 'readonly' : ''}>
     </div>
     ${a ? "" : hintHtml}
     <div class="pf-field">
