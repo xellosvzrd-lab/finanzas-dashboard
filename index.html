@@ -1836,17 +1836,15 @@
     .mm-sidebar-hide-mobile { display: block; }
     /* Secciones mobile-only: ocultar en desktop */
     .mm-section-header   { display: none; }
+    /* "Tus categorías" (mm-cats-card) queda oculta en desktop — quedaba
+       duplicando info entre el hero y la tabla editable de presupuesto de
+       abajo (misma data: categoría, gastado, % usado). Sigue visible en
+       mobile, donde no convive con la tabla editable (toggle aparte). */
     .mm-cats-card        { display: none; }
     #btn-toggle-desglose { display: none; }
     .pres-note           { display: none; }
     /* Budget table: siempre visible en desktop, sin toggle */
     #pres-desglose       { display: block !important; }
-    .mm-cats-card {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-      background: none; border: none; box-shadow: none; padding: 0; border-radius: 0;
-    }
-    .mm-cat-row { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow-card); }
-    .mm-cat-row:first-child { border-top: 1px solid var(--line); }
   }
 
   /* La lista de transacciones (antes solo mobile) ahora es el único formato,
@@ -8701,7 +8699,7 @@ function renderPresupuesto() {
           <span class="pres-cat-input-sym">$</span>
           <input type="text" inputmode="decimal" class="pres-input" data-cat="${escapeHtml(cat)}"
                  value="${pres > 0 ? String(pres).replace('.', ',') : ''}" placeholder="—"
-                 oninput="actualizarKpisPres()">
+                 oninput="formatearMiles(this); actualizarKpisPres()">
         </div>
       </div>
       <div class="pres-cat-body">
