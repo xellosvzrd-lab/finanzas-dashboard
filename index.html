@@ -5193,10 +5193,10 @@ async function cargarCategorias() {
     const { data, error } = await supabaseClient.from('categorias').select('*');
     if (error) throw error;
     const catData = {
-      gasto:           data.filter(r => r.tipo === 'GASTO'     && r.activa !== false).map(r => r.valor).sort(),
-      ingreso:         data.filter(r => r.tipo === 'INGRESO'   && r.activa !== false).map(r => r.valor).sort(),
-      fuentes:         data.filter(r => r.tipo === 'FUENTE'    && r.activa !== false).map(r => r.valor),
-      fuentesTC:       data.filter(r => r.tipo === 'FUENTE_TC' && r.activa !== false).map(r => r.valor),
+      gasto:           [...new Set(data.filter(r => r.tipo === 'GASTO'     && r.activa !== false).map(r => r.valor))].sort(),
+      ingreso:         [...new Set(data.filter(r => r.tipo === 'INGRESO'   && r.activa !== false).map(r => r.valor))].sort(),
+      fuentes:         [...new Set(data.filter(r => r.tipo === 'FUENTE'    && r.activa !== false).map(r => r.valor))],
+      fuentesTC:       [...new Set(data.filter(r => r.tipo === 'FUENTE_TC' && r.activa !== false).map(r => r.valor))],
       responsabilidad: categResponsabilidad,
       todas:           data
     };
@@ -6930,15 +6930,12 @@ function _calcularBalanceCompartido(mes, anio) {
   };
   datos.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t => addComp(t, true));
   datosIng.filter(t => (t.responsabilidad || "Mío") === "Compartido").forEach(t => addComp(t, false));
-  let aARS = 0, aUSD = 0, bARS = 0, bUSD = 0;
-  datos.filter(t => (t.responsabilidad || "Mío") === "De " + PARTNER && (t.usuario || USUARIO) === USUARIO).forEach(t => {
-    if ((t.moneda || "ARS").toUpperCase() === "USD") aUSD += Math.abs(Number(t.monto));
-    else aARS += Math.abs(Number(t.monto));
-  });
-  datos.filter(t => (t.responsabilidad || "Mío") === "De " + USUARIO && (t.usuario || USUARIO) === PARTNER).forEach(t => {
-    if ((t.moneda || "ARS").toUpperCase() === "USD") bUSD += Math.abs(Number(t.monto));
-    else bARS += Math.abs(Number(t.monto));
-  });
+  // Reutiliza _calcularReembolsos (misma fuente que usa Compartidos) en vez de
+  // recalcular "De X" acá aparte — así los dos lugares nunca vuelven a divergir.
+  const { reembA_ARS, reembA_USD, reembB_ARS, reembB_USD } = _calcularReembolsos(datos, datosIng, USUARIO, PARTNER);
+  const sumMapa = m => Object.values(m).reduce((s, v) => s + v, 0);
+  const aARS = sumMapa(reembA_ARS), aUSD = sumMapa(reembA_USD);
+  const bARS = sumMapa(reembB_ARS), bUSD = sumMapa(reembB_USD);
   return { balanceARS: compNetARS + aARS - bARS, balanceUSD: compNetUSD + aUSD - bUSD };
 }
 
@@ -8132,18 +8129,26 @@ async function guardarPresupuesto() {
 
   msg.innerHTML = "⏳ Guardando...";
   try {
-    // Borrar presupuesto existente del mes/año y re-insertar (solo el propio — la tabla
-    // no tiene RLS por usuario, así que sin este filtro se borraba también el de la pareja)
-    const { error: delErr } = await supabaseClient
-      .from('presupuesto').delete().eq('mes', mes).eq('anio', anio).eq('usuario', USUARIO);
-    if (delErr) throw delErr;
+    // Upsert primero (nunca deja el mes sin presupuesto si esto falla) y recién después
+    // borra las categorías que quedaron en $0 — al revés de antes (delete-then-insert),
+    // que si el insert fallaba a mitad de camino borraba el presupuesto sin reponerlo.
     if (items.length) {
       const rows = items.map(it => ({
         mes, anio, categoria: it.categoria, monto: it.monto,
         usuario: USUARIO, user_id: supabaseSession.user.id, workspace_id: miWorkspaceId()
       }));
-      const { error: insErr } = await supabaseClient.from('presupuesto').insert(rows);
-      if (insErr) throw insErr;
+      const { error: upErr } = await supabaseClient
+        .from('presupuesto').upsert(rows, { onConflict: 'mes,anio,categoria,user_id' });
+      if (upErr) throw upErr;
+    }
+    const { data: existentes, error: selErr } = await supabaseClient
+      .from('presupuesto').select('id, categoria').eq('mes', mes).eq('anio', anio).eq('usuario', USUARIO);
+    if (selErr) throw selErr;
+    const categoriasConMonto = new Set(items.map(it => it.categoria));
+    const idsABorrar = (existentes || []).filter(r => !categoriasConMonto.has(r.categoria)).map(r => r.id);
+    if (idsABorrar.length) {
+      const { error: delErr } = await supabaseClient.from('presupuesto').delete().in('id', idsABorrar);
+      if (delErr) throw delErr;
     }
     msg.innerHTML = `<span style="color:var(--green)">✅ Presupuesto guardado</span>`;
     renderPresupuesto();
