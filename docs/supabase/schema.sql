@@ -200,17 +200,6 @@ create table metas_ahorro (
   workspace_id   uuid not null references workspaces(id)
 );
 
--- ─── TABLA: client_error_logs ───────────────────────────────────
--- Migrada (docs/supabase/migrations/2026-07-09-client-error-logs.sql) pero
--- el cliente ya no le escribe — quedó de una investigación puntual de bug,
--- no es un feature activo. Ver PR #28.
-create table client_error_logs (
-  id         bigint primary key generated always as identity,
-  created_at timestamptz not null default now(),
-  contexto   text not null,
-  detalle    jsonb
-);
-
 -- ─── ROW LEVEL SECURITY (todas las tablas de contenido) ────────
 -- Patrón repetido en transacciones / categorias / presupuesto /
 -- compras_cuotas / plazos_fijos / acciones / recurrentes / metas_ahorro:
@@ -223,5 +212,3 @@ create table client_error_logs (
 --     hace select('*') sin filtro igual, cubierto por el propio RLS).
 --   proporcion_compartidos: sin user_id en ninguna policy (compartida).
 --   workspace_members / workspaces: solo select.
---   client_error_logs: insert abierto a cualquiera (auth.role() = 'authenticated'
---     no verificado acá), sin select/update/delete — solo escritura de diagnóstico.
