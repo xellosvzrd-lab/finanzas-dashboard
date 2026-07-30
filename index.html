@@ -4550,7 +4550,6 @@ function _aplicarCacheCateg(catData) {
   const filFuente = document.getElementById("fil-fuente");
   if (filFuente) filFuente.innerHTML = '<option value="">Todas las fuentes</option>' +
     todasFuentes.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
-  _restaurarFiltros();
 }
 
 // ─ Normaliza categorías, fuente y responsabilidad contra las listas canónicas (case-insensitive)
@@ -4883,10 +4882,6 @@ const SEL_MES_KEY  = "fp_sel_mes";
 const SEL_ANIO_KEY = "fp_sel_anio";
 const FIL_MES_KEY    = "fp_fil_mes";
 const FIL_ANIO_KEY   = "fp_fil_anio";
-const FIL_TIPO_KEY   = "fp_fil_tipo";
-const FIL_FUENTE_KEY = "fp_fil_fuente";
-const FIL_RESP_KEY   = "fp_fil_resp";
-const FIL_BUSCAR_KEY = "fp_fil_buscar";
 
 function guardarSelFecha() {
   try {
@@ -4894,29 +4889,6 @@ function guardarSelFecha() {
     localStorage.setItem(SEL_ANIO_KEY, document.getElementById("sel-anio-resumen")?.value || "");
     localStorage.setItem(FIL_MES_KEY,  document.getElementById("fil-mes")?.value || "");
     localStorage.setItem(FIL_ANIO_KEY, document.getElementById("fil-anio")?.value || "");
-  } catch(e) {}
-}
-
-function _guardarFiltros() {
-  try {
-    localStorage.setItem(FIL_TIPO_KEY,   document.getElementById("fil-tipo")?.value   || "");
-    localStorage.setItem(FIL_FUENTE_KEY, document.getElementById("fil-fuente")?.value || "");
-    localStorage.setItem(FIL_RESP_KEY,   document.getElementById("fil-resp")?.value   || "");
-    localStorage.setItem(FIL_BUSCAR_KEY, document.getElementById("fil-buscar")?.value || "");
-  } catch(e) {}
-}
-
-function _restaurarFiltros() {
-  try {
-    const tipo   = localStorage.getItem(FIL_TIPO_KEY);
-    const fuente = localStorage.getItem(FIL_FUENTE_KEY);
-    const resp   = localStorage.getItem(FIL_RESP_KEY);
-    const buscar = localStorage.getItem(FIL_BUSCAR_KEY);
-    if (tipo)   { const el = document.getElementById("fil-tipo");   if (el) el.value = tipo; }
-    if (fuente) { const el = document.getElementById("fil-fuente"); if (el) el.value = fuente; }
-    if (resp)   { const el = document.getElementById("fil-resp");   if (el) el.value = resp; }
-    if (buscar) { const el = document.getElementById("fil-buscar"); if (el) el.value = buscar; }
-    _sincronizarChipFiltro();
   } catch(e) {}
 }
 
@@ -5722,7 +5694,6 @@ function filtrarTabla() {
   });
 
   datos = _sortarDatos(datos);
-  _guardarFiltros();
 
   // ── Subtotales ──
   const subIngARS = datos.filter(t=>t.tipo==="Ingreso"&&(t.moneda||"ARS")==="ARS").reduce((s,t)=>s+Math.abs(Number(t.monto)),0);
@@ -7996,11 +7967,17 @@ function renderPresupuesto() {
     .filter(t => t.tipo === "Ingreso" && CATS_INGRESO_REAL.includes(t.categoria)
              && (t.moneda || "ARS") === "ARS")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  // Para Ama: sueldoEfectivo incluye ingresos USD × MEP (no se restan gastos USD — el sueldo es lo que cobrás, no el saldo)
+  // sueldoEfectivo incluye el neto USD × MEP (ingresos − gastos del mes, mismo
+  // criterio que sugerirPresupuestoDesdeHistorial() — antes este KPI usaba el
+  // ingreso USD bruto sin restar gastos, dos fórmulas de "sueldo con USD"
+  // activas al mismo tiempo en el archivo; decisión de Daniel: unificar en neto).
   const ingresosUSDPres = dataMesDaniel
     .filter(t => t.tipo === "Ingreso" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
     .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
-  const usdEnARSPres = PREF_USD_MEP && tipoCambioMEP ? ingresosUSDPres * tipoCambioMEP : 0;
+  const gastosUSDPres = dataMesDaniel
+    .filter(t => t.tipo === "Gasto" && !esTransferencia(t) && (t.moneda || "ARS") === "USD")
+    .reduce((s, t) => s + Math.abs(Number(t.monto)), 0);
+  const usdEnARSPres = PREF_USD_MEP && tipoCambioMEP ? (ingresosUSDPres - gastosUSDPres) * tipoCambioMEP : 0;
   const sueldoEfectivo = sueldo + usdEnARSPres;
 
   // Gasto efectivo por categoría usando lógica de responsabilidad:
@@ -8086,8 +8063,8 @@ function renderPresupuesto() {
   animateKPI(document.getElementById("pres-kpi-sueldo"), sueldoEfectivo, fmt);
   const sublSueldo = document.getElementById("pres-kpi-sueldo-sub");
   if (sublSueldo) {
-    sublSueldo.textContent = PREF_USD_MEP && tipoCambioMEP && ingresosUSDPres > 0
-      ? `ARS + ${fmtMoneda(ingresosUSDPres,"USD")} × $${Math.round(tipoCambioMEP).toLocaleString("es-AR")} MEP`
+    sublSueldo.textContent = PREF_USD_MEP && tipoCambioMEP && (ingresosUSDPres > 0 || gastosUSDPres > 0)
+      ? `ARS + neto ${fmtMoneda(ingresosUSDPres - gastosUSDPres,"USD")} × $${Math.round(tipoCambioMEP).toLocaleString("es-AR")} MEP`
       : "ingresos del mes";
   }
   animateKPI(document.getElementById("pres-kpi-gastado"), totalGasto, fmt);
